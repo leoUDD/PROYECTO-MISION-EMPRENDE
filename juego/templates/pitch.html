@@ -458,12 +458,12 @@
       data-i18n-attr="aria-label"
     >
       <span class="astro-signal-pitch" aria-hidden="true"></span>
-      <img class="astro-img-falling-pitch" src="{% static 'images/Cayendo.png' %}" alt="" aria-hidden="true">
+      <img class="astro-img-falling-pitch" src="{% static 'images/Cayendo.webp' %}" alt="" aria-hidden="true">
     </button>
 
     <div id="astroPitchOverlay" class="astro-pitch-overlay" aria-hidden="true">
       <div class="astro-pitch-card">
-        <img src="{% static 'images/Parado.png' %}" alt="" aria-hidden="true" class="astro-pitch-img">
+        <img src="{% static 'images/Parado.webp' %}" alt="" aria-hidden="true" class="astro-pitch-img">
         <div class="astro-pitch-text">
           <h3 id="astroPitchTitulo" data-i18n="pitch_astro_titulo_inicio">Estructura recomendada</h3>
           <p id="astroPitchMensaje" data-i18n="pitch_astro_mensaje_inicio">
@@ -474,8 +474,6 @@
           </button>
         </div>
       </div>
-      <audio id="astroPitchTalkAudio" src="{% static 'sounds/hablando.mp3' %}" preload="auto"></audio>
-      <audio id="astroPitchExitAudio" src="{% static 'sounds/salida.mp3' %}" preload="auto"></audio>
     </div>
 
   </main>
@@ -509,11 +507,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const astroPitchTitulo = document.getElementById("astroPitchTitulo");
   const astroPitchMensaje = document.getElementById("astroPitchMensaje");
   const astroPitchCerrar = document.getElementById("astroPitchCerrar");
-  const astroPitchTalkAudio = document.getElementById("astroPitchTalkAudio");
-  const astroPitchExitAudio = document.getElementById("astroPitchExitAudio");
-
-  if (astroPitchTalkAudio) astroPitchTalkAudio.volume = 0.25;
-  if (astroPitchExitAudio) astroPitchExitAudio.volume = 0.25;
 
   const blurTargets = [
     document.getElementById("tituloPitch"),
@@ -573,7 +566,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (astroPitchMensaje) astroPitchMensaje.textContent = mensaje;
     astroPitchOverlay.classList.add("visible");
     astroPitchOverlay.setAttribute("aria-hidden", "false");
-    if (astroPitchTalkAudio) { astroPitchTalkAudio.currentTime = 0; astroPitchTalkAudio.play().catch(() => {}); }
   }
 
   function cerrarAstroPitch() {
@@ -581,7 +573,6 @@ document.addEventListener("DOMContentLoaded", () => {
     astroPitchOverlay.classList.remove("visible");
     astroPitchOverlay.setAttribute("aria-hidden", "true");
     astroActivo = false;
-    if (astroPitchExitAudio) { astroPitchExitAudio.currentTime = 0; astroPitchExitAudio.play().catch(() => {}); }
   }
 
   function analizarPitchActual() {

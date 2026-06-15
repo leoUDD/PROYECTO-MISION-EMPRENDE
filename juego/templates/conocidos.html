@@ -268,20 +268,18 @@
 
     <button id="astro-trigger" class="astro-trigger" type="button" aria-label="Abrir mensaje del astronauta" data-i18n="conocidos_astro_aria" data-i18n-attr="aria-label">
       <span class="astro-signal" aria-hidden="true"></span>
-      <img class="astro-img-falling" src="{% static 'images/Cayendo.png' %}" alt="" aria-hidden="true">
+      <img class="astro-img-falling" src="{% static 'images/Cayendo.webp' %}" alt="" aria-hidden="true">
     </button>
 
     <div id="astro-overlay" class="astro-overlay" aria-hidden="true">
       <div id="astro-card" class="astro-card">
-        <img class="astro-img-standing" src="{% static 'images/Parado.png' %}" alt="" aria-hidden="true">
+        <img class="astro-img-standing" src="{% static 'images/Parado.webp' %}" alt="" aria-hidden="true">
         <h3 data-i18n="conocidos_astro_titulo">Mensaje del astronauta</h3>
         <p data-i18n="conocidos_astro_p1">¡Gracias por ayudarme! En compensación, les aviso algo importante:</p>
         <p data-i18n="conocidos_astro_p2">Más adelante serán evaluados por Creatividad.</p>
         <p data-i18n="conocidos_astro_p3">Si encuentran mis objetos perdidos durante la misión, les daré más consejos.</p>
         <button id="astro-close" class="astro-close" type="button" data-i18n="conocidos_astro_boton">Entendido</button>
       </div>
-      <audio id="astro-talk-audio" src="{% static 'sounds/hablando.mp3' %}" preload="auto"></audio>
-      <audio id="astro-exit-audio" src="{% static 'sounds/salida.mp3' %}" preload="auto"></audio>
     </div>
 
     <h2 id="timer" class="blur-target-bloqueado timer-esperando">00:10</h2>
@@ -466,12 +464,6 @@
       const astroTrigger   = document.getElementById("astro-trigger");
       const astroOverlay   = document.getElementById("astro-overlay");
       const astroClose     = document.getElementById("astro-close");
-      const astroTalkAudio = document.getElementById("astro-talk-audio");
-      const astroExitAudio = document.getElementById("astro-exit-audio");
-
-      if (astroTalkAudio) astroTalkAudio.volume = 0.25;
-      if (astroExitAudio) astroExitAudio.volume = 0.25;
-
       const blurTargets = [
         document.getElementById("tituloConocidos"),
         document.getElementById("speechBubbleConocidos"),
@@ -682,13 +674,11 @@
         astroTrigger.classList.add("oculto");
         astroOverlay.classList.add("activo");
         astroOverlay.setAttribute("aria-hidden","false");
-        if (astroTalkAudio) { astroTalkAudio.currentTime = 0; astroTalkAudio.play().catch(() => {}); }
       }
       function cerrarAstro() {
         if (!astroActivo || !astroOverlay) return;
         astroOverlay.classList.remove("activo");
         astroOverlay.setAttribute("aria-hidden","true");
-        if (astroExitAudio) { astroExitAudio.currentTime = 0; astroExitAudio.play().catch(() => {}); }
         astroActivo = false; astroCerrado = true;
       }
 
@@ -741,7 +731,7 @@
     <div id="dialogo-backdrop"></div>
     <div id="dialogo-box">
       <div class="dialogo-personaje activo" id="pj-nova">
-        <img class="dialogo-img" src="{% static 'images/foto2.png' %}" alt="Comandante Nova">
+        <img class="dialogo-img" src="{% static 'images/foto2.webp' %}" alt="Comandante Nova">
       </div>
       <div class="dialogo-burbuja" id="dialogo-burbuja">
         <div class="dialogo-hablante" id="dialogo-hablante">COMANDANTE NOVA</div>

@@ -36,7 +36,7 @@ body {
   color: var(--text-main);
   background:
     linear-gradient(rgba(0, 7, 18, 0.55), rgba(0, 7, 18, 0.82)),
-    url("/static/images/fondo_bienvenida.png") center/cover no-repeat fixed;
+    url("/static/images/fondo_bienvenida.webp") center/cover no-repeat fixed;
   position: relative;
   overflow-x: hidden;
 }

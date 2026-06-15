@@ -1,5 +1,5 @@
 :root {
-  --bg: #000712 url('/static/images/fondo_bienvenida.png') center/cover no-repeat fixed;
+  --bg: #000712 url('/static/images/fondo_bienvenida.webp') center/cover no-repeat fixed;
   --card: #081A2D;
   --text: #E6EEF8;
   --muted: #AAB7C8;
@@ -38,7 +38,7 @@ body {
 .team-container {
   width: clamp(620px, 72vw, 980px);
   min-height: clamp(620px, 78vh, 820px);
-  background: url('/static/images/comunicacion.png') center/cover no-repeat;
+  background: url('/static/images/comunicacion.webp') center/cover no-repeat;
   border-radius: 28px;
   box-shadow: var(--shadow);
   position: relative;

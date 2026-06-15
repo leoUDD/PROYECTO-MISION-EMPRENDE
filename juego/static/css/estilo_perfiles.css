@@ -22,7 +22,7 @@ a   { text-decoration: none; }
 
 body {
   background:
-    url('/static/images/fondo_bienvenida.png') center / cover no-repeat fixed,
+    url('/static/images/fondo_bienvenida.webp') center / cover no-repeat fixed,
     #000712;
   color: var(--text);
   font-family: "Poppins", system-ui, sans-serif;
@@ -266,7 +266,7 @@ body {
                        calc(100vw - (var(--frame-offset) * 2) - 16px)) * 1.237));
 
   /* GIF de fondo — sin animación encima para no interferir */
-  background-image: url('/static/images/mision_emprende_1536x1900_flicker.gif');
+  background-image: url('/static/images/mision_emprende_1536x1900_flicker.webp');
   background-size: 100% 100%;
   background-repeat: no-repeat;
   background-position: center top;

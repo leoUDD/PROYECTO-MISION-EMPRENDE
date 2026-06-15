@@ -375,17 +375,17 @@
 
   <!-- ASTRONAUTA FLOTANTE -->
   <button class="astro-reflexion" id="astroReflexion" aria-label="Astronauta">
-    <img src="{% static 'images/Cayendo.png' %}" alt="Astronauta">
+    <img src="{% static 'images/Cayendo.webp' %}" alt="Astronauta">
   </button>
   <div class="astro-bocadillo" id="astroBocadillo">
     Gracias por jugar, agente. ¡Hasta la próxima misión!
   </div>
 
   <!-- PERSONAJES DESPIDIÉNDOSE -->
-  <button class="personaje-izq"   id="per3" aria-label="Personaje 1"><img src="{% static 'images/foto3.png' %}" alt=""></button>
-  <button class="personaje-der"   id="per4" aria-label="Personaje 2"><img src="{% static 'images/foto4.png' %}" alt=""></button>
-  <button class="personaje-c-izq" id="per5" aria-label="Personaje 3"><img src="{% static 'images/foto5.png' %}" alt=""></button>
-  <button class="personaje-c-der" id="per6" aria-label="Personaje 4"><img src="{% static 'images/foto6.png' %}" alt=""></button>
+  <button class="personaje-izq"   id="per3" aria-label="Personaje 1"><img src="{% static 'images/foto3.webp' %}" alt=""></button>
+  <button class="personaje-der"   id="per4" aria-label="Personaje 2"><img src="{% static 'images/foto4.webp' %}" alt=""></button>
+  <button class="personaje-c-izq" id="per5" aria-label="Personaje 3"><img src="{% static 'images/foto5.webp' %}" alt=""></button>
+  <button class="personaje-c-der" id="per6" aria-label="Personaje 4"><img src="{% static 'images/foto6.webp' %}" alt=""></button>
 
   <div class="astro-bocadillo" id="bocPer3" style="bottom:clamp(120px,22vw,210px);left:clamp(130px,17vw,230px);right:auto;">¡Fue un honor misionar con ustedes, agentes!</div>
   <div class="astro-bocadillo flecha-izq" id="bocPer4" style="bottom:clamp(120px,22vw,210px);right:clamp(130px,17vw,230px);left:auto;">¡El trabajo en equipo los llevó hasta aquí. ¡Bien hecho!</div>
@@ -435,7 +435,7 @@
         <h3 class="h3" data-i18n="reflexion_instagram_titulo">Instagram</h3>
         <div class="qr-box">
           <img id="qrInstagramImg"
-               src="{% static 'images/qr_insta.png' %}"
+               src="{% static 'images/qr_insta.webp' %}"
                alt="Código QR Instagram Misión Emprende" />
         </div>
         <p class="qr-hint" data-i18n="reflexion_instagram_hint">Síguenos para nuevas misiones.</p>
@@ -445,7 +445,7 @@
         <h3 class="h3" data-i18n="reflexion_evaluacion_titulo">Evaluación de la Actividad</h3>
         <div class="qr-box">
           <img id="qrEvaluacionImg"
-               src="{% static 'images/qr_evaluacion.png' %}"
+               src="{% static 'images/qr_evaluacion.webp' %}"
                alt="Código QR Evaluación de la actividad" />
         </div>
         <p class="qr-hint" data-i18n="reflexion_evaluacion_hint">Tu opinión nos ayuda a mejorar.</p>
@@ -527,7 +527,6 @@
           if (!yaVisible) {
             boc.textContent = tJuego(clave, fallback);
             boc.classList.add("visible");
-            try { const a = new Audio("{% static 'sounds/hablando.mp3' %}"); a.volume = 0.3; a.play().catch(()=>{}); } catch(e) {}
             clearTimeout(timer);
             timer = setTimeout(() => boc.classList.remove("visible"), 4000);
           }
@@ -566,11 +565,6 @@
         if (!yaVisible) {
           bocadillo.classList.add("visible");
           visible = true;
-          try {
-            const audio = new Audio("{% static 'sounds/hablando.mp3' %}");
-            audio.volume = 0.35;
-            audio.play().catch(() => {});
-          } catch(e) {}
         }
 
         clearTimeout(timer);

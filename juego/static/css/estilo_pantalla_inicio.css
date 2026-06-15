@@ -1,6 +1,6 @@
 :root {
   --primary: #4b74aa;
-  --bg: #000712 url('/static/images/fondo_bienvenida.png') center/cover no-repeat fixed;
+  --bg: #000712 url('/static/images/fondo_bienvenida.webp') center/cover no-repeat fixed;
   --text: #111827;
 }
 
@@ -30,7 +30,7 @@ body {
 }
 
 .card {
-  background: url('/static/images/fondo_tar3.png') center/cover no-repeat;
+  background: url('/static/images/fondo_tar3.webp') center/cover no-repeat;
   border-radius: 28px;
   box-shadow: 0 18px 40px rgba(0,0,0,.6);
   text-align: center;

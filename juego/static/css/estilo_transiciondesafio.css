@@ -1,5 +1,5 @@
 :root{
-  --bg: #000712 url('/static/images/fondo_bienvenida.png') center/cover no-repeat fixed;
+  --bg: #000712 url('/static/images/fondo_bienvenida.webp') center/cover no-repeat fixed;
   --card:#081A2D;
   --text:#E6EEF8;
   --muted:#AAB7C8;
@@ -26,7 +26,7 @@ body {
 
 .team-container {
   width:clamp(360px, 90vw, 900px);
-  background:url('/static/images/desafio.png') center calc(50% + 60px)/cover no-repeat;
+  background:url('/static/images/desafio.webp') center calc(50% + 60px)/cover no-repeat;
   border-radius:28px;
   box-shadow:var(--shadow);
   padding:clamp(40px, 5vw, 70px);

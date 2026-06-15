@@ -1,5 +1,5 @@
 :root{
-  --bg: #000712 url('/static/images/fondo_bienvenida.png') center/cover no-repeat fixed;
+  --bg: #000712 url('/static/images/fondo_bienvenida.webp') center/cover no-repeat fixed;
   --card:#081A2D;
   --text:#E6EEF8;
   --muted:#AAB7C8;
@@ -27,7 +27,7 @@ body {
 /* ================== CARD PRINCIPAL ================== */
 .team-container {
   width: clamp(600px, 80vw, 1100px);
-  background: url('/static/images/apoyo.png') center/cover no-repeat;
+  background: url('/static/images/apoyo.webp') center/cover no-repeat;
   border-radius: 28px;
   box-shadow: var(--shadow);
 

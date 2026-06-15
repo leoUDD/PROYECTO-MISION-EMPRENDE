@@ -187,3 +187,7 @@ cython_debug/
 seed_data.py
 db_backup_limpio.json
 db.sqlite3
+
+# Estáticos recolectados por collectstatic. Con runserver+DEBUG la app sirve
+# desde juego/static, así que esta carpeta no se usa y no debe versionarse.
+staticfiles/

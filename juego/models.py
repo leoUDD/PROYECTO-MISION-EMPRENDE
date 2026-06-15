@@ -1,4 +1,5 @@
 from django.db import models
+from .image_utils import convertir_imagen_a_webp
 
 
 class Alumno(models.Model):
@@ -55,6 +56,7 @@ class Desafio(models.Model):
     nombredesafio = models.CharField(db_column='nombreDesafio', max_length=150, blank=True, null=True)
     tokensdesafio = models.IntegerField(db_column='tokensDesafio', blank=True, null=True)
     descripciondesafio = models.TextField(db_column='descripcionDesafio', blank=True, null=True)
+
     imagen_desafio = models.ImageField(
         upload_to="desafios/",
         null=True,
@@ -64,6 +66,31 @@ class Desafio(models.Model):
     summary = models.TextField(blank=True, null=True)
     activo = models.BooleanField(default=True)
     orden = models.PositiveIntegerField(default=0)
+
+    def save(self, *args, **kwargs):
+        archivo_anterior = None
+
+        if self.pk:
+            anterior = type(self).objects.filter(pk=self.pk).first()
+            if anterior and anterior.imagen_desafio:
+                archivo_anterior = anterior.imagen_desafio.name
+
+        if self.imagen_desafio and not self.imagen_desafio.name.lower().endswith(".webp"):
+            nombre_webp, contenido_webp = convertir_imagen_a_webp(
+                self.imagen_desafio,
+                max_size=(1200, 1200),
+                quality=80,
+            )
+
+            self.imagen_desafio.save(nombre_webp, contenido_webp, save=False)
+
+        super().save(*args, **kwargs)
+
+        if archivo_anterior and self.imagen_desafio and archivo_anterior != self.imagen_desafio.name:
+            try:
+                self.imagen_desafio.storage.delete(archivo_anterior)
+            except Exception:
+                pass
 
     class Meta:
         db_table = 'desafio'
@@ -110,6 +137,7 @@ class Grupo(models.Model):
         blank=True,
         null=True
     )
+
     sopa_ganada = models.BooleanField(default=False)
     sopa_tiempo_segundos = models.PositiveIntegerField(null=True, blank=True)
     sopa_completada_en = models.DateTimeField(null=True, blank=True)
@@ -132,6 +160,7 @@ class Grupo(models.Model):
     desafio_id_externo = models.CharField(max_length=50, blank=True, null=True)
     desafio_nombre = models.CharField(max_length=255, blank=True, null=True)
     desafio_descripcion = models.TextField(blank=True, null=True)
+
     listo_f2_tematicas = models.BooleanField(default=False)
     listo_f2_tematica = models.BooleanField(default=False)
     listo_f2_desafio = models.BooleanField(default=False)
@@ -156,10 +185,38 @@ class Grupo(models.Model):
         """Suma o resta tokens del grupo."""
         if self.tokensgrupo is None:
             self.tokensgrupo = 0
+
         self.tokensgrupo += cantidad
+
         if self.tokensgrupo < 0:
             self.tokensgrupo = 0
+
         self.save()
+
+    def save(self, *args, **kwargs):
+        archivo_anterior = None
+
+        if self.pk:
+            anterior = type(self).objects.filter(pk=self.pk).first()
+            if anterior and anterior.foto_lego:
+                archivo_anterior = anterior.foto_lego.name
+
+        if self.foto_lego and not self.foto_lego.name.lower().endswith(".webp"):
+            nombre_webp, contenido_webp = convertir_imagen_a_webp(
+                self.foto_lego,
+                max_size=(1000, 1000),
+                quality=70,
+            )
+
+            self.foto_lego.save(nombre_webp, contenido_webp, save=False)
+
+        super().save(*args, **kwargs)
+
+        if archivo_anterior and self.foto_lego and archivo_anterior != self.foto_lego.name:
+            try:
+                self.foto_lego.storage.delete(archivo_anterior)
+            except Exception:
+                pass
 
 
 class Idadministrador(models.Model):

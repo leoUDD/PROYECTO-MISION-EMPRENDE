@@ -18,7 +18,7 @@ a { text-decoration: none; }
 
 body {
   background:
-    url('/static/images/fondo_bienvenida.png') center / cover no-repeat fixed,
+    url('/static/images/fondo_bienvenida.webp') center / cover no-repeat fixed,
     #000712;
   color: var(--text);
   font-family: "Poppins", system-ui, sans-serif;
@@ -59,7 +59,7 @@ body {
                        calc((100dvh - (var(--frame-offset) * 2) - 16px) * 0.808),
                        calc(100vw - (var(--frame-offset) * 2) - 16px)) * 1.237));
 
-  background-image: url('/static/images/mision_emprende_phone_bg.gif');
+  background-image: url('/static/images/mision_emprende_phone_bg.webp');
   background-size: 100% 100%;
   background-repeat: no-repeat;
   background-position: center top;
@@ -386,7 +386,7 @@ body {
   .phone {
     width:  min(calc(100dvh * 0.808), calc(100vw - 8px)) !important;
     height: calc(100dvh - 8px) !important;
-    background-image: url('/static/images/mision_emprende_phone_bg.gif') !important;
+    background-image: url('/static/images/mision_emprende_phone_bg.webp') !important;
     background-size: 100% 100% !important;
     background-color: transparent !important;
     justify-content: flex-end !important;

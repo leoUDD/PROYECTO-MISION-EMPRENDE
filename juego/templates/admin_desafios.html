@@ -193,12 +193,7 @@
                   <p><strong>Sesión:</strong> {{ g.sesion.idsesion }}</p>
                   <p><strong>Pitch:</strong> {{ g.pitch_texto|default:"Sin pitch registrado" }}</p>
 
-                  {% if g.foto_lego %}
-                    <p><strong>LEGO:</strong></p>
-                    <img src="{{ g.foto_lego.url }}" class="lego-img">
-                  {% else %}
-                    <p><strong>LEGO:</strong> Sin imagen registrada</p>
-                  {% endif %}
+                  <p><strong>LEGO:</strong> Foto eliminada al finalizar la misión.</p>
                 </div>
               {% empty %}
                 <p>No hay grupos asociados a este desafío.</p>

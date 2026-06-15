@@ -1,5 +1,5 @@
 :root{
-  --bg: #000712 url('/static/images/fondo_bienvenida.png') center/cover no-repeat fixed;
+  --bg: #000712 url('/static/images/fondo_bienvenida.webp') center/cover no-repeat fixed;
   --card:#081A2D;
   --text:#fff;
   --muted:#E6EEF8;
@@ -32,7 +32,7 @@ body{
 
 .phone{
   width: clamp(320px, 90vw, 1100px);
-  background: url('/static/images/fondo_card.png') center/cover no-repeat;
+  background: url('/static/images/fondo_card.webp') center/cover no-repeat;
   border-radius:var(--radius);
   box-shadow:var(--shadow);
   padding:40px 30px;
@@ -59,7 +59,7 @@ body{
   width:40%;
   max-width:450px;
   aspect-ratio: 3 / 5;
-  background:url('/static/images/foto2.png') no-repeat;
+  background:url('/static/images/foto2.webp') no-repeat;
   background-size: contain;
   background-position: right var(--pos-y);
   opacity:1;

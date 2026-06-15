@@ -74,12 +74,12 @@
       </header>
 
       <button id="objetoCamaraTrigger" class="objeto-camara-trigger" type="button" aria-label="Encontrar cámara perdida" data-i18n="tematicas_camara_aria" data-i18n-attr="aria-label">
-        <img src="{% static 'images/Camara.png' %}" class="objeto-camara-img" alt="" aria-hidden="true">
+        <img src="{% static 'images/Camara.webp' %}" class="objeto-camara-img" alt="" aria-hidden="true">
       </button>
 
       <div id="objetoCamaraOverlay" class="astro-object-overlay" aria-hidden="true">
         <div class="astro-flex">
-          <img src="{% static 'images/Parado.png' %}" class="astro-img" alt="" aria-hidden="true">
+          <img src="{% static 'images/Parado.webp' %}" class="astro-img" alt="" aria-hidden="true">
           <div class="astro-text">
             <h3 data-i18n="tematicas_camara_titulo">📷 Objeto encontrado</h3>
             <p data-i18n="tematicas_camara_p1">Agente… gracias por encontrar mi equipo.</p>
@@ -88,8 +88,6 @@
             <button id="objetoCamaraClose" class="astro-object-close" type="button" data-i18n="tematicas_camara_boton">Entendido</button>
           </div>
         </div>
-        <audio id="objetoCamaraTalk" src="{% static 'sounds/hablando.mp3' %}" preload="auto"></audio>
-        <audio id="objetoCamaraExit" src="{% static 'sounds/salida.mp3' %}" preload="auto"></audio>
       </div>
 
       <section class="themes-carousel" aria-label="Temáticas disponibles">
@@ -97,7 +95,13 @@
         <div class="themes-track" id="themesTrack">
           {% for tema in tematicas %}
             <article class="theme-card" tabindex="-1" data-slug="{{ tema.slug }}" data-url="{% url 'desafios' %}">
-              <div class="thumb"><img src="{% static tema.image %}" alt="Icono de {{ tema.title }}"></div>
+              <div class="thumb">
+                {% if tema.image|slice:":7" == "/media/" %}
+                  <img src="{{ tema.image }}" alt="Icono de {{ tema.title }}">
+                {% else %}
+                  <img src="{% static tema.image %}" alt="Icono de {{ tema.title }}">
+                {% endif %}
+              </div>
               <div class="content">
                 <h2 class="title">{{ tema.title }}</h2>
                 <div class="chips">{% for chip in tema.chips %}<span class="chip">{{ chip }}</span>{% endfor %}</div>
@@ -167,12 +171,10 @@
       const camaraTrigger = document.getElementById("objetoCamaraTrigger");
       const camaraOverlay = document.getElementById("objetoCamaraOverlay");
       const camaraClose = document.getElementById("objetoCamaraClose");
-      const camaraTalk = document.getElementById("objetoCamaraTalk");
-      const camaraExit = document.getElementById("objetoCamaraExit");
       const STORAGE_CAMARA = "objeto_camara_tematicas_usado_{{ grupo.sesion.idsesion }}_{{ grupo.idgrupo }}";
       if (localStorage.getItem(STORAGE_CAMARA) === "1" && camaraTrigger) camaraTrigger.classList.add("oculto");
-      function abrirCamara() { if (!camaraOverlay) return; camaraOverlay.classList.add("activo"); camaraOverlay.setAttribute("aria-hidden", "false"); if (camaraTalk) { camaraTalk.currentTime = 0; camaraTalk.play().catch(() => {}); } }
-      function cerrarCamara() { if (!camaraOverlay) return; camaraOverlay.classList.remove("activo"); camaraOverlay.setAttribute("aria-hidden", "true"); if (camaraExit) { camaraExit.currentTime = 0; camaraExit.play().catch(() => {}); } if (camaraTrigger) camaraTrigger.classList.add("oculto"); localStorage.setItem(STORAGE_CAMARA, "1"); }
+      function abrirCamara() { if (!camaraOverlay) return; camaraOverlay.classList.add("activo"); camaraOverlay.setAttribute("aria-hidden", "false"); }
+      function cerrarCamara() { if (!camaraOverlay) return; camaraOverlay.classList.remove("activo"); camaraOverlay.setAttribute("aria-hidden", "true"); if (camaraTrigger) camaraTrigger.classList.add("oculto"); localStorage.setItem(STORAGE_CAMARA, "1"); }
       camaraTrigger?.addEventListener("click", abrirCamara);
       camaraClose?.addEventListener("click", cerrarCamara);
       camaraOverlay?.addEventListener("click", (e) => { if (e.target === camaraOverlay) cerrarCamara(); });

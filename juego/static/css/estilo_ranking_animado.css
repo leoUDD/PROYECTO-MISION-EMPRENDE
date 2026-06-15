@@ -33,7 +33,7 @@ html, body {
   background:
     radial-gradient(circle at top, rgba(51,113,182,.22), transparent 34%),
     linear-gradient(180deg, rgba(13,33,58,.82) 0%, rgba(8,17,31,.88) 100%),
-    url('/static/images/fondo_bienvenida.png') center/cover no-repeat fixed;
+    url('/static/images/fondo_bienvenida.webp') center/cover no-repeat fixed;
   color: var(--text);
 }
 

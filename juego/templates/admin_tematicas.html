@@ -247,7 +247,11 @@
       {% for t in tematicas %}
         <article class="tematica-card">
           {% if t.image %}
-            <img class="tematica-img" src="{% static t.image %}" alt="{{ t.title }}">
+            {% if t.image|slice:":7" == "/media/" %}
+              <img class="tematica-img" src="{{ t.image }}" alt="{{ t.title }}">
+            {% else %}
+              <img class="tematica-img" src="{% static t.image %}" alt="{{ t.title }}">
+            {% endif %}
           {% endif %}
 
           <h2>{{ t.title }}</h2>

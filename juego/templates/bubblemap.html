@@ -329,13 +329,13 @@
     </section>
 
     <button id="objetoCelularTrigger" class="objeto-celular-trigger blur-target-bloqueado" type="button" aria-label="Encontrar tablet perdida" data-i18n="bubble_objeto_aria" data-i18n-attr="aria-label">
-      <img src="{% static 'images/Tablet.png' %}" class="objeto-celular-icon" alt="" aria-hidden="true">
+      <img src="{% static 'images/Tablet.webp' %}" class="objeto-celular-icon" alt="" aria-hidden="true">
     </button>
 
     <div id="objetoCelularOverlay" class="astro-object-overlay" aria-hidden="true">
       <div class="astro-object-card">
         <div class="astro-flex">
-          <img src="{% static 'images/Parado.png' %}" class="astro-img" alt="" aria-hidden="true">
+          <img src="{% static 'images/Parado.webp' %}" class="astro-img" alt="" aria-hidden="true">
           <div class="astro-text">
             <h3 data-i18n="bubble_objeto_titulo">📱 Objeto encontrado</h3>
             <p data-i18n="bubble_objeto_p1">Agente… encontraste otro fragmento del equipo.</p>
@@ -345,8 +345,6 @@
           </div>
         </div>
       </div>
-      <audio id="objetoCelularTalk" src="{% static 'sounds/hablando.mp3' %}" preload="auto"></audio>
-      <audio id="objetoCelularExit" src="{% static 'sounds/salida.mp3' %}" preload="auto"></audio>
     </div>
 
     <details id="reglasBubble" class="reglas-bubble blur-target-bloqueado">
@@ -372,7 +370,7 @@
 
     <section id="bubblesSection" class="bubble-stage blur-target-bloqueado">
       <div class="bubble central" id="bubbleCentral">
-        <img id="personaObjetivoImg" src="{% static 'images/personas.png' %}" alt="Persona objetivo" />
+        <img id="personaObjetivoImg" alt="Persona objetivo" />
       </div>
     </section>
 
@@ -523,8 +521,6 @@
       const celularTrigger = document.getElementById("objetoCelularTrigger");
       const celularOverlay = document.getElementById("objetoCelularOverlay");
       const celularClose = document.getElementById("objetoCelularClose");
-      const celularTalk = document.getElementById("objetoCelularTalk");
-      const celularExit = document.getElementById("objetoCelularExit");
       const STORAGE_CELULAR = `objeto_celular_bubblemap_usado_${sesionId}_${grupoId}`;
 
       if (localStorage.getItem(STORAGE_CELULAR) === "1" && celularTrigger) {
@@ -535,14 +531,12 @@
         if (!celularOverlay) return;
         celularOverlay.classList.add("activo");
         celularOverlay.setAttribute("aria-hidden", "false");
-        if (celularTalk) { celularTalk.currentTime = 0; celularTalk.play().catch(() => {}); }
       }
 
       function cerrarCelular() {
         if (!celularOverlay) return;
         celularOverlay.classList.remove("activo");
         celularOverlay.setAttribute("aria-hidden", "true");
-        if (celularExit) { celularExit.currentTime = 0; celularExit.play().catch(() => {}); }
         if (celularTrigger) celularTrigger.classList.add("oculto");
         localStorage.setItem(STORAGE_CELULAR, "1");
       }

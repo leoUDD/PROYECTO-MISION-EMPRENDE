@@ -393,7 +393,7 @@
       </section>
     </div>
 
-    <img id="legoLogo" src="{% static 'images/Lego-logo.png' %}" class="logo blur-target-bloqueado" alt="Lego logo">
+    <img id="legoLogo" src="{% static 'images/Lego-logo.webp' %}" class="logo blur-target-bloqueado" alt="Lego logo">
 
     <h1 id="legoTitle" class="title blur-target-bloqueado" data-i18n="lego_titulo">
       Construye tu solución
@@ -426,13 +426,13 @@
       data-i18n="lego_astro_aria"
       data-i18n-attr="aria-label"
     >
-      <img src="{% static 'images/Cayendo.png' %}" class="astro-lego-icon" alt="">
+      <img src="{% static 'images/Cayendo.webp' %}" class="astro-lego-icon" alt="">
     </button>
 
     <div id="astroLegoOverlay" class="astro-lego-overlay" aria-hidden="true">
       <div class="astro-lego-card">
         <div class="astro-lego-flex">
-          <img src="{% static 'images/Parado.png' %}" class="astro-lego-standing" alt="">
+          <img src="{% static 'images/Parado.webp' %}" class="astro-lego-standing" alt="">
           <div class="astro-lego-text">
             <h3 data-i18n="lego_astro_titulo">👨‍🚀 Pregunta del astronauta</h3>
             <p data-i18n-html="true" data-i18n="lego_astro_intro">
@@ -457,8 +457,6 @@
             <button id="astroLegoClose" class="astro-lego-close" type="button" data-i18n="lego_astro_cerrar">
               Entendido
             </button>
-            <audio id="astroLegoTalk" src="{% static 'sounds/hablando.mp3' %}" preload="auto"></audio>
-            <audio id="astroLegoExit" src="{% static 'sounds/salida.mp3' %}" preload="auto"></audio>
           </div>
         </div>
       </div>
@@ -928,8 +926,6 @@
       const astroClose    = document.getElementById("astroLegoClose");
       const astroFeedback = document.getElementById("astroLegoFeedback");
       const astroOpciones = document.querySelectorAll(".astro-lego-opcion");
-      const astroTalk     = document.getElementById("astroLegoTalk");
-      const astroExit     = document.getElementById("astroLegoExit");
       const STORAGE_ASTRO_LEGO = `astro_lego_pregunta_usada_${sesionId}_${grupoId}`;
       let respondido = localStorage.getItem(STORAGE_ASTRO_LEGO)==="1";
 
@@ -943,7 +939,6 @@
       astroTrigger?.addEventListener("click",()=>{
         if (!astroOverlay||respondido) return;
         astroOverlay.classList.add("activo"); astroOverlay.setAttribute("aria-hidden","false");
-        if (astroTalk) { astroTalk.currentTime=0; astroTalk.play().catch(()=>{}); }
       });
 
       astroOpciones.forEach(btn=>{
@@ -969,7 +964,6 @@
       astroClose?.addEventListener("click",()=>{
         if (!astroOverlay) return;
         astroOverlay.classList.remove("activo"); astroOverlay.setAttribute("aria-hidden","true");
-        if (astroExit) { astroExit.currentTime=0; astroExit.play().catch(()=>{}); }
         if (astroTrigger) astroTrigger.classList.add("oculto");
       });
 

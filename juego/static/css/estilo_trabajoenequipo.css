@@ -1,5 +1,5 @@
 :root {
-  --bg: #000712 url('/static/images/fondo_bienvenida.png') center/cover no-repeat fixed;
+  --bg: #000712 url('/static/images/fondo_bienvenida.webp') center/cover no-repeat fixed;
   --card: #081A2D;
   --text: #E6EEF8;
   --muted: #AAB7C8;
@@ -51,7 +51,7 @@ main.team-container-wrap {
   border-radius: 28px !important;
   position: relative !important;
   overflow: hidden !important;
-  background: url('/static/images/fondo2.png') center/cover no-repeat !important;
+  background: url('/static/images/fondo2.webp') center/cover no-repeat !important;
   box-shadow: var(--shadow) !important;
   text-align: center !important;
   animation: fadeIn 0.6s ease-in-out;
@@ -79,13 +79,13 @@ main.team-container-wrap {
 .team-container::after {
   right: -5% !important;
   bottom: -100px !important;
-  background-image: url('/static/images/foto5.png') !important;
+  background-image: url('/static/images/foto5.webp') !important;
 }
 
 .team-container::before {
   right: 70% !important;
   bottom: -100px !important;
-  background-image: url('/static/images/foto6.png') !important;
+  background-image: url('/static/images/foto6.webp') !important;
 }
 
 /* ================== TÍTULO CON MARCO ================== */

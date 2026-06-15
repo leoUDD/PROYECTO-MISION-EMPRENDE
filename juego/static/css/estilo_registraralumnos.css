@@ -1,7 +1,7 @@
 :root {
   --primary: #4b74aa;
   --primary-dark: #3d618e;
-  --bg: url("/static/images/fondo_bienvenida.png") center/cover no-repeat fixed;
+  --bg: url("/static/images/fondo_bienvenida.webp") center/cover no-repeat fixed;
   --card: #fff;
   --text: #111827;
   --muted: #6b7280;

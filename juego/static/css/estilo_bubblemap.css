@@ -1,5 +1,5 @@
 :root{
-  --bg: #000712 url('/static/images/fondo_bienvenida.png') center/cover no-repeat fixed;
+  --bg: #000712 url('/static/images/fondo_bienvenida.webp') center/cover no-repeat fixed;
   --card:#081A2D;
   --text:#E6EEF8;
   --muted:#AAB7C8;
@@ -27,7 +27,7 @@ body{
 /* ── Contenedor principal ── */
 .bubblemap-container{
   width: clamp(360px, 96vw, 1100px);
-  background: url('/static/images/fondo_card.png') center/cover no-repeat fixed;
+  background: url('/static/images/fondo_card.webp') center/cover no-repeat fixed;
   border-radius: 28px;
   box-shadow: var(--shadow);
   padding: 16px 24px 16px;
