@@ -1,7 +1,14 @@
 :root {
-  --primary: #4b74aa;
+  --udd-blue: #003BFF;
+  --udd-blue-dark: #00104A;
+  --udd-blue-panel: #001A70;
+  --udd-green: #00F26D;
+  --udd-green-soft: rgba(0, 242, 109, 0.18);
+  --udd-white: #FFFFFF;
+
+  --primary: var(--udd-green);
   --bg: #000712 url('/static/images/fondo_bienvenida.webp') center/cover no-repeat fixed;
-  --text: #111827;
+  --text: #FFFFFF;
 }
 
 * {
@@ -22,7 +29,19 @@ body {
   overflow: hidden;
 }
 
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background:
+    linear-gradient(rgba(0, 0, 0, 0.16), rgba(0, 0, 0, 0.34));
+  pointer-events: none;
+  z-index: 0;
+}
+
 .transition-container {
+  position: relative;
+  z-index: 1;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -30,9 +49,14 @@ body {
 }
 
 .card {
-  background: url('/static/images/fondo_tar3.webp') center/cover no-repeat;
+  background:
+    linear-gradient(rgba(0, 16, 74, 0.18), rgba(0, 16, 74, 0.32)),
+    url('/static/images/fondo_tar3.webp') center/cover no-repeat;
   border-radius: 28px;
-  box-shadow: 0 18px 40px rgba(0,0,0,.6);
+  box-shadow:
+    0 18px 40px rgba(0,0,0,.6),
+    0 0 0 1px rgba(0, 242, 109, 0.14),
+    0 0 28px rgba(0, 59, 255, 0.18);
   text-align: center;
   padding: 30px 30px;
   width: clamp(500px, 80vw, 540px);
@@ -44,16 +68,19 @@ body {
   width: clamp(120px, 20vw, 180px);
   aspect-ratio: 1 / 1;
   border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, #ffffff 0%, #dbeafe 40%, #4b74aa 100%);
+  background:
+    radial-gradient(circle at 30% 30%, #ffffff 0%, #dfffea 38%, var(--udd-green) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
   margin: 0 auto 16px auto;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+  box-shadow:
+    0 10px 25px rgba(0,0,0,0.25),
+    0 0 22px rgba(0, 242, 109, 0.35);
   position: relative;
   animation: float 3s ease-in-out infinite;
-  border: 3px solid #4b74aa;
+  border: 3px solid var(--udd-green);
 }
 
 .logo img {
@@ -71,7 +98,7 @@ body {
   left: -75%;
   width: 50%;
   height: 100%;
-  background: linear-gradient(120deg, rgba(255,255,255,0.6) 0%, transparent 80%);
+  background: linear-gradient(120deg, rgba(255,255,255,0.65) 0%, transparent 80%);
   transform: skewX(-20deg);
   animation: shine 4s infinite;
 }
@@ -79,13 +106,15 @@ body {
 h1 {
   font-size: 2rem;
   font-weight: 900;
-  color: #ff7700;
+  color: var(--udd-green);
   letter-spacing: 2px;
   text-transform: uppercase;
-  text-shadow: 0 0 8px rgba(255, 119, 0, 0.6);
+  text-shadow:
+    0 0 8px rgba(0, 242, 109, 0.68),
+    0 2px 10px rgba(0,0,0,0.75);
   white-space: normal;
   overflow: hidden;
-  border-right: 3px solid #ff7700;
+  border-right: 3px solid var(--udd-green);
   animation:
     typing 4s steps(40, end) forwards,
     blink .75s step-end infinite;
@@ -98,22 +127,25 @@ h1 {
 
 @keyframes blink {
   0%   { border-color: transparent; }
-  100% { border-color: #ff7700; }
+  100% { border-color: var(--udd-green); }
 }
 
 .console-card {
   width: 100%;
   padding: 18px 20px;
-  background: rgba(0, 10, 20, 0.75);
-  border: 2px solid #4b74aa;
+  background: rgba(0, 16, 74, 0.76);
+  border: 2px solid rgba(0, 242, 109, 0.72);
   border-radius: 18px;
-  color: #dbeafe;
+  color: #FFFFFF;
   font-family: "Courier New", monospace;
   text-align: left;
   margin: 22px auto 30px auto;
   max-width: 420px;
   backdrop-filter: blur(6px);
   position: relative;
+  box-shadow:
+    inset 0 0 18px rgba(0, 242, 109, 0.08),
+    0 0 20px rgba(0, 242, 109, 0.16);
 }
 
 .console-line {
@@ -127,18 +159,24 @@ h1 {
 .console-title {
   font-weight: 700;
   font-size: 1.05rem;
-  color: #ff7700;
+  color: var(--udd-green);
   margin-bottom: 8px;
+  text-shadow: 0 0 8px rgba(0, 242, 109, 0.55);
 }
 
 .console-label {
-  color: #4b9dff;
-  font-weight: 600;
+  color: var(--udd-green);
+  font-weight: 700;
+}
+
+.console-val {
+  color: #FFFFFF;
 }
 
 .console-prompt {
   margin-top: 14px;
   font-weight: 700;
+  color: #FFFFFF;
 }
 
 .console-card::after {
@@ -147,8 +185,8 @@ h1 {
   inset: 0;
   background: repeating-linear-gradient(
     to bottom,
-    rgba(255,255,255,0.015) 0px,
-    rgba(255,255,255,0.015) 1px,
+    rgba(255,255,255,0.018) 0px,
+    rgba(255,255,255,0.018) 1px,
     transparent 2px
   );
   pointer-events: none;
@@ -167,22 +205,26 @@ h1 {
   font-size: 14px;
   color: #ffffff;
   margin-bottom: 0;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.75);
 }
 
 .btn-chip {
   position: relative;
   padding: 10px 24px;
   font-size: 15px;
-  font-weight: 700;
-  color: #ffffff;
-  background: #0b1220;
-  border: 2px solid #4b74aa;
+  font-weight: 800;
+  color: var(--udd-blue-dark);
+  background: var(--udd-green);
+  border: 2px solid var(--udd-green);
   border-radius: 12px;
   cursor: pointer;
   letter-spacing: 1px;
   text-transform: uppercase;
-  transition: transform .2s ease, box-shadow .2s ease;
+  transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
   overflow: hidden;
+  box-shadow:
+    0 0 18px rgba(0, 242, 109, 0.42),
+    0 10px 24px rgba(0,0,0,0.32);
 }
 
 .btn-chip::before,
@@ -191,10 +233,10 @@ h1 {
   position: absolute;
   height: 2px;
   width: 40%;
-  background: linear-gradient(90deg, transparent, #4b74aa, transparent);
+  background: linear-gradient(90deg, transparent, #FFFFFF, transparent);
   top: 0;
   left: 30%;
-  opacity: 0.6;
+  opacity: 0.72;
 }
 
 .btn-chip::after {
@@ -204,7 +246,17 @@ h1 {
 
 .btn-chip:hover {
   transform: translateY(-3px);
-  box-shadow: 0 0 14px rgba(75, 116, 170, 0.7);
+  filter: brightness(1.08);
+  box-shadow:
+    0 0 24px rgba(0, 242, 109, 0.78),
+    0 12px 26px rgba(0,0,0,0.4);
+}
+
+.btn-chip:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+  filter: grayscale(0.2);
+  transform: none;
 }
 
 @keyframes electricFlow {
@@ -227,13 +279,13 @@ h1 {
 
 .btn-chip:active {
   animation: flashOn 0.15s ease-out;
-  box-shadow: 0 0 22px rgba(118, 168, 255, 0.9);
+  box-shadow: 0 0 26px rgba(0, 242, 109, 0.9);
 }
 
 @keyframes flashOn {
-  0%   { background: #0b1220; }
-  50%  { background: #1a2d4d; }
-  100% { background: #0b1220; }
+  0%   { background: var(--udd-green); }
+  50%  { background: #FFFFFF; }
+  100% { background: var(--udd-green); }
 }
 
 @keyframes fadeIn {
@@ -280,7 +332,9 @@ h1 {
     margin-bottom: 14px;
   }
 
-  h1 { font-size: 1.8rem; }
+  h1 {
+    font-size: 1.8rem;
+  }
 
   .console-card {
     margin: 16px auto 20px auto;
@@ -338,8 +392,13 @@ h1 {
     max-width: 100%;
   }
 
-  .console-line  { font-size: 0.82rem; }
-  .console-title { font-size: 0.88rem; }
+  .console-line {
+    font-size: 0.82rem;
+  }
+
+  .console-title {
+    font-size: 0.88rem;
+  }
 
   .next-step {
     max-width: 100%;
@@ -355,18 +414,44 @@ h1 {
 
 /* ── Pantalla baja (height < 700px) ── */
 @media (max-height: 700px) {
-  .logo { width: clamp(80px, 12vh, 120px); margin-bottom: 8px; }
-  h1 { font-size: 1.3rem; }
-  .console-card { margin: 10px auto 14px auto; padding: 10px 14px; }
-  .console-line { font-size: 0.85rem; min-height: 1.2em; }
-  .card { padding: 16px 24px; margin-top: 0; }
+  .logo {
+    width: clamp(80px, 12vh, 120px);
+    margin-bottom: 8px;
+  }
+
+  h1 {
+    font-size: 1.3rem;
+  }
+
+  .console-card {
+    margin: 10px auto 14px auto;
+    padding: 10px 14px;
+  }
+
+  .console-line {
+    font-size: 0.85rem;
+    min-height: 1.2em;
+  }
+
+  .card {
+    padding: 16px 24px;
+    margin-top: 0;
+  }
 }
 
 /* ── Pantalla muy baja (height < 550px) ── */
 @media (max-height: 550px) {
-  .logo { display: none; }
-  h1 { font-size: 1.1rem; }
-  .card { padding: 12px 20px; }
+  .logo {
+    display: none;
+  }
+
+  h1 {
+    font-size: 1.1rem;
+  }
+
+  .card {
+    padding: 12px 20px;
+  }
 }
 
 /* ── iPad Pro vertical (769px – 1024px) ── */
@@ -389,7 +474,9 @@ h1 {
     margin-bottom: 18px;
   }
 
-  h1 { font-size: 2.2rem; }
+  h1 {
+    font-size: 2.2rem;
+  }
 
   .console-card {
     margin: 20px auto 24px auto;
@@ -397,8 +484,13 @@ h1 {
     max-width: 560px;
   }
 
-  .console-line  { font-size: 1.1rem; }
-  .console-title { font-size: 1.15rem; }
+  .console-line {
+    font-size: 1.1rem;
+  }
+
+  .console-title {
+    font-size: 1.15rem;
+  }
 
   .next-step {
     max-width: 480px;

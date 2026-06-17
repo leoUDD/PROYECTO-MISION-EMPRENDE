@@ -7,6 +7,75 @@
   <title>Misión Emprende UDD — Bienvenida</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/estilo_bienvenida.css' %}">
+
+  <style>
+    /* ============================================================
+       TRANSICIÓN DESDE TARJETA AL VIDEO VIAJE
+    ============================================================ */
+
+    .video-overlay.viaje-saliendo {
+      opacity: 0;
+      transform: scale(0.96);
+      transition: opacity 0.65s ease, transform 0.65s ease;
+      pointer-events: none;
+    }
+
+    .viaje-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      background: #000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.65s ease;
+    }
+
+    .viaje-overlay.oculto {
+      display: none;
+    }
+
+    .viaje-overlay.activo {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .video-viaje {
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      background: #000;
+      display: block;
+    }
+
+    .viaje-fallback {
+      position: absolute;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      color: #fff;
+      font-family: "Poppins", sans-serif;
+      text-align: center;
+      background: #000;
+      z-index: 2;
+    }
+
+    .viaje-fallback.visible {
+      display: flex;
+    }
+
+    .viaje-fallback button {
+      margin-top: 18px;
+      border: 1px solid rgba(0, 200, 255, 0.7);
+      background: linear-gradient(135deg, rgba(0,200,255,.85), rgba(0,120,255,.85));
+      color: #fff;
+      border-radius: 999px;
+      padding: 12px 22px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
 
@@ -82,24 +151,42 @@
         <img src="{% static 'images/edem_udd_logo.webp' %}" alt="EdEm UDD">
       </div>
 
-      <div class="video-overlay">
+      <div class="video-overlay" id="bienvenida-card">
         <p class="video-instruccion">▸Conoce tu misión antes de comenzar</p>
+
         <div class="video-container">
           <div class="sound-alert" id="soundAlert">
             🔊 Activa el sonido de tu dispositivo
           </div>
+
           <video class="video" id="introVideo" autoplay muted playsinline controls preload="auto">
             <source src="{% static 'videos/VideoIntroductorio.webm' %}" type="video/webm">
             Tu navegador no soporta video.
           </video>
         </div>
+
         <a href="{% url 'habilidades_intro' %}" class="btn-iniciar btn-locked" id="btnIniciar">
-  <span class="btn-icon">▶</span>
-  CONTINUAR AL MAPA
-</a>
+          <span class="btn-icon">▶</span>
+          CONTINUAR
+        </a>
       </div>
 
     </main>
+  </div>
+
+  <!-- VIDEO VIAJE PANTALLA COMPLETA -->
+  <div id="viajeOverlay" class="viaje-overlay oculto" aria-hidden="true">
+    <video id="viajeVideo" class="video-viaje" preload="auto" playsinline>
+      <source src="{% static 'videos/Viaje.mp4' %}" type="video/mp4">
+      Tu navegador no soporta video.
+    </video>
+
+    <div id="viajeFallback" class="viaje-fallback">
+      <div>
+        <p>No se pudo reproducir el video de transición.</p>
+        <button type="button" id="btnContinuarFallback">Continuar</button>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -122,29 +209,48 @@
       try {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
         const now = ctx.currentTime;
+
         function makeReverb(dur = 1.2) {
           const conv = ctx.createConvolver();
           const len  = ctx.sampleRate * dur;
           const buf  = ctx.createBuffer(2, len, ctx.sampleRate);
+
           for (let c = 0; c < 2; c++) {
             const ch = buf.getChannelData(c);
-            for (let i = 0; i < len; i++)
+            for (let i = 0; i < len; i++) {
               ch[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 1.5);
+            }
           }
-          conv.buffer = buf; return conv;
+
+          conv.buffer = buf;
+          return conv;
         }
-        const reverb = makeReverb(1.2), revGain = ctx.createGain();
+
+        const reverb = makeReverb(1.2);
+        const revGain = ctx.createGain();
         revGain.gain.value = 0.35;
-        reverb.connect(revGain); revGain.connect(ctx.destination);
+        reverb.connect(revGain);
+        revGain.connect(ctx.destination);
+
         function tone(freq, start, dur, type = 'sine', vol = 0.18) {
-          const osc = ctx.createOscillator(), gain = ctx.createGain();
-          osc.connect(gain); gain.connect(ctx.destination); gain.connect(reverb);
-          osc.type = type; osc.frequency.setValueAtTime(freq, now + start);
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          gain.connect(reverb);
+
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, now + start);
+
           gain.gain.setValueAtTime(0.001, now + start);
           gain.gain.linearRampToValueAtTime(vol, now + start + 0.02);
           gain.gain.exponentialRampToValueAtTime(0.001, now + start + dur);
-          osc.start(now + start); osc.stop(now + start + dur + 0.1);
+
+          osc.start(now + start);
+          osc.stop(now + start + dur + 0.1);
         }
+
         tone(55,  0.00, 0.12, 'sine', 0.28);
         tone(55,  0.18, 0.10, 'sine', 0.18);
         tone(220, 0.35, 0.08, 'sine', 0.14);
@@ -155,42 +261,126 @@
     }
 
     const btn = document.getElementById('btnIniciar');
+    const introVideo = document.getElementById('introVideo');
+    const soundAlert = document.getElementById('soundAlert');
+    const bienvenidaCard = document.getElementById('bienvenida-card');
+
+    const viajeOverlay = document.getElementById('viajeOverlay');
+    const viajeVideo = document.getElementById('viajeVideo');
+    const viajeFallback = document.getElementById('viajeFallback');
+    const btnContinuarFallback = document.getElementById('btnContinuarFallback');
+
+    let botonLiberado = false;
+    let iniciandoViaje = false;
+
+    function liberarBotonContinuar() {
+      if (botonLiberado) return;
+
+      botonLiberado = true;
+      btn.classList.remove('btn-locked');
+
+      if (soundAlert) {
+        soundAlert.style.display = 'none';
+      }
+    }
+
+    function irASiguienteVista() {
+      window.location.href = btn.href;
+    }
+
+    async function iniciarVideoViaje() {
+  if (iniciandoViaje) return;
+  iniciandoViaje = true;
+
+  // Detener completamente el primer video para que no siga sonando
+  if (introVideo) {
+    introVideo.pause();
+    introVideo.currentTime = 0;
+    introVideo.muted = true;
+  }
+
+  playAgentSound();
+
+  btn.classList.add('btn-locked');
+  btn.style.pointerEvents = 'none';
+
+  // La tarjeta se desvanece primero
+  if (bienvenidaCard) {
+    bienvenidaCard.classList.add('viaje-saliendo');
+  }
+
+  setTimeout(async () => {
+    viajeOverlay.classList.remove('oculto');
+    viajeOverlay.setAttribute('aria-hidden', 'false');
+
+    requestAnimationFrame(() => {
+      viajeOverlay.classList.add('activo');
+    });
+
+    try {
+      viajeVideo.currentTime = 0;
+      viajeVideo.muted = false;
+      viajeVideo.controls = false;
+
+      await viajeVideo.play();
+    } catch (error) {
+      console.error('No se pudo reproducir Viaje.mov:', error);
+
+      if (viajeFallback) {
+        viajeFallback.classList.add('visible');
+      } else {
+        irASiguienteVista();
+      }
+    }
+  }, 650);
+}
 
     btn.addEventListener('click', (e) => {
-      if (btn.classList.contains('btn-locked')) { e.preventDefault(); return; }
       e.preventDefault();
-      const href = e.currentTarget.href;
-      playAgentSound();
-      setTimeout(() => { window.location.href = href; }, 1100);
+
+      if (btn.classList.contains('btn-locked')) {
+        return;
+      }
+
+      iniciarVideoViaje();
     });
 
     btn.addEventListener('mouseenter', () => {
-      if (!btn.classList.contains('btn-locked')) playHoverSound();
+      if (!btn.classList.contains('btn-locked')) {
+        playHoverSound();
+      }
     });
 
-    setTimeout(() => {
-      btn.classList.remove('btn-locked');
-      document.getElementById('soundAlert').style.display = 'none';
-    }, 20000);
+    if (introVideo) {
+      introVideo.addEventListener('ended', liberarBotonContinuar);
+    }
+
+    setTimeout(liberarBotonContinuar, 20000);
+
+    if (viajeVideo) {
+      viajeVideo.addEventListener('ended', irASiguienteVista);
+    }
+
+    if (btnContinuarFallback) {
+      btnContinuarFallback.addEventListener('click', irASiguienteVista);
+    }
 
     // Ajuste del GIF en móvil
     function ajustarGifMovil() {
+      const gif = document.querySelector('.gif-spacer');
+
+      if (!gif) return;
+
       if (window.innerWidth <= 480) {
-        const gif = document.querySelector('.gif-spacer');
-        if (gif) {
-          gif.style.height = Math.round(window.innerHeight * 0.50) + 'px';
-          gif.style.width = '100%';
-          gif.style.objectFit = 'cover';
-          gif.style.objectPosition = 'center top';
-          gif.style.display = 'block';
-          gif.style.position = 'relative';
-          gif.style.flexShrink = '0';
-        }
+        gif.style.height = Math.round(window.innerHeight * 0.50) + 'px';
+        gif.style.width = '100%';
+        gif.style.objectFit = 'cover';
+        gif.style.objectPosition = 'center top';
+        gif.style.display = 'block';
+        gif.style.position = 'relative';
+        gif.style.flexShrink = '0';
       } else {
-        const gif = document.querySelector('.gif-spacer');
-        if (gif) {
-          gif.removeAttribute('style');
-        }
+        gif.removeAttribute('style');
       }
     }
 

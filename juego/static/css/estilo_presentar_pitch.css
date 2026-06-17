@@ -1,14 +1,19 @@
 :root{
-  --bg: #000712 url('/static/images/fondo_bienvenida.webp') center/cover no-repeat fixed;
-  --card:#081A2D;
-  --text:#E6EEF8;
-  --muted:#AAB7C8;
-  --primary:#00C8FF;
-  --primary-pressed:#0091cc;
-  --accent:#FF7A1A;
+  --udd-blue:#003BFF;
+  --udd-dark:#00104A;
+  --udd-green:#00F26D;
+  --udd-white:#FFFFFF;
+
+  --bg: #000712 url('/static/images/PitchFuturo.png') center/cover no-repeat fixed;
+  --card:rgba(0,16,74,.92);
+  --text:#FFFFFF;
+  --muted:rgba(255,255,255,.78);
+  --primary:#00F26D;
+  --primary-pressed:#00B955;
+  --accent:#00F26D;
   --radius:28px;
   --shadow:0 18px 40px rgba(0,0,0,.6);
-  --glow:0 0 25px rgba(0,200,255,.35);
+  --glow:0 0 25px rgba(0,242,109,.35);
 }
 
 /* Reset */
@@ -20,19 +25,35 @@ body{
   color:var(--text);
   font-family:"Poppins",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
   padding:20px;
+  position:relative;
+  overflow-x:hidden;
+}
+
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  background:
+    radial-gradient(circle at 70% 20%, rgba(0,242,109,.10), transparent 32%),
+    radial-gradient(circle at 20% 80%, rgba(0,59,255,.16), transparent 38%),
+    linear-gradient(rgba(0,0,0,.16), rgba(0,0,0,.38));
+  pointer-events:none;
+  z-index:0;
 }
 
 /* ================== CONTENEDOR PRINCIPAL ================== */
 .pitch-container{
+  position:relative;
+  z-index:1;
   width:clamp(360px, 96vw, 1100px);
-  background:rgba(4, 20, 40, 0.9);
+  background:rgba(0,16,74,.88);
   border-radius:var(--radius);
   box-shadow:var(--shadow);
   padding:clamp(24px, 4vw, 44px);
   margin:24px auto;
   backdrop-filter: blur(14px) saturate(140%);
   -webkit-backdrop-filter: blur(14px) saturate(140%);
-  border:1px solid rgba(0, 200, 255, 0.22);
+  border:1px solid rgba(0, 242, 109, 0.22);
 }
 
 /* ================== HEADER ================== */
@@ -49,7 +70,7 @@ body{
   font-size:clamp(24px,4vw,36px);
   font-weight:800;
   color:var(--accent);
-  text-shadow:0 0 16px rgba(0,200,255,.45);
+  text-shadow:0 0 16px rgba(0,242,109,.45);
 }
 
 .subtitle{
@@ -83,25 +104,25 @@ body{
 /* primario neon */
 .btn.primary{
   background:var(--primary);
-  color:#001824;
-  box-shadow:0 0 18px rgba(0,200,255,.55);
+  color:#00104A;
+  box-shadow:0 0 18px rgba(0,242,109,.55);
 }
 .btn.primary:hover{
   background:var(--primary-pressed);
   transform:translateY(-1px);
-  box-shadow:0 0 26px rgba(0,200,255,.8);
+  box-shadow:0 0 26px rgba(0,242,109,.8);
 }
 
 a.btn:not(.ghost){
   background:var(--primary);
-  color:#001824;
-  box-shadow:0 0 18px rgba(0,200,255,.55);
+  color:#00104A;
+  box-shadow:0 0 18px rgba(0,242,109,.55);
   text-decoration:none;
 }
 a.btn:not(.ghost):hover{
   background:var(--primary-pressed);
   transform:translateY(-1px);
-  box-shadow:0 0 26px rgba(0,200,255,.8);
+  box-shadow:0 0 26px rgba(0,242,109,.8);
 }
 
 /* ================== GRID DE CONTENIDO ================== */
@@ -122,8 +143,8 @@ a.btn:not(.ghost):hover{
 .panel{
   border-radius:16px;
   padding:16px 18px;
-  background:rgba(3, 15, 30, 0.96);
-  border:1px solid rgba(0, 200, 255, 0.16);
+  background:rgba(0,16,74,.82);
+  border:1px solid rgba(0, 242, 109, 0.16);
   box-shadow:0 10px 24px rgba(0,0,0,.55);
 }
 
@@ -146,8 +167,8 @@ a.btn:not(.ghost):hover{
 .timer-card{
   border-radius:16px;
   padding:16px 18px;
-  background:rgba(3, 15, 30, 0.96);
-  border:1px solid rgba(0, 200, 255, 0.16);
+  background:rgba(0,16,74,.82);
+  border:1px solid rgba(0, 242, 109, 0.16);
   box-shadow:0 10px 24px rgba(0,0,0,.55);
 }
 
@@ -164,24 +185,24 @@ a.btn:not(.ghost):hover{
   margin-bottom:10px;
 
   width:100%;
-  background:#020715;
+  background:#00104A;
   color:#ffffff;
   font-variant-numeric: tabular-nums;
   letter-spacing:.05em;
 
   border-radius:18px;
-  border:3px solid #00d4ff;
-  box-shadow:0 0 20px #00d4ff, 0 0 40px #0077ff inset;
-  text-shadow:0 0 8px #00d4ff;
+  border:3px solid #00F26D;
+  box-shadow:0 0 20px #00F26D, 0 0 40px #003BFF inset;
+  text-shadow:0 0 8px #00F26D;
   animation: timerNeonPulse 1.4s ease-in-out infinite;
 }
 
 @keyframes timerNeonPulse{
   0%,100%{
-    box-shadow:0 0 20px #00d4ff, 0 0 40px #0077ff inset;
+    box-shadow:0 0 20px #00F26D, 0 0 40px #003BFF inset;
   }
   50%{
-    box-shadow:0 0 40px #00ffff, 0 0 60px #00aaff inset;
+    box-shadow:0 0 40px #00F26D, 0 0 60px #003BFF inset;
   }
 }
 
@@ -237,7 +258,7 @@ a.btn:not(.ghost):hover{
   padding:18px 20px;
   text-align:center;
   box-shadow:var(--shadow);
-  border:1px solid rgba(0, 200, 255, 0.28);
+  border:1px solid rgba(0, 242, 109, 0.28);
 }
 
 .modal-card h4{
@@ -329,7 +350,7 @@ a.btn:not(.ghost):hover{
   font-weight: 900;
   color: #ffffff;
   margin: 4px 0 4px;
-  text-shadow: 0 0 14px rgba(0, 200, 255, 0.35);
+  text-shadow: 0 0 14px rgba(0, 242, 109, 0.35);
 }
 
 .grupo-actual-orden {

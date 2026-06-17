@@ -1,21 +1,41 @@
+/* ============================================================
+   estilo_pitch.css — Misión Emprende UDD / Pitch
+   Paleta UDD + fondo PitchFuturo.png
+============================================================ */
+
 :root {
-  --bg: #000712 url('/static/images/fondo_bienvenida.webp') center/cover no-repeat fixed;
-  --card: rgba(4, 20, 40, 0.88);
-  --text: #E6EEF8;
-  --muted: #AAB7C8;
-  --primary: #00C8FF;
-  --accent: #FF7A1A;
+  --udd-blue: #003BFF;
+  --udd-dark: #00104A;
+  --udd-green: #00F26D;
+  --udd-white: #FFFFFF;
+
+  --bg: #000712 url('/static/images/PitchFuturo.png') center/cover no-repeat fixed;
+  --card: rgba(0, 16, 74, 0.76);
+  --text: #FFFFFF;
+  --muted: rgba(255,255,255,.78);
+  --primary: var(--udd-green);
+  --accent: var(--udd-green);
   --radius: 24px;
   --shadow: 0 20px 50px rgba(0,0,0,.6);
+
   --fs-title: clamp(28px, 4vw, 40px);
-  --fs-sub:   clamp(15px, 2.5vw, 18px);
-  --fs-body:  clamp(14px, 2vw, 18px);
+  --fs-sub: clamp(15px, 2.5vw, 18px);
+  --fs-body: clamp(14px, 2vw, 18px);
   --fs-timer: clamp(28px, 6vw, 40px);
 }
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
-html, body { min-height: 100%; }
+html,
+body {
+  min-height: 100%;
+  width: 100%;
+  max-width: 100%;
+}
 
 body {
   background: var(--bg);
@@ -26,15 +46,33 @@ body {
   align-items: flex-start;
   padding: 20px;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
-/* ── Contenedor — más compacto ── */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(circle at 72% 20%, rgba(0, 242, 109, 0.10), transparent 34%),
+    radial-gradient(circle at 18% 78%, rgba(0, 59, 255, 0.18), transparent 38%),
+    linear-gradient(rgba(0,0,0,.18), rgba(0,0,0,.44));
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Contenedor ── */
 .pitch-editor {
+  position: relative;
+  z-index: 1;
   width: clamp(450px, 90vw, 720px);
-  background: rgba(0, 15, 35, 0.70);
-  padding: 28px 25px 30px;      /* menos padding inferior */
+  background: var(--card);
+  padding: 28px 25px 30px;
   border-radius: 26px;
-  box-shadow: 0 18px 40px rgba(0, 0, 0, .55);
+  box-shadow:
+    var(--shadow),
+    0 0 0 1px rgba(0, 242, 109, 0.13),
+    0 0 34px rgba(0, 59, 255, 0.22);
   backdrop-filter: blur(12px) saturate(140%);
   -webkit-backdrop-filter: blur(12px) saturate(140%);
   text-align: center;
@@ -42,15 +80,17 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;                    /* gap reducido */
+  gap: 12px;
 }
 
 /* ── Textos ── */
 .title {
   font-size: var(--fs-title);
-  font-weight: 800;
-  color: var(--accent);
-  text-shadow: 0 0 18px rgba(255, 122, 26, 0.4);
+  font-weight: 900;
+  color: var(--udd-green);
+  text-shadow:
+    0 0 14px rgba(0, 242, 109, 0.50),
+    0 0 28px rgba(0, 59, 255, 0.20);
 }
 
 .subtitle {
@@ -78,22 +118,33 @@ body {
   margin-bottom: 10px;
   width: clamp(180px, 36vw, 260px);
   height: clamp(72px, 12vw, 98px);
-  background: #0a0a0a;
-  color: #fff;
-  font-weight: 800;
+  background: rgba(0, 16, 74, 0.92);
+  color: #FFFFFF;
+  font-weight: 900;
   font-size: var(--fs-timer);
   font-variant-numeric: tabular-nums;
   letter-spacing: .04em;
-  border: clamp(3px, .8vw, 6px) solid #00d4ff;
+  border: clamp(3px, .8vw, 6px) solid var(--udd-green);
   border-radius: 24px;
-  box-shadow: 0 0 20px #00d4ff, 0 0 40px #0077ff inset;
-  text-shadow: 0 0 8px #00d4ff;
+  box-shadow:
+    0 0 20px rgba(0, 242, 109, 0.55),
+    0 0 40px rgba(0, 59, 255, 0.35) inset;
+  text-shadow: 0 0 8px rgba(0, 242, 109, 0.80);
   animation: neonPulse 1.2s ease-in-out infinite;
 }
 
 @keyframes neonPulse {
-  0%, 100% { box-shadow: 0 0 20px #00d4ff, 0 0 40px #0077ff inset; }
-  50%       { box-shadow: 0 0 40px #00ffff, 0 0 60px #00aaff inset; }
+  0%, 100% {
+    box-shadow:
+      0 0 20px rgba(0, 242, 109, 0.55),
+      0 0 40px rgba(0, 59, 255, 0.35) inset;
+  }
+
+  50% {
+    box-shadow:
+      0 0 34px rgba(0, 242, 109, 0.85),
+      0 0 58px rgba(0, 59, 255, 0.50) inset;
+  }
 }
 
 /* ── Tips ── */
@@ -102,20 +153,22 @@ body {
   max-width: 640px;
   padding: 16px 20px;
   border-radius: 16px;
-  background: rgba(0, 140, 255, 0.12);
-  border: 1px solid rgba(0, 180, 255, 0.35);
+  background: rgba(0, 242, 109, 0.10);
+  border: 1px solid rgba(0, 242, 109, 0.35);
   backdrop-filter: blur(6px);
-  box-shadow: 0 0 16px rgba(0,180,255,.25);
+  box-shadow: 0 0 16px rgba(0, 242, 109, .20);
   text-align: left;
 }
 
 .tips h2 {
   margin-bottom: 10px;
   font-size: clamp(16px, 2.6vw, 20px);
-  color: var(--primary);
+  color: var(--udd-green);
 }
 
-.tips ul { list-style: none; }
+.tips ul {
+  list-style: none;
+}
 
 .tips li {
   position: relative;
@@ -129,10 +182,11 @@ body {
 .tips li::before {
   content: "•";
   position: absolute;
-  left: 0; top: 0;
+  left: 0;
+  top: 0;
   font-size: 18px;
-  color: var(--primary);
-  text-shadow: 0 0 6px rgba(0,200,255,.6);
+  color: var(--udd-green);
+  text-shadow: 0 0 6px rgba(0,242,109,.6);
 }
 
 /* ── Formulario ── */
@@ -148,42 +202,42 @@ body {
 textarea {
   width: 100%;
   border-radius: 16px 16px 0 0;
-  border: 2px solid rgba(0,120,255,.45);
+  border: 2px solid rgba(0,242,109,.48);
   border-bottom: none;
   padding: 16px;
   font-size: clamp(14px, 2vw, 17px);
   font-family: "Poppins", system-ui, sans-serif;
   color: var(--text);
-  background: rgba(0,0,0,0.35);
+  background: rgba(0, 16, 74, 0.60);
   resize: none;
   min-height: 200px;
   backdrop-filter: blur(6px);
-  transition: border-color 0.25s ease;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
 textarea:focus {
   outline: none;
-  border-color: #00c8ff;
-  box-shadow: 0 0 16px rgba(0,200,255,.3);
+  border-color: var(--udd-green);
+  box-shadow: 0 0 16px rgba(0,242,109,.30);
 }
 
-/* ── Footer de autoguardado (reemplaza al botón limpiar) ── */
+/* ── Footer de autoguardado ── */
 .pitch-footer {
   width: 100%;
   padding: 10px 16px;
   border-radius: 0 0 16px 16px;
-  background: rgba(0, 200, 255, 0.06);
-  border: 2px solid rgba(0,120,255,.45);
-  border-top: 1px solid rgba(0,200,255,.2);
+  background: rgba(0,242,109,.08);
+  border: 2px solid rgba(0,242,109,.48);
+  border-top: 1px solid rgba(0,242,109,.22);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .save-hint {
-  color: rgba(0, 200, 255, 0.65);
+  color: rgba(0,242,109,.72);
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: .02em;
   user-select: none;
 }
@@ -193,7 +247,7 @@ textarea:focus {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.65);
+  background: rgba(0, 0, 0, 0.72);
   backdrop-filter: blur(6px);
   justify-content: center;
   align-items: center;
@@ -201,33 +255,77 @@ textarea:focus {
 }
 
 .modal-fin-box {
-  background: #081A2D;
+  background: rgba(0, 16, 74, 0.96);
   padding: 30px 22px;
   border-radius: 22px;
   width: clamp(260px, 80vw, 350px);
   text-align: center;
   box-shadow: 0 18px 40px rgba(0, 0, 0, .55);
+  border: 1px solid rgba(0,242,109,.28);
   animation: pop 0.25s ease-out;
 }
 
-.modal-fin-box h2 { color: var(--primary); margin-bottom: 10px; font-weight: 700; }
-.modal-fin-box p  { font-size: 16px; color: var(--muted); }
+.modal-fin-box h2 {
+  color: var(--udd-green);
+  margin-bottom: 10px;
+  font-weight: 800;
+}
+
+.modal-fin-box p {
+  font-size: 16px;
+  color: var(--muted);
+}
+
+/* ── Botones generales que vienen del HTML ── */
+.btn-chip,
+.astro-pitch-btn {
+  background: linear-gradient(135deg, #00F26D, #00B955) !important;
+  color: #00104A !important;
+  border: 1px solid rgba(0,242,109,.72) !important;
+  font-weight: 900 !important;
+  box-shadow: 0 0 16px rgba(0,242,109,.28) !important;
+}
+
+.btn-chip:hover,
+.astro-pitch-btn:hover {
+  transform: translateY(-1px) scale(1.03);
+  box-shadow: 0 0 22px rgba(0,242,109,.45) !important;
+}
 
 /* ── Animaciones ── */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes pop {
-  from { transform: scale(0.9); opacity: 0; }
-  to   { transform: scale(1);   opacity: 1; }
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 /* ── Responsive ── */
 @media (max-width: 480px) {
-  .title { font-size: 22px; }
-  .subtitle { font-size: 16px; }
+  .title {
+    font-size: 22px;
+  }
+
+  .subtitle {
+    font-size: 16px;
+  }
 
   .pitch-editor {
     padding: 22px 18px 24px;
@@ -239,5 +337,12 @@ textarea:focus {
     width: 82%;
     height: clamp(80px, 16vw, 110px);
     font-size: clamp(30px, 9vw, 40px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
   }
 }

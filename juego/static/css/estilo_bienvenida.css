@@ -17,8 +17,9 @@ img, video { max-width: 100%; display: block; }
 a { text-decoration: none; }
 
 body {
-  background:
-    url('/static/images/fondo_bienvenida.webp') center / cover no-repeat fixed,
+  background: 
+    linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)),
+    url('/static/images/FotoPresente.jpg') center / cover no-repeat fixed,
     #000712;
   color: var(--text);
   font-family: "Poppins", system-ui, sans-serif;

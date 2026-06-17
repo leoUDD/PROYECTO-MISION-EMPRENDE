@@ -1,31 +1,31 @@
-<!-- POPUP DIÁLOGO INTRO — Trabajo en Equipo -->
+{% load static %}
 
-<div id="dialogo-overlay" aria-modal="true" role="dialog" aria-label="Introducción de agentes">
+<!-- POPUP DIÁLOGO INTRO — Trabajo en Equipo / EdEmy -->
+
+<div id="dialogo-overlay" aria-modal="true" role="dialog" aria-label="Introducción de EdEmy">
   <div id="dialogo-backdrop"></div>
 
   <div id="dialogo-box">
 
-    <!-- Personaje IZQUIERDA (foto6 — Nova, mujer pelirroja) -->
-    <div class="dialogo-personaje izquierda" id="pj-izq">
-      <img src="/static/images/foto6.webp" alt="Capitana Solaris" class="dialogo-img">
+    <!-- Robot EdEmy -->
+    <div class="dialogo-personaje activo" id="pj-edemy">
+      <img src="{% static 'images/EdemFeliz.png' %}" alt="EdEmy" class="dialogo-img">
     </div>
 
     <!-- Burbuja central -->
     <div class="dialogo-burbuja" id="dialogo-burbuja">
-      <div class="dialogo-hablante" id="dialogo-hablante"></div>
+      <div class="dialogo-hablante" id="dialogo-hablante">EdEmy</div>
+
       <p class="dialogo-texto" id="dialogo-texto"></p>
-      <button class="dialogo-siguiente" id="dialogo-siguiente" onclick="dialogoSiguiente()">
+
+      <button class="dialogo-siguiente" id="dialogo-siguiente" type="button" onclick="dialogoSiguiente()">
         <span id="btn-label">Siguiente</span>
         <span class="dialogo-flecha">▶</span>
       </button>
+
       <div class="dialogo-progreso">
         <div id="dialogo-dots"></div>
       </div>
-    </div>
-
-    <!-- Personaje DERECHA (foto5 — Rex, hombre rubio) -->
-    <div class="dialogo-personaje derecha" id="pj-der">
-      <img src="/static/images/foto5.webp" alt="Almirante Cosmo" class="dialogo-img">
     </div>
 
   </div>
@@ -44,6 +44,7 @@
   opacity: 0;
   transition: opacity .4s ease;
 }
+
 #dialogo-overlay.visible {
   opacity: 1;
   pointer-events: all;
@@ -61,61 +62,54 @@
 #dialogo-box {
   position: relative;
   z-index: 2;
-  width: min(760px, calc(100vw - 200px));
-  margin-left: 140px;
+  width: min(760px, calc(100vw - 80px));
   display: flex;
   align-items: flex-end;
   justify-content: center;
 }
 
-/* ===== PERSONAJES ===== */
+/* ===== ROBOT ===== */
 .dialogo-personaje {
   flex-shrink: 0;
   display: flex;
   align-items: flex-end;
-  transition: opacity .4s, transform .4s, filter .4s;
   position: relative;
   z-index: 3;
-}
-
-.dialogo-personaje.inactivo {
-  opacity: 0.40;
-  filter: grayscale(45%) brightness(0.65);
-  transform: scale(0.93) translateY(6px);
-}
-.dialogo-personaje.activo {
   opacity: 1;
-  filter: none;
   transform: scale(1.05) translateY(0);
+  transition: opacity .4s, transform .4s, filter .4s;
 }
 
 .dialogo-img {
-  width: clamp(80px, 10vw, 130px);
+  width: clamp(92px, 12vw, 155px);
   height: auto;
   display: block;
   object-fit: contain;
-  margin-bottom: -8px;
+  margin-right: -12px;
+  margin-bottom: -10px;
+  filter: drop-shadow(0 0 18px rgba(0, 242, 109, 0.35));
 }
 
 /* ===== BURBUJA ===== */
 .dialogo-burbuja {
   flex: 1;
   min-width: 0;
-  background: linear-gradient(160deg, rgba(4,16,34,0.97), rgba(6,22,46,0.97));
-  border: 1.8px solid rgba(0,200,255,0.75);
+  max-width: 580px;
+  background: linear-gradient(160deg, rgba(0,16,74,0.97), rgba(3,12,38,0.97));
+  border: 1.8px solid rgba(0,242,109,0.72);
   border-radius: 20px;
   padding: 20px 22px 14px;
   box-shadow:
-    0 0 30px rgba(0,180,255,.28),
-    0 0 80px rgba(0,100,255,.14),
+    0 0 30px rgba(0,242,109,.22),
+    0 0 80px rgba(0,59,255,.14),
     0 20px 50px rgba(0,0,0,.6);
   position: relative;
   z-index: 2;
-  margin: 0 -6px;
   transform: translateY(20px);
   opacity: 0;
   transition: transform .4s cubic-bezier(.34,1.2,.64,1), opacity .4s ease;
 }
+
 .dialogo-burbuja.visible {
   transform: translateY(0);
   opacity: 1;
@@ -126,19 +120,32 @@
 .dialogo-burbuja::after {
   content: "";
   position: absolute;
-  width: 14px; height: 14px;
-  border-color: rgba(0,200,255,.6);
+  width: 14px;
+  height: 14px;
+  border-color: rgba(0,242,109,.62);
   border-style: solid;
 }
-.dialogo-burbuja::before { top:-1px; left:-1px; border-width:2px 0 0 2px; border-radius:4px 0 0 0; }
-.dialogo-burbuja::after  { top:-1px; right:-1px; border-width:2px 2px 0 0; border-radius:0 4px 0 0; }
+
+.dialogo-burbuja::before {
+  top: -1px;
+  left: -1px;
+  border-width: 2px 0 0 2px;
+  border-radius: 4px 0 0 0;
+}
+
+.dialogo-burbuja::after {
+  top: -1px;
+  right: -1px;
+  border-width: 2px 2px 0 0;
+  border-radius: 0 4px 0 0;
+}
 
 .dialogo-hablante {
   font-family: "Poppins", sans-serif;
   font-size: clamp(10px, 1.1vw, 12px);
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 2.5px;
-  color: #FF7A1A;
+  color: #00F26D;
   text-transform: uppercase;
   margin-bottom: 8px;
 }
@@ -156,12 +163,16 @@
   display: inline-block;
   width: 2px;
   height: 1.1em;
-  background: #00C8FF;
+  background: #00F26D;
   vertical-align: text-bottom;
   margin-left: 2px;
   animation: parpadeo .65s step-end infinite;
 }
-@keyframes parpadeo { 0%,100%{opacity:1} 50%{opacity:0} }
+
+@keyframes parpadeo {
+  0%,100% { opacity: 1; }
+  50% { opacity: 0; }
+}
 
 .dialogo-siguiente {
   display: flex;
@@ -171,19 +182,20 @@
   width: 100%;
   padding: 10px 16px;
   border-radius: 12px;
-  background: linear-gradient(135deg, rgba(0,200,255,.18), rgba(0,120,255,.18));
-  border: 1.5px solid rgba(0,200,255,.60);
+  background: linear-gradient(135deg, rgba(0,242,109,.18), rgba(0,59,255,.22));
+  border: 1.5px solid rgba(0,242,109,.62);
   color: #E6EEF8;
   font-family: "Poppins", sans-serif;
   font-size: clamp(12px, 1.3vw, 14px);
-  font-weight: 700;
+  font-weight: 800;
   cursor: pointer;
   transition: background .2s, transform .15s, border-color .2s;
   letter-spacing: .5px;
 }
+
 .dialogo-siguiente:hover {
-  background: linear-gradient(135deg, rgba(0,200,255,.30), rgba(0,120,255,.28));
-  border-color: rgba(0,200,255,.90);
+  background: linear-gradient(135deg, rgba(0,242,109,.28), rgba(0,59,255,.30));
+  border-color: rgba(0,242,109,.95);
   transform: translateY(-1px);
 }
 
@@ -191,26 +203,82 @@
   font-size: .85em;
   animation: flechaPulso 1s ease-in-out infinite;
 }
-@keyframes flechaPulso { 0%,100%{transform:translateX(0)} 50%{transform:translateX(4px)} }
+
+@keyframes flechaPulso {
+  0%,100% { transform: translateX(0); }
+  50% { transform: translateX(4px); }
+}
 
 /* Dots de progreso */
-.dialogo-progreso { display:flex; justify-content:center; margin-top:10px; }
-#dialogo-dots { display:flex; gap:6px; }
+.dialogo-progreso {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+#dialogo-dots {
+  display: flex;
+  gap: 6px;
+}
+
 .d-dot {
-  width:6px; height:6px; border-radius:50%;
-  background:rgba(0,200,255,.22);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(0,242,109,.22);
   transition: background .3s, transform .3s;
 }
-.d-dot.activo { background:#00C8FF; transform:scale(1.35); }
-.d-dot.hecho  { background:rgba(0,200,255,.55); }
+
+.d-dot.activo {
+  background: #00F26D;
+  transform: scale(1.35);
+}
+
+.d-dot.hecho {
+  background: rgba(0,242,109,.55);
+}
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 900px) {
-  #dialogo-box { width: min(600px, calc(100vw - 160px)); margin-left: 100px; }
+  #dialogo-box {
+    width: min(650px, calc(100vw - 44px));
+  }
+
+  .dialogo-img {
+    width: clamp(82px, 13vw, 125px);
+  }
 }
+
 @media (max-width: 700px) {
-  #dialogo-box { width: calc(100vw - 30px); margin-left: 0; }
-  .dialogo-img { width: clamp(70px, 14vw, 110px); }
+  #dialogo-box {
+    width: calc(100vw - 24px);
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  .dialogo-img {
+    width: clamp(90px, 28vw, 130px);
+    margin-right: 0;
+    margin-bottom: -8px;
+  }
+
+  .dialogo-burbuja {
+    width: 100%;
+    max-width: none;
+    padding: 18px 18px 14px;
+  }
+
+  .dialogo-texto {
+    min-height: 70px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
 }
 </style>
 
@@ -227,86 +295,102 @@
     return ctx;
   }
 
-  /* Sonido de tecla: clic corto y seco */
   function sonarTecla() {
     try {
       const c = getCtx();
       const o = c.createOscillator();
       const g = c.createGain();
-      o.connect(g); g.connect(c.destination);
+
+      o.connect(g);
+      g.connect(c.destination);
+
       o.type = "square";
       o.frequency.setValueAtTime(520, c.currentTime);
       o.frequency.exponentialRampToValueAtTime(380, c.currentTime + 0.04);
+
       g.gain.setValueAtTime(0.06, c.currentTime);
       g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.05);
+
       o.start(c.currentTime);
       o.stop(c.currentTime + 0.06);
     } catch(_) {}
   }
 
-  /* Sonido de botón: click más grave y confirmatorio */
   function sonarBoton() {
     try {
       const c = getCtx();
 
       const o1 = c.createOscillator();
       const g1 = c.createGain();
-      o1.connect(g1); g1.connect(c.destination);
+
+      o1.connect(g1);
+      g1.connect(c.destination);
+
       o1.type = "sine";
       o1.frequency.setValueAtTime(440, c.currentTime);
       o1.frequency.exponentialRampToValueAtTime(600, c.currentTime + 0.08);
+
       g1.gain.setValueAtTime(0.18, c.currentTime);
       g1.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.14);
+
       o1.start(c.currentTime);
       o1.stop(c.currentTime + 0.15);
 
       const o2 = c.createOscillator();
       const g2 = c.createGain();
-      o2.connect(g2); g2.connect(c.destination);
+
+      o2.connect(g2);
+      g2.connect(c.destination);
+
       o2.type = "sine";
       o2.frequency.setValueAtTime(660, c.currentTime + 0.06);
       o2.frequency.exponentialRampToValueAtTime(880, c.currentTime + 0.18);
+
       g2.gain.setValueAtTime(0.12, c.currentTime + 0.06);
       g2.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.22);
+
       o2.start(c.currentTime + 0.06);
       o2.stop(c.currentTime + 0.24);
     } catch(_) {}
   }
 
-  /* ── GUIÓN ── */
+  /* ── GUIÓN EdEmy ── */
   const GUION = [
-    { hablante:"izq", nombre:"CAPITANA SOLARIS",
-      texto:"¡Bienvenidos, agentes! Soy la Capitana Solaris y él es el Almirante Cosmo. Estamos aquí para prepararte para la misión." },
-    { hablante:"der", nombre:"ALMIRANTE COSMO",
-      texto:"Antes de arrancar, necesitamos hablar de algo clave: el trabajo en equipo." },
-    { hablante:"izq", nombre:"CAPITANA SOLARIS",
-      texto:"Ninguna misión se completa en solitario. Cada miembro del equipo tiene algo único que aportar." },
-    { hablante:"der", nombre:"ALMIRANTE COSMO",
-      texto:"Escúchense entre sí. Una idea que parece pequeña puede cambiar todo el rumbo de la misión." },
-    { hablante:"izq", nombre:"CAPITANA SOLARIS",
-      texto:"Repartan tareas según las fortalezas de cada uno. Juntos llegan mucho más lejos que solos." },
-    { hablante:"der", nombre:"ALMIRANTE COSMO",
-      texto:"Si el equipo falla, todos fallan. Si el equipo gana, ¡todos ganan! Así funciona esto." },
-    { hablante:"izq", nombre:"CAPITANA SOLARIS",
-      texto:"¿Listos? Cuando todo el equipo esté de acuerdo, presionen «¡Estoy listo!». ¡Buena suerte, agentes!" },
+    {
+      nombre: "EdEmy",
+      texto: "Inicio de protocolo: Trabajo en Equipo."
+    },
+    {
+      nombre: "EdEmy",
+      texto: "Una misión no avanza solo con buenas ideas. También necesita coordinación."
+    },
+    {
+      nombre: "EdEmy",
+      texto: "Repartan tareas según las fortalezas de cada integrante."
+    },
+    {
+      nombre: "EdEmy",
+      texto: "Escuchen antes de decidir. Una mirada distinta puede mejorar toda la solución."
+    },
+    {
+      nombre: "EdEmy",
+      texto: "Si el equipo se coordina, la misión avanza. Cuando estén preparados, presionen «¡Estoy listo!»."
+    }
   ];
 
-  let paso      = 0;
+  let paso = 0;
   let escribiendo = false;
   let textoCompleto = "";
   let timerEscritura = null;
   let teclaCounter = 0;
 
-  const overlay  = document.getElementById("dialogo-overlay");
-  const burbuja  = document.getElementById("dialogo-burbuja");
-  const habEl    = document.getElementById("dialogo-hablante");
-  const textoEl  = document.getElementById("dialogo-texto");
+  const overlay = document.getElementById("dialogo-overlay");
+  const burbuja = document.getElementById("dialogo-burbuja");
+  const habEl = document.getElementById("dialogo-hablante");
+  const textoEl = document.getElementById("dialogo-texto");
   const btnLabel = document.getElementById("btn-label");
-  const dotsEl   = document.getElementById("dialogo-dots");
-  const pjIzq    = document.getElementById("pj-izq");
-  const pjDer    = document.getElementById("pj-der");
+  const dotsEl = document.getElementById("dialogo-dots");
 
-  /* Construir dots */
   GUION.forEach((_, i) => {
     const d = document.createElement("div");
     d.className = "d-dot";
@@ -321,53 +405,54 @@
     });
   }
 
-  function actualizarPersonajes(hab) {
-    pjIzq.className = "dialogo-personaje izquierda " + (hab === "izq" ? "activo" : "inactivo");
-    pjDer.className = "dialogo-personaje derecha "   + (hab === "der" ? "activo" : "inactivo");
-  }
-
   function escribirTexto(txt) {
     textoCompleto = txt;
-    escribiendo   = true;
+    escribiendo = true;
     textoEl.innerHTML = "";
-    teclaCounter  = 0;
+    teclaCounter = 0;
 
     const cursor = document.createElement("span");
     cursor.className = "cursor-rpg";
 
     let i = 0;
+
     clearInterval(timerEscritura);
+
     timerEscritura = setInterval(() => {
       if (i < txt.length) {
         textoEl.textContent = txt.slice(0, i + 1);
         textoEl.appendChild(cursor);
-        /* sonido cada 2 caracteres para no saturar */
+
         teclaCounter++;
-        if (teclaCounter % 2 === 0 && txt[i] !== " ") sonarTecla();
+
+        if (teclaCounter % 2 === 0 && txt[i] !== " ") {
+          sonarTecla();
+        }
+
         i++;
       } else {
         clearInterval(timerEscritura);
         escribiendo = false;
-        textoEl.textContent = txt; /* quitar cursor al terminar */
+        textoEl.textContent = txt;
       }
     }, 30);
   }
 
   function mostrarPaso(n) {
-    const linea  = GUION[n];
+    const linea = GUION[n];
+
     habEl.textContent = linea.nombre;
-    actualizarPersonajes(linea.hablante);
     actualizarDots();
+
     btnLabel.textContent = (n === GUION.length - 1) ? "¡Entendido!" : "Siguiente";
+
     escribirTexto(linea.texto);
   }
 
-  /* Botón siguiente */
   window.dialogoSiguiente = function () {
     sonarBoton();
 
     if (escribiendo) {
-      /* Mostrar texto completo de golpe */
       clearInterval(timerEscritura);
       escribiendo = false;
       textoEl.textContent = textoCompleto;
@@ -375,17 +460,19 @@
     }
 
     paso++;
+
     if (paso >= GUION.length) {
       overlay.classList.remove("visible");
       burbuja.classList.remove("visible");
       return;
     }
+
     mostrarPaso(paso);
   };
 
-  /* Arrancar */
   setTimeout(() => {
     overlay.classList.add("visible");
+
     setTimeout(() => {
       burbuja.classList.add("visible");
       mostrarPaso(0);

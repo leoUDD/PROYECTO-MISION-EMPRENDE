@@ -1,7 +1,31 @@
 from django.db import models
 from .image_utils import convertir_imagen_a_webp
 
+class PreguntaRompehielo(models.Model):
+    TIPO_EQUIPO = (
+        ("desconocidos", "Personas que no se conocen"),
+        ("conocidos", "Personas conocidas"),
+    )
 
+    idpregunta = models.AutoField(primary_key=True)
+    tipo_equipo = models.CharField(
+        max_length=20,
+        choices=TIPO_EQUIPO,
+        default="desconocidos"
+    )
+    texto = models.TextField()
+    activa = models.BooleanField(default=True)
+    orden = models.PositiveIntegerField(default=0)
+    creada_en = models.DateTimeField(auto_now_add=True)
+    actualizada_en = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "pregunta_rompehielo"
+        ordering = ["tipo_equipo", "orden", "idpregunta"]
+
+    def __str__(self):
+        return f"{self.get_tipo_equipo_display()} — {self.texto[:60]}"
+        
 class Alumno(models.Model):
     idalumno = models.AutoField(db_column='idAlumno', primary_key=True)
     profesor_idprofesor = models.ForeignKey('Profesor', models.DO_NOTHING, db_column='profesor_idProfesor')

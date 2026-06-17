@@ -8,6 +8,327 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@400;600;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{% static 'css/estilo_habilidades_intro.css' %}">
+
+<style>
+  /* ============================================================
+     DIÁLOGO DEL ROBOT — MAPA DE HABILIDADES
+  ============================================================ */
+
+  body.dialogo-mision-activo {
+    overflow: hidden;
+  }
+
+  .intro-mision-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 28px;
+    background:
+      radial-gradient(circle at 70% 20%, rgba(0, 242, 109, 0.14), transparent 35%),
+      radial-gradient(circle at 20% 80%, rgba(0, 59, 255, 0.15), transparent 34%),
+      rgba(2, 9, 28, 0.86);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    opacity: 1;
+    transition: opacity 0.45s ease;
+  }
+
+  .intro-mision-overlay.oculto {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .intro-mision-stage {
+    width: min(1120px, 96vw);
+    min-height: min(620px, 86vh);
+    display: grid;
+    grid-template-columns: minmax(230px, 380px) minmax(320px, 1fr);
+    align-items: end;
+    gap: 28px;
+    position: relative;
+  }
+
+  .intro-mision-stage::before {
+    content: "";
+    position: absolute;
+    inset: -20px;
+    border: 1px solid rgba(0, 242, 109, 0.16);
+    border-radius: 28px;
+    background:
+      linear-gradient(90deg, rgba(0, 242, 109, 0.06) 1px, transparent 1px),
+      linear-gradient(0deg, rgba(0, 242, 109, 0.045) 1px, transparent 1px);
+    background-size: 42px 42px;
+    opacity: 0.55;
+    pointer-events: none;
+  }
+
+  .intro-robot-wrap {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    min-height: 360px;
+  }
+
+  .intro-robot-glow {
+    position: absolute;
+    width: 260px;
+    height: 260px;
+    border-radius: 999px;
+    background: radial-gradient(circle, rgba(0,242,109,.22), transparent 64%);
+    filter: blur(10px);
+    bottom: 46px;
+    opacity: 0.8;
+    animation: robotGlow 3.6s ease-in-out infinite alternate;
+  }
+
+  @keyframes robotGlow {
+    from { transform: scale(0.96); opacity: 0.55; }
+    to   { transform: scale(1.08); opacity: 0.9; }
+  }
+
+  .intro-robot-img {
+    position: relative;
+    z-index: 3;
+    width: min(330px, 34vw);
+    max-height: 520px;
+    object-fit: contain;
+    filter:
+      drop-shadow(0 0 18px rgba(0, 242, 109, 0.24))
+      drop-shadow(0 20px 34px rgba(0, 0, 0, 0.65));
+    animation: robotFloat 4.8s ease-in-out infinite alternate;
+    transition: opacity 0.22s ease, transform 0.22s ease, filter 0.22s ease;
+  }
+
+  .intro-robot-img.cambiando {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+  }
+
+  @keyframes robotFloat {
+    0%   { transform: translateY(0) rotate(-1deg); }
+    50%  { transform: translateY(-12px) rotate(1deg); }
+    100% { transform: translateY(-4px) rotate(-0.6deg); }
+  }
+
+  .intro-dialogo-box {
+    position: relative;
+    z-index: 2;
+    align-self: center;
+    background:
+      linear-gradient(160deg, rgba(5, 17, 42, 0.97), rgba(6, 25, 55, 0.96));
+    border: 1.7px solid rgba(0, 242, 109, 0.68);
+    border-radius: 24px;
+    padding: 24px 26px 20px;
+    color: #EAF7FF;
+    box-shadow:
+      0 0 32px rgba(0, 242, 109, 0.18),
+      0 22px 60px rgba(0, 0, 0, 0.55);
+    overflow: hidden;
+  }
+
+  .intro-dialogo-box::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(90deg, rgba(0, 242, 109, 0.08), transparent 32%, rgba(0, 59, 255, 0.06));
+    pointer-events: none;
+  }
+
+  .intro-dialogo-top {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .intro-dialogo-nombre {
+    font-family: "Share Tech Mono", monospace;
+    color: #00F26D;
+    letter-spacing: 0.22em;
+    font-size: 0.95rem;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+
+  .intro-dialogo-estado {
+    font-family: "Share Tech Mono", monospace;
+    color: rgba(190, 230, 255, 0.78);
+    font-size: 0.78rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .intro-dialogo-texto {
+    position: relative;
+    z-index: 2;
+    min-height: 132px;
+    font-family: "Exo 2", sans-serif;
+    font-size: clamp(1.1rem, 2vw, 1.65rem);
+    line-height: 1.55;
+    font-weight: 600;
+    color: #F3FAFF;
+    text-shadow: 0 0 12px rgba(0, 242, 109, 0.12);
+    margin: 0 0 22px;
+  }
+
+  .intro-cursor {
+    display: inline-block;
+    width: 2px;
+    height: 1.05em;
+    margin-left: 4px;
+    background: #00F26D;
+    vertical-align: -0.15em;
+    animation: introCursor 0.65s step-end infinite;
+  }
+
+  @keyframes introCursor {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  .intro-dialogo-actions {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+  }
+
+  .intro-dots {
+    display: flex;
+    gap: 7px;
+    flex-wrap: wrap;
+  }
+
+  .intro-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: rgba(0, 242, 109, 0.20);
+    transition: transform 0.25s ease, background 0.25s ease;
+  }
+
+  .intro-dot.activo {
+    background: #00F26D;
+    transform: scale(1.35);
+  }
+
+  .intro-dot.hecho {
+    background: rgba(0, 242, 109, 0.58);
+  }
+
+  .intro-dialogo-btns {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .intro-skip,
+  .intro-next {
+    font-family: "Share Tech Mono", monospace;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+    letter-spacing: 0.11em;
+  }
+
+  .intro-skip {
+    padding: 10px 14px;
+    border: 1px solid rgba(140, 180, 215, 0.34);
+    background: rgba(5, 20, 42, 0.58);
+    color: rgba(225, 240, 255, 0.74);
+  }
+
+  .intro-next {
+    padding: 12px 20px;
+    border: 1.5px solid rgba(0, 242, 109, 0.72);
+    background: linear-gradient(135deg, rgba(0, 242, 109, 0.20), rgba(0, 59, 255, 0.25));
+    color: #EAF7FF;
+    font-weight: 800;
+    box-shadow: 0 0 18px rgba(0, 242, 109, 0.15);
+  }
+
+  .intro-next:hover,
+  .intro-skip:hover {
+    transform: translateY(-1px);
+  }
+
+  .intro-next:hover {
+    background: linear-gradient(135deg, rgba(0, 242, 109, 0.32), rgba(0, 59, 255, 0.34));
+    border-color: rgba(0, 242, 109, 0.95);
+  }
+
+  .intro-skip:hover {
+    background: rgba(255, 255, 255, 0.07);
+  }
+
+  @media (max-width: 820px) {
+    .intro-mision-stage {
+      grid-template-columns: 1fr;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .intro-robot-wrap {
+      min-height: 210px;
+      align-items: center;
+    }
+
+    .intro-robot-img {
+      width: min(220px, 56vw);
+    }
+
+    .intro-dialogo-box {
+      padding: 20px 18px 18px;
+    }
+
+    .intro-dialogo-texto {
+      min-height: 118px;
+      font-size: 1.08rem;
+    }
+
+    .intro-dialogo-actions {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .intro-dialogo-btns {
+      width: 100%;
+    }
+
+    .intro-skip,
+    .intro-next {
+      flex: 1;
+      text-align: center;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .intro-mision-overlay {
+      padding: 16px;
+    }
+
+    .intro-dialogo-top {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .intro-skip {
+      display: none;
+    }
+  }
+</style>
 </head>
 <body>
 
@@ -18,8 +339,8 @@
     <div class="tb-left">
       <div class="tb-badge" data-i18n="mapa_clasificado">CLASIFICADO</div>
       <div class="tb-title" data-i18n="mapa_topbar">
-  {{ estado_mapa.titulo_mapa|default:"HABILIDADES DE MISIÓN" }}
-</div>
+        {{ estado_mapa.titulo_mapa|default:"HABILIDADES DE MISIÓN" }}
+      </div>
     </div>
     <div class="tb-pips" id="pips"></div>
   </div>
@@ -29,8 +350,8 @@
       <div class="panel-empty" id="pempty">
         <div class="pe-icon">📍</div>
         <div class="pe-text" data-i18n="mapa_selecciona_punto">
-  SELECCIONA<br>EL PUNTO<br>EN EL MAPA
-</div>
+          SELECCIONA<br>EL PUNTO<br>EN EL MAPA
+        </div>
       </div>
 
       <div class="panel-card" id="pcard">
@@ -57,14 +378,47 @@
     </div>
   </div>
 
-<div class="bottom">
-  <div class="bt-hint" id="bt-hint" data-i18n="mapa_hint">
-  // SELECCIONA LA HABILIDAD ACTIVA Y CONTINÚA LA MISIÓN
+  <div class="bottom">
+    <div class="bt-hint" id="bt-hint" data-i18n="mapa_hint">
+      // SELECCIONA LA HABILIDAD ACTIVA Y CONTINÚA LA MISIÓN
+    </div>
+    <a href="{{ estado_mapa.ruta_continuar }}" class="bt-btn" id="bt-btn" style="display:none;">
+      ▶ {{ estado_mapa.texto_boton|default:"CONTINUAR" }}
+    </a>
+  </div>
 </div>
-  <a href="{{ estado_mapa.ruta_continuar }}" class="bt-btn" id="bt-btn" style="display:none;">
-    ▶ {{ estado_mapa.texto_boton|default:"CONTINUAR" }}
-  </a>
-</div>
+
+<!-- DIÁLOGO DEL ROBOT -->
+<div class="intro-mision-overlay" id="introMisionOverlay" role="dialog" aria-modal="true" aria-label="Diálogo del mapa de habilidades">
+  <div class="intro-mision-stage">
+    <div class="intro-robot-wrap">
+      <div class="intro-robot-glow"></div>
+      <img
+        id="introRobotImg"
+        class="intro-robot-img"
+        src="{% static 'images/EdemFeliz.png' %}"
+        alt="Robot guía de la misión"
+      >
+    </div>
+
+    <section class="intro-dialogo-box">
+      <div class="intro-dialogo-top">
+        <div class="intro-dialogo-nombre">EdEmy</div>
+        <div class="intro-dialogo-estado" id="introEstado">TRANSMISIÓN INICIADA</div>
+      </div>
+
+      <p class="intro-dialogo-texto" id="introTexto"></p>
+
+      <div class="intro-dialogo-actions">
+        <div class="intro-dots" id="introDots"></div>
+
+        <div class="intro-dialogo-btns">
+          <button class="intro-skip" type="button" id="introSkip">OMITIR</button>
+          <button class="intro-next" type="button" id="introNext">SIGUIENTE</button>
+        </div>
+      </div>
+    </section>
+  </div>
 </div>
 
 <div class="habilidad-overlay" id="habilidadOverlay">
@@ -79,7 +433,6 @@
   <source src="{% static 'sounds/musica_habilidades.mp3' %}" type="audio/mpeg">
 </audio>
 
-<!-- Rutas de imágenes disponibles para mapa_agente.js -->
 <script>
   const STATIC_IMAGES = {
     "trabajo en equipo": "{% static 'images/trabajoenEquipo.webp' %}",
@@ -102,6 +455,339 @@
 <script src="{% static 'js/mapa_agente.js' %}"></script>
 
 <script>
+  /* ============================================================
+     DIÁLOGO DEL MAPA SEGÚN PROGRESO DE MISIÓN
+  ============================================================ */
+
+  document.addEventListener("DOMContentLoaded", function () {
+    document.body.classList.add("dialogo-mision-activo");
+
+    const ROBOTS = {
+      feliz:  "{% static 'images/EdemFeliz.png' %}",
+      serio:  "{% static 'images/EdemSerio.png' %}",
+      triste: "{% static 'images/EdemTriste.png' %}",
+      rojo:   "{% static 'images/EdemRojo.png' %}"
+    };
+
+    function normalizarValor(texto) {
+      return String(texto || "")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim();
+    }
+
+    const habilidadActiva = normalizarValor(window.MAPA_HABILIDADES_CONFIG?.habilidadActiva || "");
+
+    const habilidadesCompletadas = Array.isArray(window.MAPA_HABILIDADES_CONFIG?.habilidadesCompletadas)
+      ? window.MAPA_HABILIDADES_CONFIG.habilidadesCompletadas.map(normalizarValor)
+      : [];
+
+    function completada(nombre) {
+      const n = normalizarValor(nombre);
+      return habilidadesCompletadas.some(h => h === n || h.includes(n));
+    }
+
+    const guionInicioMapa = [
+      {
+        texto: "Han cruzado el umbral de la misión.",
+        robot: ROBOTS.feliz,
+        estado: "TRANSMISIÓN INICIADA"
+      },
+      {
+        texto: "Lo que ven frente a ustedes no es solo un mapa.",
+        robot: ROBOTS.serio,
+        estado: "ANÁLISIS DEL MAPA"
+      },
+      {
+        texto: "Es una ruta de recuperación.",
+        robot: ROBOTS.serio,
+        estado: "RUTA DETECTADA"
+      },
+      {
+        texto: "Durante años, la humanidad delegó sus decisiones, sus ideas y sus soluciones.",
+        robot: ROBOTS.triste,
+        estado: "REGISTRO HISTÓRICO"
+      },
+      {
+        texto: "Pero hay habilidades que ninguna máquina puede reemplazar por completo.",
+        robot: ROBOTS.serio,
+        estado: "HABILIDADES HUMANAS"
+      },
+      {
+        texto: "Primero deberán trabajar en equipo. Luego comprender el problema, crear una solución y comunicarla con claridad.",
+        robot: ROBOTS.feliz,
+        estado: "RUTA DE MISIÓN"
+      },
+      {
+        texto: "Soy EdEmy. Estaré observando su progreso.",
+        robot: ROBOTS.serio,
+        estado: "GUÍA ACTIVADO"
+      },
+      {
+        texto: "El futuro no espera. Avancen.",
+        robot: ROBOTS.rojo,
+        estado: "ORDEN DE AVANCE"
+      }
+    ];
+
+    const guionPostTrabajoEquipo = [
+      {
+        texto: "Trabajo en equipo completado.",
+        robot: ROBOTS.feliz,
+        estado: "HABILIDAD RECUPERADA"
+      },
+      {
+        texto: "Ya demostraron que una misión no avanza solo con buenas ideas. También necesita coordinación.",
+        robot: ROBOTS.serio,
+        estado: "ANÁLISIS DEL EQUIPO"
+      },
+      {
+        texto: "Ahora viene Empatía.",
+        robot: ROBOTS.feliz,
+        estado: "SIGUIENTE HABILIDAD"
+      },
+      {
+        texto: "Observen el problema desde quienes lo viven. Escuchar será más importante que asumir.",
+        robot: ROBOTS.serio,
+        estado: "MISIÓN ACTIVA"
+      }
+    ];
+
+    const guionPostEmpatia = [
+      {
+        texto: "Empatía completada.",
+        robot: ROBOTS.feliz,
+        estado: "HABILIDAD RECUPERADA"
+      },
+      {
+        texto: "Ya entendieron algo clave: un emprendimiento no empieza con una idea.",
+        robot: ROBOTS.serio,
+        estado: "LECTURA DEL PROBLEMA"
+      },
+      {
+        texto: "Empieza con un problema real, vivido por personas reales.",
+        robot: ROBOTS.serio,
+        estado: "PROBLEMA IDENTIFICADO"
+      },
+      {
+        texto: "Ahora viene Creatividad. Transformen lo aprendido en una solución con valor.",
+        robot: ROBOTS.rojo,
+        estado: "SIGUIENTE HABILIDAD"
+      }
+    ];
+
+    const guionPostCreatividad = [
+      {
+        texto: "Creatividad completada.",
+        robot: ROBOTS.feliz,
+        estado: "HABILIDAD RECUPERADA"
+      },
+      {
+        texto: "Ya tienen una solución. Pero una idea que no se comunica, no existe.",
+        robot: ROBOTS.serio,
+        estado: "SOLUCIÓN DETECTADA"
+      },
+      {
+        texto: "La etapa final pondrá a prueba Comunicación y Negociación.",
+        robot: ROBOTS.rojo,
+        estado: "FASE FINAL"
+      },
+      {
+        texto: "Presenten con claridad, escuchen la retroalimentación y prepárense para mejorar la propuesta.",
+        robot: ROBOTS.serio,
+        estado: "MISIÓN ACTIVA"
+      }
+    ];
+
+    const guionPostMisionFinal = [
+      {
+        texto: "Misión final completada.",
+        robot: ROBOTS.feliz,
+        estado: "MISIÓN COMPLETADA"
+      },
+      {
+        texto: "Comunicaron, negociaron y defendieron su propuesta.",
+        robot: ROBOTS.serio,
+        estado: "RESULTADO REGISTRADO"
+      },
+      {
+        texto: "El futuro ha sido ajustado. La humanidad aún tiene una oportunidad.",
+        robot: ROBOTS.feliz,
+        estado: "SISTEMA ESTABLE"
+      }
+    ];
+
+    function elegirGuion() {
+      if (
+        completada("mision final") ||
+        completada("comunicacion") ||
+        completada("negociacion")
+      ) {
+        return guionPostMisionFinal;
+      }
+
+      if (
+        completada("creatividad") ||
+        habilidadActiva.includes("mision final") ||
+        habilidadActiva.includes("comunicacion") ||
+        habilidadActiva.includes("negociacion")
+      ) {
+        return guionPostCreatividad;
+      }
+
+      if (
+        completada("empatia") ||
+        habilidadActiva.includes("creatividad")
+      ) {
+        return guionPostEmpatia;
+      }
+
+      if (
+        completada("trabajo en equipo") ||
+        habilidadActiva.includes("empatia")
+      ) {
+        return guionPostTrabajoEquipo;
+      }
+
+      return guionInicioMapa;
+    }
+
+    const guionIntro = elegirGuion();
+
+    const overlay = document.getElementById("introMisionOverlay");
+    const textoEl = document.getElementById("introTexto");
+    const robotImg = document.getElementById("introRobotImg");
+    const estadoEl = document.getElementById("introEstado");
+    const btnNext = document.getElementById("introNext");
+    const btnSkip = document.getElementById("introSkip");
+    const dotsEl = document.getElementById("introDots");
+
+    let paso = 0;
+    let escribiendo = false;
+    let textoCompleto = "";
+    let timerEscritura = null;
+
+    if (dotsEl) {
+      dotsEl.innerHTML = "";
+    }
+
+    guionIntro.forEach((_, index) => {
+      const dot = document.createElement("span");
+      dot.className = "intro-dot";
+      dot.id = "intro-dot-" + index;
+      dotsEl.appendChild(dot);
+    });
+
+    function actualizarDots() {
+      guionIntro.forEach((_, index) => {
+        const dot = document.getElementById("intro-dot-" + index);
+        if (!dot) return;
+
+        dot.className = "intro-dot";
+
+        if (index < paso) {
+          dot.classList.add("hecho");
+        } else if (index === paso) {
+          dot.classList.add("activo");
+        }
+      });
+    }
+
+    function cambiarRobot(src) {
+      if (!robotImg || robotImg.getAttribute("src") === src) return;
+
+      robotImg.classList.add("cambiando");
+
+      setTimeout(() => {
+        robotImg.src = src;
+        robotImg.classList.remove("cambiando");
+      }, 160);
+    }
+
+    function escribirTexto(texto) {
+      textoCompleto = texto;
+      escribiendo = true;
+      textoEl.innerHTML = "";
+
+      const cursor = document.createElement("span");
+      cursor.className = "intro-cursor";
+
+      let i = 0;
+
+      clearInterval(timerEscritura);
+
+      timerEscritura = setInterval(() => {
+        if (i < texto.length) {
+          textoEl.textContent = texto.slice(0, i + 1);
+          textoEl.appendChild(cursor);
+          i++;
+        } else {
+          clearInterval(timerEscritura);
+          escribiendo = false;
+          textoEl.textContent = texto;
+        }
+      }, 26);
+    }
+
+    function mostrarPaso(index) {
+      const item = guionIntro[index];
+
+      actualizarDots();
+      cambiarRobot(item.robot);
+
+      if (estadoEl) {
+        estadoEl.textContent = item.estado;
+      }
+
+      btnNext.textContent = index === guionIntro.length - 1 ? "INICIAR MAPA" : "SIGUIENTE";
+
+      escribirTexto(item.texto);
+    }
+
+    function cerrarIntro() {
+      clearInterval(timerEscritura);
+
+      if (!overlay) return;
+
+      overlay.classList.add("oculto");
+      document.body.classList.remove("dialogo-mision-activo");
+
+      setTimeout(() => {
+        overlay.style.display = "none";
+      }, 480);
+
+      const music = document.getElementById("bg-music");
+      if (music) {
+        music.play().catch(() => {});
+      }
+    }
+
+    btnNext.addEventListener("click", function () {
+      if (escribiendo) {
+        clearInterval(timerEscritura);
+        escribiendo = false;
+        textoEl.textContent = textoCompleto;
+        return;
+      }
+
+      paso++;
+
+      if (paso >= guionIntro.length) {
+        cerrarIntro();
+        return;
+      }
+
+      mostrarPaso(paso);
+    });
+
+    btnSkip.addEventListener("click", cerrarIntro);
+
+    mostrarPaso(0);
+  });
+</script>
+
+<script>
 const videosHabilidades = {
   "trabajo en equipo": "{% static 'videos/TeamWork.webm' %}",
   "empatia":           "{% static 'videos/Empatia.webm' %}",
@@ -114,13 +800,14 @@ const videosHabilidades = {
   ]
 };
 
-  function normalizarTexto(texto) {
-    return texto
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .trim();
-  }
+function normalizarTexto(texto) {
+  return texto
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+}
+
 function mostrarAnimacionHabilidad(nombre) {
   const overlay = document.getElementById("habilidadOverlay");
   const titulo  = document.getElementById("habilidadTitulo");
@@ -140,7 +827,6 @@ function mostrarAnimacionHabilidad(nombre) {
   video.currentTime = 0;
   video.volume = 1.0;
 
-  // Caso especial: MISIÓN FINAL reproduce Comunicación y luego Negociación
   if (Array.isArray(src)) {
     let indiceVideo = 0;
 
@@ -182,29 +868,29 @@ function mostrarAnimacionHabilidad(nombre) {
   video.onended = cerrarAnimacionHabilidad;
 }
 
-  function cerrarAnimacionHabilidad() {
-    const overlay = document.getElementById("habilidadOverlay");
-    const video   = document.getElementById("habilidadVideo");
-    overlay.classList.remove("show");
-    video.pause();
-    video.currentTime = 0;
+function cerrarAnimacionHabilidad() {
+  const overlay = document.getElementById("habilidadOverlay");
+  const video   = document.getElementById("habilidadVideo");
 
-    // Reanudar música de fondo
-    const music = document.getElementById("bg-music");
-    if (music) music.play().catch(() => {});
-  }
+  overlay.classList.remove("show");
+  video.pause();
+  video.currentTime = 0;
 
-  document.addEventListener("click", function(event) {
-    const nodo = event.target.closest(".nd");
-    if (!nodo || nodo.classList.contains("locked")) return;
+  const music = document.getElementById("bg-music");
+  if (music) music.play().catch(() => {});
+}
 
-    const label = nodo.querySelector(".nd-lbl");
-    if (!label) return;
+document.addEventListener("click", function(event) {
+  const nodo = event.target.closest(".nd");
+  if (!nodo || nodo.classList.contains("locked")) return;
 
-    setTimeout(() => {
-      mostrarAnimacionHabilidad(label.textContent);
-    }, 120);
-  });
+  const label = nodo.querySelector(".nd-lbl");
+  if (!label) return;
+
+  setTimeout(() => {
+    mostrarAnimacionHabilidad(label.textContent);
+  }, 120);
+});
 </script>
 
 </body>

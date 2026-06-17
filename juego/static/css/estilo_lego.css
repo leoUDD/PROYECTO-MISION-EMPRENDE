@@ -1,21 +1,26 @@
 /* ============================================================
-   estilo_lego.css — Misión Emprende UDD
-   Fix Chrome: body align-items: flex-start
+   estilo_lego.css — Misión Emprende UDD / LEGO
+   Paleta UDD + fondo LegoFuturo.png
 ============================================================ */
 
 :root {
-  --bg: #000712 url('/static/images/fondo_bienvenida.webp') center/cover no-repeat fixed;
-  --card: rgba(0, 15, 35, 0.70);
-  --text: #E6EEF8;
-  --muted: #AAB7C8;
-  --primary: #00C8FF;
-  --accent: #FF7A1A;
+  --udd-blue: #003BFF;
+  --udd-dark: #00104A;
+  --udd-green: #00F26D;
+  --udd-white: #FFFFFF;
+
+  --bg: #000712 url('/static/images/LegoFuturo.png') center/cover no-repeat fixed;
+  --card: rgba(0, 16, 74, 0.76);
+  --text: #FFFFFF;
+  --muted: rgba(255, 255, 255, 0.78);
+  --primary: var(--udd-green);
+  --accent: var(--udd-green);
   --radius: 22px;
   --shadow: 0 18px 40px rgba(0, 0, 0, .55);
 
   --fs-title: clamp(24px, 4vw, 32px);
-  --fs-sub:   clamp(16px, 2.4vw, 20px);
-  --fs-body:  clamp(14px, 2vw, 18px);
+  --fs-sub: clamp(16px, 2.4vw, 20px);
+  --fs-body: clamp(14px, 2vw, 18px);
   --fs-timer: clamp(28px, 6vw, 40px);
 }
 
@@ -25,24 +30,49 @@
   box-sizing: border-box;
 }
 
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  min-height: 100%;
+}
+
 body {
   background: var(--bg);
   color: var(--text);
   font-family: "Poppins", system-ui, sans-serif;
   display: flex;
   justify-content: center;
-  align-items: flex-start; /* FIX Chrome: evita que .phone colapse al alto del viewport */
+  align-items: flex-start;
   padding: 20px;
   min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(circle at 70% 20%, rgba(0, 242, 109, 0.10), transparent 32%),
+    radial-gradient(circle at 20% 80%, rgba(0, 59, 255, 0.16), transparent 38%),
+    linear-gradient(rgba(0, 0, 0, .20), rgba(0, 0, 0, .42));
+  pointer-events: none;
+  z-index: 0;
 }
 
 /* ── Contenedor principal ── */
 .phone {
+  position: relative;
+  z-index: 1;
   width: clamp(450px, 90vw, 720px);
   background: var(--card);
   padding: 35px 25px 50px;
   border-radius: 26px;
-  box-shadow: var(--shadow);
+  box-shadow:
+    var(--shadow),
+    0 0 0 1px rgba(0, 242, 109, 0.13),
+    0 0 34px rgba(0, 59, 255, 0.22);
   backdrop-filter: blur(12px) saturate(140%);
   -webkit-backdrop-filter: blur(12px) saturate(140%);
   text-align: center;
@@ -51,6 +81,7 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 14px;
+  overflow: hidden;
 }
 
 /* ── Logo ── */
@@ -63,10 +94,12 @@ body {
 /* ── Título ── */
 .title {
   font-size: var(--fs-title);
-  font-weight: 800;
+  font-weight: 900;
   margin-bottom: 12px;
-  color: var(--accent);
-  text-shadow: 0 0 18px rgba(255, 122, 26, 0.4);
+  color: var(--udd-green);
+  text-shadow:
+    0 0 14px rgba(0, 242, 109, 0.50),
+    0 0 28px rgba(0, 59, 255, 0.20);
 }
 
 /* ── Subtítulo ── */
@@ -74,8 +107,8 @@ body {
   margin-top: 10px;
   margin-bottom: 6px;
   font-size: var(--fs-sub);
-  font-weight: 700;
-  color: var(--primary);
+  font-weight: 800;
+  color: var(--udd-green);
 }
 
 /* ── Cuerpo ── */
@@ -100,8 +133,8 @@ body {
 }
 
 .ideas-list li {
-  background: rgba(0, 140, 255, 0.12);
-  border: 1px solid rgba(0, 180, 255, 0.38);
+  background: rgba(0, 242, 109, 0.11);
+  border: 1px solid rgba(0, 242, 109, 0.35);
   padding: 10px 14px;
   margin-bottom: 12px;
   border-radius: 12px;
@@ -112,6 +145,7 @@ body {
   white-space: normal;
   word-wrap: break-word;
   overflow-wrap: anywhere;
+  color: #FFFFFF;
 }
 
 /* ── Timer ── */
@@ -124,22 +158,33 @@ body {
   margin-bottom: 18px;
   width: clamp(180px, 36vw, 260px);
   height: clamp(72px, 12vw, 98px);
-  background: #0a0a0a;
-  color: #fff;
-  font-weight: 800;
+  background: rgba(0, 16, 74, 0.92);
+  color: #FFFFFF;
+  font-weight: 900;
   font-size: var(--fs-timer);
   font-variant-numeric: tabular-nums;
   letter-spacing: .04em;
-  border: clamp(3px, .8vw, 6px) solid #00d4ff;
+  border: clamp(3px, .8vw, 6px) solid var(--udd-green);
   border-radius: 24px;
-  box-shadow: 0 0 20px #00d4ff, 0 0 40px #0077ff inset;
-  text-shadow: 0 0 8px #00d4ff;
+  box-shadow:
+    0 0 20px rgba(0, 242, 109, 0.55),
+    0 0 40px rgba(0, 59, 255, 0.35) inset;
+  text-shadow: 0 0 8px rgba(0, 242, 109, 0.80);
   animation: neonPulse 1.2s ease-in-out infinite;
 }
 
 @keyframes neonPulse {
-  0%, 100% { box-shadow: 0 0 20px #00d4ff, 0 0 40px #0077ff inset; }
-  50%       { box-shadow: 0 0 40px #00ffff, 0 0 60px #00aaff inset; }
+  0%, 100% {
+    box-shadow:
+      0 0 20px rgba(0, 242, 109, 0.55),
+      0 0 40px rgba(0, 59, 255, 0.35) inset;
+  }
+
+  50% {
+    box-shadow:
+      0 0 34px rgba(0, 242, 109, 0.85),
+      0 0 58px rgba(0, 59, 255, 0.50) inset;
+  }
 }
 
 /* ── Modal ── */
@@ -147,7 +192,7 @@ body {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.65);
+  background: rgba(0, 0, 0, 0.72);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   justify-content: center;
@@ -156,19 +201,20 @@ body {
 }
 
 .modal-content {
-  background: #081A2D;
+  background: rgba(0, 16, 74, 0.96);
   padding: 30px 22px;
   border-radius: var(--radius);
   width: clamp(260px, 80vw, 350px);
   text-align: center;
   box-shadow: var(--shadow);
+  border: 1px solid rgba(0, 242, 109, 0.28);
   animation: pop 0.25s ease-out;
 }
 
 .modal-content h2 {
-  color: var(--primary);
+  color: var(--udd-green);
   margin-bottom: 10px;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .modal-content p {
@@ -178,12 +224,12 @@ body {
 }
 
 #buttonContinuar {
-  background: var(--accent);
-  color: white;
+  background: linear-gradient(135deg, #00F26D, #00B955);
+  color: #00104A;
   border: none;
   padding: 12px 26px;
   font-size: 16px;
-  font-weight: 700;
+  font-weight: 900;
   border-radius: 14px;
   cursor: pointer;
   width: 100%;
@@ -191,8 +237,8 @@ body {
 }
 
 #buttonContinuar:hover {
-  background: #ff8f3d;
   transform: translateY(-2px);
+  box-shadow: 0 0 20px rgba(0, 242, 109, 0.35);
 }
 
 /* ── Foto panel ── */
@@ -202,7 +248,7 @@ body {
   margin-top: 0;
   padding: 18px;
   border-radius: 16px;
-  border: 2px solid rgba(255, 122, 26, 0.70);
+  border: 2px solid rgba(0, 242, 109, 0.58);
   background: rgba(255, 255, 255, 0.08);
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
   text-align: center;
@@ -211,7 +257,7 @@ body {
 .foto-panel h3 {
   margin: 0 0 10px 0;
   font-size: 1.05rem;
-  color: #fff;
+  color: #FFFFFF;
   text-decoration: underline;
   text-underline-offset: 3px;
 }
@@ -261,17 +307,17 @@ body {
   margin: 6px auto 14px;
   padding: 14px 16px;
   border-radius: 16px;
-  border: 2px solid rgba(0, 200, 255, 0.55);
-  background: rgba(0, 90, 140, 0.16);
+  border: 2px solid rgba(0, 242, 109, 0.45);
+  background: rgba(0, 59, 255, 0.14);
   text-align: left;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
 }
 
 .recordatorio-desafio h3 {
   margin: 0 0 8px 0;
-  color: var(--primary);
+  color: var(--udd-green);
   font-size: 1rem;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .recordatorio-desafio p {
@@ -285,19 +331,38 @@ body {
 
 /* ── Animaciones ── */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes pop {
-  from { transform: scale(0.9); opacity: 0; }
-  to   { transform: scale(1);   opacity: 1; }
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 /* ── Responsive ── */
 @media (max-width: 480px) {
-  .title    { font-size: 22px; }
-  .subtitle { font-size: 16px; }
+  .title {
+    font-size: 22px;
+  }
+
+  .subtitle {
+    font-size: 16px;
+  }
 
   .phone {
     padding: 28px 18px 40px;
@@ -310,5 +375,14 @@ body {
     font-size: clamp(30px, 9vw, 40px);
   }
 
-  .ideas-list { margin-bottom: 14px; }
+  .ideas-list {
+    margin-bottom: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
 }

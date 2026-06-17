@@ -14,20 +14,25 @@
   <main class="team-container" role="region" aria-label="Introducción a comunicación">
     <section class="team-section">
 
-      <!-- TÍTULO CON MARCO -->
       <div class="title-wrapper">
-        <h1 class="title" data-i18n="comunicacion_intro_titulo">Comunicación</h1>
+        <h1 class="title">Comunicación</h1>
       </div>
 
-      <!-- PANEL UNIFICADO -->
       <div class="mission-panel">
-        <p data-i18n="comunicacion_intro_texto">
-          Agentes, una gran solución también debe saber contarse.
-          En esta fase prepararán un pitch claro, potente y convincente para presentar su propuesta.
+        <p>
+          Ya tienen una solución. Ahora necesitan explicarla con claridad.
         </p>
 
-        <div class="tablet-reminder" data-i18n="comunicacion_intro_tablet">
-          &#128241; Protocolo: recuerden rotar la tablet.
+        <p>
+          Una buena idea pierde fuerza si el equipo no logra comunicar qué problema resuelve, a quién ayuda y por qué tiene valor.
+        </p>
+
+        <p>
+          En esta fase prepararán un pitch breve, claro y convincente para presentar su propuesta.
+        </p>
+
+        <div class="tablet-reminder">
+          📱 Protocolo: recuerden rotar la tablet antes de continuar.
         </div>
 
         <div class="panel-divider"></div>
@@ -51,10 +56,19 @@
 
       function traducirBotonListoFase() {
         const botones = document.querySelectorAll(".next-step button, .btn-chip, .oai-btn-chip");
+
         botones.forEach(btn => {
           if (!btn) return;
+
           const textoActual = (btn.textContent || "").trim().toLowerCase();
-          if (btn.disabled || textoActual.includes("esperando") || textoActual.includes("waiting") || textoActual.includes("listo") || textoActual.includes("ready")) {
+
+          if (
+            btn.disabled ||
+            textoActual.includes("esperando") ||
+            textoActual.includes("waiting") ||
+            textoActual.includes("listo") ||
+            textoActual.includes("ready")
+          ) {
             if (btn.disabled) {
               btn.textContent = tJuego("comunicacion_intro_boton_esperando", "Esperando...");
             } else {
@@ -66,10 +80,13 @@
 
       function traducirContadoresListos() {
         const textos = document.querySelectorAll(".contador-fase, #contador-listos-fase, #texto-espera-fase, .oai-estado-listo");
+
         textos.forEach(el => {
           if (!el) return;
+
           const texto = el.textContent || "";
           const match = texto.match(/(\d+)\/(\d+)/);
+
           if (match) {
             el.textContent = `${match[1]}/${match[2]} ${tJuego("comunicacion_intro_grupos_listos", "grupos listos")}`;
           } else if (texto.toLowerCase().includes("esperando") || texto.toLowerCase().includes("waiting")) {
@@ -84,7 +101,10 @@
       }
 
       setTimeout(traducirComunicacionIntroDinamico, 300);
-      window.addEventListener("idiomaJuegoCambiado", () => traducirComunicacionIntroDinamico());
+
+      window.addEventListener("idiomaJuegoCambiado", () => {
+        traducirComunicacionIntroDinamico();
+      });
     });
   </script>
 

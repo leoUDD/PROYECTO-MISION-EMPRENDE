@@ -6,9 +6,29 @@ from django.conf.urls.static import static
 urlpatterns = [
     #NUEVO
     path(
-    "sesion/<int:sesion_id>/dev/timer-10/",
-    views.dev_timer_10_segundos,
-    name="dev_timer_10_segundos"
+        "sesion/<int:sesion_id>/dev/timer-10/",
+        views.dev_timer_10_segundos,
+        name="dev_timer_10_segundos"
+        ),
+        path(
+        "dashboardadmin/preguntas-rompehielo/",
+        views.admin_preguntas_rompehielo,
+        name="admin_preguntas_rompehielo"
+    ),
+    path(
+        "dashboardadmin/preguntas-rompehielo/<int:idpregunta>/editar/",
+        views.admin_preguntas_rompehielo_editar,
+        name="admin_preguntas_rompehielo_editar"
+    ),
+    path(
+        "dashboardadmin/preguntas-rompehielo/<int:idpregunta>/toggle/",
+        views.admin_preguntas_rompehielo_toggle,
+        name="admin_preguntas_rompehielo_toggle"
+    ),
+    path(
+        "dashboardadmin/preguntas-rompehielo/<int:idpregunta>/eliminar/",
+        views.admin_preguntas_rompehielo_eliminar,
+        name="admin_preguntas_rompehielo_eliminar"
     ),
     path("continuar-desde-mapa/", views.continuar_desde_mapa, name="continuar_desde_mapa"),
     path("sesion/<int:sesion_id>/fase-anterior/", views.profesor_fase_anterior, name="profesor_fase_anterior"),

@@ -16,21 +16,26 @@
     <div class="team-container" role="region" aria-label="Introducción a trabajo en equipo">
       <section class="team-section">
 
-        <!-- TÍTULO CON MARCO PROPIO -->
         <div class="title-wrapper">
-          <h1 data-i18n="trabajo_equipo_titulo">Trabajo en Equipo</h1>
+          <h1>Trabajo en Equipo</h1>
         </div>
 
-        <!-- PANEL UNIFICADO: texto + recordatorio + botón -->
         <div class="mission-panel">
 
-          <p data-i18n="desafios_intro_texto">
-            Agentes, toda misión inicia con un desafío.
-            Ahora elegirán su siguiente objetivo.
+          <p>
+            El futuro no se construye en solitario.
           </p>
 
-          <div class="tablet-reminder" data-i18n="desafios_intro_tablet">
-            📱 Protocolo: recuerden rotar la tablet.
+          <p>
+            Una buena solución nace cuando distintas miradas, habilidades y formas de pensar trabajan juntas.
+          </p>
+
+          <p>
+            Ahora avanzarán al siguiente objetivo de la misión.
+          </p>
+
+          <div class="tablet-reminder">
+            📱 Protocolo: recuerden rotar la tablet antes de continuar.
           </div>
 
           <div class="panel-divider"></div>
@@ -58,7 +63,9 @@
         const botones = document.querySelectorAll(".next-step button, .btn-chip");
         botones.forEach(btn => {
           if (!btn) return;
+
           const textoActual = (btn.textContent || "").trim().toLowerCase();
+
           if (btn.disabled || textoActual.includes("esperando") || textoActual.includes("waiting")) {
             btn.textContent = tJuego("trabajo_equipo_boton_esperando", "Esperando...");
           } else {
@@ -69,10 +76,13 @@
 
       function traducirContadoresListos() {
         const textos = document.querySelectorAll(".contador-fase, #contador-listos-fase, #texto-espera-fase");
+
         textos.forEach(el => {
           if (!el) return;
+
           const texto = el.textContent || "";
           const match = texto.match(/(\d+)\/(\d+)/);
+
           if (match) {
             el.textContent = `${match[1]}/${match[2]} ${tJuego("trabajo_equipo_grupos_listos", "grupos listos")}`;
           } else if (texto.toLowerCase().includes("esperando") || texto.toLowerCase().includes("waiting")) {

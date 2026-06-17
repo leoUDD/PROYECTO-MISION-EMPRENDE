@@ -14,20 +14,25 @@
   <main class="team-container" role="region" aria-label="Introducción a creatividad">
     <section class="team-section">
 
-      <!-- TÍTULO CON MARCO -->
       <div class="title-wrapper">
-        <h1 class="title" data-i18n="creatividad_intro_titulo">Creatividad</h1>
+        <h1 class="title">Creatividad</h1>
       </div>
 
-      <!-- PANEL UNIFICADO -->
       <div class="mission-panel">
-        <p data-i18n="creatividad_intro_texto">
-          Agentes, la creatividad impulsa soluciones únicas.
-          Ahora pondrán a prueba su idea construyendo con LEGO.
+        <p>
+          Ya comprendieron el problema. Ahora deben transformar esa información en una solución.
         </p>
 
-        <div class="tablet-reminder" data-i18n="creatividad_intro_tablet">
-          &#128241; Protocolo: recuerden rotar la tablet.
+        <p>
+          La creatividad no es solo imaginar algo nuevo: es construir una respuesta útil para una necesidad real.
+        </p>
+
+        <p>
+          En esta fase pondrán a prueba su idea creando un prototipo con LEGO.
+        </p>
+
+        <div class="tablet-reminder">
+          📱 Protocolo: recuerden rotar la tablet antes de continuar.
         </div>
 
         <div class="panel-divider"></div>
@@ -51,10 +56,19 @@
 
       function traducirBotonListoFase() {
         const botones = document.querySelectorAll(".next-step button, .btn-chip, .oai-btn-chip");
+
         botones.forEach(btn => {
           if (!btn) return;
+
           const textoActual = (btn.textContent || "").trim().toLowerCase();
-          if (btn.disabled || textoActual.includes("esperando") || textoActual.includes("waiting") || textoActual.includes("listo") || textoActual.includes("ready")) {
+
+          if (
+            btn.disabled ||
+            textoActual.includes("esperando") ||
+            textoActual.includes("waiting") ||
+            textoActual.includes("listo") ||
+            textoActual.includes("ready")
+          ) {
             if (btn.disabled) {
               btn.textContent = tJuego("creatividad_intro_boton_esperando", "Esperando...");
             } else {
@@ -66,10 +80,13 @@
 
       function traducirContadoresListos() {
         const textos = document.querySelectorAll(".contador-fase, #contador-listos-fase, #texto-espera-fase, .oai-estado-listo");
+
         textos.forEach(el => {
           if (!el) return;
+
           const texto = el.textContent || "";
           const match = texto.match(/(\d+)\/(\d+)/);
+
           if (match) {
             el.textContent = `${match[1]}/${match[2]} ${tJuego("creatividad_intro_grupos_listos", "grupos listos")}`;
           } else if (texto.toLowerCase().includes("esperando") || texto.toLowerCase().includes("waiting")) {

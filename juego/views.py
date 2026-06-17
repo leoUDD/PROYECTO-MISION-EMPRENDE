@@ -27,6 +27,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 #NUEVO CIERRRE
 from django.shortcuts import redirect, render
 from django.contrib import messages
+from .models import PreguntaRompehielo
 from django.views.decorators.http import require_http_methods
 from .models import Tematica, Desafio
 import openpyxl
@@ -2518,6 +2519,99 @@ def minijuego1(request):
         "grupo": grupo,
         "sopa_ganada": bool(grupo.sopa_ganada),
     })
+
+def admin_preguntas_rompehielo(request):
+    if request.method == "POST":
+        idpregunta = request.POST.get("idpregunta")
+        tipo_equipo = request.POST.get("tipo_equipo", "desconocidos")
+        texto = request.POST.get("texto", "").strip()
+        orden = request.POST.get("orden") or 0
+        activa = request.POST.get("activa") == "on"
+
+        if tipo_equipo not in ["desconocidos", "conocidos"]:
+            messages.error(request, "Tipo de equipo inválido.")
+            return redirect("admin_preguntas_rompehielo")
+
+        if not texto:
+            messages.error(request, "La pregunta no puede estar vacía.")
+            return redirect("admin_preguntas_rompehielo")
+
+        try:
+            orden = int(orden)
+        except ValueError:
+            orden = 0
+
+        if idpregunta:
+            pregunta = get_object_or_404(PreguntaRompehielo, idpregunta=idpregunta)
+            pregunta.tipo_equipo = tipo_equipo
+            pregunta.texto = texto
+            pregunta.orden = orden
+            pregunta.activa = activa
+            pregunta.save()
+            messages.success(request, "Pregunta actualizada correctamente.")
+        else:
+            PreguntaRompehielo.objects.create(
+                tipo_equipo=tipo_equipo,
+                texto=texto,
+                orden=orden,
+                activa=activa
+            )
+            messages.success(request, "Pregunta creada correctamente.")
+
+        return redirect("admin_preguntas_rompehielo")
+
+    preguntas_desconocidos = PreguntaRompehielo.objects.filter(
+        tipo_equipo="desconocidos"
+    ).order_by("orden", "idpregunta")
+
+    preguntas_conocidos = PreguntaRompehielo.objects.filter(
+        tipo_equipo="conocidos"
+    ).order_by("orden", "idpregunta")
+
+    return render(request, "admin_preguntas_rompehielo.html", {
+        "preguntas_desconocidos": preguntas_desconocidos,
+        "preguntas_conocidos": preguntas_conocidos,
+        "pregunta_editando": None,
+    })
+
+
+def admin_preguntas_rompehielo_editar(request, idpregunta):
+    pregunta_editando = get_object_or_404(PreguntaRompehielo, idpregunta=idpregunta)
+
+    preguntas_desconocidos = PreguntaRompehielo.objects.filter(
+        tipo_equipo="desconocidos"
+    ).order_by("orden", "idpregunta")
+
+    preguntas_conocidos = PreguntaRompehielo.objects.filter(
+        tipo_equipo="conocidos"
+    ).order_by("orden", "idpregunta")
+
+    return render(request, "admin_preguntas_rompehielo.html", {
+        "preguntas_desconocidos": preguntas_desconocidos,
+        "preguntas_conocidos": preguntas_conocidos,
+        "pregunta_editando": pregunta_editando,
+    })
+
+
+def admin_preguntas_rompehielo_toggle(request, idpregunta):
+    pregunta = get_object_or_404(PreguntaRompehielo, idpregunta=idpregunta)
+
+    if request.method == "POST":
+        pregunta.activa = not pregunta.activa
+        pregunta.save()
+        messages.success(request, "Estado de la pregunta actualizado.")
+
+    return redirect("admin_preguntas_rompehielo")
+
+
+def admin_preguntas_rompehielo_eliminar(request, idpregunta):
+    pregunta = get_object_or_404(PreguntaRompehielo, idpregunta=idpregunta)
+
+    if request.method == "POST":
+        pregunta.delete()
+        messages.success(request, "Pregunta eliminada correctamente.")
+
+    return redirect("admin_preguntas_rompehielo")
 
 @require_POST
 def sopa_completada(request):

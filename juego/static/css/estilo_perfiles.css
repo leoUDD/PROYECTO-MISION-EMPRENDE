@@ -3,13 +3,13 @@
    ============================================================ */
 
 :root {
-  --card:        #081A2D;
-  --text:        #E6EEF8;
-  --primary:     #00C8FF;
-  --accent:      #FF7A1A;
-  --glow-cyan:   0 0 22px rgba(0, 200, 255, .75);
-  --glow-orange: 0 0 22px rgba(255, 122, 26, .75);
-  --glow-purple: 0 0 22px rgba(160, 100, 255, .75);
+  --card:        rgba(0, 18, 76, 0.92);
+  --text:        #FFFFFF;
+  --primary:     #00F26D;
+  --accent:      #FFFFFF;
+  --glow-cyan:   0 0 22px rgba(0, 242, 109, .75);
+  --glow-orange: 0 0 22px rgba(255, 255, 255, .65);
+  --glow-purple: 0 0 22px rgba(0, 59, 255, .75);
   --radius:      28px;
   --shadow:      0 18px 40px rgba(0, 0, 0, .6);
   --frame-offset: clamp(12px, 2vw, 24px);
@@ -21,8 +21,9 @@ img { max-width: 100%; display: block; }
 a   { text-decoration: none; }
 
 body {
-  background:
-    url('/static/images/fondo_bienvenida.webp') center / cover no-repeat fixed,
+  background: 
+    linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)),
+    url('/static/images/FotoPresente.jpg') center / cover no-repeat fixed,
     #000712;
   color: var(--text);
   font-family: "Poppins", system-ui, sans-serif;
