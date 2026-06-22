@@ -432,3 +432,235 @@ body::before {
     transition: none !important;
   }
 }
+
+/* =====================================================
+   EDEMY DIALOGO GRANDE + FONDO CAMUFLADO / BORROSO
+   Pegar al final del CSS
+===================================================== */
+
+/* Cuando el diálogo está visible, oscurece y desenfoca el fondo */
+body:has(#dialogo-inicial-overlay.visible) .team-container-wrap,
+body:has(#dialogo-inicial-overlay.visible) .team-container {
+  filter: blur(7px) brightness(.35) saturate(.75) !important;
+  transform: scale(1.015) !important;
+  pointer-events: none !important;
+  user-select: none !important;
+  transition: filter .35s ease, transform .35s ease !important;
+}
+
+/* Capa oscura encima del fondo cuando habla EdEmy */
+#dialogo-inicial-overlay.visible #dialogo-backdrop,
+#dialogo-backdrop {
+  background:
+    radial-gradient(circle at center, rgba(0, 252, 152, .10), transparent 42%),
+    rgba(0, 5, 18, .78) !important;
+  backdrop-filter: blur(8px) brightness(.55) !important;
+  -webkit-backdrop-filter: blur(8px) brightness(.55) !important;
+}
+
+/* Overlay completo del diálogo */
+#dialogo-inicial-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 9999 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: clamp(24px, 4vw, 72px) !important;
+}
+
+/* Caja general: EdEmy + diálogo */
+#dialogo-box {
+  width: min(1320px, 92vw) !important;
+  min-height: min(620px, 76vh) !important;
+  margin-left: 0 !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: clamp(36px, 5vw, 90px) !important;
+
+  position: relative !important;
+  z-index: 3 !important;
+}
+
+/* EdEmy más grande */
+.dialogo-personaje {
+  flex: 0 0 auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.dialogo-personaje.activo {
+  transform: scale(1) translateY(0) !important;
+}
+
+.dialogo-img {
+  width: clamp(260px, 25vw, 440px) !important;
+  height: auto !important;
+  margin-bottom: 0 !important;
+  object-fit: contain !important;
+  filter:
+    drop-shadow(0 0 22px rgba(0, 252, 152, .45))
+    drop-shadow(0 0 46px rgba(0, 200, 255, .22)) !important;
+}
+
+/* Burbuja más grande y legible */
+.dialogo-burbuja {
+  flex: 1 !important;
+  max-width: 820px !important;
+  min-height: 290px !important;
+
+  padding: clamp(30px, 3vw, 46px) !important;
+  border-radius: 28px !important;
+
+  background:
+    radial-gradient(circle at top left, rgba(0, 252, 152, .12), transparent 34%),
+    linear-gradient(160deg, rgba(0, 16, 74, .98), rgba(2, 8, 30, .98)) !important;
+
+  border: 2.2px solid rgba(0, 252, 152, .82) !important;
+
+  box-shadow:
+    0 0 34px rgba(0, 252, 152, .25),
+    0 0 90px rgba(0, 59, 255, .18),
+    0 24px 70px rgba(0,0,0,.70) !important;
+}
+
+/* Nombre EDEMY */
+.dialogo-hablante {
+  font-size: clamp(16px, 1.35vw, 24px) !important;
+  font-weight: 900 !important;
+  letter-spacing: 4px !important;
+  color: #00FC98 !important;
+  margin-bottom: 20px !important;
+}
+
+/* Texto principal grande */
+.dialogo-texto-rpg {
+  font-size: clamp(25px, 2.25vw, 40px) !important;
+  line-height: 1.42 !important;
+  min-height: 130px !important;
+  font-weight: 800 !important;
+  color: #F3FAFF !important;
+  text-shadow: 0 0 10px rgba(0, 200, 255, .24) !important;
+  margin-bottom: 30px !important;
+}
+
+/* Cursor más visible */
+.cursor-rpg {
+  width: 4px !important;
+  height: 1.15em !important;
+  background: #00FC98 !important;
+  box-shadow: 0 0 10px rgba(0, 252, 152, .9) !important;
+}
+
+/* Botón grande */
+.dialogo-siguiente {
+  min-height: 62px !important;
+  padding: 17px 28px !important;
+  border-radius: 17px !important;
+
+  font-size: clamp(17px, 1.5vw, 24px) !important;
+  font-weight: 900 !important;
+  letter-spacing: .05em !important;
+
+  background: linear-gradient(135deg, rgba(0, 252, 152, .22), rgba(0, 59, 255, .26)) !important;
+  border: 2px solid rgba(0, 252, 152, .78) !important;
+  color: #FFFFFF !important;
+
+  box-shadow:
+    0 0 18px rgba(0, 252, 152, .25),
+    inset 0 0 20px rgba(0, 200, 255, .10) !important;
+}
+
+.dialogo-siguiente:hover {
+  transform: translateY(-2px) scale(1.02) !important;
+  border-color: rgba(0, 252, 152, 1) !important;
+  box-shadow:
+    0 0 26px rgba(0, 252, 152, .38),
+    inset 0 0 24px rgba(0, 200, 255, .14) !important;
+}
+
+/* Puntos de progreso más grandes */
+.dialogo-progreso {
+  margin-top: 20px !important;
+}
+
+#dialogo-dots {
+  gap: 11px !important;
+}
+
+.d-dot {
+  width: 11px !important;
+  height: 11px !important;
+  background: rgba(0, 252, 152, .22) !important;
+}
+
+.d-dot.activo {
+  background: #00FC98 !important;
+  transform: scale(1.45) !important;
+  box-shadow: 0 0 12px rgba(0, 252, 152, .75) !important;
+}
+
+.d-dot.hecho {
+  background: rgba(0, 252, 152, .62) !important;
+}
+
+/* Responsive tablet */
+@media (max-width: 900px) {
+  #dialogo-box {
+    width: 94vw !important;
+    min-height: auto !important;
+    gap: 28px !important;
+  }
+
+  .dialogo-img {
+    width: clamp(200px, 28vw, 310px) !important;
+  }
+
+  .dialogo-burbuja {
+    max-width: 680px !important;
+    min-height: 250px !important;
+    padding: 28px !important;
+  }
+
+  .dialogo-texto-rpg {
+    font-size: clamp(21px, 3vw, 31px) !important;
+    min-height: 115px !important;
+  }
+}
+
+/* Responsive móvil */
+@media (max-width: 700px) {
+  #dialogo-box {
+    width: 94vw !important;
+    flex-direction: column !important;
+    gap: 18px !important;
+  }
+
+  .dialogo-img {
+    width: clamp(160px, 42vw, 250px) !important;
+  }
+
+  .dialogo-burbuja {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 230px !important;
+    padding: 24px 20px !important;
+  }
+
+  .dialogo-hablante {
+    font-size: 15px !important;
+  }
+
+  .dialogo-texto-rpg {
+    font-size: clamp(19px, 5vw, 27px) !important;
+    min-height: 105px !important;
+  }
+
+  .dialogo-siguiente {
+    min-height: 56px !important;
+    font-size: 17px !important;
+  }
+}

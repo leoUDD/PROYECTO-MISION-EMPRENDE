@@ -73,6 +73,281 @@
     }
     .modal-content button:hover { transform: translateY(-1px); background: linear-gradient(135deg, rgba(0,200,255,.35), rgba(0,120,255,.45)); }
 
+
+    /* ================== DIÁLOGO EDEMY — INICIO SOPA ================== */
+    body.dialogo-edemy-activo .game-container {
+      filter: blur(7px) brightness(.35) saturate(.78);
+      transform: scale(1.012);
+      pointer-events: none;
+      user-select: none;
+      transition: filter .35s ease, transform .35s ease;
+    }
+
+    #dialogo-inicial-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: clamp(24px, 4vw, 72px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .35s ease;
+    }
+
+    #dialogo-inicial-overlay.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    #dialogo-inicial-overlay.oculto {
+      display: none !important;
+    }
+
+    #dialogo-backdrop {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at center, rgba(0, 252, 152, .10), transparent 42%),
+        rgba(0, 5, 18, .78);
+      backdrop-filter: blur(8px) brightness(.55);
+      -webkit-backdrop-filter: blur(8px) brightness(.55);
+    }
+
+    #dialogo-box {
+      position: relative;
+      z-index: 3;
+      width: min(1320px, 92vw);
+      min-height: min(620px, 76vh);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(36px, 5vw, 90px);
+    }
+
+    .dialogo-personaje {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .dialogo-img {
+      width: clamp(260px, 25vw, 440px);
+      height: auto;
+      object-fit: contain;
+      filter:
+        drop-shadow(0 0 22px rgba(0, 252, 152, .45))
+        drop-shadow(0 0 46px rgba(0, 200, 255, .22));
+    }
+
+    .dialogo-burbuja {
+      flex: 1;
+      max-width: 820px;
+      min-height: 290px;
+      padding: clamp(30px, 3vw, 46px);
+      border-radius: 28px;
+      background:
+        radial-gradient(circle at top left, rgba(0, 252, 152, .12), transparent 34%),
+        linear-gradient(160deg, rgba(0, 16, 74, .98), rgba(2, 8, 30, .98));
+      border: 2.2px solid rgba(0, 252, 152, .82);
+      box-shadow:
+        0 0 34px rgba(0, 252, 152, .25),
+        0 0 90px rgba(0, 59, 255, .18),
+        0 24px 70px rgba(0,0,0,.70);
+      color: #F3FAFF;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: transform .35s cubic-bezier(.34,1.2,.64,1), opacity .35s ease;
+    }
+
+    .dialogo-burbuja.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .dialogo-hablante {
+      font-size: clamp(16px, 1.35vw, 24px);
+      font-weight: 900;
+      letter-spacing: 4px;
+      color: #00FC98;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    .dialogo-texto-rpg {
+      font-size: clamp(25px, 2.25vw, 40px);
+      line-height: 1.42;
+      min-height: 130px;
+      font-weight: 800;
+      color: #F3FAFF;
+      text-shadow: 0 0 10px rgba(0, 200, 255, .24);
+      margin: 0 0 30px 0;
+    }
+
+    .cursor-rpg {
+      display: inline-block;
+      width: 4px;
+      height: 1.15em;
+      background: #00FC98;
+      vertical-align: text-bottom;
+      margin-left: 3px;
+      box-shadow: 0 0 10px rgba(0, 252, 152, .9);
+      animation: parpadeo .65s step-end infinite;
+    }
+
+    @keyframes parpadeo {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    .dialogo-siguiente {
+      width: 100%;
+      min-height: 62px;
+      padding: 17px 28px;
+      border-radius: 17px;
+      font-size: clamp(17px, 1.5vw, 24px);
+      font-weight: 900;
+      letter-spacing: .05em;
+      cursor: pointer;
+      background: linear-gradient(135deg, rgba(0, 252, 152, .22), rgba(0, 59, 255, .26));
+      border: 2px solid rgba(0, 252, 152, .78);
+      color: #FFFFFF;
+      box-shadow:
+        0 0 18px rgba(0, 252, 152, .25),
+        inset 0 0 20px rgba(0, 200, 255, .10);
+      transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease, opacity .2s ease;
+    }
+
+    .dialogo-siguiente:hover:not(:disabled) {
+      transform: translateY(-2px) scale(1.02);
+      border-color: rgba(0, 252, 152, 1);
+      box-shadow:
+        0 0 26px rgba(0, 252, 152, .38),
+        inset 0 0 24px rgba(0, 200, 255, .14);
+    }
+
+    .dialogo-siguiente:disabled {
+      opacity: .65;
+      cursor: not-allowed;
+    }
+
+    .dialogo-flecha {
+      display: inline-block;
+      margin-left: 8px;
+      animation: flechaPulso 1s ease-in-out infinite;
+    }
+
+    @keyframes flechaPulso {
+      0%, 100% { transform: translateX(0); }
+      50% { transform: translateX(5px); }
+    }
+
+    .dialogo-progreso {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    #dialogo-dots {
+      display: flex;
+      gap: 11px;
+    }
+
+    .d-dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: rgba(0, 252, 152, .22);
+      transition: background .25s ease, transform .25s ease, box-shadow .25s ease;
+    }
+
+    .d-dot.activo {
+      background: #00FC98;
+      transform: scale(1.45);
+      box-shadow: 0 0 12px rgba(0, 252, 152, .75);
+    }
+
+    .d-dot.hecho {
+      background: rgba(0, 252, 152, .62);
+    }
+
+    .dialogo-espera-wrap {
+      margin-top: 18px;
+      text-align: center;
+      color: #E6F7FF;
+      font-size: clamp(15px, 1.3vw, 19px);
+      font-weight: 700;
+    }
+
+    .dialogo-espera-wrap .contador-fase {
+      margin-top: 6px;
+      color: #00FC98;
+      font-weight: 900;
+      text-shadow: 0 0 12px rgba(0, 252, 152, .45);
+    }
+
+    .dialogo-info-oculta {
+      display: none !important;
+    }
+
+    @media (max-width: 900px) {
+      #dialogo-box {
+        width: 94vw;
+        min-height: auto;
+        gap: 28px;
+      }
+
+      .dialogo-img {
+        width: clamp(200px, 28vw, 310px);
+      }
+
+      .dialogo-burbuja {
+        max-width: 680px;
+        min-height: 250px;
+        padding: 28px;
+      }
+
+      .dialogo-texto-rpg {
+        font-size: clamp(21px, 3vw, 31px);
+        min-height: 115px;
+      }
+    }
+
+    @media (max-width: 700px) {
+      #dialogo-box {
+        width: 94vw;
+        flex-direction: column;
+        gap: 18px;
+      }
+
+      .dialogo-img {
+        width: clamp(160px, 42vw, 250px);
+      }
+
+      .dialogo-burbuja {
+        width: 100%;
+        max-width: 100%;
+        min-height: 230px;
+        padding: 24px 20px;
+      }
+
+      .dialogo-hablante {
+        font-size: 15px;
+      }
+
+      .dialogo-texto-rpg {
+        font-size: clamp(19px, 5vw, 27px);
+        min-height: 105px;
+      }
+
+      .dialogo-siguiente {
+        min-height: 56px;
+        font-size: 17px;
+      }
+    }
+
     /* Mejora visual celdas */
     .cell.found {
       background: linear-gradient(135deg, #22c55e, #86efac) !important;
@@ -120,19 +395,6 @@
   data-sopa-ganada="{{ sopa_ganada|yesno:'true,false' }}"
 >
   <main class="game-container">
-
-    <!-- Overlay inicio de fase -->
-    <div id="inicio-fase-overlay" class="inicio-fase-overlay">
-      <section id="inicio-fase-card" class="inicio-fase-card">
-        <div class="inicio-fase-badge" data-i18n="sopa_badge">MISIÓN DE RASTREO</div>
-        <h3 data-i18n="sopa_antes">Antes de comenzar</h3>
-        <p data-i18n="sopa_intro_1">El sistema ha ocultado conceptos clave del emprendimiento dentro de la sopa de letras.</p>
-        <p data-i18n="sopa_intro_2">Tendrán 1 minuto para encontrarlos. Cuando todos los escuadrones estén listos, el rastreo comenzará automáticamente.</p>
-        <button type="button" id="btn-listo-fase" class="btn-chip" data-i18n="sopa_boton_listo">⚡ Listo para comenzar</button>
-        <div id="texto-espera-fase" class="contador-fase" data-i18n="sopa_esperando">Esperando a los demás equipos...</div>
-        <div id="contador-listos-fase" class="contador-fase">0/0 grupos listos</div>
-      </section>
-    </div>
 
     <h1 id="tituloSopa" class="blur-target-bloqueado" data-i18n="sopa_titulo">Sopa de Letras</h1>
     <p id="subtituloSopa" class="blur-target-bloqueado" data-i18n="sopa_subtitulo">Encuentra las palabras ocultas relacionadas con el emprendimiento</p>
@@ -196,6 +458,36 @@
     ></div>
   </main>
 
+  <div id="dialogo-inicial-overlay" class="oculto" aria-modal="true" role="dialog" aria-label="Mensaje de EdEmy">
+    <div id="dialogo-backdrop"></div>
+
+    <div id="dialogo-box">
+      <div class="dialogo-personaje activo" id="pj-edemy">
+        <img class="dialogo-img" src="{% static 'images/EdemFeliz.png' %}" alt="EdEmy">
+      </div>
+
+      <div class="dialogo-burbuja" id="dialogo-burbuja">
+        <div class="dialogo-hablante" id="dialogo-hablante">EdEmy</div>
+
+        <p class="dialogo-texto-rpg" id="dialogo-texto"></p>
+
+        <button class="dialogo-siguiente" id="btn-dialogo-continuar" type="button" onclick="dialogoSiguiente()">
+          <span id="btn-rpg-label">Siguiente</span>
+          <span class="dialogo-flecha">▶</span>
+        </button>
+
+        <div class="dialogo-espera-wrap dialogo-info-oculta" id="dialogo-espera-wrap">
+          <div id="texto-espera-fase" class="contador-fase" data-i18n="sopa_esperando">Esperando a los demás equipos...</div>
+          <div id="contador-listos-fase" class="contador-fase">0/0 grupos listos</div>
+        </div>
+
+        <div class="dialogo-progreso">
+          <div id="dialogo-dots"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="{% static 'js/sopadeletras.js' %}"></script>
 
   <script>
@@ -232,30 +524,36 @@
     window.addEventListener("beforeunload", () => audio.pause());
   })();
 
-  /* ── Lógica de inicio de fase — idéntica al bubblemap ── */
+  /* ── Lógica de inicio de fase con diálogo de EdEmy ── */
   document.addEventListener("DOMContentLoaded", () => {
     function tJuego(clave, fallback = "") {
       const idioma = window.i18nJuego?.obtenerIdioma?.() || "es";
       return window.i18nJuego?.traducciones?.[idioma]?.[clave] || fallback;
     }
-    function textoGruposListos(listos, total) { return `${listos}/${total} ${tJuego("sopa_grupos_listos", "grupos listos")}`; }
-    function textoEsperando() { return tJuego("sopa_boton_esperando", "Esperando..."); }
-    function textoListo()     { return tJuego("sopa_boton_listo", "⚡ Listo para comenzar"); }
 
-    const sesionId   = "{{ grupo.sesion.idsesion }}";
-    const grupoId    = "{{ grupo.idgrupo }}";
-    const csrfToken  = "{{ csrf_token }}";
+    function textoGruposListos(listos, total) {
+      return `${listos}/${total} ${tJuego("sopa_grupos_listos", "grupos listos")}`;
+    }
 
-    const boton      = document.getElementById("btn-listo-fase");
-    const textoEspera= document.getElementById("texto-espera-fase");
-    const contador   = document.getElementById("contador-listos-fase");
-    const overlay    = document.getElementById("inicio-fase-overlay");
+    function textoEsperando() {
+      return tJuego("sopa_boton_esperando", "Esperando...");
+    }
 
-    // ── Variables idénticas al bubblemap ──
+    function textoListo() {
+      return tJuego("sopa_boton_listo", "⚡ Confirmar equipo listo");
+    }
+
+    const sesionId    = "{{ grupo.sesion.idsesion }}";
+    const grupoId     = "{{ grupo.idgrupo }}";
+    const csrfToken   = "{{ csrf_token }}";
+    const textoEspera = document.getElementById("texto-espera-fase");
+    const contador    = document.getElementById("contador-listos-fase");
+
     let countdownMostrado          = false;
     let countdownEnCurso           = false;
     let timerRealSolicitado        = false;
     let timerLiberadoTrasCountdown = false;
+    let yaListo                    = false;
 
     const blurTargets = [
       document.getElementById("tituloSopa"),
@@ -265,13 +563,193 @@
       document.getElementById("wordsBox"),
     ];
 
+    (function instalarDialogoEdemy() {
+      const GUION = [
+        { texto: "Escuadrón, atención." },
+        { texto: "El sistema ocultó conceptos clave del emprendimiento dentro de una sopa de letras." },
+        { texto: "Tendrán 1 minuto para encontrar las palabras antes de que termine el rastreo." },
+        { texto: "Trabajen rápido, comuníquense y revisen cada ruta con calma." },
+        { texto: "Cuando estén listos, presionen confirmar. La misión empezará cuando todos los escuadrones estén listos." },
+      ];
+
+      let paso = 0;
+      let escribiendo = false;
+      let textoCompleto = "";
+      let timerEscritura = null;
+      let teclaCounter = 0;
+      let dotsCreados = false;
+      let dialogoInicializado = false;
+
+      const overlayDialogo = document.getElementById("dialogo-inicial-overlay");
+      const burbuja        = document.getElementById("dialogo-burbuja");
+      const textoEl        = document.getElementById("dialogo-texto");
+      const btnDialogo     = document.getElementById("btn-dialogo-continuar");
+      const btnLabel       = document.getElementById("btn-rpg-label");
+      const dotsEl         = document.getElementById("dialogo-dots");
+      const esperaWrap     = document.getElementById("dialogo-espera-wrap");
+
+      function crearDots() {
+        if (!dotsEl || dotsCreados) return;
+
+        dotsEl.innerHTML = "";
+
+        GUION.forEach((_, i) => {
+          const d = document.createElement("div");
+          d.className = "d-dot";
+          d.id = "dot-" + i;
+          dotsEl.appendChild(d);
+        });
+
+        dotsCreados = true;
+      }
+
+      function actualizarDots() {
+        GUION.forEach((_, i) => {
+          const d = document.getElementById("dot-" + i);
+          if (!d) return;
+          d.className = "d-dot" + (i < paso ? " hecho" : i === paso ? " activo" : "");
+        });
+      }
+
+      function mostrarInfoEspera(mostrar) {
+        if (esperaWrap) {
+          esperaWrap.classList.toggle("dialogo-info-oculta", !mostrar);
+        }
+      }
+
+      function cambiarTextoBoton(texto) {
+        if (btnLabel) btnLabel.textContent = texto;
+      }
+
+      function escribirTexto(txt) {
+        if (!textoEl) return;
+
+        textoCompleto = txt;
+        escribiendo = true;
+        textoEl.innerHTML = "";
+        teclaCounter = 0;
+
+        const cursor = document.createElement("span");
+        cursor.className = "cursor-rpg";
+
+        let i = 0;
+        clearInterval(timerEscritura);
+
+        timerEscritura = setInterval(() => {
+          if (i < txt.length) {
+            textoEl.textContent = txt.slice(0, i + 1);
+            textoEl.appendChild(cursor);
+            teclaCounter++;
+
+            if (teclaCounter % 2 === 0 && txt[i] !== " " && typeof window.sonarTecla === "function") {
+              window.sonarTecla();
+            }
+
+            i++;
+          } else {
+            clearInterval(timerEscritura);
+            escribiendo = false;
+            textoEl.textContent = txt;
+          }
+        }, 28);
+      }
+
+      function mostrarPaso(n) {
+        paso = n;
+        mostrarInfoEspera(false);
+        actualizarDots();
+
+        if (btnDialogo) btnDialogo.disabled = false;
+
+        cambiarTextoBoton(n === GUION.length - 1 ? textoListo() : "Siguiente");
+        escribirTexto(GUION[n].texto);
+      }
+
+      window.dialogoSiguiente = async function () {
+        if (typeof window.sonarBoton === "function") window.sonarBoton();
+
+        if (escribiendo) {
+          clearInterval(timerEscritura);
+          escribiendo = false;
+          if (textoEl) textoEl.textContent = textoCompleto;
+          return;
+        }
+
+        if (paso < GUION.length - 1) {
+          mostrarPaso(paso + 1);
+          return;
+        }
+
+        if (typeof window.marcarListoFase === "function") {
+          await window.marcarListoFase();
+        }
+      };
+
+      window.mostrarDialogoInicial = function () {
+        if (!overlayDialogo || !burbuja) return;
+
+        crearDots();
+        document.body.classList.add("dialogo-edemy-activo");
+        overlayDialogo.classList.remove("oculto");
+        overlayDialogo.classList.add("visible");
+
+        setTimeout(() => {
+          burbuja.classList.add("visible");
+
+          if (!dialogoInicializado) {
+            dialogoInicializado = true;
+            mostrarPaso(0);
+          }
+        }, 120);
+      };
+
+      window.ocultarDialogoInicial = function () {
+        if (!overlayDialogo) return;
+
+        document.body.classList.remove("dialogo-edemy-activo");
+        overlayDialogo.classList.remove("visible");
+        overlayDialogo.classList.add("oculto");
+      };
+
+      window.marcarDialogoComoEsperando = function () {
+        if (!overlayDialogo || !textoEl || !btnDialogo) return;
+
+        window.mostrarDialogoInicial?.();
+        clearInterval(timerEscritura);
+        escribiendo = false;
+        paso = GUION.length - 1;
+        actualizarDots();
+
+        textoEl.textContent = "Confirmación registrada. Esperen mientras los demás escuadrones terminan de confirmar.";
+        btnDialogo.disabled = true;
+        cambiarTextoBoton(textoEsperando());
+        mostrarInfoEspera(true);
+      };
+
+      window.habilitarDialogoListoDeNuevo = function () {
+        if (!btnDialogo) return;
+
+        btnDialogo.disabled = false;
+        cambiarTextoBoton(textoListo());
+        mostrarInfoEspera(false);
+      };
+
+      window.actualizarContadorDialogo = function (texto) {
+        if (contador) {
+          contador.textContent = texto;
+          contador.classList.remove("dialogo-info-oculta");
+        }
+      };
+    })();
+
     function activarFase() {
       blurTargets.forEach(el => {
         if (!el) return;
-        el.classList.remove("blur-target-bloqueado","timer-esperando");
+        el.classList.remove("blur-target-bloqueado", "timer-esperando");
         el.classList.add("blur-target-activo");
       });
-      if (overlay) overlay.classList.add("overlay-hidden");
+
+      window.ocultarDialogoInicial?.();
     }
 
     function bloquearFase() {
@@ -280,21 +758,32 @@
         el.classList.remove("blur-target-activo");
         el.classList.add("blur-target-bloqueado");
       });
+
       const tc = document.getElementById("timer-container");
       if (tc) tc.classList.add("timer-esperando");
-      if (overlay) overlay.classList.remove("overlay-hidden");
+
+      if (!yaListo) {
+        window.mostrarDialogoInicial?.();
+      } else {
+        window.marcarDialogoComoEsperando?.();
+      }
     }
 
-    // ── Idéntico al bubblemap ──
     async function iniciarTimerRealDespuesCountdown() {
       if (timerRealSolicitado) return;
       timerRealSolicitado = true;
+
       try {
         const res = await fetch(`/sesion/${sesionId}/iniciar-timer-inicio-fase/`, {
-          method: "POST", credentials: "same-origin",
-          headers: { "Content-Type": "application/json", "X-CSRFToken": csrfToken },
+          method: "POST",
+          credentials: "same-origin",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrfToken,
+          },
           body: JSON.stringify({})
         });
+
         const data = await res.json();
         if (!res.ok || !data.ok) throw new Error(data.error || "No se pudo iniciar el timer.");
       } catch (err) {
@@ -303,21 +792,66 @@
       }
     }
 
+    window.marcarListoFase = async function () {
+      if (yaListo) return;
+
+      const btnDialogo = document.getElementById("btn-dialogo-continuar");
+      const btnLabel = document.getElementById("btn-rpg-label");
+
+      if (btnDialogo) btnDialogo.disabled = true;
+      if (btnLabel) btnLabel.textContent = textoEsperando();
+
+      try {
+        const res = await fetch(`/grupo/${grupoId}/listo/`, {
+          method: "POST",
+          credentials: "same-origin",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrfToken,
+          },
+          body: JSON.stringify({})
+        });
+
+        const data = await res.json();
+        if (!res.ok || !data.ok) throw new Error(data.error || "No se pudo marcar listo.");
+
+        yaListo = true;
+
+        const textoContador = textoGruposListos(data.listos || 0, data.total || 0);
+        if (contador) contador.textContent = textoContador;
+        if (textoEspera) textoEspera.textContent = tJuego("sopa_esperando", "Esperando a los demás equipos...");
+
+        window.marcarDialogoComoEsperando?.();
+        consultarEstado();
+      } catch (err) {
+        console.error("Error marcando listo:", err);
+        yaListo = false;
+        window.habilitarDialogoListoDeNuevo?.();
+
+        if (textoEspera) {
+          textoEspera.textContent = tJuego("sopa_error_listo", "No se pudo registrar. Intenta nuevamente.");
+        }
+      }
+    };
+
     async function consultarEstado() {
       try {
-        const res = await fetch(`/sesion/${sesionId}/estado/`, { credentials: "same-origin", cache: "no-store" });
+        const res = await fetch(`/sesion/${sesionId}/estado/`, {
+          credentials: "same-origin",
+          cache: "no-store"
+        });
+
         if (!res.ok) return;
         const data = await res.json();
 
-        if (contador) {
-          contador.textContent = textoGruposListos(data.listosInicio || 0, data.totalListosInicio || 0);
-        }
+        const textoContador = textoGruposListos(data.listosInicio || 0, data.totalListosInicio || 0);
+        if (contador) contador.textContent = textoContador;
+        window.actualizarContadorDialogo?.(textoContador);
 
         const miGrupo = (data.grupos || []).find(g => Number(g.id) === Number(grupoId));
         if (miGrupo && miGrupo.listoF1) {
-          boton.disabled = true;
-          boton.textContent = textoEsperando();
-          if (textoEspera) textoEspera.textContent = tJuego("sopa_esperando", "Esperando a los demás equipos...");
+          yaListo = true;
+          window.marcarDialogoComoEsperando?.();
         }
 
         if (data.faseActual && data.faseActual !== "f1_sopa" && data.rutaAlumno) {
@@ -328,7 +862,6 @@
         }
 
         if (data.inicioFaseHabilitado) {
-          // Activar si el countdown ya terminó
           if (countdownMostrado && !countdownEnCurso) activarFase();
         } else {
           countdownMostrado = false;
@@ -338,51 +871,32 @@
           bloquearFase();
         }
 
-        // ── Flujo countdown idéntico al bubblemap ──
         if (data.inicioFaseHabilitado && !countdownMostrado && !countdownEnCurso) {
           countdownEnCurso = true;
+
           window.oaiCountdown.run(async () => {
             countdownMostrado = true;
             countdownEnCurso = false;
             timerLiberadoTrasCountdown = true;
+
             await iniciarTimerRealDespuesCountdown();
             activarFase();
           });
         }
-
       } catch (err) {
         console.error("Error consultando estado:", err);
       }
     }
 
-    if (boton) {
-      boton.addEventListener("click", async () => {
-        boton.disabled = true;
-        boton.textContent = textoEsperando();
-        try {
-          const res = await fetch(`/grupo/${grupoId}/listo/`, {
-            method: "POST", credentials: "same-origin",
-            headers: { "Content-Type": "application/json", "X-CSRFToken": csrfToken },
-            body: JSON.stringify({})
-          });
-          const data = await res.json();
-          if (!res.ok || !data.ok) throw new Error(data.error || "No se pudo marcar listo.");
-          if (contador) contador.textContent = textoGruposListos(data.listos || 0, data.total || 0);
-          if (textoEspera) textoEspera.textContent = tJuego("sopa_esperando", "Esperando a los demás equipos...");
-          consultarEstado();
-        } catch (err) {
-          console.error("Error marcando listo:", err);
-          boton.disabled = false;
-          boton.textContent = textoListo();
-          if (textoEspera) textoEspera.textContent = tJuego("sopa_error_listo", "No se pudo registrar. Intenta nuevamente.");
-        }
-      });
-    }
-
     window.addEventListener("idiomaJuegoCambiado", () => {
-      if (contador) { const p = contador.textContent.match(/(\d+)\/(\d+)/); if (p) contador.textContent = textoGruposListos(p[1], p[2]); }
-      if (boton) boton.textContent = boton.disabled ? textoEsperando() : textoListo();
-      if (textoEspera) textoEspera.textContent = tJuego("sopa_esperando", "Esperando a los demás equipos...");
+      if (contador) {
+        const p = contador.textContent.match(/(\d+)\/(\d+)/);
+        if (p) contador.textContent = textoGruposListos(p[1], p[2]);
+      }
+
+      if (textoEspera) {
+        textoEspera.textContent = tJuego("sopa_esperando", "Esperando a los demás equipos...");
+      }
     });
 
     bloquearFase();
