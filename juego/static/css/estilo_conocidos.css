@@ -1,10 +1,10 @@
 :root{
-  --bg: #000712 url('/static/images/fondo_bienvenida.webp') center/cover no-repeat fixed;
+  --bg: #000712 url('/static/images/ConocidosONo.png') center/cover no-repeat fixed;
   --card:#081A2D;
   --text:#fff;
   --muted:#E6EEF8;
-  --primary:#FF7A1A;
-  --accent:#FF7A1A;
+  --primary:#00FC98;
+  --accent:#00FC98;
   --radius:28px;
   --shadow:0 18px 40px rgba(0,0,0,.6);
   --glow:0 0 25px rgba(0,200,255,.35);
@@ -51,21 +51,6 @@ body{
   z-index:2;
 }
 
-.phone::after{
-  content:"";
-  position:absolute;
-  right:-3%;
-  bottom:-170px;
-  width:40%;
-  max-width:450px;
-  aspect-ratio: 3 / 5;
-  background:url('/static/images/foto2.webp') no-repeat;
-  background-size: contain;
-  background-position: right var(--pos-y);
-  opacity:1;
-  z-index:1;
-  pointer-events:none;
-}
 
 .title{
   margin:40px 0 8px;
@@ -660,4 +645,274 @@ body{
 
 @media (prefers-reduced-motion: reduce){
   *{ animation:none !important; transition:none !important; }
+}
+
+
+/* ============================================================
+   OVERRIDE — DIÁLOGO EDEMY GRANDE / VISIBLE DESDE LEJOS
+   Este bloque va al final porque el HTML también trae estilos del diálogo.
+   Se usa más especificidad + !important para pisar esos estilos.
+   ============================================================ */
+
+body #dialogo-inicial-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 1000 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: clamp(24px, 4vw, 70px) !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+  transition: opacity .4s ease !important;
+}
+
+body #dialogo-inicial-overlay.visible {
+  opacity: 1 !important;
+  pointer-events: all !important;
+}
+
+body #dialogo-inicial-overlay.oculto {
+  display: none !important;
+}
+
+body #dialogo-backdrop {
+  position: absolute !important;
+  inset: 0 !important;
+  background: rgba(0, 5, 15, 0.74) !important;
+  backdrop-filter: blur(5px) !important;
+  -webkit-backdrop-filter: blur(5px) !important;
+}
+
+body #dialogo-box {
+  position: relative !important;
+  z-index: 2 !important;
+  width: min(1280px, 88vw) !important;
+  min-height: min(560px, 70vh) !important;
+  margin-left: 0 !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: clamp(34px, 5vw, 80px) !important;
+}
+
+body .dialogo-personaje {
+  flex: 0 0 auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+  z-index: 3 !important;
+}
+
+body .dialogo-personaje.activo {
+  opacity: 1 !important;
+  filter: none !important;
+  transform: scale(1) !important;
+}
+
+body .dialogo-img {
+  width: clamp(220px, 24vw, 390px) !important;
+  height: auto !important;
+  display: block !important;
+  object-fit: contain !important;
+  margin-bottom: 0 !important;
+  filter: drop-shadow(0 0 28px rgba(0, 252, 152, .45)) !important;
+}
+
+body .dialogo-burbuja {
+  flex: 1 !important;
+  max-width: 780px !important;
+  min-height: 250px !important;
+
+  background: linear-gradient(160deg, rgba(0,16,74,0.97), rgba(3,12,38,0.98)) !important;
+  border: 2px solid rgba(0,252,152,0.78) !important;
+  border-radius: 26px !important;
+
+  padding: clamp(28px, 3vw, 42px) !important;
+  box-shadow:
+    0 0 34px rgba(0,252,152,.24),
+    0 0 90px rgba(0,59,255,.16),
+    0 24px 60px rgba(0,0,0,.65) !important;
+
+  position: relative !important;
+  z-index: 2 !important;
+  margin: 0 !important;
+  transform: translateY(20px) !important;
+  opacity: 0 !important;
+  transition: transform .4s cubic-bezier(.34,1.2,.64,1), opacity .4s ease !important;
+}
+
+body .dialogo-burbuja.visible {
+  transform: translateY(0) !important;
+  opacity: 1 !important;
+}
+
+body .dialogo-burbuja::before,
+body .dialogo-burbuja::after {
+  content: "" !important;
+  position: absolute !important;
+  width: 18px !important;
+  height: 18px !important;
+  border-color: rgba(0,252,152,.70) !important;
+  border-style: solid !important;
+}
+
+body .dialogo-burbuja::before {
+  top: -1px !important;
+  left: -1px !important;
+  border-width: 2px 0 0 2px !important;
+  border-radius: 5px 0 0 0 !important;
+}
+
+body .dialogo-burbuja::after {
+  top: -1px !important;
+  right: -1px !important;
+  border-width: 2px 2px 0 0 !important;
+  border-radius: 0 5px 0 0 !important;
+}
+
+body .dialogo-hablante {
+  font-family: "Poppins", sans-serif !important;
+  font-size: clamp(16px, 1.35vw, 22px) !important;
+  font-weight: 800 !important;
+  letter-spacing: 3px !important;
+  color: #00FC98 !important;
+  text-transform: uppercase !important;
+  margin-bottom: 18px !important;
+}
+
+body .dialogo-texto-rpg {
+  font-family: "Poppins", sans-serif !important;
+  font-size: clamp(24px, 2.25vw, 38px) !important;
+  color: #E6EEF8 !important;
+  line-height: 1.45 !important;
+  min-height: 120px !important;
+  margin: 0 0 28px 0 !important;
+  font-weight: 700 !important;
+}
+
+body .cursor-rpg {
+  display: inline-block !important;
+  width: 3px !important;
+  height: 1.1em !important;
+  background: #00FC98 !important;
+  vertical-align: text-bottom !important;
+  margin-left: 3px !important;
+  animation: parpadeo .65s step-end infinite !important;
+}
+
+body .dialogo-siguiente {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  width: 100% !important;
+  min-height: 58px !important;
+  padding: 16px 24px !important;
+  border-radius: 16px !important;
+  background: linear-gradient(135deg, rgba(0,252,152,.20), rgba(0,59,255,.24)) !important;
+  border: 2px solid rgba(0,252,152,.72) !important;
+  color: #E6EEF8 !important;
+  font-family: "Poppins", sans-serif !important;
+  font-size: clamp(17px, 1.5vw, 24px) !important;
+  font-weight: 800 !important;
+  letter-spacing: .04em !important;
+  cursor: pointer !important;
+  transition: background .2s, transform .15s, border-color .2s !important;
+}
+
+body .dialogo-siguiente:hover {
+  background: linear-gradient(135deg, rgba(0,252,152,.30), rgba(0,59,255,.32)) !important;
+  border-color: rgba(0,252,152,.98) !important;
+  transform: translateY(-1px) !important;
+}
+
+body .dialogo-flecha {
+  font-size: .9em !important;
+  animation: flechaPulso 1s ease-in-out infinite !important;
+}
+
+body .dialogo-progreso {
+  display: flex !important;
+  justify-content: center !important;
+  margin-top: 18px !important;
+}
+
+body #dialogo-dots {
+  display: flex !important;
+  gap: 10px !important;
+}
+
+body .d-dot {
+  width: 10px !important;
+  height: 10px !important;
+  border-radius: 50% !important;
+  background: rgba(0,252,152,.24) !important;
+  transition: background .3s, transform .3s !important;
+}
+
+body .d-dot.activo {
+  background: #00FC98 !important;
+  transform: scale(1.45) !important;
+}
+
+body .d-dot.hecho {
+  background: rgba(0,252,152,.62) !important;
+}
+
+/* Ajuste del contador/listos dentro del diálogo grande */
+body #contador-listos-dialogo,
+body .contador-fase-dialogo {
+  margin-top: 14px !important;
+  font-size: clamp(16px, 1.3vw, 22px) !important;
+  font-weight: 800 !important;
+  color: #00FC98 !important;
+  text-align: center !important;
+}
+
+/* Responsive del diálogo grande */
+@media (max-width: 900px) {
+  body #dialogo-box {
+    width: min(94vw, 900px) !important;
+    gap: 26px !important;
+  }
+
+  body .dialogo-img {
+    width: clamp(170px, 28vw, 260px) !important;
+  }
+
+  body .dialogo-texto-rpg {
+    font-size: clamp(20px, 3vw, 30px) !important;
+  }
+}
+
+@media (max-width: 700px) {
+  body #dialogo-box {
+    width: 94vw !important;
+    min-height: auto !important;
+    flex-direction: column !important;
+    gap: 18px !important;
+  }
+
+  body .dialogo-img {
+    width: clamp(150px, 42vw, 230px) !important;
+  }
+
+  body .dialogo-burbuja {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 230px !important;
+    padding: 24px 22px !important;
+  }
+
+  body .dialogo-texto-rpg {
+    font-size: clamp(19px, 5vw, 26px) !important;
+    min-height: 110px !important;
+  }
+
+  body .dialogo-siguiente {
+    font-size: 17px !important;
+  }
 }

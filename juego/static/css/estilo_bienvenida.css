@@ -5,7 +5,7 @@
 :root {
   --text:         #E6EEF8;
   --primary:      #00C8FF;
-  --accent:       #FF7A1A;
+  --accent:       #00FC98;
   --radius:       28px;
   --shadow:       0 18px 40px rgba(0,0,0,.6);
   --frame-offset: clamp(8px, 2vw, 24px);
@@ -60,7 +60,7 @@ body {
                        calc((100dvh - (var(--frame-offset) * 2) - 16px) * 0.808),
                        calc(100vw - (var(--frame-offset) * 2) - 16px)) * 1.237));
 
-  background-image: url('/static/images/mision_emprende_phone_bg.webp');
+  background-image: url('/static/images/mision_emprende_phone_bg.png');
   background-size: 100% 100%;
   background-repeat: no-repeat;
   background-position: center top;
@@ -136,7 +136,7 @@ body {
   letter-spacing: 0.08em;
   color: var(--accent);
   text-align: center;
-  text-shadow: 0 0 14px rgba(255,122,26,0.7);
+  text-shadow: 0 0 14px rgba(0,252,152,0.7);
   animation: instruccionPulse 2.5s ease-in-out infinite;
 }
 
@@ -387,7 +387,7 @@ body {
   .phone {
     width:  min(calc(100dvh * 0.808), calc(100vw - 8px)) !important;
     height: calc(100dvh - 8px) !important;
-    background-image: url('/static/images/mision_emprende_phone_bg.webp') !important;
+    background-image: url('/static/images/mision_emprende_phone_bg.png') !important;
     background-size: 100% 100% !important;
     background-color: transparent !important;
     justify-content: flex-end !important;

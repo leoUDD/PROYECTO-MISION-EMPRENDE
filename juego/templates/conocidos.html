@@ -195,6 +195,35 @@
       transform: translateY(-1px);
     }
 
+    .dialogo-siguiente:disabled {
+      opacity: .62;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .dialogo-estado,
+    .dialogo-contador {
+      margin: 9px 0 0;
+      text-align: center;
+      font-family: "Poppins", sans-serif;
+      font-size: clamp(12px, 1.25vw, 14px);
+      line-height: 1.35;
+    }
+
+    .dialogo-estado {
+      color: rgba(230,238,248,.92);
+    }
+
+    .dialogo-contador {
+      color: #00F26D;
+      font-weight: 800;
+      text-shadow: 0 0 10px rgba(0,242,109,.30);
+    }
+
+    .dialogo-info-oculta {
+      display: none;
+    }
+
     .dialogo-flecha {
       font-size: .85em;
       animation: flechaPulso 1s ease-in-out infinite;
@@ -537,49 +566,7 @@
 <body>
   <main class="phone" role="region" aria-label="Formación de equipos">
 
-    <div id="inicio-fase-overlay" class="inicio-fase-overlay">
-      <section id="inicio-fase-card" class="inicio-fase-card">
-        <div class="inicio-fase-badge">DESAFÍO 1 — FORMACIÓN DE EQUIPOS</div>
-
-        {% if modo_rapido %}
-          <h3>La seguridad de lo conocido</h3>
-
-          <p>Eligieron trabajar con personas conocidas.</p>
-
-          <p>
-            Eso puede ayudarles a organizarse más rápido y aprovechar la confianza que ya existe.
-          </p>
-
-          <p>
-            Pero no se queden en la rutina: escuchen de nuevo y coordínense mejor.
-          </p>
-        {% else %}
-          <h3>El desafío de lo nuevo</h3>
-
-          <p>Trabajarán con personas que quizás no conocen.</p>
-
-          <p>
-            Eso puede ser incómodo al inicio, pero también puede abrir nuevas ideas y miradas distintas.
-          </p>
-
-          <p>
-            Escuchen, preséntense y descubran qué puede aportar cada integrante.
-          </p>
-        {% endif %}
-
-        <p>No hay elección correcta. Solo resultados distintos.</p>
-
-        <button class="btn-chip" id="btn-listo-fase" type="button">
-          ⚡ Listo para comenzar
-        </button>
-
-        <p id="texto-espera-fase" class="contador-fase">
-          Esperando a los demás equipos...
-        </p>
-
-        <p id="contador-listos-fase" class="contador-fase">0/0 grupos listos</p>
-      </section>
-    </div>
+    <!-- Introducción plana eliminada: ahora EdEmy guía esta espera inicial con diálogo RPG. -->
 
     <h1 id="tituloConocidos" class="title blur-target-bloqueado">
       {% if modo_rapido %}
@@ -607,7 +594,7 @@
 
     <button id="astro-trigger" class="astro-trigger" type="button" aria-label="Abrir transmisión secundaria">
       <span class="astro-signal" aria-hidden="true"></span>
-      <img class="astro-img-falling" src="{% static 'images/EdemFeliz.png' %}" alt="" aria-hidden="true">
+      <img class="astro-img-falling" src="{% static 'images/Consejo1.png' %}" alt="" aria-hidden="true">
     </button>
 
     <div id="astro-overlay" class="astro-overlay" aria-hidden="true">
@@ -629,8 +616,43 @@
     <div
       id="routes"
       data-sesion-id="{{ grupo.sesion.idsesion }}"
-      data-tiempo="{{ grupo.sesion.segundos_restantes|default:10 }}">
+      data-tiempo="{{ grupo.sesion.segundos_restantes|default:10 }}"
+      data-modo-rapido="{% if modo_rapido %}true{% else %}false{% endif %}">
     </div>
+
+  <div id="dialogo-inicial-overlay" aria-modal="true" role="dialog" aria-label="Mensaje de EdEmy">
+    <div id="dialogo-backdrop"></div>
+
+    <div id="dialogo-box">
+      <div class="dialogo-personaje activo" id="pj-edemy">
+        <img class="dialogo-img" src="{% static 'images/EdemSerio.png' %}" alt="EdEmy">
+      </div>
+
+      <div class="dialogo-burbuja" id="dialogo-burbuja">
+        <div class="dialogo-hablante" id="dialogo-hablante">EdEmy</div>
+
+        <p class="dialogo-texto-rpg" id="dialogo-texto"></p>
+
+        <button class="dialogo-siguiente" id="btn-dialogo-continuar" type="button" onclick="dialogoSiguiente()">
+          <span id="btn-rpg-label">Siguiente</span>
+          <span class="dialogo-flecha">▶</span>
+        </button>
+
+        <p id="texto-espera-fase" class="dialogo-estado dialogo-info-oculta">
+          Esperando a los demás equipos...
+        </p>
+
+        <p id="contador-listos-fase" class="dialogo-contador dialogo-info-oculta">
+          0/0 grupos listos
+        </p>
+
+        <div class="dialogo-progreso">
+          <div id="dialogo-dots"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
 
     <script id="preguntas-rompehielo-json" type="application/json">
       {% if preguntas_rompehielo_json %}
@@ -716,23 +738,21 @@
       };
     })();
 
-    document.addEventListener("DOMContentLoaded", function () {
+    (function () {
       const GUION = MODO_RAPIDO
         ? [
             { texto: "Escuadrón confirmado." },
-            { texto: "Eligieron la seguridad de lo conocido." },
-            { texto: "Ya tienen una ventaja: conocen parte de la forma en que este equipo piensa, decide y se organiza." },
-            { texto: "Pero no confundan confianza con rutina." },
-            { texto: "Una misión real exige escuchar de nuevo, mirar distinto y coordinarse mejor que antes." },
-            { texto: "Soy EdEmy. Observaré cómo convierten esa confianza en una ventaja real." },
+            { texto: "Eligieron trabajar con personas conocidas." },
+            { texto: "Usen esa confianza para organizarse rápido." },
+            { texto: "Pero no trabajen en automático: escuchen de nuevo y coordínense mejor." },
+            { texto: "Cuando estén listos, presionen confirmar. La misión empezará cuando todos los escuadrones estén listos." },
           ]
         : [
             { texto: "Escuadrón confirmado." },
-            { texto: "Eligieron el desafío de lo nuevo." },
-            { texto: "Trabajar con desconocidos puede parecer incierto, pero también puede ampliar los límites del equipo." },
-            { texto: "Cada persona trae una mirada distinta, una experiencia distinta y una forma distinta de resolver." },
-            { texto: "Escuchen antes de decidir. La primera habilidad de esta misión será construir equipo." },
-            { texto: "Soy EdEmy. Observaré cómo transforman la incertidumbre en colaboración." },
+            { texto: "Trabajarán con personas que quizás no conocen." },
+            { texto: "Primero preséntense y escuchen qué puede aportar cada integrante." },
+            { texto: "Las ideas distintas pueden abrir mejores rutas." },
+            { texto: "Cuando estén listos, presionen confirmar. La misión empezará cuando todos los escuadrones estén listos." },
           ];
 
       let paso = 0;
@@ -740,25 +760,52 @@
       let textoCompleto = "";
       let timerEscritura = null;
       let teclaCounter = 0;
+      let dotsCreados = false;
+      let dialogoInicializado = false;
 
       const overlayDialogo = document.getElementById("dialogo-inicial-overlay");
       const burbuja        = document.getElementById("dialogo-burbuja");
       const textoEl        = document.getElementById("dialogo-texto");
+      const btnDialogo     = document.getElementById("btn-dialogo-continuar");
       const btnLabel       = document.getElementById("btn-rpg-label");
       const dotsEl         = document.getElementById("dialogo-dots");
+      const esperaEl       = document.getElementById("texto-espera-fase");
+      const contadorEl     = document.getElementById("contador-listos-fase");
 
-      GUION.forEach((_, i) => {
-        const d = document.createElement("div");
-        d.className = "d-dot";
-        d.id = "dot-" + i;
-        dotsEl.appendChild(d);
-      });
+      function crearDots() {
+        if (!dotsEl || dotsCreados) return;
+
+        dotsEl.innerHTML = "";
+
+        GUION.forEach((_, i) => {
+          const d = document.createElement("div");
+          d.className = "d-dot";
+          d.id = "dot-" + i;
+          dotsEl.appendChild(d);
+        });
+
+        dotsCreados = true;
+      }
 
       function actualizarDots() {
         GUION.forEach((_, i) => {
           const d = document.getElementById("dot-" + i);
+          if (!d) return;
           d.className = "d-dot" + (i < paso ? " hecho" : i === paso ? " activo" : "");
         });
+      }
+
+      function mostrarInfoEspera(mostrar) {
+        [esperaEl, contadorEl].forEach(el => {
+          if (!el) return;
+          el.classList.toggle("dialogo-info-oculta", !mostrar);
+        });
+      }
+
+      function cambiarTextoBoton(texto) {
+        if (btnLabel) {
+          btnLabel.textContent = texto;
+        }
       }
 
       function escribirTexto(txt) {
@@ -791,16 +838,23 @@
             escribiendo = false;
             textoEl.textContent = txt;
           }
-        }, 30);
+        }, 28);
       }
 
       function mostrarPaso(n) {
+        paso = n;
+        mostrarInfoEspera(false);
         actualizarDots();
-        btnLabel.textContent = (n === GUION.length - 1) ? "Continuar misión" : "Siguiente";
+
+        if (btnDialogo) {
+          btnDialogo.disabled = false;
+        }
+
+        cambiarTextoBoton(n === GUION.length - 1 ? "⚡ Confirmar equipo listo" : "Siguiente");
         escribirTexto(GUION[n].texto);
       }
 
-      window.dialogoSiguiente = function () {
+      window.dialogoSiguiente = async function () {
         if (typeof window.sonarBoton === "function") {
           window.sonarBoton();
         }
@@ -812,27 +866,74 @@
           return;
         }
 
-        paso++;
-
-        if (paso >= GUION.length) {
-          overlayDialogo.classList.remove("visible");
-          overlayDialogo.classList.add("oculto");
+        if (paso < GUION.length - 1) {
+          mostrarPaso(paso + 1);
           return;
         }
 
-        mostrarPaso(paso);
+        if (typeof window.marcarListoFase === "function") {
+          await window.marcarListoFase();
+        }
       };
 
-      window._mostrarDialogoNova = function () {
+      window.mostrarDialogoInicial = function () {
+        if (!overlayDialogo || !burbuja) return;
+
+        crearDots();
+
         overlayDialogo.classList.remove("oculto");
         overlayDialogo.classList.add("visible");
 
         setTimeout(() => {
           burbuja.classList.add("visible");
-          mostrarPaso(0);
-        }, 200);
+
+          if (!dialogoInicializado) {
+            dialogoInicializado = true;
+            mostrarPaso(0);
+          }
+        }, 120);
       };
-    });
+
+      window.ocultarDialogoInicial = function () {
+        if (!overlayDialogo) return;
+
+        overlayDialogo.classList.remove("visible");
+        overlayDialogo.classList.add("oculto");
+      };
+
+      window.marcarDialogoComoEsperando = function () {
+        if (!overlayDialogo || !textoEl || !btnDialogo) return;
+
+        window.mostrarDialogoInicial?.();
+
+        clearInterval(timerEscritura);
+        escribiendo = false;
+        paso = GUION.length - 1;
+        actualizarDots();
+
+        textoEl.textContent = "Confirmación registrada. Esperen mientras los demás escuadrones terminan de confirmar.";
+        btnDialogo.disabled = true;
+        cambiarTextoBoton("Esperando...");
+        mostrarInfoEspera(true);
+      };
+
+      window.habilitarDialogoListoDeNuevo = function () {
+        if (!btnDialogo) return;
+
+        btnDialogo.disabled = false;
+        cambiarTextoBoton("⚡ Confirmar equipo listo");
+        mostrarInfoEspera(false);
+      };
+
+      window.actualizarContadorDialogo = function (texto) {
+        if (contadorEl) {
+          contadorEl.textContent = texto;
+          contadorEl.classList.remove("dialogo-info-oculta");
+        }
+      };
+
+      window.mostrarDialogoInicial();
+    })();
 
     (function () {
       function tJuego(clave, fallback = "") {
@@ -878,10 +979,18 @@
       const alarmAudio     = document.getElementById("alarm-audio");
       const btnPregunta    = document.getElementById("btnPregunta");
       const preguntaTexto  = document.getElementById("preguntaTexto");
-      const overlay        = document.getElementById("inicio-fase-overlay");
-      const botonListo     = document.getElementById("btn-listo-fase");
+      const overlay        = null;
       const textoEspera    = document.getElementById("texto-espera-fase");
       const contadorListos = document.getElementById("contador-listos-fase");
+
+      function obtenerBotonListo() {
+        return document.getElementById("btn-dialogo-continuar");
+      }
+
+      function cambiarTextoBotonListo(texto) {
+        const label = document.getElementById("btn-rpg-label");
+        if (label) label.textContent = texto;
+      }
       const astroTrigger   = document.getElementById("astro-trigger");
       const astroOverlay   = document.getElementById("astro-overlay");
       const astroClose     = document.getElementById("astro-close");
@@ -920,8 +1029,6 @@
       let yaListo = false;
       let astroActivo = false;
       let astroCerrado = false;
-      let yaDialogoMostrado = false;
-
       let countdownMostrado = false;
       let countdownEnCurso = false;
       let timerRealSolicitado = false;
@@ -1042,14 +1149,7 @@
           el.classList.add("blur-target-activo");
         });
 
-        if (overlay) {
-          overlay.classList.add("overlay-hidden");
-        }
-
-        if (!yaDialogoMostrado && typeof window._mostrarDialogoNova === "function") {
-          yaDialogoMostrado = true;
-          window._mostrarDialogoNova();
-        }
+        window.ocultarDialogoInicial?.();
       }
 
       function bloquearFase() {
@@ -1064,22 +1164,27 @@
           timerElement.classList.add("timer-esperando");
         }
 
-        if (overlay) {
-          overlay.classList.remove("overlay-hidden");
-        }
+        window.mostrarDialogoInicial?.();
       }
 
       function sincronizarBoton(miGrupo) {
-        if (!botonListo) return;
+        const botonListo = obtenerBotonListo();
 
         if (miGrupo && miGrupo.listoLobby) {
           yaListo = true;
-          botonListo.disabled = true;
-          botonListo.textContent = textoEsperando();
+
+          if (botonListo) {
+            botonListo.disabled = true;
+          }
+
+          cambiarTextoBotonListo(textoEsperando());
 
           if (textoEspera) {
             textoEspera.textContent = tJuego("conocidos_esperando", "Esperando a los demás equipos...");
+            textoEspera.classList.remove("dialogo-info-oculta");
           }
+
+          window.marcarDialogoComoEsperando?.();
         }
       }
 
@@ -1089,6 +1194,8 @@
         if (contadorListos) {
           contadorListos.textContent = textoGruposListos(data.gruposListosLobby || 0, data.totalGrupos || 0);
         }
+
+        window.actualizarContadorDialogo?.(textoGruposListos(data.gruposListosLobby || 0, data.totalGrupos || 0));
 
         const miGrupo = (data.grupos || []).find(g => Number(g.id) === Number(grupoId)) || null;
         sincronizarBoton(miGrupo);
@@ -1133,6 +1240,8 @@
         if (!timerIniciado && data.inicioFaseHabilitado) {
           if (!countdownMostrado && !countdownEnCurso) {
             countdownEnCurso = true;
+
+            window.ocultarDialogoInicial?.();
 
             window.oaiCountdown.run(async () => {
               countdownMostrado = true;
@@ -1221,48 +1330,59 @@
         astroClose.addEventListener("click", cerrarAstro);
       }
 
-      if (botonListo) {
-        botonListo.addEventListener("click", async () => {
-          if (yaListo) return;
+      window.marcarListoFase = async function () {
+        const botonListo = obtenerBotonListo();
 
-          botonListo.disabled = true;
-          botonListo.textContent = textoEsperando();
+        if (yaListo || !botonListo) return;
 
-          try {
-            const res = await fetch(`/grupo/${grupoId}/listo/`, {
-              method: "POST",
-              credentials: "same-origin",
-              headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": csrfToken
-              },
-              body: JSON.stringify({ fase: "f1_conocidos" })
-            });
+        botonListo.disabled = true;
+        cambiarTextoBotonListo(textoEsperando());
 
-            const data = await res.json();
+        try {
+          const res = await fetch(`/grupo/${grupoId}/listo/`, {
+            method: "POST",
+            credentials: "same-origin",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRFToken": csrfToken
+            },
+            body: JSON.stringify({ fase: "f1_conocidos" })
+          });
 
-            yaListo = true;
+          const data = await res.json();
 
-            if (contadorListos) {
-              contadorListos.textContent = textoGruposListos(data.listos || 0, data.total || 0);
-            }
-
-            if (textoEspera) {
-              textoEspera.textContent = tJuego("conocidos_esperando", "Esperando a los demás equipos...");
-            }
-
-            if (data.inicio_fase_habilitado) {
-              consultarEstadoSesion();
-            }
-          } catch (err) {
-            console.error("Error marcando listo:", err);
-
-            botonListo.disabled = false;
-            botonListo.textContent = textoListoComenzar();
-            yaListo = false;
+          if (!res.ok) {
+            throw new Error(data.error || "No se pudo marcar el grupo como listo.");
           }
-        });
-      }
+
+          yaListo = true;
+
+          if (contadorListos) {
+            contadorListos.textContent = textoGruposListos(data.listos || 0, data.total || 0);
+            contadorListos.classList.remove("dialogo-info-oculta");
+          }
+
+          window.actualizarContadorDialogo?.(textoGruposListos(data.listos || 0, data.total || 0));
+
+          if (textoEspera) {
+            textoEspera.textContent = tJuego("conocidos_esperando", "Esperando a los demás equipos...");
+            textoEspera.classList.remove("dialogo-info-oculta");
+          }
+
+          window.marcarDialogoComoEsperando?.();
+
+          if (data.inicio_fase_habilitado) {
+            consultarEstadoSesion();
+          }
+        } catch (err) {
+          console.error("Error marcando listo:", err);
+
+          botonListo.disabled = false;
+          cambiarTextoBotonListo("⚡ Confirmar equipo listo");
+          window.habilitarDialogoListoDeNuevo?.();
+          yaListo = false;
+        }
+      };
 
       window.addEventListener("idiomaJuegoCambiado", () => {
         if (ultimoIndice >= 0 && preguntaTexto) {
@@ -1277,8 +1397,10 @@
           }
         }
 
+        const botonListo = obtenerBotonListo();
+
         if (botonListo) {
-          botonListo.textContent = botonListo.disabled ? textoEsperando() : textoListoComenzar();
+          cambiarTextoBotonListo(botonListo.disabled ? textoEsperando() : "⚡ Confirmar equipo listo");
         }
 
         if (textoEspera) {
@@ -1294,31 +1416,6 @@
     })();
     </script>
   </main>
-
-  <div id="dialogo-inicial-overlay" aria-modal="true" role="dialog" aria-label="Mensaje de EdEmy">
-    <div id="dialogo-backdrop"></div>
-
-    <div id="dialogo-box">
-      <div class="dialogo-personaje activo" id="pj-edemy">
-        <img class="dialogo-img" src="{% static 'images/EdemSerio.png' %}" alt="EdEmy">
-      </div>
-
-      <div class="dialogo-burbuja" id="dialogo-burbuja">
-        <div class="dialogo-hablante" id="dialogo-hablante">EdEmy</div>
-
-        <p class="dialogo-texto-rpg" id="dialogo-texto"></p>
-
-        <button class="dialogo-siguiente" id="btn-dialogo-continuar" type="button" onclick="dialogoSiguiente()">
-          <span id="btn-rpg-label">Siguiente</span>
-          <span class="dialogo-flecha">▶</span>
-        </button>
-
-        <div class="dialogo-progreso">
-          <div id="dialogo-dots"></div>
-        </div>
-      </div>
-    </div>
-  </div>
 
   {% include "includes/sincronizacion_fase.html" %}
   {% include "includes/countdown_inicio_fase.html" %}

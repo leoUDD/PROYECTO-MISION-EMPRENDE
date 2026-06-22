@@ -5,7 +5,7 @@
   --udd-green: #00F26D;
   --udd-white: #FFFFFF;
 
-  --bg: #000712 url('/static/images/fondo_bienvenida.webp') center/cover no-repeat fixed;
+  --bg: #000712 url('/static/images/ConocidosONo.png') center/cover no-repeat fixed;
   --card: rgba(0, 16, 74, 0.86);
   --text: #FFFFFF;
   --muted: rgba(255,255,255,0.78);
@@ -140,11 +140,11 @@ body::before{
 
 /* imágenes por tarjeta */
 .mode-intro{
-  background-image:url("/static/images/desconocidos.webp");
+  background-image:url("/static/images/Desconocidos.png");
 }
 
 .mode-known{
-  background-image:url("/static/images/conocidoos.webp");
+  background-image:url("/static/images/Conocidos.png");
 }
 
 /* overlay para contraste */

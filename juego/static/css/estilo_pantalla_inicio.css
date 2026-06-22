@@ -7,7 +7,7 @@
   --udd-white: #FFFFFF;
 
   --primary: var(--udd-green);
-  --bg: #000712 url('/static/images/fondo_bienvenida.webp') center/cover no-repeat fixed;
+  --bg: #000712 url('/static/images/EntradaUdd.png') center/cover no-repeat fixed;
   --text: #FFFFFF;
 }
 

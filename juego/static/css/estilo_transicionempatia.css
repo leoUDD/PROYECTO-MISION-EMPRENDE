@@ -4,7 +4,7 @@
   --udd-green: #00F26D;
   --udd-white: #FFFFFF;
 
-  --bg: #000712 url('/static/images/fondo_bienvenida.webp') center/cover no-repeat fixed;
+  --bg: #000712 url('/static/images/FondoTransiciones.png') center/cover no-repeat fixed;
   --card: #081A2D;
   --text: #FFFFFF;
   --muted: rgba(255,255,255,.78);
@@ -63,7 +63,7 @@ body::before {
   min-height: clamp(620px, 78vh, 820px);
   background:
     linear-gradient(rgba(0, 16, 74, .08), rgba(0, 16, 74, .20)),
-    url('/static/images/empatia.webp') center/cover no-repeat;
+    url('/static/images/TransicionEmpatia.png') center/cover no-repeat;
   border-radius: 28px;
   box-shadow:
     var(--shadow),
