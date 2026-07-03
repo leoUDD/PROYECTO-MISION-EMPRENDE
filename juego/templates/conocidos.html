@@ -8,607 +8,60 @@
   <title>Misión Emprende UDD — Formación de equipos</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/estilo_conocidos.css' %}" />
-
-  <style>
-    .phone { position: relative; overflow: hidden; }
-
-    #dialogo-inicial-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 1000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity .4s ease;
-    }
-
-    #dialogo-inicial-overlay.visible {
-      opacity: 1;
-      pointer-events: all;
-    }
-
-    #dialogo-inicial-overlay.oculto {
-      display: none !important;
-    }
-
-    #dialogo-backdrop {
-      position: absolute;
-      inset: 0;
-      background: rgba(0, 5, 15, 0.68);
-      backdrop-filter: blur(3px);
-      -webkit-backdrop-filter: blur(3px);
-    }
-
-    #dialogo-box {
-      position: relative !important;
-      z-index: 2 !important;
-      width: min(760px, calc(100vw - 200px)) !important;
-      margin-left: -140px !important;
-      display: flex !important;
-      align-items: flex-end !important;
-      justify-content: center !important;
-    }
-
-    @media (max-width: 900px) {
-      #dialogo-box {
-        width: min(620px, calc(100vw - 140px)) !important;
-        margin-left: -100px !important;
-      }
-    }
-
-    @media (max-width: 700px) {
-      #dialogo-box {
-        width: calc(100vw - 24px) !important;
-        margin-left: 0 !important;
-      }
-    }
-
-    .dialogo-personaje {
-      flex-shrink: 0;
-      display: flex;
-      align-items: flex-end;
-      transition: opacity .4s, transform .4s, filter .4s;
-      position: relative;
-      z-index: 3;
-    }
-
-    .dialogo-personaje.activo {
-      opacity: 1;
-      filter: none;
-      transform: scale(1.05) translateY(0);
-    }
-
-    .dialogo-img {
-      width: clamp(90px, 11vw, 150px);
-      height: auto;
-      display: block;
-      object-fit: contain;
-      margin-bottom: -8px;
-    }
-
-    .dialogo-burbuja {
-      flex: 1;
-      min-width: 0;
-      max-width: 560px;
-      background: linear-gradient(160deg, rgba(0,16,74,0.97), rgba(3,12,38,0.97));
-      border: 1.8px solid rgba(0,242,109,0.72);
-      border-radius: 20px;
-      padding: 20px 22px 14px;
-      box-shadow:
-        0 0 30px rgba(0,242,109,.22),
-        0 0 80px rgba(0,59,255,.14),
-        0 20px 50px rgba(0,0,0,.6);
-      position: relative;
-      z-index: 2;
-      margin: 0 -6px;
-      transform: translateY(20px);
-      opacity: 0;
-      transition: transform .4s cubic-bezier(.34,1.2,.64,1), opacity .4s ease;
-    }
-
-    .dialogo-burbuja.visible {
-      transform: translateY(0);
-      opacity: 1;
-    }
-
-    .dialogo-burbuja::before,
-    .dialogo-burbuja::after {
-      content: "";
-      position: absolute;
-      width: 14px;
-      height: 14px;
-      border-color: rgba(0,242,109,.62);
-      border-style: solid;
-    }
-
-    .dialogo-burbuja::before {
-      top: -1px;
-      left: -1px;
-      border-width: 2px 0 0 2px;
-      border-radius: 4px 0 0 0;
-    }
-
-    .dialogo-burbuja::after {
-      top: -1px;
-      right: -1px;
-      border-width: 2px 2px 0 0;
-      border-radius: 0 4px 0 0;
-    }
-
-    .dialogo-hablante {
-      font-family: "Poppins", sans-serif;
-      font-size: clamp(10px, 1.1vw, 12px);
-      font-weight: 700;
-      letter-spacing: 2.5px;
-      color: #00F26D;
-      text-transform: uppercase;
-      margin-bottom: 8px;
-    }
-
-    .dialogo-texto-rpg {
-      font-family: "Poppins", sans-serif;
-      font-size: clamp(13px, 1.4vw, 16px);
-      color: #E6EEF8;
-      line-height: 1.6;
-      min-height: 52px;
-      margin: 0 0 14px 0;
-    }
-
-    .cursor-rpg {
-      display: inline-block;
-      width: 2px;
-      height: 1.1em;
-      background: #00F26D;
-      vertical-align: text-bottom;
-      margin-left: 2px;
-      animation: parpadeo .65s step-end infinite;
-    }
-
-    @keyframes parpadeo {
-      0%,100% { opacity: 1; }
-      50% { opacity: 0; }
-    }
-
-    .dialogo-siguiente {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      width: 100%;
-      padding: 10px 16px;
-      border-radius: 12px;
-      background: linear-gradient(135deg, rgba(0,242,109,.18), rgba(0,59,255,.22));
-      border: 1.5px solid rgba(0,242,109,.62);
-      color: #E6EEF8;
-      font-family: "Poppins", sans-serif;
-      font-size: clamp(12px, 1.3vw, 14px);
-      font-weight: 700;
-      cursor: pointer;
-      transition: background .2s, transform .15s, border-color .2s;
-    }
-
-    .dialogo-siguiente:hover {
-      background: linear-gradient(135deg, rgba(0,242,109,.28), rgba(0,59,255,.30));
-      border-color: rgba(0,242,109,.95);
-      transform: translateY(-1px);
-    }
-
-    .dialogo-siguiente:disabled {
-      opacity: .62;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    .dialogo-estado,
-    .dialogo-contador {
-      margin: 9px 0 0;
-      text-align: center;
-      font-family: "Poppins", sans-serif;
-      font-size: clamp(12px, 1.25vw, 14px);
-      line-height: 1.35;
-    }
-
-    .dialogo-estado {
-      color: rgba(230,238,248,.92);
-    }
-
-    .dialogo-contador {
-      color: #00F26D;
-      font-weight: 800;
-      text-shadow: 0 0 10px rgba(0,242,109,.30);
-    }
-
-    .dialogo-info-oculta {
-      display: none;
-    }
-
-    .dialogo-flecha {
-      font-size: .85em;
-      animation: flechaPulso 1s ease-in-out infinite;
-    }
-
-    @keyframes flechaPulso {
-      0%,100% { transform: translateX(0); }
-      50% { transform: translateX(4px); }
-    }
-
-    .dialogo-progreso {
-      display: flex;
-      justify-content: center;
-      margin-top: 10px;
-    }
-
-    #dialogo-dots {
-      display: flex;
-      gap: 6px;
-    }
-
-    .d-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: rgba(0,242,109,.22);
-      transition: background .3s, transform .3s;
-    }
-
-    .d-dot.activo {
-      background: #00F26D;
-      transform: scale(1.35);
-    }
-
-    .d-dot.hecho {
-      background: rgba(0,242,109,.55);
-    }
-
-    .inicio-fase-overlay {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: flex-start;
-      justify-content: center;
-      padding: 28px 20px 20px;
-      z-index: 20;
-      pointer-events: none;
-    }
-
-    .inicio-fase-card {
-      width: min(92%, 760px);
-      background:
-        radial-gradient(circle at top left, rgba(0,242,109,.10), transparent 38%),
-        linear-gradient(160deg, rgba(0,16,74,.94), rgba(2,10,35,.96));
-      border: 1px solid rgba(0,242,109,.36);
-      box-shadow:
-        0 12px 30px rgba(0,0,0,.30),
-        0 0 24px rgba(0,242,109,.12);
-      border-radius: 22px;
-      padding: 18px 22px;
-      color: #fff;
-      backdrop-filter: blur(6px);
-      pointer-events: auto;
-    }
-
-    .inicio-fase-badge {
-      display: inline-block;
-      margin-bottom: 12px;
-      padding: 7px 14px;
-      border-radius: 999px;
-      background: rgba(0,242,109,.12);
-      border: 1px solid rgba(0,242,109,.38);
-      font-weight: 700;
-      font-size: 0.88rem;
-      color: #00F26D;
-    }
-
-    .inicio-fase-card h3 {
-      margin: 0 0 10px 0;
-      font-size: 1.15rem;
-      font-weight: 800;
-      color: #FFFFFF;
-    }
-
-    .inicio-fase-card p {
-      margin: 0 0 10px 0;
-      line-height: 1.5;
-      font-size: 1rem;
-      color: rgba(255,255,255,.90);
-    }
-
-    .btn-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      margin-top: 12px;
-      padding: 10px 18px;
-      border-radius: 999px;
-      border: 1px solid rgba(0,242,109,.48);
-      background: linear-gradient(135deg, rgba(0,242,109,.22), rgba(0,59,255,.22));
-      color: #FFFFFF;
-      font-weight: 700;
-      font-size: 0.95rem;
-      cursor: pointer;
-      transition: all 0.25s ease;
-      box-shadow: 0 0 14px rgba(0,242,109,.22);
-      backdrop-filter: blur(4px);
-    }
-
-    .btn-chip:hover {
-      transform: translateY(-1px) scale(1.03);
-      box-shadow: 0 0 20px rgba(0,242,109,.34);
-    }
-
-    .btn-chip:disabled {
-      opacity: 0.65;
-      cursor: not-allowed;
-    }
-
-    .contador-fase {
-      margin-top: 10px;
-      font-size: 0.95rem;
-      opacity: 0.95;
-    }
-
-    .blur-target-bloqueado {
-      filter: blur(6px);
-      pointer-events: none;
-      user-select: none;
-      opacity: .70;
-      transition: all .3s ease;
-    }
-
-    .blur-target-activo {
-      filter: none;
-      pointer-events: auto;
-      user-select: auto;
-      opacity: 1;
-      transition: all .3s ease;
-    }
-
-    .timer-esperando {
-      opacity: .55;
-    }
-
-    .overlay-hidden {
-      display: none;
-    }
-
-    @media (max-width: 900px) {
-      .inicio-fase-overlay {
-        padding-top: 20px;
-      }
-
-      .inicio-fase-card {
-        width: min(94%, 680px);
-        padding: 16px 18px;
-      }
-    }
-
-    @media (max-width: 640px) {
-      .inicio-fase-overlay {
-        padding: 14px 12px 12px;
-        align-items: flex-start;
-      }
-
-      .inicio-fase-card {
-        width: 100%;
-        border-radius: 18px;
-        padding: 14px 14px 16px;
-      }
-
-      .btn-chip {
-        width: 100%;
-        justify-content: center;
-      }
-
-      .contador-fase {
-        font-size: 0.9rem;
-      }
-    }
-
-    .astro-trigger {
-      position: absolute;
-      top: clamp(92px, 18vh, 190px);
-      left: clamp(18px, 7vw, 86px);
-      width: 118px;
-      height: 118px;
-      border: none;
-      border-radius: 999px;
-      background: transparent;
-      box-shadow: none;
-      cursor: pointer;
-      z-index: 12;
-      display: grid;
-      place-items: center;
-      animation: astroFloat 6s ease-in-out infinite alternate;
-      transition: transform .2s ease;
-    }
-
-    .astro-trigger:hover {
-      transform: scale(1.06);
-    }
-
-    .astro-trigger.oculto {
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .astro-signal {
-      position: absolute;
-      right: -4px;
-      top: -4px;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background: #00F26D;
-      box-shadow: 0 0 0 0 rgba(0,242,109,.65);
-      animation: astroPing 1.5s infinite;
-    }
-
-    .astro-img-falling {
-      width: 150px;
-      height: auto;
-      display: block;
-      filter: drop-shadow(0 0 18px rgba(0,242,109,.55));
-    }
-
-    @keyframes astroFloat {
-      0% { transform: translate(0,0) rotate(-4deg); }
-      50% { transform: translate(58px,34px) rotate(5deg); }
-      100% { transform: translate(122px,72px) rotate(-3deg); }
-    }
-
-    @keyframes astroPing {
-      0% { box-shadow: 0 0 0 0 rgba(0,242,109,.65); }
-      75% { box-shadow: 0 0 0 13px rgba(0,242,109,0); }
-      100% { box-shadow: 0 0 0 0 rgba(0,242,109,0); }
-    }
-
-    .astro-overlay {
-      position: absolute;
-      inset: 0;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 32;
-      background: rgba(1,12,28,.50);
-      backdrop-filter: blur(4px);
-      padding: 18px;
-    }
-
-    .astro-overlay.activo {
-      display: flex;
-    }
-
-    .astro-card {
-      width: min(90%, 480px);
-      padding: 22px 22px 18px;
-      padding-left: 155px;
-      min-height: 260px;
-      text-align: left;
-      border-radius: 24px;
-      background:
-        radial-gradient(circle at top left, rgba(0,242,109,.18), transparent 40%),
-        rgba(8,24,48,0.96);
-      border: 1px solid rgba(0,242,109,.30);
-      box-shadow: 0 18px 42px rgba(0,0,0,.38);
-      color: #fff;
-      animation: astroCardIn .32s ease both;
-      position: relative;
-    }
-
-    .astro-card h3 {
-      margin: 0 0 12px;
-      color: #00F26D;
-      font-size: 1.25rem;
-      position: relative;
-      z-index: 2;
-    }
-
-    .astro-card p {
-      margin: 0 0 10px;
-      line-height: 1.5;
-      color: #d9e6f2;
-      font-size: .98rem;
-      position: relative;
-      z-index: 2;
-    }
-
-    .astro-img-standing {
-      position: absolute;
-      left: -35px;
-      bottom: -8px;
-      width: 185px;
-      height: auto;
-      filter: drop-shadow(0 0 20px rgba(0,242,109,.35));
-    }
-
-    .astro-close {
-      margin-top: 12px;
-      border: 1px solid rgba(0,242,109,.40);
-      background: linear-gradient(135deg, rgba(0,242,109,.90), rgba(0,59,255,.60));
-      color: #fff;
-      border-radius: 999px;
-      padding: 10px 18px;
-      font-weight: 800;
-      cursor: pointer;
-      position: relative;
-      z-index: 2;
-    }
-
-    @keyframes astroCardIn {
-      from { transform: translateY(12px) scale(.96); opacity: 0; }
-      to { transform: translateY(0) scale(1); opacity: 1; }
-    }
-
-    @media (max-width: 640px) {
-      .astro-img-falling {
-        width: 115px;
-      }
-
-      .astro-card {
-        padding-left: 18px;
-        padding-top: 145px;
-        text-align: center;
-      }
-
-      .astro-img-standing {
-        left: 50%;
-        top: -40px;
-        bottom: auto;
-        transform: translateX(-50%);
-        width: 135px;
-      }
-    }
-  </style>
 </head>
 
-<body>
+<body class="conocidos-page">
   <main class="phone" role="region" aria-label="Formación de equipos">
 
-    <!-- Introducción plana eliminada: ahora EdEmy guía esta espera inicial con diálogo RPG. -->
+    <section class="zona-juego" aria-label="Zona de juego">
+      <div class="zona-juego-fondo" aria-hidden="true"></div>
 
-    <h1 id="tituloConocidos" class="title blur-target-bloqueado">
-      {% if modo_rapido %}
-        La confianza también es una herramienta
-      {% else %}
-        Las diferencias pueden abrir nuevas rutas
-      {% endif %}
-    </h1>
-
-    <div id="speechBubbleConocidos" class="speech-bubble blur-target-bloqueado">
-      <p class="body">
+      <h1 id="tituloConocidos" class="title blur-target-bloqueado">
         {% if modo_rapido %}
-          Respondan una pregunta para reconocer cómo pueden usar su experiencia previa como ventaja.
+          La confianza también es una herramienta
         {% else %}
-          Respondan una pregunta para conocerse mejor y descubrir qué puede aportar cada integrante.
+          Las diferencias pueden abrir nuevas rutas
         {% endif %}
-      </p>
+      </h1>
 
-      <p class="body pregunta-random" id="preguntaTexto">👉 Cargando pregunta...</p>
+      <div class="juego-contenido">
+        <div id="speechBubbleConocidos" class="speech-bubble blur-target-bloqueado">
+          <p class="body">
+            {% if modo_rapido %}
+              Respondan una pregunta para reconocer cómo pueden usar su experiencia previa como ventaja.
+            {% else %}
+              Respondan una pregunta para conocerse mejor y descubrir qué puede aportar cada integrante.
+            {% endif %}
+          </p>
 
-      <button class="btn-random" id="btnPregunta" type="button">
-        Nueva pregunta
-      </button>
-    </div>
+          <p class="body pregunta-random" id="preguntaTexto">👉 Cargando pregunta...</p>
 
-    <button id="astro-trigger" class="astro-trigger" type="button" aria-label="Abrir transmisión secundaria">
-      <span class="astro-signal" aria-hidden="true"></span>
-      <img class="astro-img-falling" src="{% static 'images/Consejo1.png' %}" alt="" aria-hidden="true">
-    </button>
-
-    <div id="astro-overlay" class="astro-overlay" aria-hidden="true">
-      <div id="astro-card" class="astro-card">
-        <img class="astro-img-standing" src="{% static 'images/EdemRojo.png' %}" alt="" aria-hidden="true">
-        <h3>Transmisión secundaria</h3>
-        <p>Recuerden observar cómo trabaja su equipo.</p>
-        <p>Las distintas miradas pueden mejorar una solución.</p>
-        <p>Más adelante, esa colaboración puede marcar la diferencia.</p>
-        <button id="astro-close" class="astro-close" type="button">Entendido</button>
+          <button class="btn-random" id="btnPregunta" type="button">
+            Nueva pregunta
+          </button>
+        </div>
       </div>
-    </div>
 
-    <h2 id="timer" class="blur-target-bloqueado timer-esperando">00:10</h2>
+      <div class="juego-footer">
+        <h2 id="timer" class="blur-target-bloqueado timer-esperando">00:10</h2>
+      </div>
+
+      <button id="astro-trigger" class="astro-trigger" type="button" aria-label="Abrir transmisión secundaria">
+        <span class="astro-signal" aria-hidden="true"></span>
+        <img class="astro-img-falling" src="{% static 'images/Consejo1.png' %}" alt="" aria-hidden="true">
+      </button>
+
+      <div id="astro-overlay" class="astro-overlay" aria-hidden="true">
+        <div id="astro-card" class="astro-card" role="dialog" aria-label="Transmisión secundaria">
+          <img class="astro-img-standing" src="{% static 'images/EdemRojo.png' %}" alt="" aria-hidden="true">
+          <h3>Transmisión secundaria</h3>
+          <p>Recuerden observar cómo trabaja su equipo.</p>
+          <p>Las distintas miradas pueden mejorar una solución.</p>
+          <p>Más adelante, esa colaboración puede marcar la diferencia.</p>
+          <button id="astro-close" class="astro-close" type="button">Entendido</button>
+        </div>
+      </div>
+    </section>
 
     <audio id="alarm-audio" src="{% static 'sounds/alarma.mp3' %}" preload="auto"></audio>
     <audio id="musica-fondo" src="{% static 'sounds/musica_conocidos.mp3' %}" loop preload="auto"></audio>
@@ -620,15 +73,15 @@
       data-modo-rapido="{% if modo_rapido %}true{% else %}false{% endif %}">
     </div>
 
-  <div id="dialogo-inicial-overlay" aria-modal="true" role="dialog" aria-label="Mensaje de EdEmy">
-    <div id="dialogo-backdrop"></div>
+    <div id="dialogo-inicial-overlay" aria-modal="true" role="dialog" aria-label="Mensaje de EdEmy">
+      <div id="dialogo-backdrop"></div>
 
-    <div id="dialogo-box">
-      <div class="dialogo-personaje activo" id="pj-edemy">
+      <div id="dialogo-box">
+        <div class="dialogo-personaje activo" id="pj-edemy">
         <img class="dialogo-img" src="{% static 'images/EdemSerio.png' %}" alt="EdEmy">
       </div>
 
-      <div class="dialogo-burbuja" id="dialogo-burbuja">
+        <div class="dialogo-burbuja" id="dialogo-burbuja">
         <div class="dialogo-hablante" id="dialogo-hablante">EdEmy</div>
 
         <p class="dialogo-texto-rpg" id="dialogo-texto"></p>

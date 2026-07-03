@@ -6,285 +6,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Misión Emprende UDD — Bubble Map</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/estilo_bubblemap.css' %}">
-
-  <style>
-    .bubblemap-container {
-      position: relative;
-      padding-bottom: 24px;
-      overflow-x: hidden;
-    }
-
-    .inicio-fase-overlay {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: flex-start;
-      justify-content: center;
-      padding: 26px 18px 18px;
-      z-index: 20;
-      pointer-events: none;
-    }
-
-    .inicio-fase-card {
-      width: min(92%, 860px);
-      background: rgba(8, 24, 48, 0.9);
-      border: 1px solid rgba(0, 200, 255, 0.30);
-      box-shadow: 0 12px 30px rgba(0,0,0,.24);
-      border-radius: 22px;
-      padding: 18px 22px;
-      color: #fff;
-      backdrop-filter: blur(6px);
-      pointer-events: auto;
-    }
-
-    .inicio-fase-badge {
-      display: inline-block;
-      margin-bottom: 12px;
-      padding: 7px 14px;
-      border-radius: 999px;
-      background: rgba(0, 200, 255, 0.12);
-      border: 1px solid rgba(0, 200, 255, 0.28);
-      font-weight: 700;
-      font-size: 0.88rem;
-      color: #dff7ff;
-    }
-
-    .inicio-fase-card h3 { margin: 0 0 10px 0; font-size: 1.15rem; font-weight: 800; }
-    .inicio-fase-card p  { margin: 0 0 10px 0; line-height: 1.5; font-size: 1rem; }
-
-    .btn-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      margin-top: 12px;
-      padding: 10px 18px;
-      border-radius: 999px;
-      border: 1px solid rgba(0, 200, 255, 0.4);
-      background: linear-gradient(135deg, rgba(0, 200, 255, 0.15), rgba(0, 120, 255, 0.25));
-      color: #E6F7FF;
-      font-weight: 700;
-      font-size: 0.95rem;
-      cursor: pointer;
-      transition: all 0.25s ease;
-      box-shadow: 0 0 10px rgba(0, 200, 255, 0.25);
-      backdrop-filter: blur(4px);
-    }
-    .btn-chip:hover {
-      transform: translateY(-1px) scale(1.03);
-      background: linear-gradient(135deg, rgba(0, 200, 255, 0.35), rgba(0, 120, 255, 0.45));
-      box-shadow: 0 0 18px rgba(0, 200, 255, 0.45);
-    }
-    .btn-chip:disabled { opacity: 0.65; cursor: not-allowed; box-shadow: none; }
-
-    .contador-fase { margin-top: 10px; font-size: 0.95rem; opacity: 0.95; }
-
-    .blur-target-bloqueado { filter: blur(6px); pointer-events: none; user-select: none; opacity: .70; transition: all .3s ease; }
-    .blur-target-activo    { filter: none; pointer-events: auto; user-select: auto; opacity: 1; transition: all .3s ease; }
-    .timer-esperando       { opacity: .55; }
-    .overlay-hidden        { display: none; }
-
-    /* ── Bubble stage ── */
-    .bubble-stage {
-      width: min(94vw, 660px);
-      height: min(94vw, 660px);
-      margin: 18px auto 14px;
-      position: relative;
-    }
-
-    /* ── Burbuja central ── */
-    .bubble.central {
-      width: 200px !important;
-      height: 200px !important;
-      left: 50% !important;
-      top: 50% !important;
-      transform: translate(-50%, -50%) !important;
-      cursor: default;
-      background: rgba(255,255,255,.18);
-      border: 2px solid rgba(255,255,255,.35);
-      z-index: 2;
-    }
-    .bubble.central:hover { transform: translate(-50%, -50%) !important; }
-    .bubble.central img { width: 100%; height: 100%; object-fit: cover; object-position: center; }
-
-    /* ── Burbujas satélite ── */
-    .bubble-item {
-      width: 155px !important;
-      height: 155px !important;
-      z-index: 3;
-    }
-
-    /* Neutralizar hover de movimiento para TODAS las burbujas */
-    .bubble:hover {
-      transform: translate(-50%, -50%) !important;
-      box-shadow: 0 16px 28px rgba(0,0,0,.24);
-    }
-
-    /* Posiciones en círculo — radio 230px, referencia de reloj */
-    /* 12h - naranja */
-    .bubble-gustos {
-      left: calc(50% +   0.0px) !important; top: calc(50% - 230.0px) !important;
-      transform: translate(-50%, -50%) !important;
-      background: #ff9f0a; right: auto !important; bottom: auto !important;
-    }
-    .bubble-gustos:hover { transform: translate(-50%, -50%) !important; }
-
-    /* 2h - verde fuerte */
-    .bubble-emociones {
-      left: calc(50% + 199.2px) !important; top: calc(50% - 115.0px) !important;
-      transform: translate(-50%, -50%) !important;
-      background: #9cff1a; right: auto !important; bottom: auto !important;
-    }
-    .bubble-emociones:hover { transform: translate(-50%, -50%) !important; }
-
-    /* 4h - verde débil */
-    .bubble-habitos {
-      left: calc(50% + 199.2px) !important; top: calc(50% + 115.0px) !important;
-      transform: translate(-50%, -50%) !important;
-      background: #8ee889; right: auto !important; bottom: auto !important;
-    }
-    .bubble-habitos:hover { transform: translate(-50%, -50%) !important; }
-
-    /* 6h - roja */
-    .bubble-entorno {
-      left: calc(50% +   0.0px) !important; top: calc(50% + 230.0px) !important;
-      transform: translate(-50%, -50%) !important;
-      background: #ef767a; right: auto !important; bottom: auto !important;
-    }
-    .bubble-entorno:hover { transform: translate(-50%, -50%) !important; }
-
-    /* 8h - naranja débil */
-    .bubble-otros {
-      left: calc(50% - 199.2px) !important; top: calc(50% + 115.0px) !important;
-      transform: translate(-50%, -50%) !important;
-      background: #ff9f7a; right: auto !important; bottom: auto !important;
-    }
-    .bubble-otros:hover { transform: translate(-50%, -50%) !important; }
-
-    /* 10h - celeste */
-    .bubble-obstaculos {
-      left: calc(50% - 199.2px) !important; top: calc(50% - 115.0px) !important;
-      transform: translate(-50%, -50%) !important;
-      background: #add8e6; right: auto !important; bottom: auto !important;
-    }
-    .bubble-obstaculos:hover { transform: translate(-50%, -50%) !important; }
-
-    /* Texto oscuro dentro de burbujas para contraste */
-    .bubble-title  { font-size: 0.95rem; font-weight: 900; margin-bottom: 4px; color: #1a1a2e; text-shadow: none; }
-    .bubble-preview { font-size: 0.75rem; line-height: 1.2; font-weight: 700; color: #1a1a2e; opacity: .85; }
-    .bubble-count  { position: absolute; left: 8px; top: 8px; min-width: 22px; height: 22px; border-radius: 999px; background: rgba(0,0,0,.18); border: 1px solid rgba(255,255,255,.28); display: inline-flex; align-items: center; justify-content: center; font-size: .72rem; font-weight: 900; color: #1a1a2e; }
-    .bubble-status { position: absolute; right: 8px; top: 8px; font-size: .72rem; background: rgba(0,0,0,.15); border-radius: 999px; padding: 2px 6px; }
-
-    /* ── Reglas bubble ── */
-    .reglas-bubble { width: min(92%, 980px); margin: 12px auto 16px; padding: 16px 18px; border-radius: 18px; background: rgba(7, 21, 43, 0.92); border: 1px solid rgba(0, 200, 255, 0.30); color: #E6EEF8; line-height: 1.5; box-shadow: 0 10px 28px rgba(0,0,0,.25); }
-    .reglas-bubble summary { cursor: pointer; font-weight: 900; font-size: 1rem; color: #00C8FF; }
-    .reglas-bubble li { margin-bottom: 6px; font-weight: 600; color: #d9e6f2; }
-    .reglas-bubble ul { margin: 10px 0 0 18px; padding: 0; }
-
-    /* ── Desafío panel ── */
-    .desafio-panel { width: 100%; max-width: 760px; margin: 14px auto 22px; border-radius: 18px; overflow: hidden; border: 2px solid rgba(0, 200, 255, 0.35); background: rgba(7, 38, 70, 0.78); box-shadow: 0 10px 28px rgba(0,0,0,.22); }
-    .desafio-toggle { width: 100%; border: none; background: transparent; color: #fff; padding: 16px 18px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; text-align: left; }
-    .desafio-toggle-head { display: flex; flex-direction: column; gap: 4px; }
-    .desafio-etiqueta { font-size: 0.95rem; font-weight: 700; color: #00c8ff; }
-    .desafio-titulo { font-size: 1.08rem; font-weight: 700; color: #ffffff; }
-    .desafio-icono { font-size: 1rem; font-weight: 800; color: #00c8ff; }
-    .desafio-body { border-top: 1px solid rgba(255,255,255,.12); padding: 16px 18px 18px; }
-    .desafio-descripcion { margin: 0; color: #d9e6f2; line-height: 1.5; font-size: 0.98rem; }
-
-    /* ── Celular ── */
-    .objeto-celular-trigger { position: fixed; right: clamp(18px, 4vw, 54px); bottom: clamp(92px, 15vh, 150px); width: 76px; height: 76px; border: none; border-radius: 24px; background: rgba(7, 21, 43, 0.86); border: 1px solid rgba(0, 200, 255, 0.32); box-shadow: 0 12px 26px rgba(0,0,0,.30), 0 0 18px rgba(0,200,255,.18); cursor: pointer; z-index: 60; display: flex; align-items: center; justify-content: center; animation: celularFloat 4.2s ease-in-out infinite alternate; }
-    .objeto-celular-trigger:hover { transform: scale(1.06); }
-    .objeto-celular-icon { width: 82px; height: auto; object-fit: contain; animation: celularBounce 1.4s ease-in-out infinite alternate; }
-    @keyframes celularFloat { from { translate: 0 0; } to { translate: -30px -24px; } }
-    @keyframes celularBounce { from { transform: translateY(0) rotate(-4deg); } to { transform: translateY(-8px) rotate(4deg); } }
-    .objeto-celular-trigger.oculto { display: none; }
-
-    /* ── Astro overlay ── */
-    .astro-object-overlay { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; padding: 18px; z-index: 90; background: rgba(0,0,0,.54); backdrop-filter: blur(5px); }
-    .astro-object-overlay.activo { display: flex; }
-    .astro-object-card { width: min(92vw, 560px); border-radius: 24px; padding: 22px; background: radial-gradient(circle at top left, rgba(0,200,255,.18), transparent 40%), rgba(7,21,43,0.96); border: 1px solid rgba(0,200,255,.34); box-shadow: 0 18px 44px rgba(0,0,0,.42); color: #fff; text-align: center; animation: objectCardIn .28s ease both; }
-    @keyframes objectCardIn { from { opacity: 0; transform: translateY(14px) scale(.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
-    .astro-object-card h3 { margin: 0 0 10px; font-size: 1.35rem; color: #00c8ff; }
-    .astro-object-card p { margin: 0 0 10px; line-height: 1.5; color: #d9e6f2; font-weight: 600; }
-    .astro-object-card strong { color: #ffe29a; }
-    .astro-object-close { margin-top: 10px; border: 1px solid rgba(0,200,255,.42); border-radius: 999px; padding: 11px 18px; background: linear-gradient(135deg, rgba(0,200,255,.90), rgba(0,120,255,.90)); color: #fff; font-weight: 900; cursor: pointer; }
-    .astro-flex { display: flex; align-items: center; gap: 24px; }
-    .astro-img { width: 140px; height: auto; flex-shrink: 0; }
-    .astro-text { display: flex; flex-direction: column; gap: 10px; text-align: left; }
-
-    /* ── Footer y acciones ── */
-    .footer-actions { width: min(94%, 980px); margin: 0 auto; display: flex; justify-content: center; }
-    .bubble-actions { width: min(94%, 980px); margin: 0 auto 16px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
-    .bubble-action-btn { border: 1px solid rgba(255,255,255,.28); background: rgba(255,255,255,.12); color: #fff; border-radius: 999px; padding: 10px 14px; font-weight: 800; cursor: pointer; }
-    .bubble-action-btn:hover { background: rgba(255,255,255,.20); }
-
-    /* ── Modales ── */
-    .editor-modal, .resultado-modal { position: fixed; inset: 0; z-index: 90; display: none; align-items: center; justify-content: center; padding: 20px; background: radial-gradient(circle at top, rgba(0,200,255,.10), transparent 35%), rgba(2,10,22,.78); backdrop-filter: blur(10px); }
-    .editor-modal.visible, .resultado-modal.visible { display: flex; }
-    .editor-card, .resultado-card { width: min(94vw, 760px); max-height: 88vh; overflow: auto; border-radius: 26px; padding: 22px; background: linear-gradient(180deg, rgba(8,26,45,.98), rgba(4,18,35,.98)); border: 1.6px solid rgba(0,200,255,.34); color: #E6EEF8; box-shadow: 0 22px 54px rgba(0,0,0,.52), 0 0 26px rgba(0,200,255,.18); animation: popupMissionIn .24s ease both; }
-    @keyframes popupMissionIn { from { transform: translateY(8px) scale(.97); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
-    .editor-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
-    .editor-head h3, .resultado-card h2 { margin: 0; color: #fff; font-weight: 900; font-size: clamp(1.18rem,2.2vw,1.5rem); }
-    .editor-question { margin-bottom: 14px; padding: 14px 16px; border-radius: 16px; background: rgba(0,200,255,.10); border: 1px solid rgba(0,200,255,.24); color: #DFF6FF; line-height: 1.5; font-weight: 600; }
-    .otros-tabs { display: none; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
-    .otros-tabs.visible { display: flex; }
-    .otro-tab { border: 1px solid rgba(0,200,255,.24); background: rgba(255,255,255,.05); color: #D9E7F5; border-radius: 999px; padding: 8px 13px; font-weight: 800; cursor: pointer; }
-    .otro-tab.active { background: linear-gradient(135deg, rgba(0,200,255,.22), rgba(0,140,255,.28)); color: #fff; border-color: rgba(0,200,255,.55); }
-    .otro-tab-add { background: rgba(255,122,26,.12); border-color: rgba(255,122,26,.45); color: #FFD6B6; }
-    .editor-card textarea, .editor-card input { width: 100%; border-radius: 18px; border: 1.5px solid rgba(0,200,255,.26); padding: 14px 15px; font-size: 1rem; color: #F2F8FF; background: rgba(255,255,255,.04); outline: none; font-family: "Poppins", system-ui, sans-serif; }
-    .editor-card textarea { min-height: 190px; resize: vertical; line-height: 1.48; }
-    .editor-card textarea:focus, .editor-card input:focus { border-color: rgba(0,200,255,.68); background: rgba(0,200,255,.05); box-shadow: 0 0 0 3px rgba(0,200,255,.12); }
-    .editor-actions, .resultado-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; margin-top: 16px; }
-    .btn-close-editor, .btn-secondary-local, .btn-primary-local { border: none; border-radius: 999px; padding: 11px 18px; font-weight: 800; font-size: .95rem; cursor: pointer; }
-    .btn-close-editor { min-width: 44px; min-height: 44px; padding: 0; display: inline-flex; align-items: center; justify-content: center; background: rgba(255,255,255,.06); color: #DCEBFA; border: 1px solid rgba(255,255,255,.08); }
-    .btn-secondary-local { background: rgba(255,255,255,.08); color: #E6EEF8; border: 1px solid rgba(255,255,255,.10); }
-    .btn-primary-local { background: linear-gradient(135deg,#00C8FF,#008CFF); color: #fff; box-shadow: 0 8px 18px rgba(0,140,255,.28); }
-    .resultado-card { text-align: center; min-height: 560px; display: flex; flex-direction: column; justify-content: flex-start; }
-    .resultado-badge { display: inline-flex; align-items: center; justify-content: center; padding: 8px 18px; border-radius: 999px; margin: 0 auto 14px; background: rgba(0,200,255,.12); border: 1px solid rgba(0,200,255,.34); color: #AEEBFF; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; font-size: .82rem; }
-    .resultado-icono { font-size: 2.3rem; margin-bottom: 10px; }
-    .resultado-nivel { display: inline-block; margin: 12px 0; padding: 9px 16px; border-radius: 999px; background: rgba(255,122,26,.12); border: 1px solid rgba(255,122,26,.35); color: #FFD6B6; font-weight: 900; font-size: 1rem; }
-    .resultado-detalle { background: rgba(255,255,255,.04); border: 1px solid rgba(0,200,255,.16); border-radius: 18px; padding: 14px 16px; margin-top: 14px; text-align: left; color: #E6EEF8; line-height: 1.56; }
-    .resultado-actions { min-height: 58px; display: flex; align-items: center; justify-content: flex-end; }
-    #btnConfirmarResultado { min-width: 240px; white-space: nowrap; }
-    body.modal-open { overflow: hidden; }
-    .resultado-emoji, .confetti { display: none !important; }
-
-    /* ── Botón mute música ── */
-    #btnMuteBubble {
-      position: fixed;
-      bottom: clamp(20px, 4vh, 36px);
-      right: clamp(18px, 4vw, 36px);
-      z-index: 70;
-      width: 44px; height: 44px;
-      border-radius: 50%;
-      border: 1px solid rgba(0,200,255,.35);
-      background: rgba(7,21,43,.82);
-      color: #00c8ff;
-      font-size: 1.2rem;
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 4px 14px rgba(0,0,0,.3);
-      backdrop-filter: blur(6px);
-      transition: background .2s;
-    }
-    #btnMuteBubble:hover { background: rgba(0,200,255,.18); }
-
-    /* ── Responsive móvil ── */
-    @media (max-width: 640px) {
-      .inicio-fase-overlay { padding: 14px 12px 12px; }
-      .inicio-fase-card { width: 100%; border-radius: 18px; padding: 14px; }
-      .btn-chip { width: 100%; justify-content: center; }
-      .bubble-stage { display: grid; grid-template-columns: repeat(2, minmax(110px, 1fr)); gap: 12px; height: auto !important; }
-      .bubble, .bubble-item { position: relative !important; left: auto !important; right: auto !important; top: auto !important; bottom: auto !important; transform: none !important; width: 100% !important; aspect-ratio: 1/1; height: auto !important; }
-      .bubble:hover { transform: none !important; }
-      .bubble.central { grid-column: 1/-1; width: 190px !important; height: 190px !important; justify-self: center; position: relative !important; }
-      .bubble.central:hover { transform: none !important; }
-      .astro-flex { flex-direction: column; text-align: center; }
-      .astro-text { text-align: center; }
-      .astro-img { width: 110px; }
-      .objeto-celular-trigger { width: 64px; height: 64px; border-radius: 20px; bottom: 82px; }
-    }
-  </style>
 </head>
 
 <body data-sesion-id="{{ grupo.sesion.idsesion }}">
@@ -295,20 +18,48 @@
 
   <main class="bubblemap-container">
 
-    <div id="inicio-fase-overlay" class="inicio-fase-overlay">
-      <section id="inicio-fase-card" class="inicio-fase-card">
-        <div class="inicio-fase-badge" data-i18n="bubble_badge">MISIÓN DE EMPATÍA</div>
-        <h3 data-i18n="bubble_antes">Antes de comenzar</h3>
-        <p data-i18n="bubble_intro_1">Agentes, analicen a la persona objetivo del desafío.</p>
-        <p data-i18n="bubble_intro_2">Tendrán 3 minutos para completar el Bubble Map. Cuando todos estén listos, el análisis comenzará automáticamente.</p>
-        <button type="button" id="btn-listo-fase" class="btn-chip" data-i18n="bubble_boton_listo">⚡ Listo para comenzar</button>
-        <div id="texto-espera-fase" class="contador-fase" data-i18n="bubble_esperando">Esperando a los demás equipos...</div>
-        <div id="contador-listos-fase" class="contador-fase">0/0 grupos listos</div>
-      </section>
+    <div id="inicio-fase-overlay" class="inicio-fase-overlay dialogo-bubblemap">
+      <div id="dialogo-backdrop" class="dialogo-backdrop" aria-hidden="true"></div>
+
+      <div id="dialogo-box" class="dialogo-box" role="dialog" aria-modal="true" aria-label="Mensaje de EdEmy">
+        <div class="dialogo-personaje activo" id="pj-edemy">
+          <img class="dialogo-img" src="{% static 'images/EdemFeliz.png' %}" alt="EdEmy">
+        </div>
+
+        <section id="inicio-fase-card" class="inicio-fase-card dialogo-burbuja visible">
+          <div class="dialogo-hablante">EdEmy</div>
+
+          <p id="dialogo-bubble-texto" class="dialogo-texto-rpg">
+            Agentes, antes de responder observen bien a la persona objetivo.
+          </p>
+
+          <button type="button" id="btn-dialogo-bubble-continuar" class="dialogo-siguiente">
+            <span id="dialogo-bubble-label">Continuar</span>
+            <span class="dialogo-flecha">▶</span>
+          </button>
+
+          <div id="dialogo-listo-wrap" class="dialogo-listo-wrap">
+            <button type="button" id="btn-listo-fase" class="btn-chip" data-i18n="bubble_boton_listo">
+              ⚡ Listo para comenzar
+            </button>
+            <div id="texto-espera-fase" class="contador-fase" data-i18n="bubble_esperando">
+              Esperando a los demás equipos...
+            </div>
+            <div id="contador-listos-fase" class="contador-fase">0/0 grupos listos</div>
+          </div>
+
+          <div class="dialogo-progreso" aria-hidden="true">
+            <div id="dialogo-bubble-dots">
+              <span class="d-dot activo"></span>
+              <span class="d-dot"></span>
+            </div>
+          </div>
+        </section>
+      </div>
     </div>
 
-    <h1 id="tituloBubble" class="blur-target-bloqueado" data-i18n="bubble_titulo">
-      💭 Bubble Map — Misión de empatía
+    <h1 id="tituloBubble" class="blur-target-bloqueado">
+      💭 Misión de empatía
     </h1>
 
     <p id="subtituloBubble" class="subtitle blur-target-bloqueado" data-i18n="bubble_subtitulo">
@@ -512,6 +263,72 @@
       const textoEspera = document.getElementById("texto-espera-fase");
       const contador = document.getElementById("contador-listos-fase");
       const overlay = document.getElementById("inicio-fase-overlay");
+      const dialogoBubbleTexto = document.getElementById("dialogo-bubble-texto");
+      const dialogoBubbleContinuar = document.getElementById("btn-dialogo-bubble-continuar");
+      const dialogoBubbleLabel = document.getElementById("dialogo-bubble-label");
+      const dialogoBubbleDots = Array.from(document.querySelectorAll("#dialogo-bubble-dots .d-dot"));
+
+      const dialogoBubblePasos = [
+        {
+          texto: tJuego(
+            "bubble_dialogo_paso_1",
+            "Agentes, observen a la persona objetivo. Piensen qué necesita, qué siente y qué obstáculos enfrenta."
+          ),
+          boton: tJuego("bubble_dialogo_continuar", "Continuar")
+        },
+        {
+          texto: tJuego(
+            "bubble_dialogo_paso_2",
+            "Completen las burbujas con ideas claras. Cada respuesta ayudará a crear una mejor solución."
+          ),
+          boton: tJuego("bubble_dialogo_continuar", "Continuar")
+        }
+      ];
+
+      let dialogoBubblePaso = 0;
+
+      function actualizarDialogoBubble() {
+        if (!dialogoBubbleTexto) return;
+
+        const paso = dialogoBubblePasos[dialogoBubblePaso] || dialogoBubblePasos[0];
+        dialogoBubbleTexto.textContent = paso.texto;
+
+        if (dialogoBubbleLabel) {
+          dialogoBubbleLabel.textContent = paso.boton;
+        }
+
+        dialogoBubbleDots.forEach((dot, idx) => {
+          dot.classList.toggle("activo", idx === dialogoBubblePaso);
+          dot.classList.toggle("hecho", idx < dialogoBubblePaso);
+        });
+
+      }
+
+      if (dialogoBubbleContinuar) {
+        dialogoBubbleContinuar.addEventListener("click", () => {
+          if (dialogoBubblePaso < dialogoBubblePasos.length - 1) {
+            dialogoBubblePaso++;
+            actualizarDialogoBubble();
+            return;
+          }
+
+          if (overlay) {
+            overlay.classList.add("dialogo-final");
+            overlay.classList.remove("dialogo-esperando");
+            dialogoBubbleContinuar.classList.add("dialogo-info-oculta");
+          }
+
+          if (dialogoBubbleTexto) {
+            dialogoBubbleTexto.textContent = tJuego(
+              "bubble_dialogo_confirmar",
+              "Cuando su equipo esté preparado, presionen listo. El mapa comenzará cuando todos los escuadrones estén listos."
+            );
+          }
+        });
+      }
+
+      actualizarDialogoBubble();
+
       const timerWrap = document.getElementById("timerWrap");
       const routesEl = document.getElementById("routes");
       const timerElement = document.getElementById("timer");
@@ -888,7 +705,13 @@
         if (!data) return;
         if (contador) contador.textContent = textoGruposListos(data.listosInicio || 0, data.totalListosInicio || 0);
         const miGrupo = (data.grupos || []).find(g => Number(g.id) === Number(grupoId));
-        if (miGrupo && miGrupo.listoF2Generico) { boton.disabled = true; boton.textContent = textoEsperando(); if (textoEspera) textoEspera.textContent = textoEsperaEquipos(); }
+        if (miGrupo && miGrupo.listoF2Generico) {
+          if (overlay) overlay.classList.add("dialogo-final", "dialogo-esperando");
+          if (dialogoBubbleContinuar) dialogoBubbleContinuar.classList.add("dialogo-info-oculta");
+          boton.disabled = true;
+          boton.textContent = textoEsperando();
+          if (textoEspera) textoEspera.textContent = textoEsperaEquipos();
+        }
         if (data.inicioFaseHabilitado) { if (countdownMostrado && !countdownEnCurso) activarFase(); }
         else { countdownMostrado = false; countdownEnCurso = false; timerLiberadoTrasCountdown = false; timerRealSolicitado = false; bloquearFase(); }
         const backendSeconds = Number(data.segundosRestantes);
@@ -938,6 +761,8 @@
         boton.addEventListener("click", async () => {
           boton.disabled = true;
           boton.textContent = textoEsperando();
+          if (overlay) overlay.classList.add("dialogo-final", "dialogo-esperando");
+          if (dialogoBubbleContinuar) dialogoBubbleContinuar.classList.add("dialogo-info-oculta");
           try {
             const res = await fetch(`/grupo/${grupoId}/listo/`, { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json", "X-CSRFToken": csrfToken }, body: JSON.stringify({ fase: "f2_bubblemap" }) });
             const data = await res.json();
@@ -956,6 +781,7 @@
             console.error("Error marcando listo:", err);
             boton.disabled = false;
             boton.textContent = textoListo();
+            if (overlay) overlay.classList.add("dialogo-final");
             if (textoEspera) textoEspera.textContent = tJuego("bubble_error_registro", "No se pudo registrar. Intenta nuevamente.");
           }
         });

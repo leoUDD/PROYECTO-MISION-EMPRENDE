@@ -664,3 +664,149 @@ body:has(#dialogo-inicial-overlay.visible) .team-container {
     font-size: 17px !important;
   }
 }
+
+/* =====================================================
+   DIÁLOGO EDEMY — TRANSICIÓN EMPATÍA
+   Fuerza visibilidad controlada, tamaño grande y texto legible.
+===================================================== */
+#dialogo-inicial-overlay.oculto {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+#dialogo-inicial-overlay.visible {
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+
+#dialogo-inicial-overlay {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity .35s ease, visibility .35s ease;
+}
+
+#dialogo-backdrop {
+  position: absolute !important;
+  inset: 0 !important;
+}
+
+.dialogo-burbuja {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity .35s ease, transform .35s cubic-bezier(.34,1.2,.64,1);
+}
+
+.dialogo-burbuja.visible {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+
+.dialogo-siguiente {
+  width: 100% !important;
+  cursor: pointer !important;
+}
+
+.dialogo-siguiente:disabled {
+  opacity: .68 !important;
+  cursor: default !important;
+  transform: none !important;
+}
+
+.dialogo-flecha {
+  display: inline-block;
+  margin-left: 8px;
+  animation: dialogoFlechaEmpatia 1s ease-in-out infinite;
+}
+
+@keyframes dialogoFlechaEmpatia {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(5px); }
+}
+
+.dialogo-progreso {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+#dialogo-dots {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+.d-dot {
+  display: block !important;
+  border-radius: 999px !important;
+  transition: transform .25s ease, background .25s ease, box-shadow .25s ease !important;
+}
+
+.dialogo-espera-wrap {
+  margin-top: 18px !important;
+  text-align: center !important;
+  color: #E6F7FF !important;
+  font-size: clamp(15px, 1.25vw, 19px) !important;
+  font-weight: 800 !important;
+}
+
+.dialogo-espera-wrap .contador-fase {
+  margin-top: 8px !important;
+  color: #00FC98 !important;
+  font-size: clamp(15px, 1.25vw, 19px) !important;
+  font-weight: 900 !important;
+  text-shadow: 0 0 12px rgba(0, 252, 152, .45) !important;
+}
+
+.dialogo-info-oculta {
+  display: none !important;
+}
+
+@media (max-width: 700px) {
+  .dialogo-espera-wrap {
+    font-size: 15px !important;
+  }
+}
+
+
+/* =====================================================
+   FLUJO NUEVO: EdEmy solo presenta, luego se lee la tarjeta
+===================================================== */
+body.dialogo-finalizado .mission-panel {
+  animation: tarjetaMisionEmpatiaEntra .55s ease both, tarjetaMisionEmpatiaPulso 1.35s ease .45s 2;
+}
+
+body.dialogo-finalizado .next-step {
+  animation: puntoControlEmpatiaPulso 1.35s ease .9s 2;
+}
+
+@keyframes tarjetaMisionEmpatiaEntra {
+  from {
+    opacity: .72;
+    transform: translateX(-50%) translateY(12px) scale(.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+@keyframes tarjetaMisionEmpatiaPulso {
+  0%, 100% {
+    box-shadow:
+      0 0 18px rgba(0, 242, 109, .28),
+      0 0 45px rgba(0, 59, 255, .20);
+  }
+  50% {
+    box-shadow:
+      0 0 28px rgba(0, 252, 152, .48),
+      0 0 70px rgba(0, 200, 255, .28);
+  }
+}
+
+@keyframes puntoControlEmpatiaPulso {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.025); }
+}

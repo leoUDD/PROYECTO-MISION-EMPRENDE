@@ -23,40 +23,41 @@
     🔊
   </button>
 
-  <main class="team-container" role="region" aria-label="Introducción a desafíos">
-    <section class="team-section">
+  <main class="team-container-wrap">
+    <div class="team-container" role="region" aria-label="Introducción a desafíos">
+      <section class="team-section">
 
-      <div class="title-wrapper">
-        <h1 class="title">Desafíos</h1>
-      </div>
-
-      <div class="mission-panel">
-
-        <p>
-          Toda misión comienza con un desafío real.
-        </p>
-
-        <p>
-          Ahora elegirán el problema que guiará su investigación, sus decisiones y su futura solución.
-        </p>
-
-        <p>
-          Observen con atención. No se trata de escoger lo más fácil, sino aquello que puedan comprender y transformar.
-        </p>
-
-        <div class="tablet-reminder">
-          📱 Protocolo: recuerden rotar la tablet antes de continuar.
+        <div class="title-wrapper">
+          <span class="mission-badge">Desafío 2 · Definición del problema</span>
+          <h1 class="title">Desafíos</h1>
         </div>
 
-        <div class="panel-divider"></div>
+        <div class="mission-panel">
+          <p class="mission-lead">
+            Toda misión comienza con un problema real por resolver.
+          </p>
 
-        <div class="next-step">
-          {% include "includes/boton_listo_fase.html" with fase_clave="f2" fase_actual_esperada="f2_transicion" campo_listos="gruposListosF2Generico" campo_mi_grupo="listoF2Generico" texto_boton="¡Estoy listo!" %}
+          <p>
+            Ahora elegirán el desafío que guiará su investigación, sus decisiones y la solución que construirán como equipo.
+          </p>
+
+          <p>
+            No busquen solo lo más fácil: elijan aquello que puedan comprender, observar y transformar con una propuesta de valor clara.
+          </p>
+
+          <div class="tablet-reminder">
+            📱 Protocolo: recuerden rotar la tablet antes de continuar.
+          </div>
+
+          <div class="panel-divider"></div>
+
+          <div class="next-step">
+            {% include "includes/boton_listo_fase.html" with fase_clave="f2" fase_actual_esperada="f2_transicion" campo_listos="gruposListosF2Generico" campo_mi_grupo="listoF2Generico" texto_boton="¡Estoy listo!" %}
+          </div>
         </div>
 
-      </div>
-
-    </section>
+      </section>
+    </div>
   </main>
 
   <div id="routes" data-sesion-id="{{ grupo.sesion.idsesion }}"></div>

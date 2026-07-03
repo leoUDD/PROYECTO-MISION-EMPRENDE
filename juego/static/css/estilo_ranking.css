@@ -1,6 +1,9 @@
 /* ============================================
-   VARIABLES
+   RANKING — BASE + OVERRIDE SOLO PARCIAL
+   - El ranking final se mantiene con los estilos base.
+   - El ranking parcial usa body.ranking-parcial.
 ============================================ */
+
 :root {
   --bg: #000712 url('/static/images/FondoRanking.png') center/cover no-repeat fixed;
   --card: rgba(8, 26, 45, 0.92);
@@ -16,7 +19,17 @@
 /* ============================================
    RESET
 ============================================ */
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
 body {
   font-family: "Poppins", sans-serif;
   background: var(--bg);
@@ -46,7 +59,7 @@ body {
   font-size: clamp(26px, 4vw, 40px);
   font-weight: 800;
   margin-bottom: 8px;
-  color: var(--accent)
+  color: var(--accent);
 }
 
 .subtitle {
@@ -70,16 +83,20 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 14px;
   margin-bottom: 18px;
 }
 
-.session-name { color: var(--muted); }
+.session-name {
+  color: var(--muted);
+}
 
 /* ============================================
    TABLA
 ============================================ */
 .table-wrapper {
   overflow-x: auto;
+  border-radius: 16px;
 }
 
 .ranking-table {
@@ -106,21 +123,28 @@ body {
   font-size: 15px;
 }
 
+.ranking-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
 /* ============================================
-   PODIO CLASSES
+   PODIO CLASSES BASE / FINAL
+   Se dejan como estaban para no tocar ranking final.
 ============================================ */
 .podium-1 {
   background: linear-gradient(90deg, rgba(255,215,0,0.25), rgba(255,215,0,0.05));
 }
+
 .podium-2 {
   background: linear-gradient(90deg, rgba(192,192,192,0.25), rgba(192,192,192,0.05));
 }
+
 .podium-3 {
   background: linear-gradient(90deg, rgba(205,127,50,0.25), rgba(205,127,50,0.05));
 }
 
 /* ============================================
-   MEDALLAS
+   MEDALLAS BASE / FINAL
 ============================================ */
 .medal {
   font-size: 24px;
@@ -156,6 +180,9 @@ body {
   border-radius: 999px;
   text-decoration: none;
   transition: 0.2s;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
 }
 
 .btn-primary:hover {
@@ -172,3 +199,798 @@ body {
   font-size: 16px;
   color: var(--muted);
 }
+
+/* ============================================================
+   OVERRIDE — SOLO RANKING PARCIAL
+   Para activarlo, el body debe tener class="ranking-parcial".
+   El ranking final debe tener class="ranking-final" o no usar esta clase.
+============================================================ */
+.ranking-parcial {
+  --rank-green: #00FC98;
+  --rank-green-soft: #26FFC2;
+  --rank-blue: #00C8FF;
+  --rank-blue-soft: #5BE7FF;
+  --rank-dark: rgba(3, 14, 32, .88);
+}
+
+.ranking-parcial::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 12%, rgba(0, 252, 152, .11), transparent 34%),
+    linear-gradient(180deg, rgba(0, 0, 0, .08), rgba(0, 0, 0, .34));
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Header parcial */
+.ranking-parcial .page-header h1 {
+  color: var(--rank-green);
+  text-shadow:
+    0 0 14px rgba(0, 252, 152, .70),
+    0 0 32px rgba(0, 200, 255, .28);
+}
+
+.ranking-parcial .subtitle {
+  color: rgba(230, 238, 248, .94);
+  font-weight: 700;
+  text-shadow: 0 0 10px rgba(0, 200, 255, .22);
+}
+
+/* Card parcial */
+.ranking-parcial .card {
+  background:
+    radial-gradient(circle at top, rgba(0, 252, 152, .10), transparent 34%),
+    linear-gradient(180deg, rgba(5, 17, 36, .88), rgba(3, 12, 28, .94));
+  border: 1.5px solid rgba(0, 200, 255, .36);
+  box-shadow:
+    0 20px 44px rgba(0, 0, 0, .48),
+    0 0 26px rgba(0, 200, 255, .14),
+    inset 0 0 0 1px rgba(255,255,255,.04);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.ranking-parcial .card-header-row h2 {
+  color: var(--rank-green);
+  text-shadow: 0 0 12px rgba(0, 252, 152, .45);
+}
+
+.ranking-parcial .session-name {
+  color: rgba(230, 238, 248, .78);
+}
+
+/* Tabla parcial */
+.ranking-parcial .ranking-table {
+  border-collapse: separate;
+  border-spacing: 0 8px;
+}
+
+.ranking-parcial .ranking-table thead {
+  background: rgba(0, 200, 255, .10);
+}
+
+.ranking-parcial .ranking-table th {
+  color: rgba(230, 238, 248, .92);
+  border-bottom: 1px solid rgba(0, 200, 255, .24);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  font-size: 12px;
+}
+
+.ranking-parcial .ranking-table td {
+  border-bottom: none;
+  color: #F3FAFF;
+}
+
+.ranking-parcial .ranking-table tbody tr td:first-child {
+  border-radius: 16px 0 0 16px;
+}
+
+.ranking-parcial .ranking-table tbody tr td:last-child {
+  border-radius: 0 16px 16px 0;
+}
+
+/* Quita amarillo/plata/bronce en ranking parcial */
+.ranking-parcial .podium-1,
+.ranking-parcial .podium-2,
+.ranking-parcial .podium-3 {
+  background: transparent;
+}
+
+/* Degradé verde por posición */
+.ranking-parcial .ranking-table tbody tr {
+  --rank-alpha: .18;
+  --rank-border: .22;
+  --rank-glow: .10;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(0, 252, 152, var(--rank-alpha)),
+      rgba(0, 200, 255, calc(var(--rank-alpha) * .32)),
+      rgba(3, 14, 32, .28)
+    );
+
+  box-shadow:
+    inset 3px 0 0 rgba(0, 252, 152, var(--rank-border)),
+    0 0 14px rgba(0, 252, 152, var(--rank-glow));
+
+  transition:
+    transform .18s ease,
+    background .18s ease,
+    box-shadow .18s ease;
+}
+
+.ranking-parcial .ranking-table tbody tr:hover {
+  transform: translateX(4px);
+  box-shadow:
+    inset 4px 0 0 rgba(0, 252, 152, .86),
+    0 0 18px rgba(0, 252, 152, .24),
+    0 0 28px rgba(0, 200, 255, .14);
+}
+
+/* Intensidad por ranking */
+.ranking-parcial .ranking-table tbody tr:nth-child(1) {
+  --rank-alpha: .56;
+  --rank-border: .95;
+  --rank-glow: .32;
+}
+
+.ranking-parcial .ranking-table tbody tr:nth-child(2) {
+  --rank-alpha: .46;
+  --rank-border: .80;
+  --rank-glow: .26;
+}
+
+.ranking-parcial .ranking-table tbody tr:nth-child(3) {
+  --rank-alpha: .38;
+  --rank-border: .68;
+  --rank-glow: .22;
+}
+
+.ranking-parcial .ranking-table tbody tr:nth-child(4) {
+  --rank-alpha: .31;
+  --rank-border: .56;
+  --rank-glow: .18;
+}
+
+.ranking-parcial .ranking-table tbody tr:nth-child(5) {
+  --rank-alpha: .26;
+  --rank-border: .48;
+  --rank-glow: .15;
+}
+
+.ranking-parcial .ranking-table tbody tr:nth-child(6) {
+  --rank-alpha: .22;
+  --rank-border: .40;
+  --rank-glow: .13;
+}
+
+.ranking-parcial .ranking-table tbody tr:nth-child(7) {
+  --rank-alpha: .19;
+  --rank-border: .34;
+  --rank-glow: .11;
+}
+
+.ranking-parcial .ranking-table tbody tr:nth-child(8) {
+  --rank-alpha: .16;
+  --rank-border: .30;
+  --rank-glow: .09;
+}
+
+.ranking-parcial .ranking-table tbody tr:nth-child(9) {
+  --rank-alpha: .13;
+  --rank-border: .25;
+  --rank-glow: .07;
+}
+
+.ranking-parcial .ranking-table tbody tr:nth-child(n+10) {
+  --rank-alpha: .10;
+  --rank-border: .20;
+  --rank-glow: .05;
+}
+
+/* Medallas reemplazadas visualmente por número verde solo en parcial */
+.ranking-parcial .ranking-table tbody {
+  counter-reset: ranking-position;
+}
+
+.ranking-parcial .ranking-table tbody tr {
+  counter-increment: ranking-position;
+}
+
+.ranking-parcial .medal,
+.ranking-parcial .partial-rank-number {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  background:
+    radial-gradient(circle at 35% 25%, rgba(255,255,255,.32), transparent 34%),
+    linear-gradient(135deg, var(--rank-green), var(--rank-blue));
+
+  border: 1.5px solid rgba(230, 255, 248, .86);
+  box-shadow:
+    0 0 14px rgba(0, 252, 152, .35),
+    0 0 24px rgba(0, 200, 255, .16);
+
+  font-size: 0;
+}
+
+.ranking-parcial .medal::before,
+.ranking-parcial .partial-rank-number::before {
+  content: counter(ranking-position);
+  font-size: 15px;
+  font-weight: 900;
+  color: #001626;
+}
+
+.ranking-parcial .ranking-table tbody tr:nth-child(1) .medal,
+.ranking-parcial .ranking-table tbody tr:nth-child(1) .partial-rank-number {
+  transform: scale(1.12);
+  box-shadow:
+    0 0 0 7px rgba(0, 252, 152, .12),
+    0 0 22px rgba(0, 252, 152, .78),
+    0 0 36px rgba(0, 200, 255, .32);
+}
+
+.ranking-parcial .ranking-table tbody tr:nth-child(1) td {
+  font-weight: 900;
+}
+
+/* Si el parcial no está en tabla, también aplica a lista simple */
+.ranking-parcial .partial-ranking-list {
+  display: grid;
+  gap: 12px;
+  list-style: none;
+}
+
+.ranking-parcial .partial-ranking-item {
+  --rank-alpha: .18;
+  --rank-border: .22;
+  --rank-glow: .10;
+
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(0, 252, 152, var(--rank-alpha)),
+      rgba(0, 200, 255, calc(var(--rank-alpha) * .32)),
+      rgba(3, 14, 32, .28)
+    );
+  box-shadow:
+    inset 3px 0 0 rgba(0, 252, 152, var(--rank-border)),
+    0 0 14px rgba(0, 252, 152, var(--rank-glow));
+}
+
+.ranking-parcial .partial-ranking-item:nth-child(1) { --rank-alpha: .56; --rank-border: .95; --rank-glow: .32; }
+.ranking-parcial .partial-ranking-item:nth-child(2) { --rank-alpha: .46; --rank-border: .80; --rank-glow: .26; }
+.ranking-parcial .partial-ranking-item:nth-child(3) { --rank-alpha: .38; --rank-border: .68; --rank-glow: .22; }
+.ranking-parcial .partial-ranking-item:nth-child(4) { --rank-alpha: .31; --rank-border: .56; --rank-glow: .18; }
+.ranking-parcial .partial-ranking-item:nth-child(5) { --rank-alpha: .26; --rank-border: .48; --rank-glow: .15; }
+.ranking-parcial .partial-ranking-item:nth-child(6) { --rank-alpha: .22; --rank-border: .40; --rank-glow: .13; }
+.ranking-parcial .partial-ranking-item:nth-child(7) { --rank-alpha: .19; --rank-border: .34; --rank-glow: .11; }
+.ranking-parcial .partial-ranking-item:nth-child(8) { --rank-alpha: .16; --rank-border: .30; --rank-glow: .09; }
+.ranking-parcial .partial-ranking-item:nth-child(n+9) { --rank-alpha: .11; --rank-border: .22; --rank-glow: .06; }
+
+.ranking-parcial .partial-team-name {
+  font-weight: 900;
+  color: #F3FAFF;
+}
+
+.ranking-parcial .partial-team-tokens {
+  font-weight: 900;
+  color: var(--rank-green-soft);
+  white-space: nowrap;
+}
+
+/* Badge "yo" sin naranjo */
+.ranking-parcial .team-col .badge-yo,
+.ranking-parcial .badge-yo {
+  background: linear-gradient(135deg, var(--rank-green), var(--rank-blue));
+  color: #001626;
+  font-weight: 900;
+  box-shadow: 0 0 12px rgba(0, 252, 152, .32);
+}
+
+/* Botón del ranking parcial */
+.ranking-parcial .btn-primary {
+  background: linear-gradient(135deg, var(--rank-green), var(--rank-blue));
+  color: #001626;
+  box-shadow:
+    0 0 18px rgba(0, 252, 152, .26),
+    0 0 28px rgba(0, 200, 255, .14);
+}
+
+.ranking-parcial .btn-primary:hover {
+  background: linear-gradient(135deg, #26FFC2, #5BE7FF);
+  transform: translateY(-2px) scale(1.02);
+}
+
+/* ============================================
+   RESPONSIVE
+============================================ */
+@media (max-width: 720px) {
+  body {
+    padding: 14px;
+  }
+
+  .card {
+    padding: 18px 14px;
+    border-radius: 18px;
+  }
+
+  .card-header-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .ranking-table th,
+  .ranking-table td {
+    padding: 11px 10px;
+    font-size: 13px;
+  }
+
+  .ranking-parcial .medal,
+  .ranking-parcial .partial-rank-number {
+    width: 32px;
+    height: 32px;
+  }
+
+  .ranking-parcial .partial-ranking-item {
+    grid-template-columns: auto 1fr;
+  }
+
+  .ranking-parcial .partial-team-tokens {
+    grid-column: 2;
+  }
+}
+
+@media (max-width: 460px) {
+  .page-header h1 {
+    font-size: 25px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+  }
+
+  .ranking-table th:nth-child(3),
+  .ranking-table td:nth-child(3) {
+    text-align: right;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+
+
+/* =====================================================
+       FIX DEFINITIVO — RANKING PARCIAL VERDE/AZUL
+       Debe ir DESPUÉS de los estilos antiguos del ranking parcial.
+       Corrige amarillo, rojo y botón morado.
+    ===================================================== */
+
+    body.ranking-parcial {
+      --rank-green: #00FC98;
+      --rank-green-soft: #26FFC2;
+      --rank-blue: #00C8FF;
+      --rank-blue-soft: #5BE7FF;
+      --rank-panel: rgba(4, 17, 40, .88);
+    }
+
+    body.ranking-parcial .ranking-parcial-card {
+      background:
+        radial-gradient(circle at top left, rgba(0, 252, 152, .12), transparent 34%),
+        linear-gradient(180deg, rgba(5, 17, 36, .90), rgba(2, 10, 24, .96)) !important;
+      border: 1.5px solid rgba(0, 200, 255, .34) !important;
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, .04) inset,
+        0 20px 60px rgba(0, 0, 0, .38),
+        0 0 28px rgba(0, 200, 255, .14) !important;
+    }
+
+    body.ranking-parcial .ranking-parcial-card .titulo {
+      color: var(--rank-green) !important;
+      text-shadow:
+        0 0 14px rgba(0, 252, 152, .68),
+        0 0 32px rgba(0, 200, 255, .24) !important;
+    }
+
+    body.ranking-parcial .ranking-parcial-card .subtitulo {
+      color: rgba(230, 238, 248, .94) !important;
+      font-weight: 700 !important;
+      text-shadow: 0 0 10px rgba(0, 200, 255, .22) !important;
+    }
+
+    body.ranking-parcial .ranking-fila,
+    body.ranking-parcial .ranking-fila.ranking-primero,
+    body.ranking-parcial .ranking-fila.ranking-ultimo,
+    body.ranking-parcial .ranking-fila.es-mi-equipo {
+      --rank-alpha: .15;
+      --rank-border: .24;
+      --rank-glow: .08;
+
+      background:
+        linear-gradient(
+          90deg,
+          rgba(0, 252, 152, var(--rank-alpha)),
+          rgba(0, 200, 255, calc(var(--rank-alpha) * .34)),
+          rgba(3, 14, 32, .34)
+        ) !important;
+
+      border: 1px solid rgba(0, 200, 255, .14) !important;
+      border-left: 4px solid rgba(0, 252, 152, var(--rank-border)) !important;
+
+      box-shadow:
+        0 0 14px rgba(0, 252, 152, var(--rank-glow)),
+        inset 0 0 0 1px rgba(255,255,255,.035) !important;
+
+      color: #F3FAFF !important;
+    }
+
+    body.ranking-parcial .ranking-fila:nth-child(1) {
+      --rank-alpha: .58;
+      --rank-border: .98;
+      --rank-glow: .34;
+      box-shadow:
+        0 0 0 1px rgba(0, 252, 152, .36),
+        0 0 24px rgba(0, 252, 152, .34),
+        0 0 42px rgba(0, 200, 255, .17),
+        inset 0 0 0 1px rgba(255,255,255,.07) !important;
+    }
+
+    body.ranking-parcial .ranking-fila:nth-child(2) {
+      --rank-alpha: .48;
+      --rank-border: .84;
+      --rank-glow: .28;
+    }
+
+    body.ranking-parcial .ranking-fila:nth-child(3) {
+      --rank-alpha: .40;
+      --rank-border: .70;
+      --rank-glow: .23;
+    }
+
+    body.ranking-parcial .ranking-fila:nth-child(4) {
+      --rank-alpha: .33;
+      --rank-border: .58;
+      --rank-glow: .18;
+    }
+
+    body.ranking-parcial .ranking-fila:nth-child(5) {
+      --rank-alpha: .27;
+      --rank-border: .48;
+      --rank-glow: .14;
+    }
+
+    body.ranking-parcial .ranking-fila:nth-child(6) {
+      --rank-alpha: .22;
+      --rank-border: .40;
+      --rank-glow: .11;
+    }
+
+    body.ranking-parcial .ranking-fila:nth-child(7) {
+      --rank-alpha: .18;
+      --rank-border: .34;
+      --rank-glow: .09;
+    }
+
+    body.ranking-parcial .ranking-fila:nth-child(n+8) {
+      --rank-alpha: .13;
+      --rank-border: .26;
+      --rank-glow: .06;
+    }
+
+    body.ranking-parcial .ranking-fila:hover {
+      transform: translateX(4px) !important;
+      border-left-color: rgba(0, 252, 152, .95) !important;
+      box-shadow:
+        0 0 20px rgba(0, 252, 152, .22),
+        0 0 32px rgba(0, 200, 255, .14),
+        inset 0 0 0 1px rgba(255,255,255,.06) !important;
+    }
+
+    body.ranking-parcial .ranking-fila-top,
+    body.ranking-parcial .ranking-fila-nombre,
+    body.ranking-parcial .ranking-fila-nombre span:first-child {
+      color: #F3FAFF !important;
+    }
+
+    body.ranking-parcial .ranking-fila:nth-child(1) .ranking-fila-nombre span:first-child {
+      font-weight: 900 !important;
+      text-shadow:
+        0 0 10px rgba(0, 252, 152, .68),
+        0 0 18px rgba(0, 200, 255, .24) !important;
+    }
+
+    body.ranking-parcial .ranking-fila-tokens {
+      color: var(--rank-green-soft) !important;
+      font-weight: 900 !important;
+      text-shadow: 0 0 8px rgba(0, 252, 152, .32) !important;
+    }
+
+    body.ranking-parcial .ranking-barra-wrap {
+      background: rgba(255, 255, 255, .08) !important;
+      border: 1px solid rgba(0, 200, 255, .16) !important;
+      box-shadow: inset 0 0 10px rgba(0,0,0,.35) !important;
+    }
+
+    body.ranking-parcial .ranking-fila .ranking-barra-fill,
+    body.ranking-parcial .ranking-fila.ranking-primero .ranking-barra-fill,
+    body.ranking-parcial .ranking-fila.ranking-ultimo .ranking-barra-fill,
+    body.ranking-parcial .ranking-fila:nth-child(1) .ranking-barra-fill,
+    body.ranking-parcial .ranking-fila:nth-child(2) .ranking-barra-fill,
+    body.ranking-parcial .ranking-fila:nth-child(3) .ranking-barra-fill,
+    body.ranking-parcial .ranking-fila:nth-child(4) .ranking-barra-fill,
+    body.ranking-parcial .ranking-fila:nth-child(5) .ranking-barra-fill {
+      background:
+        linear-gradient(
+          90deg,
+          var(--rank-green),
+          var(--rank-green-soft),
+          var(--rank-blue)
+        ) !important;
+      box-shadow:
+        0 0 12px rgba(0, 252, 152, .42),
+        0 0 22px rgba(0, 200, 255, .18) !important;
+    }
+
+    body.ranking-parcial .ranking-fila:nth-child(1) .ranking-barra-fill {
+      box-shadow:
+        0 0 18px rgba(0, 252, 152, .72),
+        0 0 32px rgba(0, 200, 255, .28) !important;
+    }
+
+    body.ranking-parcial .ranking-fila.es-mi-equipo {
+      outline: 2px solid rgba(0, 200, 255, .48) !important;
+      outline-offset: 2px !important;
+    }
+
+    body.ranking-parcial .tag-mi-equipo {
+      color: #001626 !important;
+      background:
+        linear-gradient(135deg, var(--rank-green), var(--rank-blue)) !important;
+      border: 1px solid rgba(230, 255, 248, .55) !important;
+      box-shadow: 0 0 12px rgba(0, 252, 152, .32) !important;
+      font-weight: 900 !important;
+    }
+
+    body.ranking-parcial .btn-ranking-listo {
+      color: #001626 !important;
+      background:
+        linear-gradient(135deg, var(--rank-green), var(--rank-blue)) !important;
+      border: 1px solid rgba(230, 255, 248, .58) !important;
+      box-shadow:
+        0 14px 30px rgba(0, 252, 152, .20),
+        0 0 22px rgba(0, 200, 255, .18) !important;
+    }
+
+    body.ranking-parcial .btn-ranking-listo:hover:not(:disabled) {
+      transform: translateY(-2px) scale(1.02) !important;
+      background:
+        linear-gradient(135deg, var(--rank-green-soft), var(--rank-blue-soft)) !important;
+      box-shadow:
+        0 18px 34px rgba(0, 252, 152, .28),
+        0 0 30px rgba(0, 200, 255, .22) !important;
+    }
+
+    body.ranking-parcial .btn-ranking-listo:disabled {
+      opacity: .75 !important;
+      cursor: not-allowed !important;
+      transform: none !important;
+    }
+
+    body.ranking-parcial .ranking-estado {
+      color: rgba(230, 238, 248, .88) !important;
+    }
+
+/* =====================================================
+   PATCH FINAL — DEGRADÉ VERDE MÁS VISIBLE POR POSICIÓN
+   Solo afecta ranking parcial. Ranking final intacto.
+===================================================== */
+
+html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .ranking-parcial-card {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(0, 252, 152, .16), transparent 32%),
+    linear-gradient(180deg, rgba(4, 18, 38, .72), rgba(2, 10, 24, .90)) !important;
+  border: 1.5px solid rgba(0, 200, 255, .42) !important;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, .04) inset,
+    0 24px 64px rgba(0, 0, 0, .42),
+    0 0 34px rgba(0, 200, 255, .16) !important;
+}
+
+html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .ranking-parcial-card .ranking-barras {
+  gap: 18px !important;
+}
+
+html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .ranking-parcial-card .ranking-barras .ranking-fila,
+html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .ranking-parcial-card .ranking-barras .ranking-fila.ranking-primero,
+html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .ranking-parcial-card .ranking-barras .ranking-fila.ranking-ultimo,
+html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .ranking-parcial-card .ranking-barras .ranking-fila.es-mi-equipo {
+  --row-green: .10;
+  --row-cyan: .035;
+  --row-border: .24;
+  --row-glow: .08;
+  --bar-a: #009B61;
+  --bar-b: #008D86;
+  --bar-c: #007C9C;
+  --bar-glow: .12;
+
+  position: relative !important;
+  overflow: hidden !important;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(0, 252, 152, var(--row-green)) 0%,
+      rgba(0, 200, 255, var(--row-cyan)) 58%,
+      rgba(2, 10, 24, .82) 100%
+    ) !important;
+
+  border: 1px solid rgba(0, 200, 255, .14) !important;
+  border-left: 6px solid rgba(0, 252, 152, var(--row-border)) !important;
+  box-shadow:
+    0 0 18px rgba(0, 252, 152, var(--row-glow)),
+    inset 0 0 0 1px rgba(255, 255, 255, .035) !important;
+}
+
+html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .ranking-parcial-card .ranking-barras .ranking-fila::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(255,255,255,.13), transparent 24%, transparent 100%);
+  opacity: var(--row-shine, .06);
+  pointer-events: none;
+}
+
+/* 1°: verde más fuerte y resplandeciente */
+html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .ranking-parcial-card .ranking-barras .ranking-fila:nth-child(1),
+html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .ranking-parcial-card .ranking-barras .ranking-fila.ranking-primero:nth-child(1) {
+  --row-green: .62;
+  --row-cyan: .30;
+  --row-border: 1;
+  --row-glow: .48;
+  --row-shine: .20;
+  --bar-a: #00FF88;
+  --bar-b: #26FFC2;
+  --bar-c: #00E7FF;
+  --bar-glow: .76;
+
+  border-color: rgba(0, 252, 152, .78) !important;
+  box-shadow:
+    0 0 0 1px rgba(0, 252, 152, .44),
+    0 0 26px rgba(0, 252, 152, .48),
+    0 0 48px rgba(0, 200, 255, .22),
+    inset 0 0 20px rgba(0, 252, 152, .16) !important;
+}
+
+/* 2°: claramente más suave que el primero */
+html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .ranking-parcial-card .ranking-barras .ranking-fila:nth-child(2) {
+  --row-green: .28;
+  --row-cyan: .12;
+  --row-border: .62;
+  --row-glow: .20;
+  --row-shine: .10;
+  --bar-a: #00D47C;
+  --bar-b: #00B695;
+  --bar-c: #00A2CF;
+  --bar-glow: .34;
+}
+
+html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .ranking-parcial-card .ranking-barras .ranking-fila:nth-child(3) {
+  --row-green: .20;
+  --row-cyan: .08;
+  --row-border: .48;
+  --row-glow: .15;
+  --row-shine: .08;
+  --bar-a: #00B86F;
+  --bar-b: #009A7B;
+  --bar-c: #0087AD;
+  --bar-glow: .25;
+}
+
+html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .ranking-parcial-card .ranking-barras .ranking-fila:nth-child(4) {
+  --row-green: .15;
+  --row-cyan: .06;
+  --row-border: .38;
+  --row-glow: .11;
+  --row-shine: .06;
+  --bar-a: #009F61;
+  --bar-b: #00866D;
+  --bar-c: #007997;
+  --bar-glow: .18;
+}
+
+html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .ranking-parcial-card .ranking-barras .ranking-fila:nth-child(5) {
+  --row-green: .12;
+  --row-cyan: .045;
+  --row-border: .31;
+  --row-glow: .08;
+  --row-shine: .05;
+  --bar-a: #008C55;
+  --bar-b: #007461;
+  --bar-c: #006D87;
+  --bar-glow: .14;
+}
+
+html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .ranking-parcial-card .ranking-barras .ranking-fila:nth-child(n+6) {
+  --row-green: .085;
+  --row-cyan: .03;
+  --row-border: .22;
+  --row-glow: .055;
+  --row-shine: .035;
+  --bar-a: #007746;
+  --bar-b: #006050;
+  --bar-c: #005D72;
+  --bar-glow: .10;
+}
+
+html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .ranking-parcial-card .ranking-barras .ranking-fila .ranking-barra-fill,
+html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .ranking-parcial-card .ranking-barras .ranking-fila.ranking-primero .ranking-barra-fill,
+html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .ranking-parcial-card .ranking-barras .ranking-fila.ranking-ultimo .ranking-barra-fill {
+  background:
+    linear-gradient(90deg, var(--bar-a), var(--bar-b), var(--bar-c)) !important;
+  box-shadow:
+    0 0 16px rgba(0, 252, 152, var(--bar-glow)),
+    0 0 28px rgba(0, 200, 255, calc(var(--bar-glow) * .55)) !important;
+}
+
+html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .ranking-parcial-card .ranking-barras .ranking-fila:nth-child(1) .ranking-fila-nombre span:first-child,
+html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .ranking-parcial-card .ranking-barras .ranking-fila:nth-child(1) .ranking-fila-tokens {
+  color: #FFFFFF !important;
+  text-shadow:
+    0 0 10px rgba(0, 252, 152, .82),
+    0 0 20px rgba(0, 200, 255, .30) !important;
+}
+
+html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .ranking-parcial-card .ranking-barras .ranking-fila:nth-child(n+2) .ranking-fila-nombre span:first-child {
+  color: rgba(230, 255, 248, .92) !important;
+  text-shadow: none !important;
+}
+
+html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .ranking-parcial-card .ranking-barras .ranking-fila:nth-child(n+2) .ranking-fila-tokens {
+  color: rgba(38, 255, 194, .82) !important;
+  text-shadow: 0 0 6px rgba(0, 252, 152, .16) !important;
+}
+
+html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .tag-mi-equipo {
+  background: linear-gradient(135deg, #00FC98, #00C8FF) !important;
+  color: #001626 !important;
+  border: 1px solid rgba(230, 255, 248, .70) !important;
+  box-shadow: 0 0 12px rgba(0, 252, 152, .36) !important;
+}
+
+html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .btn-ranking-listo {
+  background: linear-gradient(135deg, #00FC98, #00C8FF) !important;
+  color: #001626 !important;
+  border: 1px solid rgba(230, 255, 248, .68) !important;
+  box-shadow:
+    0 14px 30px rgba(0, 252, 152, .22),
+    0 0 24px rgba(0, 200, 255, .20) !important;
+}
+
+html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .btn-ranking-listo:hover:not(:disabled) {
+  background: linear-gradient(135deg, #26FFC2, #5BE7FF) !important;
+  transform: translateY(-2px) scale(1.02) !important;
+  box-shadow:
+    0 18px 34px rgba(0, 252, 152, .30),
+    0 0 30px rgba(0, 200, 255, .24) !important;
+}
+

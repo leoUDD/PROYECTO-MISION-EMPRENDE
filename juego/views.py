@@ -48,39 +48,35 @@ from django.db.models import F
 
 
 FASES_ORDEN = [
-    "intro_habilidades",
     "f1_bienvenida",
     "f1_conocidos",
     "f1_pre_sopa",
     "f1_sopa",
     "f1_ranking",
 
-    "mapa_f2_empatia",
     "f2_transicion",
     "f2_tematicas",
     "f2_transicion_empatia",
     "f2_bubblemap",
     "f2_ranking",
 
-    "mapa_f3_creatividad",
     "f3_transicion_creatividad",
     "f3_lego",
     "f3_ranking",
 
-    "mapa_f4_final",
     "f4_transicion_comunicacion",
     "f4_construccion_pitch",
     "f4_orden_pitch",
     "f4_presentacion_pitch",
-    "f5_evaluacion_pitch",
 
+    "f5_evaluacion_pitch",
     "f6_ranking",
     "reflexion",
 ]
 
 RUTA_POR_FASE = {
     "lobby": "pantalla_espera",
-    "intro_habilidades": "habilidades_intro",
+
     "f1_bienvenida": "pantalla_inicio",
     "f1_conocidos": "promptconocidos",
     "f1_pre_sopa": "trabajoenequipo",
@@ -92,9 +88,6 @@ RUTA_POR_FASE = {
     "f2_transicion_empatia": "transicionempatia",
     "f2_bubblemap": "bubblemap",
     "f2_ranking": "ranking",
-    "mapa_f2_empatia": "habilidades_intro",
-    "mapa_f3_creatividad": "habilidades_intro",
-    "mapa_f4_final": "habilidades_intro",
 
     "f3_transicion_creatividad": "transicioncreatividad",
     "f3_lego": "lego",
@@ -107,17 +100,12 @@ RUTA_POR_FASE = {
 
     "f5_transicion_apoyo": "transicionapoyo",
     "f5_evaluacion_pitch": "peer_review",
-
     "f6_ranking": "ranking",
     "reflexion": "reflexion",
 }
 
 ETIQUETA_FASE = {
 
-    "intro_habilidades": "Mapa · Trabajo en equipo",
-    "mapa_f2_empatia": "Mapa · Empatía",
-    "mapa_f3_creatividad": "Mapa · Creatividad",
-    "mapa_f4_final": "Mapa · Misión final",
     "f1_bienvenida": "F1 · Bienvenida",
     "f1_conocidos": "F1 · Conocerse",
     "f1_pre_sopa": "F1 · Trabajo en equipo",
@@ -609,7 +597,7 @@ def autoavanzar_si_todos_listos(sesion):
 
     elif fase_actual == "f1_ranking":
         if grupos.filter(listo_f6=True).count() == total:
-            nueva_fase = "mapa_f2_empatia"
+            nueva_fase = "f2_transicion"
 
     elif fase_actual == "f2_transicion":
         if grupos.filter(listo_f2=True).count() == total:
@@ -625,7 +613,7 @@ def autoavanzar_si_todos_listos(sesion):
 
     elif fase_actual == "f2_ranking":
         if grupos.filter(listo_f6=True).count() == total:
-            nueva_fase = "mapa_f3_creatividad"
+            nueva_fase = "f3_transicion_creatividad"
 
     elif fase_actual == "f3_transicion_creatividad":
         if grupos.filter(listo_f3=True).count() == total:
@@ -637,7 +625,7 @@ def autoavanzar_si_todos_listos(sesion):
 
     elif fase_actual == "f3_ranking":
         if grupos.filter(listo_f6=True).count() == total:
-            nueva_fase = "mapa_f4_final"
+            nueva_fase = "f4_transicion_comunicacion"
 
     elif fase_actual == "f4_transicion_comunicacion":
         if grupos.filter(listo_f4=True).count() == total:

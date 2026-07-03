@@ -10,40 +10,69 @@
   <link rel="stylesheet" href="{% static 'css/estilo_transicioncreatividad.css' %}" />
 </head>
 
-<body data-sesion-id="{{ grupo.sesion.idsesion }}">
-  <main class="team-container" role="region" aria-label="Introducción a creatividad">
-    <section class="team-section">
+<body data-sesion-id="{{ grupo.sesion.idsesion }}" class="dialogo-activo">
 
-      <div class="title-wrapper">
-        <h1 class="title">Creatividad</h1>
-      </div>
+  <main class="team-container-wrap">
+    <div class="team-container" role="region" aria-label="Introducción a creatividad">
+      <section class="team-section">
 
-      <div class="mission-panel">
-        <p>
-          Ya comprendieron el problema. Ahora deben transformar esa información en una solución.
-        </p>
-
-        <p>
-          La creatividad no es solo imaginar algo nuevo: es construir una respuesta útil para una necesidad real.
-        </p>
-
-        <p>
-          En esta fase pondrán a prueba su idea creando un prototipo con LEGO.
-        </p>
-
-        <div class="tablet-reminder">
-          📱 Protocolo: recuerden rotar la tablet antes de continuar.
+        <div class="title-wrapper">
+          <span class="mission-badge">FASE 3 · IDEACIÓN</span>
+          <h1 class="title">Creatividad</h1>
         </div>
 
-        <div class="panel-divider"></div>
+        <div class="mission-panel" aria-label="Tarjeta de misión creatividad">
+          <p class="mission-lead">
+            Ya comprendieron el problema. Ahora deben transformar esa información en una solución.
+          </p>
 
-        <div class="next-step">
-          {% include "includes/boton_listo_fase.html" with fase_clave="f3" fase_actual_esperada="f3_transicion_creatividad" campo_listos="gruposListosF3" campo_mi_grupo="listoF3" texto_boton="¡Estoy listo!" %}
+          <p>
+            La creatividad no es solo imaginar algo nuevo: es construir una respuesta útil para una necesidad real.
+          </p>
+
+          <p>
+            En esta fase pondrán a prueba su idea creando un prototipo con LEGO.
+          </p>
+
+          <div class="tablet-reminder">
+            📱 Protocolo: recuerden rotar la tablet antes de continuar.
+          </div>
+
+          <div class="panel-divider"></div>
+
+          <div class="next-step">
+            {% include "includes/boton_listo_fase.html" with fase_clave="f3" fase_actual_esperada="f3_transicion_creatividad" campo_listos="gruposListosF3" campo_mi_grupo="listoF3" texto_boton="¡Estoy listo!" %}
+          </div>
         </div>
-      </div>
 
-    </section>
+      </section>
+    </div>
   </main>
+
+  <div id="dialogo-inicial-overlay" class="visible" role="dialog" aria-modal="true" aria-labelledby="dialogo-hablante">
+    <div id="dialogo-backdrop"></div>
+
+    <div id="dialogo-box">
+      <div class="dialogo-personaje activo" aria-hidden="true">
+        <img class="dialogo-img" src="{% static 'images/EdemFeliz.png' %}" alt="">
+      </div>
+
+      <section class="dialogo-burbuja">
+        <div id="dialogo-hablante" class="dialogo-hablante">EDEMY</div>
+        <div class="dialogo-texto-rpg">
+          <span id="dialogo-texto"></span><span class="cursor-rpg"></span>
+        </div>
+
+        <button type="button" id="dialogo-siguiente" class="dialogo-siguiente">
+          Continuar
+        </button>
+
+        <div class="dialogo-progreso" aria-hidden="true">
+          <div id="dialogo-dots"></div>
+        </div>
+      </section>
+    </div>
+  </div>
 
   <div id="routes" data-sesion-id="{{ grupo.sesion.idsesion }}"></div>
 
@@ -101,10 +130,85 @@
       }
 
       setTimeout(traducirCreatividadIntroDinamico, 300);
+      setInterval(traducirCreatividadIntroDinamico, 1600);
 
       window.addEventListener("idiomaJuegoCambiado", () => {
         traducirCreatividadIntroDinamico();
       });
+    });
+  </script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const overlay = document.getElementById("dialogo-inicial-overlay");
+      const textoEl = document.getElementById("dialogo-texto");
+      const btn = document.getElementById("dialogo-siguiente");
+      const dots = document.getElementById("dialogo-dots");
+
+      if (!overlay || !textoEl || !btn || !dots) return;
+
+      const mensajes = [
+        "Ya comprendieron el problema. Ahora llega el momento de convertir esa información en una solución.",
+        "Creatividad no es solo imaginar algo nuevo: es construir una respuesta útil para una necesidad real.",
+        "En esta fase pondrán a prueba su idea creando un prototipo con LEGO. Lean la tarjeta de misión y luego confirmen cuando estén listos."
+      ];
+
+      let indice = 0;
+      let escribiendo = false;
+      let timer = null;
+
+      function renderDots() {
+        dots.innerHTML = mensajes.map((_, i) => {
+          const clase = i === indice ? "activo" : (i < indice ? "hecho" : "");
+          return `<span class="d-dot ${clase}"></span>`;
+        }).join("");
+      }
+
+      function escribir(texto) {
+        clearInterval(timer);
+        escribiendo = true;
+        textoEl.textContent = "";
+        let i = 0;
+
+        timer = setInterval(() => {
+          textoEl.textContent += texto.charAt(i);
+          i += 1;
+
+          if (i >= texto.length) {
+            clearInterval(timer);
+            escribiendo = false;
+            btn.textContent = indice === mensajes.length - 1 ? "Ver tarjeta de misión" : "Continuar";
+          }
+        }, 18);
+      }
+
+      function mostrarMensaje() {
+        renderDots();
+        btn.textContent = "Continuar";
+        escribir(mensajes[indice]);
+      }
+
+      btn.addEventListener("click", () => {
+        if (escribiendo) {
+          clearInterval(timer);
+          textoEl.textContent = mensajes[indice];
+          escribiendo = false;
+          btn.textContent = indice === mensajes.length - 1 ? "Ver tarjeta de misión" : "Continuar";
+          return;
+        }
+
+        if (indice < mensajes.length - 1) {
+          indice += 1;
+          mostrarMensaje();
+          return;
+        }
+
+        overlay.classList.remove("visible");
+        overlay.setAttribute("aria-hidden", "true");
+        document.body.classList.remove("dialogo-activo");
+      });
+
+      mostrarMensaje();
     });
   </script>
 

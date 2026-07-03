@@ -1,19 +1,19 @@
 :root {
   --udd-blue: #003BFF;
   --udd-dark: #00104A;
-  --udd-panel: rgba(0, 16, 74, 0.72);
   --udd-green: #00F26D;
+  --udd-cyan: #00C8FF;
+  --udd-cyan-soft: #5BE7FF;
   --udd-white: #FFFFFF;
 
   --bg: #000712 url('/static/images/FondoTransiciones.png') center/cover no-repeat fixed;
-  --card: #081A2D;
   --text: #FFFFFF;
-  --muted: rgba(255,255,255,.78);
-  --primary: var(--udd-green);
-  --accent: var(--udd-white);
-  --radius: 28px;
-  --shadow: 0 18px 40px rgba(0,0,0,.6);
-  --glow: 0 0 25px rgba(0,242,109,.35);
+  --muted: rgba(230, 238, 248, .82);
+  --panel: rgba(3, 18, 42, .54);
+  --panel-strong: rgba(3, 16, 38, .72);
+  --border-blue: rgba(0, 200, 255, .34);
+  --border-green: rgba(0, 242, 109, .46);
+  --shadow-soft: 0 18px 42px rgba(0, 0, 0, .30);
 }
 
 * {
@@ -25,6 +25,7 @@
 html,
 body {
   width: 100%;
+  min-height: 100%;
   max-width: 100%;
 }
 
@@ -32,11 +33,11 @@ body {
   font-family: "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   background: var(--bg);
   color: var(--text);
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
   min-height: 100vh;
-  padding: 20px 20px 20px 155px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
   overflow-x: hidden;
 }
 
@@ -44,499 +45,461 @@ body::before {
   content: "";
   position: fixed;
   inset: 0;
-  background: linear-gradient(rgba(0,0,0,.12), rgba(0,0,0,.32));
-  pointer-events: none;
   z-index: 0;
-}
-
-/* ================== WRAPPER ================== */
-main.team-container-wrap {
-  position: relative;
-  z-index: 1;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  min-width: 0 !important;
-  box-sizing: border-box !important;
-  padding: 0 !important;
-  margin: 0 !important;
-}
-
-/* ================== CARD PRINCIPAL ================== */
-.team-container {
-  width: min(900px, calc(100vw - 175px)) !important;
-  height: auto !important;
-  min-height: 0 !important;
-  padding: 26px 42px clamp(100px, 8vh, 160px) !important;
-  border-radius: 28px !important;
-  position: relative !important;
-  overflow: hidden !important;
+  pointer-events: none;
   background:
-    linear-gradient(rgba(0, 16, 74, .14), rgba(0, 16, 74, .24)),
-    url('/static/images/fondo2.webp') center/cover no-repeat !important;
-  box-shadow:
-    var(--shadow),
-    0 0 0 1px rgba(0,242,109,.12),
-    0 0 34px rgba(0,59,255,.18) !important;
-  text-align: center !important;
-  animation: fadeIn 0.6s ease-in-out;
+    radial-gradient(circle at 52% 30%, rgba(0, 242, 109, .08), transparent 36%),
+    linear-gradient(180deg, rgba(0, 5, 18, .14), rgba(0, 5, 18, .38));
 }
-
-.team-container > * {
-  position: relative;
-  z-index: 2;
-}
-
-/* ===== PERSONAJES ===== */
-.team-container::before,
-.team-container::after {
-  content: "";
-  position: absolute !important;
-  width: 38% !important;
-  max-width: 320px !important;
-  aspect-ratio: 3/5 !important;
-  background-repeat: no-repeat !important;
-  background-size: contain !important;
-  pointer-events: none !important;
-  z-index: 1 !important;
-}
-
-.team-container::after {
-  right: -3% !important;
-  bottom: -70px !important;
-  width: 34% !important;
-  max-width: 260px !important;
-  background-image: url('/static/images/EdemFeliz.png') !important;
-}
-
-.team-container::before {
-  display: none !important;
-}
-
-/* ================== TÍTULO CON MARCO ================== */
-.team-container .title-wrapper {
-  position: relative !important;
-  z-index: 6 !important;
-  display: inline-block !important;
-  margin: 0 auto !important;
-  padding: 10px 28px 12px !important;
-  border-radius: 16px !important;
-  background: rgba(0, 16, 74, 0.68) !important;
-  border: 1.8px solid rgba(0, 242, 109, 0.78) !important;
-  backdrop-filter: blur(10px) saturate(150%) !important;
-  -webkit-backdrop-filter: blur(10px) saturate(150%) !important;
-  box-shadow:
-    0 0 18px rgba(0, 242, 109, .36),
-    0 0 45px rgba(0, 59, 255, .20) !important;
-}
-
-.team-container .title,
-.team-container .title h1,
-.team-container .title-wrapper h1 {
-  color: var(--udd-green) !important;
-  font-size: clamp(26px, 4vw, 58px) !important;
-  font-weight: 900 !important;
-  line-height: 1.05 !important;
-  text-align: center !important;
-  margin: 0 !important;
-  text-shadow:
-    0 0 12px rgba(0, 242, 109, 0.65),
-    0 0 30px rgba(0, 59, 255, 0.28) !important;
-}
-
-/* ================== PANEL UNIFICADO ================== */
-.team-container .mission-panel {
-  position: relative !important;
-  z-index: 7 !important;
-  width: min(56%, 480px) !important;
-  margin: 56px auto 0 auto !important;
-  padding: 17px 21px !important;
-  border-radius: 18px !important;
-  background: rgba(0, 16, 74, 0.66) !important;
-  border: 1.8px solid rgba(0, 242, 109, 0.72) !important;
-  backdrop-filter: blur(10px) saturate(150%) !important;
-  -webkit-backdrop-filter: blur(10px) saturate(150%) !important;
-  box-shadow:
-    0 0 18px rgba(0, 242, 109, .28),
-    0 0 45px rgba(0, 59, 255, .20) !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  gap: 12px !important;
-  text-align: left !important;
-}
-
-.team-container .mission-panel > p,
-.team-container .mission-panel .body {
-  color: #FFFFFF !important;
-  font-size: clamp(12px, 1.2vw, 16px) !important;
-  line-height: 1.45 !important;
-  font-weight: 500 !important;
-  width: 100% !important;
-  margin: 0 !important;
-  text-shadow: 0 2px 8px rgba(0,0,0,.45);
-}
-
-/* ================== TABLET REMINDER ================== */
-.team-container .tablet-reminder {
-  width: 100% !important;
-  padding: 8px 10px !important;
-  border-radius: 10px !important;
-  background: rgba(0, 242, 109, 0.13) !important;
-  border: 1.5px solid rgba(0, 242, 109, 0.65) !important;
-  color: #FFFFFF !important;
-  font-weight: 700 !important;
-  font-size: clamp(0.72em, 1.1vw, 0.88em) !important;
-  line-height: 1.35 !important;
-  box-shadow: 0 0 14px rgba(0, 242, 109, 0.20) !important;
-}
-
-/* ================== LÍNEA DIVISORA ================== */
-.team-container .panel-divider {
-  width: 100% !important;
-  height: 1px !important;
-  background: rgba(0, 242, 109, 0.24) !important;
-  margin: 2px 0 !important;
-}
-
-/* ================== BLOQUE BOTÓN DENTRO DEL PANEL ================== */
-.team-container .mission-panel .next-step {
-  width: 100% !important;
-  margin: 0 !important;
-  padding: 10px 0 0 0 !important;
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: center !important;
-  align-items: center !important;
-  gap: 8px !important;
-  text-align: center !important;
-}
-
-.team-container .mission-panel .next-step span,
-.team-container .mission-panel .next-step p,
-.team-container .mission-panel .next-step strong,
-.team-container .mission-panel .next-step .oai-estado-listo {
-  font-size: clamp(12px, 1.2vw, 15px) !important;
-  line-height: 1.25 !important;
-  text-align: center !important;
-  color: var(--muted) !important;
-}
-
-/* ================== BOTÓN ================== */
-.btn-chip {
-  background: linear-gradient(135deg, #00F26D, #00B955) !important;
-  color: #00104A !important;
-  border: 1px solid rgba(0,242,109,.9) !important;
-  padding: clamp(9px, 1.3vh, 11px) clamp(16px, 2.5vw, 22px) !important;
-  border-radius: 13px !important;
-  font-size: clamp(13px, 1.6vw, 18px) !important;
-  font-weight: 900 !important;
-  cursor: pointer !important;
-  box-shadow:
-    0 10px 20px rgba(0, 242, 109, .24),
-    0 0 18px rgba(0, 242, 109, .32) !important;
-  transition: transform .2s ease, box-shadow .2s ease, opacity .2s ease !important;
-  min-width: 160px !important;
-}
-
-.btn-chip:hover {
-  transform: translateY(-2px) !important;
-  box-shadow:
-    0 14px 26px rgba(0, 242, 109, .32),
-    0 0 24px rgba(0, 242, 109, .45) !important;
-}
-
-.btn-chip:disabled {
-  opacity: 0.9 !important;
-  cursor: default !important;
-  transform: none !important;
-}
-
-/* ================== ANIMACIÓN ================== */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* ================== RESPONSIVE ================== */
 
 @media (min-width: 1101px) {
   body {
-    padding: 20px 20px 20px 155px !important;
+    padding-left: 155px;
+  }
+}
+
+main.team-container-wrap {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.team-container {
+  position: relative;
+  width: min(980px, calc(100vw - 185px));
+  min-height: clamp(560px, 72vh, 720px);
+  border-radius: 30px;
+  overflow: hidden;
+  padding: clamp(34px, 4vw, 54px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+
+  background:
+    radial-gradient(circle at 50% 0%, rgba(0, 242, 109, .13), transparent 34%),
+    linear-gradient(180deg, rgba(3, 24, 52, .58), rgba(2, 11, 28, .46));
+
+  border: 1.5px solid var(--border-blue);
+  box-shadow:
+    var(--shadow-soft),
+    inset 0 0 0 1px rgba(255, 255, 255, .05),
+    0 0 26px rgba(0, 200, 255, .12);
+
+  backdrop-filter: blur(7px) saturate(124%);
+  -webkit-backdrop-filter: blur(7px) saturate(124%);
+  animation: fadeIn .55s ease both;
+}
+
+.team-container::before {
+  content: "";
+  position: absolute;
+  inset: 12px;
+  border-radius: 24px;
+  border: 1px solid rgba(0, 242, 109, .14);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.team-container::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    linear-gradient(90deg, transparent, rgba(0, 200, 255, .09), transparent),
+    linear-gradient(180deg, rgba(255,255,255,.035), transparent 18%, transparent 82%, rgba(0,242,109,.05));
+  opacity: .9;
+}
+
+.team-section {
+  position: relative;
+  z-index: 2;
+  width: min(100%, 840px);
+  min-height: clamp(470px, 58vh, 590px);
+  display: grid;
+  grid-template-rows: auto 1fr;
+  align-items: center;
+  justify-items: center;
+  gap: clamp(28px, 4vh, 44px);
+}
+
+.title-wrapper {
+  width: min(100%, 780px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.mission-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: rgba(0, 242, 109, .12);
+  border: 1px solid rgba(0, 242, 109, .42);
+  color: var(--udd-green);
+  font-size: clamp(12px, 1.1vw, 14px);
+  font-weight: 900;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  text-shadow: 0 0 10px rgba(0, 242, 109, .34);
+}
+
+.title-wrapper h1 {
+  color: var(--udd-green);
+  font-size: clamp(42px, 5.1vw, 72px);
+  font-weight: 900;
+  line-height: .98;
+  text-align: center;
+  letter-spacing: -0.035em;
+  text-shadow:
+    0 0 14px rgba(0, 242, 109, .52),
+    0 0 28px rgba(0, 200, 255, .24);
+}
+
+.mission-panel {
+  width: min(100%, 640px);
+  border-radius: 22px;
+  padding: clamp(22px, 2.6vw, 32px);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 14px;
+  text-align: left;
+
+  background:
+    radial-gradient(circle at top left, rgba(0, 242, 109, .10), transparent 36%),
+    rgba(3, 18, 42, .52);
+  border: 1.4px solid rgba(0, 200, 255, .36);
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, .22),
+    0 0 20px rgba(0, 200, 255, .10);
+
+  backdrop-filter: blur(6px) saturate(120%);
+  -webkit-backdrop-filter: blur(6px) saturate(120%);
+}
+
+.mission-panel p {
+  color: var(--muted);
+  font-size: clamp(16px, 1.45vw, 20px);
+  line-height: 1.48;
+  font-weight: 600;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, .35);
+}
+
+.mission-panel .mission-lead {
+  color: #FFFFFF;
+  font-size: clamp(19px, 1.75vw, 24px);
+  font-weight: 900;
+  line-height: 1.32;
+}
+
+.tablet-reminder {
+  width: 100%;
+  margin-top: 2px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  color: #FFFFFF;
+  font-size: clamp(13px, 1.15vw, 15px);
+  font-weight: 800;
+  line-height: 1.3;
+  background: rgba(0, 242, 109, .11);
+  border: 1px solid rgba(0, 242, 109, .42);
+  box-shadow: inset 0 0 18px rgba(0, 242, 109, .06);
+}
+
+.panel-divider {
+  width: 100%;
+  height: 1px;
+  margin: 4px 0 2px;
+  background: linear-gradient(90deg, transparent, rgba(0, 242, 109, .42), rgba(0, 200, 255, .32), transparent);
+}
+
+.next-step {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.next-step::before {
+  content: "PUNTO DE CONTROL";
+  color: rgba(230, 238, 248, .76);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  text-shadow: 0 0 8px rgba(0, 242, 109, .34);
+}
+
+.next-step button,
+.next-step .btn,
+.next-step .btn-chip,
+.next-step .oai-btn-chip,
+.btn-chip,
+.oai-btn-chip {
+  min-width: 170px;
+  max-width: 100%;
+  min-height: 48px;
+  padding: 12px 22px;
+  border-radius: 14px;
+  border: 1px solid rgba(0, 242, 109, .88) !important;
+  background: linear-gradient(135deg, #00F26D, #00C8FF) !important;
+  color: #00104A !important;
+  font-family: "Poppins", system-ui, sans-serif;
+  font-size: clamp(14px, 1.35vw, 17px);
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow:
+    0 12px 22px rgba(0, 242, 109, .22),
+    0 0 18px rgba(0, 200, 255, .20) !important;
+  transition: transform .2s ease, box-shadow .2s ease, opacity .2s ease;
+}
+
+.next-step button:hover,
+.next-step .btn:hover,
+.next-step .btn-chip:hover,
+.next-step .oai-btn-chip:hover,
+.btn-chip:hover,
+.oai-btn-chip:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 14px 28px rgba(0, 242, 109, .30),
+    0 0 26px rgba(0, 200, 255, .26) !important;
+}
+
+.next-step button:disabled,
+.next-step .btn:disabled,
+.next-step .btn-chip:disabled,
+.next-step .oai-btn-chip:disabled,
+.btn-chip:disabled,
+.oai-btn-chip:disabled {
+  opacity: .86;
+  cursor: default;
+  transform: none;
+}
+
+.next-step span,
+.next-step p,
+.next-step strong,
+.oai-estado-listo,
+.contador-fase,
+#contador-listos-fase,
+#texto-espera-fase {
+  color: rgba(230, 238, 248, .82);
+  font-size: clamp(13px, 1.15vw, 15px);
+  line-height: 1.3;
+  text-align: center;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(.99);
   }
 
-  .team-container {
-    width: min(900px, calc(100vw - 175px)) !important;
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 
 @media (max-width: 1100px) {
   body {
-    padding: 16px 16px 16px 110px !important;
+    padding: 16px 16px 16px 110px;
   }
 
   .team-container {
-    width: min(820px, calc(100vw - 126px)) !important;
-    padding: 24px 34px clamp(90px, 8vh, 150px) !important;
+    width: min(860px, calc(100vw - 128px));
+    min-height: clamp(560px, 74vh, 720px);
+    padding: 34px 28px;
   }
 
-  .team-container .title-wrapper h1,
-  .team-container .title h1 {
-    font-size: clamp(24px, 4.2vw, 50px) !important;
+  .title-wrapper h1 {
+    font-size: clamp(36px, 5.4vw, 60px);
   }
 
-  .team-container .mission-panel {
-    width: min(60%, 460px) !important;
-    margin-top: 50px !important;
+  .mission-panel {
+    width: min(100%, 620px);
   }
 }
 
 @media (max-width: 820px) {
   body {
-    padding: 16px 16px 16px 110px !important;
-    align-items: center !important;
+    padding: 14px 14px 14px 104px;
   }
 
   .team-container {
-    width: 100% !important;
-    padding: 22px 20px 220px !important;
-    border-radius: 24px !important;
+    width: calc(100vw - 120px);
+    min-height: 680px;
+    border-radius: 24px;
+    padding: 30px 22px;
   }
 
-  .team-container .title-wrapper {
-    padding: 8px 20px 10px !important;
+  .team-section {
+    min-height: 600px;
   }
 
-  .team-container .title-wrapper h1,
-  .team-container .title h1 {
-    font-size: 32px !important;
-  }
-
-  .team-container .mission-panel {
-    width: 58% !important;
-    margin-left: auto !important;
-    margin-right: 0 !important;
-    margin-top: 46px !important;
-    padding: 13px 15px !important;
-  }
-
-  .team-container::after {
-    width: 28% !important;
-    right: -5% !important;
-    bottom: 0 !important;
-  }
-
-  .team-container::before {
-    width: 25% !important;
-    right: 70% !important;
-    bottom: 0 !important;
+  .mission-panel {
+    width: min(100%, 560px);
   }
 }
 
-@media (max-width: 768px) {
-  body {
-    padding: 14px 14px 14px 104px !important;
-    align-items: center !important;
-  }
-
-  .team-container {
-    width: 100% !important;
-    padding: 20px 18px 200px !important;
-    border-radius: 22px !important;
-  }
-
-  .team-container .title-wrapper h1,
-  .team-container .title h1 {
-    font-size: 30px !important;
-  }
-
-  .team-container .mission-panel {
-    width: 60% !important;
-    margin-left: auto !important;
-    margin-right: 0 !important;
-    margin-top: 42px !important;
-    padding: 12px 14px !important;
-  }
-
-  .team-container::after {
-    width: 27% !important;
-    right: -5% !important;
-    bottom: 0 !important;
-  }
-
-  .team-container::before {
-    width: 24% !important;
-    right: 70% !important;
-    bottom: 0 !important;
-  }
-}
-
-/* ── Móvil ── */
 @media (max-width: 700px) {
   body {
-    padding: 12px 12px 90px 12px !important;
-    align-items: center !important;
+    align-items: flex-start;
+    padding: 14px 14px 94px;
   }
 
   .team-container {
-    width: calc(100vw - 24px) !important;
-    padding: 18px 16px clamp(150px, 18vh, 210px) !important;
-    border-radius: 20px !important;
-  }
-
-  .team-container .title-wrapper {
-    padding: 7px 16px 9px !important;
-    border-radius: 13px !important;
-  }
-
-  .team-container .title-wrapper h1,
-  .team-container .title h1 {
-    font-size: clamp(20px, 5.5vw, 30px) !important;
-    text-align: center !important;
-  }
-
-  .team-container .mission-panel {
-    width: min(88%, 420px) !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
-    margin-top: 28px !important;
-    padding: 12px 14px !important;
-  }
-
-  .team-container .mission-panel > p,
-  .team-container .mission-panel .body {
-    font-size: 12px !important;
-  }
-
-  .team-container::after {
-    display: none !important;
+    width: 100%;
+    min-height: 720px;
+    border-radius: 22px;
+    padding: 28px 16px 34px;
   }
 
   .team-container::before {
-    display: block !important;
-    width: 34% !important;
-    right: 66% !important;
-    bottom: 0 !important;
+    inset: 8px;
+    border-radius: 18px;
+  }
+
+  .team-section {
+    min-height: 650px;
+    gap: 24px;
+  }
+
+  .mission-badge {
+    font-size: 10px;
+    padding: 7px 12px;
+  }
+
+  .title-wrapper h1 {
+    font-size: clamp(34px, 10vw, 48px);
+  }
+
+  .mission-panel {
+    width: 100%;
+    padding: 20px 16px;
+    border-radius: 18px;
+  }
+
+  .mission-panel p {
+    font-size: 15px;
+  }
+
+  .mission-panel .mission-lead {
+    font-size: 18px;
+  }
+
+  .next-step button,
+  .next-step .btn,
+  .next-step .btn-chip,
+  .next-step .oai-btn-chip,
+  .btn-chip,
+  .oai-btn-chip {
+    width: min(100%, 280px);
+    min-width: 0;
   }
 }
 
 @media (max-width: 430px) {
   body {
-    padding: 10px 10px 90px 10px !important;
+    padding: 10px 10px 90px;
   }
 
   .team-container {
-    width: calc(100vw - 20px) !important;
-    padding: 16px 14px 160px !important;
-    border-radius: 20px !important;
+    min-height: 700px;
+    padding: 24px 12px 30px;
+    border-radius: 20px;
   }
 
-  .team-container .title-wrapper h1,
-  .team-container .title h1 {
-    font-size: 23px !important;
+  .team-section {
+    min-height: 640px;
   }
 
-  .team-container .mission-panel {
-    width: 92% !important;
-    margin-top: 26px !important;
-    padding: 11px 12px !important;
+  .title-wrapper h1 {
+    font-size: clamp(30px, 11vw, 42px);
   }
 
-  .team-container::before {
-    width: 36% !important;
+  .mission-panel {
+    padding: 17px 13px;
   }
 
-  .btn-chip {
-    min-width: 130px !important;
-    font-size: 14px !important;
-    padding: 9px 16px !important;
+  .mission-panel p {
+    font-size: 14px;
+  }
+
+  .mission-panel .mission-lead {
+    font-size: 16px;
+  }
+
+  .tablet-reminder {
+    font-size: 12px;
   }
 }
 
-@media (max-width: 390px) {
+@media (max-height: 640px) and (min-width: 701px) {
+  body {
+    align-items: flex-start;
+    overflow-y: auto;
+  }
+
   .team-container {
-    padding: 14px 12px 145px !important;
+    margin: 14px 0;
+    min-height: 560px;
   }
 
-  .team-container .title-wrapper h1,
-  .team-container .title h1 {
-    font-size: 20px !important;
+  .team-section {
+    min-height: 480px;
   }
 
-  .team-container .mission-panel {
-    width: 94% !important;
-    margin-top: 22px !important;
-    padding: 10px 11px !important;
+  .mission-panel {
+    padding: 18px 22px;
+    gap: 10px;
   }
 
-  .team-container::before {
-    width: 38% !important;
+  .mission-panel p {
+    font-size: 14px;
   }
 
-  .btn-chip {
-    min-width: 120px !important;
-    font-size: 13px !important;
-  }
-}
-
-/* Pantalla muy baja */
-@media (max-height: 600px) {
-  .team-container {
-    padding-bottom: 90px !important;
-  }
-
-  .team-container .title-wrapper h1,
-  .team-container .title h1 {
-    font-size: clamp(18px, 3.2vw, 32px) !important;
-  }
-
-  .team-container .mission-panel {
-    padding: 9px 12px !important;
-    margin-top: 22px !important;
-    gap: 8px !important;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation: none !important;
-    transition: none !important;
+  .mission-panel .mission-lead {
+    font-size: 17px;
   }
 }
 
 /* =====================================================
    EDEMY DIALOGO GRANDE + FONDO CAMUFLADO / BORROSO
-   Pegar al final del CSS
 ===================================================== */
 
-/* Cuando el diálogo está visible, oscurece y desenfoca el fondo */
 body:has(#dialogo-inicial-overlay.visible) .team-container-wrap,
 body:has(#dialogo-inicial-overlay.visible) .team-container {
-  filter: blur(7px) brightness(.35) saturate(.75) !important;
-  transform: scale(1.015) !important;
-  pointer-events: none !important;
-  user-select: none !important;
-  transition: filter .35s ease, transform .35s ease !important;
+  filter: blur(7px) brightness(.36) saturate(.76);
+  transform: scale(1.012);
+  pointer-events: none;
+  user-select: none;
+  transition: filter .35s ease, transform .35s ease;
 }
 
-/* Capa oscura encima del fondo cuando habla EdEmy */
-#dialogo-inicial-overlay.visible #dialogo-backdrop,
-#dialogo-backdrop {
+#dialogo-backdrop,
+#dialogo-inicial-overlay.visible #dialogo-backdrop {
   background:
-    radial-gradient(circle at center, rgba(0, 252, 152, .10), transparent 42%),
+    radial-gradient(circle at center, rgba(0, 252, 152, .11), transparent 42%),
     rgba(0, 5, 18, .78) !important;
-  backdrop-filter: blur(8px) brightness(.55) !important;
-  -webkit-backdrop-filter: blur(8px) brightness(.55) !important;
+  backdrop-filter: blur(8px) brightness(.56) !important;
+  -webkit-backdrop-filter: blur(8px) brightness(.56) !important;
 }
 
-/* Overlay completo del diálogo */
 #dialogo-inicial-overlay {
   position: fixed !important;
   inset: 0 !important;
@@ -547,22 +510,18 @@ body:has(#dialogo-inicial-overlay.visible) .team-container {
   padding: clamp(24px, 4vw, 72px) !important;
 }
 
-/* Caja general: EdEmy + diálogo */
 #dialogo-box {
   width: min(1320px, 92vw) !important;
   min-height: min(620px, 76vh) !important;
   margin-left: 0 !important;
-
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   gap: clamp(36px, 5vw, 90px) !important;
-
   position: relative !important;
   z-index: 3 !important;
 }
 
-/* EdEmy más grande */
 .dialogo-personaje {
   flex: 0 0 auto !important;
   display: flex !important;
@@ -584,28 +543,22 @@ body:has(#dialogo-inicial-overlay.visible) .team-container {
     drop-shadow(0 0 46px rgba(0, 200, 255, .22)) !important;
 }
 
-/* Burbuja más grande y legible */
 .dialogo-burbuja {
   flex: 1 !important;
   max-width: 820px !important;
   min-height: 290px !important;
-
   padding: clamp(30px, 3vw, 46px) !important;
   border-radius: 28px !important;
-
   background:
     radial-gradient(circle at top left, rgba(0, 252, 152, .12), transparent 34%),
     linear-gradient(160deg, rgba(0, 16, 74, .98), rgba(2, 8, 30, .98)) !important;
-
   border: 2.2px solid rgba(0, 252, 152, .82) !important;
-
   box-shadow:
     0 0 34px rgba(0, 252, 152, .25),
     0 0 90px rgba(0, 59, 255, .18),
-    0 24px 70px rgba(0,0,0,.70) !important;
+    0 24px 70px rgba(0, 0, 0, .70) !important;
 }
 
-/* Nombre EDEMY */
 .dialogo-hablante {
   font-size: clamp(16px, 1.35vw, 24px) !important;
   font-weight: 900 !important;
@@ -614,7 +567,6 @@ body:has(#dialogo-inicial-overlay.visible) .team-container {
   margin-bottom: 20px !important;
 }
 
-/* Texto principal grande */
 .dialogo-texto-rpg {
   font-size: clamp(25px, 2.25vw, 40px) !important;
   line-height: 1.42 !important;
@@ -625,7 +577,6 @@ body:has(#dialogo-inicial-overlay.visible) .team-container {
   margin-bottom: 30px !important;
 }
 
-/* Cursor más visible */
 .cursor-rpg {
   width: 4px !important;
   height: 1.15em !important;
@@ -633,20 +584,16 @@ body:has(#dialogo-inicial-overlay.visible) .team-container {
   box-shadow: 0 0 10px rgba(0, 252, 152, .9) !important;
 }
 
-/* Botón grande */
 .dialogo-siguiente {
   min-height: 62px !important;
   padding: 17px 28px !important;
   border-radius: 17px !important;
-
   font-size: clamp(17px, 1.5vw, 24px) !important;
   font-weight: 900 !important;
   letter-spacing: .05em !important;
-
   background: linear-gradient(135deg, rgba(0, 252, 152, .22), rgba(0, 59, 255, .26)) !important;
   border: 2px solid rgba(0, 252, 152, .78) !important;
   color: #FFFFFF !important;
-
   box-shadow:
     0 0 18px rgba(0, 252, 152, .25),
     inset 0 0 20px rgba(0, 200, 255, .10) !important;
@@ -660,7 +607,6 @@ body:has(#dialogo-inicial-overlay.visible) .team-container {
     inset 0 0 24px rgba(0, 200, 255, .14) !important;
 }
 
-/* Puntos de progreso más grandes */
 .dialogo-progreso {
   margin-top: 20px !important;
 }
@@ -685,7 +631,6 @@ body:has(#dialogo-inicial-overlay.visible) .team-container {
   background: rgba(0, 252, 152, .62) !important;
 }
 
-/* Responsive tablet */
 @media (max-width: 900px) {
   #dialogo-box {
     width: 94vw !important;
@@ -709,7 +654,6 @@ body:has(#dialogo-inicial-overlay.visible) .team-container {
   }
 }
 
-/* Responsive móvil */
 @media (max-width: 700px) {
   #dialogo-box {
     width: 94vw !important;
@@ -740,5 +684,12 @@ body:has(#dialogo-inicial-overlay.visible) .team-container {
   .dialogo-siguiente {
     min-height: 56px !important;
     font-size: 17px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
   }
 }
