@@ -10,37 +10,70 @@
   <link rel="stylesheet" href="{% static 'css/estilo_transicionempatia.css' %}" />
 </head>
 
-<body data-sesion-id="{{ grupo.sesion.idsesion }}">
-  <main class="team-container" role="region" aria-label="Introducción a empatía">
-    <section class="team-section">
+<body class="dialogo-edemy-activo" data-sesion-id="{{ grupo.sesion.idsesion }}">
+  <main class="team-container-wrap">
+    <div class="team-container" role="region" aria-label="Introducción a empatía">
+      <section class="team-section">
 
-      <!-- TÍTULO CON MARCO -->
-      <div class="title-wrapper">
-        <h1 class="title" data-i18n="empatia_intro_titulo">Empatía</h1>
-      </div>
-
-      <!-- PANEL UNIFICADO -->
-      <div class="mission-panel">
-        <p data-i18n="empatia_intro_texto">
-          Agentes, antes de crear una solución deben entender a quién están ayudando.
-          Completarán un Bubble Map sobre su persona objetivo.
-        </p>
-
-        <div class="tablet-reminder" data-i18n="empatia_intro_tablet">
-          📱 Protocolo: recuerden rotar la tablet.
+        <div class="title-wrapper">
+          <span class="mission-badge">Objetivo de misión</span>
+          <h1>Empatía</h1>
         </div>
 
-        <div class="panel-divider"></div>
+        <div class="mission-panel">
+          <p class="mission-lead">
+            Un emprendimiento no comienza con una idea.
+          </p>
 
-        <div class="next-step">
-          {% include "includes/boton_listo_fase.html" with fase_clave="f2_empatia" fase_actual_esperada="f2_transicion_empatia" campo_listos="gruposListosF2Empatia" campo_mi_grupo="listoF2Empatia" texto_boton="¡Estoy listo!" %}
+          <p>
+            Comienza con un problema que alguien vive y que aún no ha sido resuelto de la mejor forma.
+          </p>
+
+          <p>
+            Ahora deberán observar, escuchar y comprender a su persona objetivo antes de crear una solución.
+          </p>
+
+          <div class="tablet-reminder">
+            📱 Protocolo: roten la tablet antes de continuar.
+          </div>
+
+          <div class="panel-divider"></div>
+
+          <div class="next-step">
+            {% include "includes/boton_listo_fase.html" with fase_clave="f2_empatia" fase_actual_esperada="f2_transicion_empatia" campo_listos="gruposListosF2Empatia" campo_mi_grupo="listoF2Empatia" texto_boton="¡Estoy listo!" %}
+          </div>
         </div>
-      </div>
 
-    </section>
+      </section>
+    </div>
   </main>
 
   <div id="routes" data-sesion-id="{{ grupo.sesion.idsesion }}"></div>
+
+  <div id="dialogo-inicial-overlay" class="visible" aria-modal="true" role="dialog" aria-label="Mensaje de EdEmy">
+    <div id="dialogo-backdrop"></div>
+
+    <div id="dialogo-box">
+      <div class="dialogo-personaje activo" id="pj-edemy">
+        <img class="dialogo-img" src="{% static 'images/EdemSerio.png' %}" alt="EdEmy">
+      </div>
+
+      <div class="dialogo-burbuja visible" id="dialogo-burbuja">
+        <div class="dialogo-hablante" id="dialogo-hablante">EdEmy</div>
+
+        <p class="dialogo-texto-rpg" id="dialogo-texto"></p>
+
+        <button class="dialogo-siguiente" id="btn-dialogo-continuar" type="button" onclick="dialogoSiguiente()">
+          <span id="btn-rpg-label">Continuar</span>
+          <span class="dialogo-flecha">▶</span>
+        </button>
+
+        <div class="dialogo-progreso">
+          <div id="dialogo-dots"></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
@@ -51,10 +84,19 @@
 
       function traducirBotonListoFase() {
         const botones = document.querySelectorAll(".next-step button, .btn-chip, .oai-btn-chip");
+
         botones.forEach(btn => {
           if (!btn) return;
+
           const textoActual = (btn.textContent || "").trim().toLowerCase();
-          if (btn.disabled || textoActual.includes("esperando") || textoActual.includes("waiting") || textoActual.includes("listo") || textoActual.includes("ready")) {
+
+          if (
+            btn.disabled ||
+            textoActual.includes("esperando") ||
+            textoActual.includes("waiting") ||
+            textoActual.includes("listo") ||
+            textoActual.includes("ready")
+          ) {
             if (btn.disabled) {
               btn.textContent = tJuego("empatia_intro_boton_esperando", "Esperando...");
             } else {
@@ -66,15 +108,14 @@
 
       function traducirContadoresListos() {
         const textos = document.querySelectorAll(".contador-fase, #contador-listos-fase, #texto-espera-fase, .oai-estado-listo");
+
         textos.forEach(el => {
           if (!el) return;
+
           const texto = el.textContent || "";
           const match = texto.match(/(\d+)\/(\d+)/);
-          if (match) {
-            el.textContent = `${match[1]}/${match[2]} ${tJuego("empatia_intro_grupos_listos", "grupos listos")}`;
-          } else if (texto.toLowerCase().includes("esperando") || texto.toLowerCase().includes("waiting")) {
-            el.textContent = tJuego("empatia_intro_esperando", "Esperando a los demás equipos...");
-          }
+
+          
         });
       }
 
@@ -84,11 +125,140 @@
       }
 
       setTimeout(traducirEmpatiaIntroDinamico, 300);
+      setInterval(traducirEmpatiaIntroDinamico, 1600);
 
       window.addEventListener("idiomaJuegoCambiado", () => {
         traducirEmpatiaIntroDinamico();
       });
     });
+  </script>
+
+  <script>
+    (function () {
+      const GUION = [
+        {
+          texto: "Escuadrón, antes de diseñar una solución necesitan entender a la persona que vive el problema."
+        },
+        {
+          texto: "Empatizar significa observar, escuchar y preguntar sin adelantarse a responder. Busquen señales reales, no solo suposiciones."
+        },
+        {
+          texto: "Cuando cierre esta transmisión, lean la tarjeta de misión. Luego confirmen desde ahí para avanzar al Bubble Map junto a los demás equipos."
+        }
+      ];
+
+      let paso = 0;
+      let escribiendo = false;
+      let textoCompleto = "";
+      let timerEscritura = null;
+      let dotsCreados = false;
+      let teclaCounter = 0;
+
+      const overlayDialogo = document.getElementById("dialogo-inicial-overlay");
+      const textoEl = document.getElementById("dialogo-texto");
+      const btnDialogo = document.getElementById("btn-dialogo-continuar");
+      const btnLabel = document.getElementById("btn-rpg-label");
+      const dotsEl = document.getElementById("dialogo-dots");
+
+      function crearDots() {
+        if (!dotsEl || dotsCreados) return;
+        dotsEl.innerHTML = "";
+
+        GUION.forEach((_, i) => {
+          const d = document.createElement("div");
+          d.className = "d-dot";
+          d.id = "dot-" + i;
+          dotsEl.appendChild(d);
+        });
+
+        dotsCreados = true;
+      }
+
+      function actualizarDots() {
+        GUION.forEach((_, i) => {
+          const d = document.getElementById("dot-" + i);
+          if (!d) return;
+          d.className = "d-dot" + (i < paso ? " hecho" : i === paso ? " activo" : "");
+        });
+      }
+
+      function cambiarTextoBoton(texto) {
+        if (btnLabel) btnLabel.textContent = texto;
+      }
+
+      function escribirTexto(txt) {
+        if (!textoEl) return;
+
+        textoCompleto = txt;
+        escribiendo = true;
+        textoEl.innerHTML = "";
+        teclaCounter = 0;
+
+        const cursor = document.createElement("span");
+        cursor.className = "cursor-rpg";
+
+        let i = 0;
+        clearInterval(timerEscritura);
+
+        timerEscritura = setInterval(() => {
+          if (i < txt.length) {
+            textoEl.textContent = txt.slice(0, i + 1);
+            textoEl.appendChild(cursor);
+            teclaCounter++;
+
+            if (teclaCounter % 2 === 0 && txt[i] !== " " && typeof window.sonarTecla === "function") {
+              window.sonarTecla();
+            }
+
+            i++;
+          } else {
+            clearInterval(timerEscritura);
+            escribiendo = false;
+            textoEl.textContent = txt;
+          }
+        }, 24);
+      }
+
+      function mostrarPaso(n) {
+        paso = n;
+        actualizarDots();
+        cambiarTextoBoton(n === GUION.length - 1 ? "Ver tarjeta de misión" : "Continuar");
+        escribirTexto(GUION[n].texto);
+      }
+
+      function cerrarDialogo() {
+        clearInterval(timerEscritura);
+        escribiendo = false;
+
+        document.body.classList.remove("dialogo-edemy-activo");
+
+        if (!overlayDialogo) return;
+        overlayDialogo.classList.remove("visible");
+        overlayDialogo.classList.add("oculto");
+        overlayDialogo.setAttribute("aria-hidden", "true");
+      }
+
+      window.dialogoSiguiente = function () {
+        if (typeof window.sonarBoton === "function") window.sonarBoton();
+
+        if (escribiendo) {
+          clearInterval(timerEscritura);
+          escribiendo = false;
+          if (textoEl) textoEl.textContent = textoCompleto;
+          return;
+        }
+
+        if (paso < GUION.length - 1) {
+          mostrarPaso(paso + 1);
+          return;
+        }
+
+        cerrarDialogo();
+      };
+
+      crearDots();
+      mostrarPaso(0);
+    })();
   </script>
 
   {% include "includes/sincronizacion_fase.html" %}

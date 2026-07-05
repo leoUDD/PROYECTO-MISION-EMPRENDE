@@ -6,11 +6,30 @@ from django.conf.urls.static import static
 urlpatterns = [
     #NUEVO
     path(
-    "sesion/<int:sesion_id>/dev/timer-10/",
-    views.dev_timer_10_segundos,
-    name="dev_timer_10_segundos"
+        "sesion/<int:sesion_id>/dev/timer-10/",
+        views.dev_timer_10_segundos,
+        name="dev_timer_10_segundos"
+        ),
+        path(
+        "dashboardadmin/preguntas-rompehielo/",
+        views.admin_preguntas_rompehielo,
+        name="admin_preguntas_rompehielo"
     ),
-    path("continuar-desde-mapa/", views.continuar_desde_mapa, name="continuar_desde_mapa"),
+    path(
+        "dashboardadmin/preguntas-rompehielo/<int:idpregunta>/editar/",
+        views.admin_preguntas_rompehielo_editar,
+        name="admin_preguntas_rompehielo_editar"
+    ),
+    path(
+        "dashboardadmin/preguntas-rompehielo/<int:idpregunta>/toggle/",
+        views.admin_preguntas_rompehielo_toggle,
+        name="admin_preguntas_rompehielo_toggle"
+    ),
+    path(
+        "dashboardadmin/preguntas-rompehielo/<int:idpregunta>/eliminar/",
+        views.admin_preguntas_rompehielo_eliminar,
+        name="admin_preguntas_rompehielo_eliminar"
+    ),
     path("sesion/<int:sesion_id>/fase-anterior/", views.profesor_fase_anterior, name="profesor_fase_anterior"),
     path("dashboardadmin/tiempos/", views.admin_tiempos, name="admin_tiempos"),
     path("dashboardadmin/ruleta/", views.admin_ruleta, name="admin_ruleta"),
@@ -28,7 +47,6 @@ urlpatterns = [
     path("conocidos-modo/<str:modo>/", views.elegir_modo_conocidos, name="elegir_modo_conocidos"),
     path("conocidos-rapido/", views.conocidos_rapido, name="conocidos_rapido"),
     path("ruleta-lego-token/", views.aplicar_resultado_ruleta_lego, name="aplicar_resultado_ruleta_lego"),
-    path("habilidades-intro/", views.habilidades_intro, name="habilidades_intro"),
     path('dashboardadmin/tematicas/', views.admin_tematicas, name='admin_tematicas'),
     path('dashboardadmin/desafios/', views.admin_desafios, name='admin_desafios'),
     path("sopa/registrar-palabra/", views.registrar_palabra_sopa, name="registrar_palabra_sopa"),

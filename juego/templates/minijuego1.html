@@ -7,111 +7,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Misión Emprende UDD — Sopa de Letras</title>
   <link rel="stylesheet" href="{% static 'css/estilo_sopadeletras.css' %}">
-  <style>
-    .game-container { position: relative; }
-
-    .inicio-fase-overlay {
-      position: absolute; inset: 0;
-      display: flex; align-items: flex-start; justify-content: center;
-      padding: 26px 18px 18px;
-      z-index: 20; pointer-events: none;
-    }
-
-    .inicio-fase-card {
-      width: min(92%, 860px);
-      background: rgba(8, 24, 48, 0.88);
-      border: 1px solid rgba(0, 200, 255, 0.30);
-      box-shadow: 0 12px 30px rgba(0,0,0,.24);
-      border-radius: 22px; padding: 18px 22px;
-      color: #fff; backdrop-filter: blur(6px);
-      pointer-events: auto;
-    }
-
-    .inicio-fase-badge {
-      display: inline-block; margin-bottom: 12px; padding: 7px 14px;
-      border-radius: 999px; background: rgba(0, 200, 255, 0.12);
-      border: 1px solid rgba(0, 200, 255, 0.28);
-      font-weight: 700; font-size: 0.88rem; color: #dff7ff;
-    }
-
-    .inicio-fase-card h3 { margin: 0 0 10px 0; font-size: 1.15rem; font-weight: 800; }
-    .inicio-fase-card p  { margin: 0 0 10px 0; line-height: 1.5; font-size: 1rem; }
-
-    .btn-chip {
-      display: inline-flex; align-items: center; gap: 8px;
-      margin-top: 12px; padding: 10px 18px; border-radius: 999px;
-      border: 1px solid rgba(0, 200, 255, 0.4);
-      background: linear-gradient(135deg, rgba(0, 200, 255, 0.15), rgba(0, 120, 255, 0.25));
-      color: #E6F7FF; font-weight: 600; font-size: 0.95rem; cursor: pointer;
-      transition: all 0.25s ease; box-shadow: 0 0 10px rgba(0, 200, 255, 0.25);
-      backdrop-filter: blur(4px);
-    }
-    .btn-chip:hover { transform: translateY(-1px) scale(1.03); background: linear-gradient(135deg, rgba(0, 200, 255, 0.35), rgba(0, 120, 255, 0.45)); box-shadow: 0 0 18px rgba(0, 200, 255, 0.45); }
-    .btn-chip:active { transform: scale(0.97); }
-    .btn-chip:disabled { opacity: 0.65; cursor: not-allowed; box-shadow: none; }
-
-    .contador-fase { margin-top: 10px; font-size: 0.95rem; opacity: 0.95; }
-
-    .blur-target-bloqueado { filter: blur(6px); pointer-events: none; user-select: none; opacity: .70; transition: all .3s ease; }
-    .blur-target-activo    { filter: none; pointer-events: auto; user-select: auto; opacity: 1; transition: all .3s ease; }
-    .timer-esperando { opacity: .55; }
-    .overlay-hidden  { display: none; }
-
-    .modal { background: rgba(0,0,0,.72); backdrop-filter: blur(4px); }
-    .modal-content {
-      background: rgba(7, 21, 43, 0.96); color: #fff;
-      border: 1px solid rgba(0,200,255,.25); box-shadow: 0 12px 30px rgba(0,0,0,.35);
-    }
-    .modal-content h2, .modal-content p { color: #fff; text-shadow: none; }
-    .modal-content button {
-      display: inline-flex; align-items: center; justify-content: center;
-      margin-top: 12px; padding: 10px 18px; border-radius: 999px;
-      border: 1px solid rgba(0,200,255,.4);
-      background: linear-gradient(135deg, rgba(0,200,255,.15), rgba(0,120,255,.25));
-      color: #E6F7FF; font-weight: 600; font-size: 0.95rem; cursor: pointer;
-      transition: all 0.25s ease; box-shadow: 0 0 10px rgba(0,200,255,.25);
-    }
-    .modal-content button:hover { transform: translateY(-1px); background: linear-gradient(135deg, rgba(0,200,255,.35), rgba(0,120,255,.45)); }
-
-    /* Mejora visual celdas */
-    .cell.found {
-      background: linear-gradient(135deg, #22c55e, #86efac) !important;
-      color: #052e16 !important; font-weight: 900 !important;
-      border: 2px solid #bbf7d0 !important;
-      box-shadow: 0 0 10px rgba(34,197,94,.85), inset 0 0 0 2px rgba(255,255,255,.35) !important;
-      transform: scale(1.04); z-index: 3;
-    }
-    .cell.selected {
-      background: linear-gradient(135deg, #38bdf8, #0ea5e9) !important;
-      color: #fff !important; font-weight: 900 !important;
-      border: 2px solid #bae6fd !important;
-      box-shadow: 0 0 12px rgba(14,165,233,.85), inset 0 0 0 2px rgba(255,255,255,.28) !important;
-      transform: scale(1.03); z-index: 4;
-    }
-    #word-list li.found { text-decoration: line-through; color: #22c55e !important; font-weight: 900; opacity: 1 !important; }
-
-    /* Botón mute */
-    #btn-musica {
-      position: fixed; bottom: 20px; right: 20px; z-index: 500;
-      background: rgba(0,20,40,.85); border: 1.5px solid rgba(0,200,255,.6);
-      border-radius: 50%; width: 44px; height: 44px; font-size: 20px;
-      cursor: pointer; display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 0 14px rgba(0,200,255,.25); transition: border-color .2s, box-shadow .2s, transform .15s;
-    }
-    #btn-musica:hover { border-color: rgba(0,200,255,.9); box-shadow: 0 0 22px rgba(0,200,255,.45); transform: scale(1.08); }
-
-    @media (max-width: 900px) {
-      .inicio-fase-card { width: min(94%, 760px); padding: 16px 18px; }
-    }
-    @media (max-width: 640px) {
-      .inicio-fase-overlay { padding: 14px 12px 12px; }
-      .inicio-fase-card { width: 100%; border-radius: 18px; padding: 14px 14px 16px; }
-      .inicio-fase-card h3 { font-size: 1rem; }
-      .inicio-fase-card p  { font-size: 0.92rem; line-height: 1.4; }
-      .btn-chip { width: 100%; justify-content: center; }
-      .contador-fase { font-size: 0.9rem; }
-    }
-  </style>
 </head>
 
 <body
@@ -121,20 +16,7 @@
 >
   <main class="game-container">
 
-    <!-- Overlay inicio de fase -->
-    <div id="inicio-fase-overlay" class="inicio-fase-overlay">
-      <section id="inicio-fase-card" class="inicio-fase-card">
-        <div class="inicio-fase-badge" data-i18n="sopa_badge">MISIÓN DE RASTREO</div>
-        <h3 data-i18n="sopa_antes">Antes de comenzar</h3>
-        <p data-i18n="sopa_intro_1">El sistema ha ocultado conceptos clave del emprendimiento dentro de la sopa de letras.</p>
-        <p data-i18n="sopa_intro_2">Tendrán 1 minuto para encontrarlos. Cuando todos los escuadrones estén listos, el rastreo comenzará automáticamente.</p>
-        <button type="button" id="btn-listo-fase" class="btn-chip" data-i18n="sopa_boton_listo">⚡ Listo para comenzar</button>
-        <div id="texto-espera-fase" class="contador-fase" data-i18n="sopa_esperando">Esperando a los demás equipos...</div>
-        <div id="contador-listos-fase" class="contador-fase">0/0 grupos listos</div>
-      </section>
-    </div>
-
-    <h1 id="tituloSopa" class="blur-target-bloqueado" data-i18n="sopa_titulo">Sopa de Letras</h1>
+    <h1 id="tituloSopa" class="blur-target-bloqueado" data-i18n="sopa_titulo">Trabajo En Equipo</h1>
     <p id="subtituloSopa" class="blur-target-bloqueado" data-i18n="sopa_subtitulo">Encuentra las palabras ocultas relacionadas con el emprendimiento</p>
 
     <div id="timer-container" class="blur-target-bloqueado timer-esperando">
@@ -161,7 +43,7 @@
         <img src="{% static 'gifs/token_dorado_clean_grande.gif' %}" alt="Token de recompensa" class="token-animado">
         <h2 id="winTitle" data-i18n="sopa_win_titulo">¡Buen trabajo!</h2>
         <p id="winText" data-i18n="sopa_win_texto">Se han encontrado todas las palabras. ¡Impresionante!</p>
-        <p id="winEspera" style="margin-top:12px; font-weight:700; opacity:0.8; color:#AEEBFF;">
+        <p id="winEspera" class="win-espera">
           Esperando a los demás escuadrones...
         </p>
       </div>
@@ -195,6 +77,36 @@
       data-sopa-ganada="{{ sopa_ganada|yesno:'true,false' }}"
     ></div>
   </main>
+
+  <div id="dialogo-inicial-overlay" class="oculto" aria-modal="true" role="dialog" aria-label="Mensaje de EdEmy">
+    <div id="dialogo-backdrop"></div>
+
+    <div id="dialogo-box">
+      <div class="dialogo-personaje activo" id="pj-edemy">
+        <img class="dialogo-img" src="{% static 'images/EdemFeliz.png' %}" alt="EdEmy">
+      </div>
+
+      <div class="dialogo-burbuja" id="dialogo-burbuja">
+        <div class="dialogo-hablante" id="dialogo-hablante">EdEmy</div>
+
+        <p class="dialogo-texto-rpg" id="dialogo-texto"></p>
+
+        <button class="dialogo-siguiente" id="btn-dialogo-continuar" type="button" onclick="dialogoSiguiente()">
+          <span id="btn-rpg-label">Siguiente</span>
+          <span class="dialogo-flecha">▶</span>
+        </button>
+
+        <div class="dialogo-espera-wrap dialogo-info-oculta" id="dialogo-espera-wrap">
+          <div id="texto-espera-fase" class="contador-fase" data-i18n="sopa_esperando">Esperando a los demás equipos...</div>
+          <div id="contador-listos-fase" class="contador-fase">0/0 grupos listos</div>
+        </div>
+
+        <div class="dialogo-progreso">
+          <div id="dialogo-dots"></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script src="{% static 'js/sopadeletras.js' %}"></script>
 
@@ -232,30 +144,36 @@
     window.addEventListener("beforeunload", () => audio.pause());
   })();
 
-  /* ── Lógica de inicio de fase — idéntica al bubblemap ── */
+  /* ── Lógica de inicio de fase con diálogo de EdEmy ── */
   document.addEventListener("DOMContentLoaded", () => {
     function tJuego(clave, fallback = "") {
       const idioma = window.i18nJuego?.obtenerIdioma?.() || "es";
       return window.i18nJuego?.traducciones?.[idioma]?.[clave] || fallback;
     }
-    function textoGruposListos(listos, total) { return `${listos}/${total} ${tJuego("sopa_grupos_listos", "grupos listos")}`; }
-    function textoEsperando() { return tJuego("sopa_boton_esperando", "Esperando..."); }
-    function textoListo()     { return tJuego("sopa_boton_listo", "⚡ Listo para comenzar"); }
 
-    const sesionId   = "{{ grupo.sesion.idsesion }}";
-    const grupoId    = "{{ grupo.idgrupo }}";
-    const csrfToken  = "{{ csrf_token }}";
+    function textoGruposListos(listos, total) {
+      return `${listos}/${total} ${tJuego("sopa_grupos_listos", "grupos listos")}`;
+    }
 
-    const boton      = document.getElementById("btn-listo-fase");
-    const textoEspera= document.getElementById("texto-espera-fase");
-    const contador   = document.getElementById("contador-listos-fase");
-    const overlay    = document.getElementById("inicio-fase-overlay");
+    function textoEsperando() {
+      return tJuego("sopa_boton_esperando", "Esperando...");
+    }
 
-    // ── Variables idénticas al bubblemap ──
+    function textoListo() {
+      return tJuego("sopa_boton_listo", "⚡ Confirmar equipo listo");
+    }
+
+    const sesionId    = "{{ grupo.sesion.idsesion }}";
+    const grupoId     = "{{ grupo.idgrupo }}";
+    const csrfToken   = "{{ csrf_token }}";
+    const textoEspera = document.getElementById("texto-espera-fase");
+    const contador    = document.getElementById("contador-listos-fase");
+
     let countdownMostrado          = false;
     let countdownEnCurso           = false;
     let timerRealSolicitado        = false;
     let timerLiberadoTrasCountdown = false;
+    let yaListo                    = false;
 
     const blurTargets = [
       document.getElementById("tituloSopa"),
@@ -265,13 +183,193 @@
       document.getElementById("wordsBox"),
     ];
 
+    (function instalarDialogoEdemy() {
+      const GUION = [
+        { texto: "Escuadrón, atención." },
+        { texto: "El sistema ocultó conceptos clave del emprendimiento dentro de una sopa de letras." },
+        { texto: "Tendrán 1 minuto para encontrar las palabras antes de que termine el rastreo." },
+        { texto: "Trabajen rápido, comuníquense y revisen cada ruta con calma." },
+        { texto: "Cuando estén listos, presionen confirmar. La misión empezará cuando todos los escuadrones estén listos." },
+      ];
+
+      let paso = 0;
+      let escribiendo = false;
+      let textoCompleto = "";
+      let timerEscritura = null;
+      let teclaCounter = 0;
+      let dotsCreados = false;
+      let dialogoInicializado = false;
+
+      const overlayDialogo = document.getElementById("dialogo-inicial-overlay");
+      const burbuja        = document.getElementById("dialogo-burbuja");
+      const textoEl        = document.getElementById("dialogo-texto");
+      const btnDialogo     = document.getElementById("btn-dialogo-continuar");
+      const btnLabel       = document.getElementById("btn-rpg-label");
+      const dotsEl         = document.getElementById("dialogo-dots");
+      const esperaWrap     = document.getElementById("dialogo-espera-wrap");
+
+      function crearDots() {
+        if (!dotsEl || dotsCreados) return;
+
+        dotsEl.innerHTML = "";
+
+        GUION.forEach((_, i) => {
+          const d = document.createElement("div");
+          d.className = "d-dot";
+          d.id = "dot-" + i;
+          dotsEl.appendChild(d);
+        });
+
+        dotsCreados = true;
+      }
+
+      function actualizarDots() {
+        GUION.forEach((_, i) => {
+          const d = document.getElementById("dot-" + i);
+          if (!d) return;
+          d.className = "d-dot" + (i < paso ? " hecho" : i === paso ? " activo" : "");
+        });
+      }
+
+      function mostrarInfoEspera(mostrar) {
+        if (esperaWrap) {
+          esperaWrap.classList.toggle("dialogo-info-oculta", !mostrar);
+        }
+      }
+
+      function cambiarTextoBoton(texto) {
+        if (btnLabel) btnLabel.textContent = texto;
+      }
+
+      function escribirTexto(txt) {
+        if (!textoEl) return;
+
+        textoCompleto = txt;
+        escribiendo = true;
+        textoEl.innerHTML = "";
+        teclaCounter = 0;
+
+        const cursor = document.createElement("span");
+        cursor.className = "cursor-rpg";
+
+        let i = 0;
+        clearInterval(timerEscritura);
+
+        timerEscritura = setInterval(() => {
+          if (i < txt.length) {
+            textoEl.textContent = txt.slice(0, i + 1);
+            textoEl.appendChild(cursor);
+            teclaCounter++;
+
+            if (teclaCounter % 2 === 0 && txt[i] !== " " && typeof window.sonarTecla === "function") {
+              window.sonarTecla();
+            }
+
+            i++;
+          } else {
+            clearInterval(timerEscritura);
+            escribiendo = false;
+            textoEl.textContent = txt;
+          }
+        }, 28);
+      }
+
+      function mostrarPaso(n) {
+        paso = n;
+        mostrarInfoEspera(false);
+        actualizarDots();
+
+        if (btnDialogo) btnDialogo.disabled = false;
+
+        cambiarTextoBoton(n === GUION.length - 1 ? textoListo() : "Siguiente");
+        escribirTexto(GUION[n].texto);
+      }
+
+      window.dialogoSiguiente = async function () {
+        if (typeof window.sonarBoton === "function") window.sonarBoton();
+
+        if (escribiendo) {
+          clearInterval(timerEscritura);
+          escribiendo = false;
+          if (textoEl) textoEl.textContent = textoCompleto;
+          return;
+        }
+
+        if (paso < GUION.length - 1) {
+          mostrarPaso(paso + 1);
+          return;
+        }
+
+        if (typeof window.marcarListoFase === "function") {
+          await window.marcarListoFase();
+        }
+      };
+
+      window.mostrarDialogoInicial = function () {
+        if (!overlayDialogo || !burbuja) return;
+
+        crearDots();
+        document.body.classList.add("dialogo-edemy-activo");
+        overlayDialogo.classList.remove("oculto");
+        overlayDialogo.classList.add("visible");
+
+        setTimeout(() => {
+          burbuja.classList.add("visible");
+
+          if (!dialogoInicializado) {
+            dialogoInicializado = true;
+            mostrarPaso(0);
+          }
+        }, 120);
+      };
+
+      window.ocultarDialogoInicial = function () {
+        if (!overlayDialogo) return;
+
+        document.body.classList.remove("dialogo-edemy-activo");
+        overlayDialogo.classList.remove("visible");
+        overlayDialogo.classList.add("oculto");
+      };
+
+      window.marcarDialogoComoEsperando = function () {
+        if (!overlayDialogo || !textoEl || !btnDialogo) return;
+
+        window.mostrarDialogoInicial?.();
+        clearInterval(timerEscritura);
+        escribiendo = false;
+        paso = GUION.length - 1;
+        actualizarDots();
+
+        textoEl.textContent = "Confirmación registrada. Esperen mientras los demás escuadrones terminan de confirmar.";
+        btnDialogo.disabled = true;
+        cambiarTextoBoton(textoEsperando());
+        mostrarInfoEspera(true);
+      };
+
+      window.habilitarDialogoListoDeNuevo = function () {
+        if (!btnDialogo) return;
+
+        btnDialogo.disabled = false;
+        cambiarTextoBoton(textoListo());
+        mostrarInfoEspera(false);
+      };
+
+      window.actualizarContadorDialogo = function (texto) {
+        if (contador) {
+          contador.textContent = texto;
+          contador.classList.remove("dialogo-info-oculta");
+        }
+      };
+    })();
+
     function activarFase() {
       blurTargets.forEach(el => {
         if (!el) return;
-        el.classList.remove("blur-target-bloqueado","timer-esperando");
+        el.classList.remove("blur-target-bloqueado", "timer-esperando");
         el.classList.add("blur-target-activo");
       });
-      if (overlay) overlay.classList.add("overlay-hidden");
+
+      window.ocultarDialogoInicial?.();
     }
 
     function bloquearFase() {
@@ -280,21 +378,32 @@
         el.classList.remove("blur-target-activo");
         el.classList.add("blur-target-bloqueado");
       });
+
       const tc = document.getElementById("timer-container");
       if (tc) tc.classList.add("timer-esperando");
-      if (overlay) overlay.classList.remove("overlay-hidden");
+
+      if (!yaListo) {
+        window.mostrarDialogoInicial?.();
+      } else {
+        window.marcarDialogoComoEsperando?.();
+      }
     }
 
-    // ── Idéntico al bubblemap ──
     async function iniciarTimerRealDespuesCountdown() {
       if (timerRealSolicitado) return;
       timerRealSolicitado = true;
+
       try {
         const res = await fetch(`/sesion/${sesionId}/iniciar-timer-inicio-fase/`, {
-          method: "POST", credentials: "same-origin",
-          headers: { "Content-Type": "application/json", "X-CSRFToken": csrfToken },
+          method: "POST",
+          credentials: "same-origin",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrfToken,
+          },
           body: JSON.stringify({})
         });
+
         const data = await res.json();
         if (!res.ok || !data.ok) throw new Error(data.error || "No se pudo iniciar el timer.");
       } catch (err) {
@@ -303,21 +412,66 @@
       }
     }
 
+    window.marcarListoFase = async function () {
+      if (yaListo) return;
+
+      const btnDialogo = document.getElementById("btn-dialogo-continuar");
+      const btnLabel = document.getElementById("btn-rpg-label");
+
+      if (btnDialogo) btnDialogo.disabled = true;
+      if (btnLabel) btnLabel.textContent = textoEsperando();
+
+      try {
+        const res = await fetch(`/grupo/${grupoId}/listo/`, {
+          method: "POST",
+          credentials: "same-origin",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrfToken,
+          },
+          body: JSON.stringify({})
+        });
+
+        const data = await res.json();
+        if (!res.ok || !data.ok) throw new Error(data.error || "No se pudo marcar listo.");
+
+        yaListo = true;
+
+        const textoContador = textoGruposListos(data.listos || 0, data.total || 0);
+        if (contador) contador.textContent = textoContador;
+        if (textoEspera) textoEspera.textContent = tJuego("sopa_esperando", "Esperando a los demás equipos...");
+
+        window.marcarDialogoComoEsperando?.();
+        consultarEstado();
+      } catch (err) {
+        console.error("Error marcando listo:", err);
+        yaListo = false;
+        window.habilitarDialogoListoDeNuevo?.();
+
+        if (textoEspera) {
+          textoEspera.textContent = tJuego("sopa_error_listo", "No se pudo registrar. Intenta nuevamente.");
+        }
+      }
+    };
+
     async function consultarEstado() {
       try {
-        const res = await fetch(`/sesion/${sesionId}/estado/`, { credentials: "same-origin", cache: "no-store" });
+        const res = await fetch(`/sesion/${sesionId}/estado/`, {
+          credentials: "same-origin",
+          cache: "no-store"
+        });
+
         if (!res.ok) return;
         const data = await res.json();
 
-        if (contador) {
-          contador.textContent = textoGruposListos(data.listosInicio || 0, data.totalListosInicio || 0);
-        }
+        const textoContador = textoGruposListos(data.listosInicio || 0, data.totalListosInicio || 0);
+        if (contador) contador.textContent = textoContador;
+        window.actualizarContadorDialogo?.(textoContador);
 
         const miGrupo = (data.grupos || []).find(g => Number(g.id) === Number(grupoId));
         if (miGrupo && miGrupo.listoF1) {
-          boton.disabled = true;
-          boton.textContent = textoEsperando();
-          if (textoEspera) textoEspera.textContent = tJuego("sopa_esperando", "Esperando a los demás equipos...");
+          yaListo = true;
+          window.marcarDialogoComoEsperando?.();
         }
 
         if (data.faseActual && data.faseActual !== "f1_sopa" && data.rutaAlumno) {
@@ -328,7 +482,6 @@
         }
 
         if (data.inicioFaseHabilitado) {
-          // Activar si el countdown ya terminó
           if (countdownMostrado && !countdownEnCurso) activarFase();
         } else {
           countdownMostrado = false;
@@ -338,51 +491,32 @@
           bloquearFase();
         }
 
-        // ── Flujo countdown idéntico al bubblemap ──
         if (data.inicioFaseHabilitado && !countdownMostrado && !countdownEnCurso) {
           countdownEnCurso = true;
+
           window.oaiCountdown.run(async () => {
             countdownMostrado = true;
             countdownEnCurso = false;
             timerLiberadoTrasCountdown = true;
+
             await iniciarTimerRealDespuesCountdown();
             activarFase();
           });
         }
-
       } catch (err) {
         console.error("Error consultando estado:", err);
       }
     }
 
-    if (boton) {
-      boton.addEventListener("click", async () => {
-        boton.disabled = true;
-        boton.textContent = textoEsperando();
-        try {
-          const res = await fetch(`/grupo/${grupoId}/listo/`, {
-            method: "POST", credentials: "same-origin",
-            headers: { "Content-Type": "application/json", "X-CSRFToken": csrfToken },
-            body: JSON.stringify({})
-          });
-          const data = await res.json();
-          if (!res.ok || !data.ok) throw new Error(data.error || "No se pudo marcar listo.");
-          if (contador) contador.textContent = textoGruposListos(data.listos || 0, data.total || 0);
-          if (textoEspera) textoEspera.textContent = tJuego("sopa_esperando", "Esperando a los demás equipos...");
-          consultarEstado();
-        } catch (err) {
-          console.error("Error marcando listo:", err);
-          boton.disabled = false;
-          boton.textContent = textoListo();
-          if (textoEspera) textoEspera.textContent = tJuego("sopa_error_listo", "No se pudo registrar. Intenta nuevamente.");
-        }
-      });
-    }
-
     window.addEventListener("idiomaJuegoCambiado", () => {
-      if (contador) { const p = contador.textContent.match(/(\d+)\/(\d+)/); if (p) contador.textContent = textoGruposListos(p[1], p[2]); }
-      if (boton) boton.textContent = boton.disabled ? textoEsperando() : textoListo();
-      if (textoEspera) textoEspera.textContent = tJuego("sopa_esperando", "Esperando a los demás equipos...");
+      if (contador) {
+        const p = contador.textContent.match(/(\d+)\/(\d+)/);
+        if (p) contador.textContent = textoGruposListos(p[1], p[2]);
+      }
+
+      if (textoEspera) {
+        textoEspera.textContent = tJuego("sopa_esperando", "Esperando a los demás equipos...");
+      }
     });
 
     bloquearFase();

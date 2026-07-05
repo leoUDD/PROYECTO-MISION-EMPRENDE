@@ -5,38 +5,48 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title data-i18n="modo_juego_document_title">Misión Emprende UDD — Modo de juego</title>
+  <title>Misión Emprende UDD — Formación de equipos</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&family=Orbitron:wght@700;900&family=Exo+2:wght@700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/estilo_promptconocidos.css' %}" />
 </head>
 
 <body>
-  <main class="mode-container" role="region" aria-label="Elegir modo de juego">
+  <main class="mode-container" role="region" aria-label="Elegir modo de equipo">
     <header class="mode-header">
-      <h1 class="mode-title" data-i18n="modo_juego_titulo">Reclutas, seleccionen un modo de juego:</h1>
-      <p class="mode-subtitle" data-i18n="modo_juego_subtitulo">
-        ¿Ya se conocen o es su primera misión juntos?
+      <div class="mode-kicker">DESAFÍO 1 — FORMACIÓN DE EQUIPOS</div>
+
+      <h1 class="mode-title">
+        Elijan cómo comenzará su escuadrón
+      </h1>
+
+      <p class="mode-subtitle">
+        Pueden optar por <strong>la seguridad de lo conocido</strong>… o por
+        <strong>el desafío de lo nuevo</strong>.
+        Trabajar con quienes ya conocen puede facilitar el proceso, pero trabajar con desconocidos
+        puede expandir sus límites. No hay elección correcta. Solo resultados distintos.
       </p>
     </header>
 
     <section class="mode-grid">
-      <a href="{% url 'elegir_modo_conocidos' 'normal' %}" class="mode-card mode-intro">
+      <a href="{% url 'elegir_modo_conocidos' 'normal' %}" class="mode-card mode-intro" aria-label="Elegir equipo con personas que no se conocen">
         <div class="overlay"></div>
         <div class="mode-content">
-          <h2 class="mode-name" data-i18n="modo_juego_primera_vez">Primera vez juntos</h2>
-          <p class="mode-desc" data-i18n="modo_juego_primera_vez_desc">
-            Rompe el hielo, preséntense y activen la energía del escuadrón.
+          <h2 class="mode-name">Personas que no se conocen</h2>
+          <p class="mode-desc">
+            Rompan el hielo, preséntense y descubran qué puede aportar cada integrante a la misión.
           </p>
+          <span class="mode-cta">Aceptar desafío</span>
         </div>
       </a>
 
-      <a href="{% url 'elegir_modo_conocidos' 'rapido' %}" class="mode-card mode-known">
+      <a href="{% url 'elegir_modo_conocidos' 'rapido' %}" class="mode-card mode-known" aria-label="Elegir equipo con personas conocidas">
         <div class="overlay"></div>
         <div class="mode-content">
-          <h2 class="mode-name" data-i18n="modo_juego_viejos_conocidos">Viejos conocidos</h2>
-          <p class="mode-desc" data-i18n="modo_juego_viejos_conocidos_desc">
-            Este modo está pensado para escuadrones con experiencia previa.
+          <h2 class="mode-name">Personas conocidas</h2>
+          <p class="mode-desc">
+            Usen la confianza previa para organizarse con rapidez y avanzar como un equipo sincronizado.
           </p>
+          <span class="mode-cta">Usar ventaja</span>
         </div>
       </a>
     </section>
@@ -65,6 +75,7 @@
   intentarReproducir();
 
   let audioCtx = null;
+
   function getAudioCtx() {
     if (!audioCtx || audioCtx.state === 'closed') {
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -78,13 +89,17 @@
       const now = ctx.currentTime;
       const osc  = ctx.createOscillator();
       const gain = ctx.createGain();
+
       osc.connect(gain);
       gain.connect(ctx.destination);
+
       osc.type = 'sine';
       osc.frequency.setValueAtTime(320, now);
       osc.frequency.linearRampToValueAtTime(520, now + 0.1);
+
       gain.gain.setValueAtTime(0.08, now);
       gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+
       osc.start(now);
       osc.stop(now + 0.2);
     } catch(e) {}

@@ -10,35 +10,69 @@
   <link rel="stylesheet" href="{% static 'css/estilo_transicioncomunicacion.css' %}" />
 </head>
 
-<body data-sesion-id="{{ grupo.sesion.idsesion }}">
-  <main class="team-container" role="region" aria-label="Introducción a comunicación">
-    <section class="team-section">
+<body data-sesion-id="{{ grupo.sesion.idsesion }}" class="dialogo-activo">
 
-      <!-- TÍTULO CON MARCO -->
-      <div class="title-wrapper">
-        <h1 class="title" data-i18n="comunicacion_intro_titulo">Comunicación</h1>
-      </div>
+  <main class="team-container-wrap">
+    <div class="team-container" role="region" aria-label="Introducción a comunicación">
+      <section class="team-section">
 
-      <!-- PANEL UNIFICADO -->
-      <div class="mission-panel">
-        <p data-i18n="comunicacion_intro_texto">
-          Agentes, una gran solución también debe saber contarse.
-          En esta fase prepararán un pitch claro, potente y convincente para presentar su propuesta.
-        </p>
-
-        <div class="tablet-reminder" data-i18n="comunicacion_intro_tablet">
-          &#128241; Protocolo: recuerden rotar la tablet.
+        <div class="title-wrapper">
+          <span class="mission-badge">FASE 4 · PITCH</span>
+          <h1 class="title">Comunicación</h1>
         </div>
 
-        <div class="panel-divider"></div>
+        <div class="mission-panel" aria-label="Tarjeta de misión comunicación">
+          <p class="mission-lead">
+            Ya tienen una solución. Ahora necesitan explicarla con claridad.
+          </p>
 
-        <div class="next-step">
-          {% include "includes/boton_listo_fase.html" with fase_clave="f4" fase_actual_esperada="f4_transicion_comunicacion" campo_listos="gruposListosF4" campo_mi_grupo="listoF4" texto_boton="¡Estoy listo!" %}
+          <p>
+            Una buena idea pierde fuerza si el equipo no logra comunicar qué problema resuelve, a quién ayuda y por qué tiene valor.
+          </p>
+
+          <p>
+            En esta fase prepararán un pitch breve, claro y convincente para presentar su propuesta.
+          </p>
+
+          <div class="tablet-reminder">
+            📱 Protocolo: recuerden rotar la tablet antes de continuar.
+          </div>
+
+          <div class="panel-divider"></div>
+
+          <div class="next-step">
+            {% include "includes/boton_listo_fase.html" with fase_clave="f4" fase_actual_esperada="f4_transicion_comunicacion" campo_listos="gruposListosF4" campo_mi_grupo="listoF4" texto_boton="¡Estoy listo!" %}
+          </div>
         </div>
-      </div>
 
-    </section>
+      </section>
+    </div>
   </main>
+
+  <div id="dialogo-inicial-overlay" class="visible" role="dialog" aria-modal="true" aria-labelledby="dialogo-hablante">
+    <div id="dialogo-backdrop"></div>
+
+    <div id="dialogo-box">
+      <div class="dialogo-personaje activo" aria-hidden="true">
+        <img class="dialogo-img" src="{% static 'images/EdemFeliz.png' %}" alt="">
+      </div>
+
+      <section class="dialogo-burbuja">
+        <div id="dialogo-hablante" class="dialogo-hablante">EDEMY</div>
+        <div class="dialogo-texto-rpg">
+          <span id="dialogo-texto"></span><span class="cursor-rpg"></span>
+        </div>
+
+        <button type="button" id="dialogo-siguiente" class="dialogo-siguiente">
+          Continuar
+        </button>
+
+        <div class="dialogo-progreso" aria-hidden="true">
+          <div id="dialogo-dots"></div>
+        </div>
+      </section>
+    </div>
+  </div>
 
   <div id="routes" data-sesion-id="{{ grupo.sesion.idsesion }}"></div>
 
@@ -51,10 +85,19 @@
 
       function traducirBotonListoFase() {
         const botones = document.querySelectorAll(".next-step button, .btn-chip, .oai-btn-chip");
+
         botones.forEach(btn => {
           if (!btn) return;
+
           const textoActual = (btn.textContent || "").trim().toLowerCase();
-          if (btn.disabled || textoActual.includes("esperando") || textoActual.includes("waiting") || textoActual.includes("listo") || textoActual.includes("ready")) {
+
+          if (
+            btn.disabled ||
+            textoActual.includes("esperando") ||
+            textoActual.includes("waiting") ||
+            textoActual.includes("listo") ||
+            textoActual.includes("ready")
+          ) {
             if (btn.disabled) {
               btn.textContent = tJuego("comunicacion_intro_boton_esperando", "Esperando...");
             } else {
@@ -66,10 +109,13 @@
 
       function traducirContadoresListos() {
         const textos = document.querySelectorAll(".contador-fase, #contador-listos-fase, #texto-espera-fase, .oai-estado-listo");
+
         textos.forEach(el => {
           if (!el) return;
+
           const texto = el.textContent || "";
           const match = texto.match(/(\d+)\/(\d+)/);
+
           if (match) {
             el.textContent = `${match[1]}/${match[2]} ${tJuego("comunicacion_intro_grupos_listos", "grupos listos")}`;
           } else if (texto.toLowerCase().includes("esperando") || texto.toLowerCase().includes("waiting")) {
@@ -84,7 +130,86 @@
       }
 
       setTimeout(traducirComunicacionIntroDinamico, 300);
-      window.addEventListener("idiomaJuegoCambiado", () => traducirComunicacionIntroDinamico());
+      setInterval(traducirComunicacionIntroDinamico, 1600);
+
+      window.addEventListener("idiomaJuegoCambiado", () => {
+        traducirComunicacionIntroDinamico();
+      });
+    });
+  </script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const overlay = document.getElementById("dialogo-inicial-overlay");
+      const textoEl = document.getElementById("dialogo-texto");
+      const btn = document.getElementById("dialogo-siguiente");
+      const dots = document.getElementById("dialogo-dots");
+
+      if (!overlay || !textoEl || !btn || !dots) return;
+
+      const mensajes = [
+        "Ya tienen una solución.\nAhora necesitan que otros la entiendan.",
+        "Una buena idea pierde fuerza si no logran explicar\nqué problema resuelve y a quién ayuda.",
+        "En esta fase prepararán un pitch breve,\nclaro y convincente para presentar su propuesta.",
+        "Cuando termine el diálogo, lean la tarjeta de misión.\nLuego confirmen cuando su equipo esté listo."
+      ];
+
+      let indice = 0;
+      let escribiendo = false;
+      let timer = null;
+
+      function renderDots() {
+        dots.innerHTML = mensajes.map((_, i) => {
+          const clase = i === indice ? "activo" : (i < indice ? "hecho" : "");
+          return `<span class="d-dot ${clase}"></span>`;
+        }).join("");
+      }
+
+      function escribir(texto) {
+        clearInterval(timer);
+        escribiendo = true;
+        textoEl.textContent = "";
+        let i = 0;
+
+        timer = setInterval(() => {
+          textoEl.textContent += texto.charAt(i);
+          i += 1;
+
+          if (i >= texto.length) {
+            clearInterval(timer);
+            escribiendo = false;
+            btn.textContent = indice === mensajes.length - 1 ? "Ver tarjeta de misión" : "Continuar";
+          }
+        }, 18);
+      }
+
+      function mostrarMensaje() {
+        renderDots();
+        btn.textContent = "Continuar";
+        escribir(mensajes[indice]);
+      }
+
+      btn.addEventListener("click", () => {
+        if (escribiendo) {
+          clearInterval(timer);
+          textoEl.textContent = mensajes[indice];
+          escribiendo = false;
+          btn.textContent = indice === mensajes.length - 1 ? "Ver tarjeta de misión" : "Continuar";
+          return;
+        }
+
+        if (indice < mensajes.length - 1) {
+          indice += 1;
+          mostrarMensaje();
+          return;
+        }
+
+        overlay.classList.remove("visible");
+        overlay.setAttribute("aria-hidden", "true");
+        document.body.classList.remove("dialogo-activo");
+      });
+
+      mostrarMensaje();
     });
   </script>
 

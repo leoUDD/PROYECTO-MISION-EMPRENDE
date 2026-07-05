@@ -1,6 +1,8 @@
 #NUEVO
 from django.shortcuts import render, redirect
-
+from django.core.files.storage import default_storage
+from django.conf import settings
+from .image_utils import convertir_imagen_a_webp
 from django.utils.text import slugify
 from .models import TiempoFase
 from django.core.files.storage import FileSystemStorage
@@ -25,10 +27,12 @@ from django.shortcuts import get_object_or_404, redirect, render
 #NUEVO CIERRRE
 from django.shortcuts import redirect, render
 from django.contrib import messages
+from .models import PreguntaRompehielo
 from django.views.decorators.http import require_http_methods
 from .models import Tematica, Desafio
 import openpyxl
-import pandas as pd
+import csv
+import io
 from .models import Alumno, Profesor, Usuario, Grupo, Desafio, Idadministrador, Sesion, Reto, Retogrupo, Evaluacion, PalabraSopaEncontrada
 from django.db import transaction
 from django.core.validators import validate_email
@@ -44,39 +48,35 @@ from django.db.models import F
 
 
 FASES_ORDEN = [
-    "intro_habilidades",
     "f1_bienvenida",
     "f1_conocidos",
     "f1_pre_sopa",
     "f1_sopa",
     "f1_ranking",
 
-    "mapa_f2_empatia",
     "f2_transicion",
     "f2_tematicas",
     "f2_transicion_empatia",
     "f2_bubblemap",
     "f2_ranking",
 
-    "mapa_f3_creatividad",
     "f3_transicion_creatividad",
     "f3_lego",
     "f3_ranking",
 
-    "mapa_f4_final",
     "f4_transicion_comunicacion",
     "f4_construccion_pitch",
     "f4_orden_pitch",
     "f4_presentacion_pitch",
-    "f5_evaluacion_pitch",
 
+    "f5_evaluacion_pitch",
     "f6_ranking",
     "reflexion",
 ]
 
 RUTA_POR_FASE = {
     "lobby": "pantalla_espera",
-    "intro_habilidades": "habilidades_intro",
+
     "f1_bienvenida": "pantalla_inicio",
     "f1_conocidos": "promptconocidos",
     "f1_pre_sopa": "trabajoenequipo",
@@ -88,9 +88,6 @@ RUTA_POR_FASE = {
     "f2_transicion_empatia": "transicionempatia",
     "f2_bubblemap": "bubblemap",
     "f2_ranking": "ranking",
-    "mapa_f2_empatia": "habilidades_intro",
-    "mapa_f3_creatividad": "habilidades_intro",
-    "mapa_f4_final": "habilidades_intro",
 
     "f3_transicion_creatividad": "transicioncreatividad",
     "f3_lego": "lego",
@@ -103,17 +100,12 @@ RUTA_POR_FASE = {
 
     "f5_transicion_apoyo": "transicionapoyo",
     "f5_evaluacion_pitch": "peer_review",
-
     "f6_ranking": "ranking",
     "reflexion": "reflexion",
 }
 
 ETIQUETA_FASE = {
 
-    "intro_habilidades": "Mapa · Trabajo en equipo",
-    "mapa_f2_empatia": "Mapa · Empatía",
-    "mapa_f3_creatividad": "Mapa · Creatividad",
-    "mapa_f4_final": "Mapa · Misión final",
     "f1_bienvenida": "F1 · Bienvenida",
     "f1_conocidos": "F1 · Conocerse",
     "f1_pre_sopa": "F1 · Trabajo en equipo",
@@ -605,7 +597,7 @@ def autoavanzar_si_todos_listos(sesion):
 
     elif fase_actual == "f1_ranking":
         if grupos.filter(listo_f6=True).count() == total:
-            nueva_fase = "mapa_f2_empatia"
+            nueva_fase = "f2_transicion"
 
     elif fase_actual == "f2_transicion":
         if grupos.filter(listo_f2=True).count() == total:
@@ -621,7 +613,7 @@ def autoavanzar_si_todos_listos(sesion):
 
     elif fase_actual == "f2_ranking":
         if grupos.filter(listo_f6=True).count() == total:
-            nueva_fase = "mapa_f3_creatividad"
+            nueva_fase = "f3_transicion_creatividad"
 
     elif fase_actual == "f3_transicion_creatividad":
         if grupos.filter(listo_f3=True).count() == total:
@@ -633,7 +625,7 @@ def autoavanzar_si_todos_listos(sesion):
 
     elif fase_actual == "f3_ranking":
         if grupos.filter(listo_f6=True).count() == total:
-            nueva_fase = "mapa_f4_final"
+            nueva_fase = "f4_transicion_comunicacion"
 
     elif fase_actual == "f4_transicion_comunicacion":
         if grupos.filter(listo_f4=True).count() == total:
@@ -684,6 +676,7 @@ def autoavanzar_si_todos_listos(sesion):
     elif fase_actual == "f6_ranking":
         if grupos.filter(listo_f6=True).count() == total:
             nueva_fase = "reflexion"
+            borrar_fotos_lego_sesion(sesion)
 
     if not nueva_fase:
         return False
@@ -2104,7 +2097,8 @@ def marcar_grupo_listo(request, grupo_id):
 
         if todos:
             nueva_fase = siguiente_fase_automatica(fase_actual)
-
+            if nueva_fase == "reflexion":
+                borrar_fotos_lego_sesion(sesion)
             sesion.fase_actual = nueva_fase
             sesion.segundos_restantes = tiempo_por_fase(sesion, nueva_fase)
             sesion.timer_corriendo = False
@@ -2513,6 +2507,99 @@ def minijuego1(request):
         "grupo": grupo,
         "sopa_ganada": bool(grupo.sopa_ganada),
     })
+
+def admin_preguntas_rompehielo(request):
+    if request.method == "POST":
+        idpregunta = request.POST.get("idpregunta")
+        tipo_equipo = request.POST.get("tipo_equipo", "desconocidos")
+        texto = request.POST.get("texto", "").strip()
+        orden = request.POST.get("orden") or 0
+        activa = request.POST.get("activa") == "on"
+
+        if tipo_equipo not in ["desconocidos", "conocidos"]:
+            messages.error(request, "Tipo de equipo inválido.")
+            return redirect("admin_preguntas_rompehielo")
+
+        if not texto:
+            messages.error(request, "La pregunta no puede estar vacía.")
+            return redirect("admin_preguntas_rompehielo")
+
+        try:
+            orden = int(orden)
+        except ValueError:
+            orden = 0
+
+        if idpregunta:
+            pregunta = get_object_or_404(PreguntaRompehielo, idpregunta=idpregunta)
+            pregunta.tipo_equipo = tipo_equipo
+            pregunta.texto = texto
+            pregunta.orden = orden
+            pregunta.activa = activa
+            pregunta.save()
+            messages.success(request, "Pregunta actualizada correctamente.")
+        else:
+            PreguntaRompehielo.objects.create(
+                tipo_equipo=tipo_equipo,
+                texto=texto,
+                orden=orden,
+                activa=activa
+            )
+            messages.success(request, "Pregunta creada correctamente.")
+
+        return redirect("admin_preguntas_rompehielo")
+
+    preguntas_desconocidos = PreguntaRompehielo.objects.filter(
+        tipo_equipo="desconocidos"
+    ).order_by("orden", "idpregunta")
+
+    preguntas_conocidos = PreguntaRompehielo.objects.filter(
+        tipo_equipo="conocidos"
+    ).order_by("orden", "idpregunta")
+
+    return render(request, "admin_preguntas_rompehielo.html", {
+        "preguntas_desconocidos": preguntas_desconocidos,
+        "preguntas_conocidos": preguntas_conocidos,
+        "pregunta_editando": None,
+    })
+
+
+def admin_preguntas_rompehielo_editar(request, idpregunta):
+    pregunta_editando = get_object_or_404(PreguntaRompehielo, idpregunta=idpregunta)
+
+    preguntas_desconocidos = PreguntaRompehielo.objects.filter(
+        tipo_equipo="desconocidos"
+    ).order_by("orden", "idpregunta")
+
+    preguntas_conocidos = PreguntaRompehielo.objects.filter(
+        tipo_equipo="conocidos"
+    ).order_by("orden", "idpregunta")
+
+    return render(request, "admin_preguntas_rompehielo.html", {
+        "preguntas_desconocidos": preguntas_desconocidos,
+        "preguntas_conocidos": preguntas_conocidos,
+        "pregunta_editando": pregunta_editando,
+    })
+
+
+def admin_preguntas_rompehielo_toggle(request, idpregunta):
+    pregunta = get_object_or_404(PreguntaRompehielo, idpregunta=idpregunta)
+
+    if request.method == "POST":
+        pregunta.activa = not pregunta.activa
+        pregunta.save()
+        messages.success(request, "Estado de la pregunta actualizado.")
+
+    return redirect("admin_preguntas_rompehielo")
+
+
+def admin_preguntas_rompehielo_eliminar(request, idpregunta):
+    pregunta = get_object_or_404(PreguntaRompehielo, idpregunta=idpregunta)
+
+    if request.method == "POST":
+        pregunta.delete()
+        messages.success(request, "Pregunta eliminada correctamente.")
+
+    return redirect("admin_preguntas_rompehielo")
 
 @require_POST
 def sopa_completada(request):
@@ -2989,11 +3076,8 @@ def cargar_alumnos(request):
         archivo = request.FILES["archivo_excel"]
 
         try:
-            if archivo.name.lower().endswith('.xlsx'):
-                df = pd.read_excel(archivo)
-            elif archivo.name.lower().endswith('.csv'):
-                df = pd.read_csv(archivo)
-            else:
+            nombre_archivo = archivo.name.lower()
+            if not (nombre_archivo.endswith('.xlsx') or nombre_archivo.endswith('.csv')):
                 messages.error(request, "Formato no soportado. Usa .xlsx o .csv.")
                 return render(
                     request,
@@ -3001,8 +3085,10 @@ def cargar_alumnos(request):
                     {"alumnos": alumnos, "sesion_activa": sesion_activa},
                 )
 
+            filas = leer_filas_archivo(archivo)
+
             with transaction.atomic():
-                for _, row in df.iterrows():
+                for row in filas:
                     Alumno.objects.create(
                         profesor_idprofesor=profesor,
                         sesion=sesion_activa,
@@ -3707,28 +3793,60 @@ def reflexion(request):
     if not grupo:
         return redirect("registro")
 
+    if grupo and grupo.sesion:
+        borrar_fotos_lego_sesion(grupo.sesion)    
+
     if not acceso_permitido(grupo, "reflexion"):
         return redirect("pantalla_espera")
 
     return render(request, "reflexion.html", {"grupo": grupo})
-def leer_alumnos_desde_archivo(archivo):
+def leer_filas_archivo(archivo):
+    """Lee un .xlsx (openpyxl) o .csv (csv nativo) y devuelve una lista de
+    diccionarios {encabezado: valor}, usando '' para celdas vacias.
+    Reemplaza a pandas para no depender de pandas/numpy en produccion."""
     nombre = archivo.name.lower()
 
-    if nombre.endswith(".xlsx") or nombre.endswith(".xls"):
-        df = pd.read_excel(archivo)
-    elif nombre.endswith(".csv"):
-        df = pd.read_csv(archivo)
-    else:
-        raise ValueError("Formato no soportado. Usa .xlsx, .xls o .csv.")
+    if nombre.endswith(".xlsx"):
+        wb = openpyxl.load_workbook(archivo, read_only=True, data_only=True)
+        ws = wb.active
+        iterador = ws.iter_rows(values_only=True)
+        try:
+            encabezados = [
+                str(c).strip() if c is not None else "" for c in next(iterador)
+            ]
+        except StopIteration:
+            return []
+        filas = []
+        for fila in iterador:
+            if fila is None or all(v is None for v in fila):
+                continue
+            filas.append(
+                {
+                    clave: ("" if valor is None else valor)
+                    for clave, valor in zip(encabezados, fila)
+                }
+            )
+        return filas
 
-    df = df.fillna("")
-    return df
+    if nombre.endswith(".csv"):
+        archivo.seek(0)
+        texto = io.TextIOWrapper(archivo, encoding="utf-8-sig", newline="")
+        return [
+            {clave: (valor if valor is not None else "") for clave, valor in fila.items()}
+            for fila in csv.DictReader(texto)
+        ]
+
+    raise ValueError("Formato no soportado. Usa .xlsx o .csv.")
+
+
+def leer_alumnos_desde_archivo(archivo):
+    return leer_filas_archivo(archivo)
 
 
 def crear_alumnos_en_sesion(df, profesor, sesion):
     alumnos_creados = []
 
-    for _, row in df.iterrows():
+    for row in df:
         alumno = Alumno.objects.create(
             profesor_idprofesor=profesor,
             sesion=sesion,
@@ -3814,7 +3932,7 @@ def crear_sesion(request):
         try:
             df = leer_alumnos_desde_archivo(archivo)
 
-            if df.empty:
+            if not df:
                 messages.error(request, "El archivo no tiene estudiantes.")
                 return render(request, "crear_sesion.html")
 
@@ -3848,7 +3966,7 @@ def crear_sesion(request):
                         alumnos_en_esta_sesion += 1
 
                     fin = inicio + alumnos_en_esta_sesion
-                    df_sesion = df.iloc[inicio:fin]
+                    df_sesion = df[inicio:fin]
                     inicio = fin
 
                     if cantidad_sesiones == 1:
@@ -4194,16 +4312,19 @@ def eliminar_profesor_forzado(request, profesor_id):
     return redirect("registrarprofesor")
 
 def guardar_imagen_tematica(request_file):
+
     if not request_file:
         return ""
 
-    carpeta = os.path.join(settings.BASE_DIR, "juego", "static", "images", "tematicas")
-    os.makedirs(carpeta, exist_ok=True)
+    nombre_webp, contenido_webp = convertir_imagen_a_webp(
+        request_file,
+        max_size=(1400, 900),
+        quality=80,
+    )
 
-    storage = FileSystemStorage(location=carpeta)
-    filename = storage.save(request_file.name, request_file)
+    ruta = default_storage.save(f"tematicas/{nombre_webp}", contenido_webp)
 
-    return f"images/tematicas/{filename}"
+    return settings.MEDIA_URL + ruta
 
 
 def admin_tematicas(request):
@@ -4368,6 +4489,27 @@ def limpiar_fotos_lego_por_desafio(desafio):
             grupo.foto_lego = None
             grupo.save(update_fields=["foto_lego"])
 
+def borrar_foto_lego_grupo(grupo):
+
+    if grupo.foto_lego:
+        try:
+            grupo.foto_lego.delete(save=False)
+        except Exception:
+            pass
+
+        grupo.foto_lego = None
+        grupo.save(update_fields=["foto_lego"])
+
+
+def borrar_fotos_lego_sesion(sesion):
+
+    grupos = Grupo.objects.filter(
+        sesion=sesion,
+        foto_lego__isnull=False,
+    ).exclude(foto_lego="")
+
+    for grupo in grupos:
+        borrar_foto_lego_grupo(grupo)
 
 def admin_ruleta(request):
     if request.method == "POST":

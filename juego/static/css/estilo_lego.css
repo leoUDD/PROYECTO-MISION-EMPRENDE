@@ -1,219 +1,641 @@
 /* ============================================================
-   estilo_lego.css — Misión Emprende UDD
-   Fix Chrome: body align-items: flex-start
+   estilo_lego.css — Misión Emprende UDD / LEGO
+   EdEmy dialog + tarjeta translúcida + paleta verde/cyan
 ============================================================ */
 
 :root {
-  --bg: #000712 url('/static/images/fondo_bienvenida.png') center/cover no-repeat fixed;
-  --card: rgba(0, 15, 35, 0.70);
-  --text: #E6EEF8;
-  --muted: #AAB7C8;
-  --primary: #00C8FF;
-  --accent: #FF7A1A;
-  --radius: 22px;
-  --shadow: 0 18px 40px rgba(0, 0, 0, .55);
+  --udd-blue: #003BFF;
+  --udd-dark: #00104A;
+  --udd-deep: #000712;
+  --udd-green: #00F26D;
+  --udd-green-2: #00FC98;
+  --udd-cyan: #00C8FF;
+  --udd-cyan-soft: #5BE7FF;
+  --udd-white: #FFFFFF;
 
-  --fs-title: clamp(24px, 4vw, 32px);
-  --fs-sub:   clamp(16px, 2.4vw, 20px);
-  --fs-body:  clamp(14px, 2vw, 18px);
-  --fs-timer: clamp(28px, 6vw, 40px);
+  --bg: #000712 url('/static/images/LegoFuturo.png') center/cover no-repeat fixed;
+  --text: #FFFFFF;
+  --muted: rgba(230, 238, 248, .82);
+
+  --panel: rgba(3, 18, 42, .54);
+  --panel-strong: rgba(3, 16, 38, .76);
+  --border-blue: rgba(0, 200, 255, .34);
+  --border-green: rgba(0, 242, 109, .46);
+  --shadow-soft: 0 18px 42px rgba(0, 0, 0, .30);
+  --shadow-strong: 0 24px 70px rgba(0, 0, 0, .62);
+
+  --radius: 24px;
+  --fs-title: clamp(34px, 4.5vw, 62px);
+  --fs-sub: clamp(18px, 2.2vw, 24px);
+  --fs-body: clamp(15px, 1.45vw, 19px);
+  --fs-timer: clamp(32px, 5vw, 52px);
 }
 
 *, *::before, *::after {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  min-height: 100%;
+  max-width: 100%;
 }
 
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: "Poppins", system-ui, sans-serif;
+  font-family: "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  min-height: 100vh;
   display: flex;
   justify-content: center;
-  align-items: flex-start; /* FIX Chrome: evita que .phone colapse al alto del viewport */
-  padding: 20px;
-  min-height: 100vh;
+  align-items: flex-start;
+  padding: 22px;
+  overflow-x: hidden;
 }
 
-/* ── Contenedor principal ── */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 56% 16%, rgba(0, 242, 109, .09), transparent 34%),
+    radial-gradient(circle at 18% 78%, rgba(0, 200, 255, .10), transparent 38%),
+    linear-gradient(180deg, rgba(0, 5, 18, .16), rgba(0, 5, 18, .50));
+}
+
+@media (min-width: 1101px) {
+  body {
+    padding-left: 155px;
+  }
+}
+
+/* ─────────────────────────────────────────────
+   CONTENEDOR PRINCIPAL TRANSLÚCIDO
+───────────────────────────────────────────── */
+
 .phone {
-  width: clamp(450px, 90vw, 720px);
-  background: var(--card);
-  padding: 35px 25px 50px;
-  border-radius: 26px;
-  box-shadow: var(--shadow);
-  backdrop-filter: blur(12px) saturate(140%);
-  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  position: relative;
+  z-index: 1;
+  width: min(1120px, calc(100vw - 185px));
+  min-height: clamp(640px, 82vh, 920px);
+  margin: 8px auto 22px;
+  padding: clamp(28px, 3.2vw, 46px);
+  border-radius: 30px;
+  overflow: hidden;
+
+  background:
+    radial-gradient(circle at 50% 0%, rgba(0, 242, 109, .13), transparent 34%),
+    linear-gradient(180deg, rgba(3, 24, 52, .58), rgba(2, 11, 28, .46));
+  border: 1.5px solid var(--border-blue);
+  box-shadow:
+    var(--shadow-soft),
+    inset 0 0 0 1px rgba(255, 255, 255, .05),
+    0 0 28px rgba(0, 200, 255, .13);
+
+  backdrop-filter: blur(7px) saturate(124%);
+  -webkit-backdrop-filter: blur(7px) saturate(124%);
   text-align: center;
-  animation: fadeIn 0.5s ease-out;
+
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
+
+  animation: fadeIn .55s ease both;
 }
 
-/* ── Logo ── */
+.phone::before {
+  content: "";
+  position: absolute;
+  inset: 12px;
+  border-radius: 24px;
+  border: 1px solid rgba(0, 242, 109, .14);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.phone::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, transparent, rgba(0, 200, 255, .08), transparent),
+    linear-gradient(180deg, rgba(255,255,255,.035), transparent 18%, transparent 82%, rgba(0,242,109,.05));
+  opacity: .9;
+}
+
+.phone > * {
+  position: relative;
+  z-index: 1;
+}
+
 .logo {
-  width: 120px;
+  width: clamp(86px, 10vw, 130px);
   display: block;
-  margin: 0 auto 18px;
+  margin: 0 auto 2px;
+  filter:
+    drop-shadow(0 0 14px rgba(0, 242, 109, .25))
+    drop-shadow(0 8px 22px rgba(0, 0, 0, .42));
 }
 
-/* ── Título ── */
 .title {
   font-size: var(--fs-title);
-  font-weight: 800;
-  margin-bottom: 12px;
-  color: var(--accent);
-  text-shadow: 0 0 18px rgba(255, 122, 26, 0.4);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.035em;
+  color: var(--udd-green);
+  text-shadow:
+    0 0 14px rgba(0, 242, 109, .50),
+    0 0 28px rgba(0, 200, 255, .24);
 }
 
-/* ── Subtítulo ── */
 .subtitle {
-  margin-top: 10px;
-  margin-bottom: 6px;
   font-size: var(--fs-sub);
-  font-weight: 700;
-  color: var(--primary);
+  font-weight: 900;
+  color: #FFFFFF;
+  margin-top: 4px;
+  text-shadow: 0 0 12px rgba(0, 200, 255, .18);
 }
 
-/* ── Cuerpo ── */
 .body {
+  width: min(100%, 860px);
   font-size: var(--fs-body);
-  margin-top: 20px;
-  margin-bottom: 20px;
-  line-height: 1.45;
+  line-height: 1.52;
   color: var(--muted);
+  font-weight: 650;
   text-align: center;
-  width: 100%;
-  max-width: 640px;
 }
 
-/* ── Lista de ideas ── */
+/* ─────────────────────────────────────────────
+   DIÁLOGO INICIAL EDEMY
+───────────────────────────────────────────── */
+
+.inicio-fase-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(22px, 4vw, 62px);
+}
+
+.inicio-fase-overlay.overlay-hidden {
+  display: none !important;
+}
+
+.lego-dialogo-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(circle at center, rgba(0, 252, 152, .10), transparent 42%),
+    rgba(0, 5, 18, .72);
+  backdrop-filter: blur(4px) brightness(.62);
+  -webkit-backdrop-filter: blur(4px) brightness(.62);
+}
+
+.lego-dialogo-card {
+  position: relative;
+  z-index: 1;
+  width: min(1180px, 92vw);
+  min-height: min(520px, 70vh);
+  display: grid;
+  grid-template-columns: minmax(220px, 390px) minmax(420px, 1fr);
+  align-items: center;
+  gap: clamp(28px, 4vw, 70px);
+}
+
+.lego-dialogo-personaje {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lego-dialogo-img {
+  width: clamp(220px, 24vw, 390px);
+  height: auto;
+  object-fit: contain;
+  filter:
+    drop-shadow(0 0 22px rgba(0, 252, 152, .42))
+    drop-shadow(0 0 46px rgba(0, 200, 255, .20))
+    drop-shadow(0 24px 38px rgba(0, 0, 0, .64));
+  animation: edemyFloat 3.6s ease-in-out infinite alternate;
+}
+
+.lego-dialogo-burbuja {
+  width: 100%;
+  min-height: 300px;
+  padding: clamp(28px, 3vw, 44px);
+  border-radius: 28px;
+  text-align: left;
+
+  background:
+    radial-gradient(circle at top left, rgba(0, 252, 152, .14), transparent 34%),
+    linear-gradient(160deg, rgba(0, 16, 74, .98), rgba(2, 8, 30, .98));
+  border: 2px solid rgba(0, 252, 152, .82);
+  box-shadow:
+    0 0 32px rgba(0, 252, 152, .24),
+    0 0 82px rgba(0, 59, 255, .18),
+    var(--shadow-strong);
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.lego-dialogo-badge {
+  align-self: flex-start;
+  padding: 8px 16px;
+  margin-bottom: 18px;
+  border-radius: 999px;
+  background: rgba(0, 252, 152, .12);
+  border: 1px solid rgba(0, 252, 152, .46);
+  color: var(--udd-green-2);
+  font-size: clamp(12px, 1vw, 15px);
+  font-weight: 900;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  text-shadow: 0 0 10px rgba(0, 252, 152, .35);
+}
+
+.lego-dialogo-title {
+  color: #FFFFFF;
+  font-size: clamp(34px, 4.2vw, 62px);
+  line-height: 1.02;
+  font-weight: 900;
+  letter-spacing: -0.035em;
+  margin-bottom: 20px;
+  text-shadow:
+    0 0 12px rgba(0, 200, 255, .22),
+    0 4px 18px rgba(0, 0, 0, .45);
+}
+
+.lego-dialogo-text {
+  color: #F3FAFF;
+  font-size: clamp(23px, 2vw, 34px);
+  line-height: 1.48;
+  font-weight: 850;
+  text-shadow: 0 0 10px rgba(0, 200, 255, .20);
+  margin-bottom: 24px;
+}
+
+.lego-dialogo-progress {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.lego-dialogo-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(0, 252, 152, .22);
+}
+
+.lego-dialogo-dot.activo {
+  background: var(--udd-green-2);
+  transform: scale(1.38);
+  box-shadow: 0 0 12px rgba(0, 252, 152, .72);
+}
+
+.lego-dialogo-dot.hecho {
+  background: rgba(0, 252, 152, .62);
+}
+
+.lego-dialogo-btn {
+  align-self: flex-start;
+  min-height: 56px;
+  padding: 15px 28px;
+  border-radius: 16px;
+  border: 2px solid rgba(0, 252, 152, .78);
+  background: linear-gradient(135deg, rgba(0, 252, 152, .20), rgba(0, 200, 255, .24));
+  color: #FFFFFF;
+  font-family: "Poppins", system-ui, sans-serif;
+  font-size: clamp(16px, 1.4vw, 21px);
+  font-weight: 900;
+  letter-spacing: .04em;
+  cursor: pointer;
+  box-shadow:
+    0 0 18px rgba(0, 252, 152, .25),
+    inset 0 0 20px rgba(0, 200, 255, .10);
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+
+.lego-dialogo-btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  border-color: rgba(0, 252, 152, 1);
+  box-shadow:
+    0 0 26px rgba(0, 252, 152, .38),
+    inset 0 0 24px rgba(0, 200, 255, .14);
+}
+
+.lego-dialogo-ready {
+  margin-top: 4px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(0, 252, 152, .30);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.lego-dialogo-ready[hidden] {
+  display: none !important;
+}
+
+/* ─────────────────────────────────────────────
+   ESTADOS BLOQUEADOS / ACTIVOS
+───────────────────────────────────────────── */
+
+.blur-target-bloqueado {
+  filter: none;
+  pointer-events: none;
+  user-select: none;
+  opacity: .34;
+  transition: opacity .25s ease, transform .25s ease;
+}
+
+.blur-target-activo {
+  filter: none;
+  pointer-events: auto;
+  user-select: auto;
+  opacity: 1;
+  transition: opacity .25s ease, transform .25s ease;
+}
+
+.timer-esperando {
+  opacity: .44;
+}
+
+/* ─────────────────────────────────────────────
+   BOTONES
+───────────────────────────────────────────── */
+
+.btn-chip,
+.oai-btn-chip,
+#btn-listo-fase,
+#btnAbrirRuletaLego,
+#btnLanzarRuletaLego {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 12px 22px;
+  border-radius: 14px;
+  border: 1px solid rgba(0, 242, 109, .88) !important;
+  background: linear-gradient(135deg, var(--udd-green), var(--udd-cyan)) !important;
+  color: #00104A !important;
+  font-family: "Poppins", system-ui, sans-serif;
+  font-size: clamp(14px, 1.25vw, 17px);
+  font-weight: 900;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow:
+    0 12px 22px rgba(0, 242, 109, .22),
+    0 0 18px rgba(0, 200, 255, .20) !important;
+  transition: transform .2s ease, box-shadow .2s ease, opacity .2s ease;
+}
+
+.btn-chip:hover,
+.oai-btn-chip:hover,
+#btn-listo-fase:hover,
+#btnAbrirRuletaLego:hover,
+#btnLanzarRuletaLego:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 14px 28px rgba(0, 242, 109, .30),
+    0 0 26px rgba(0, 200, 255, .26) !important;
+}
+
+.btn-chip:disabled,
+.oai-btn-chip:disabled,
+#btn-listo-fase:disabled,
+#btnAbrirRuletaLego:disabled,
+#btnLanzarRuletaLego:disabled {
+  opacity: .72;
+  cursor: default;
+  transform: none;
+}
+
+.contador-fase {
+  color: rgba(230, 238, 248, .84);
+  font-size: clamp(13px, 1.1vw, 15px);
+  line-height: 1.3;
+  font-weight: 800;
+  text-align: left;
+}
+
+/* ─────────────────────────────────────────────
+   PANELES INTERNOS
+───────────────────────────────────────────── */
+
+.desafio-panel,
+.ruleta-lego-card,
+.foto-panel,
+.recordatorio-desafio {
+  width: min(100%, 900px);
+  border-radius: 20px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at top left, rgba(0, 242, 109, .10), transparent 36%),
+    rgba(3, 18, 42, .52);
+  border: 1.4px solid rgba(0, 200, 255, .36);
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, .22),
+    0 0 20px rgba(0, 200, 255, .10);
+  backdrop-filter: blur(6px) saturate(120%);
+  -webkit-backdrop-filter: blur(6px) saturate(120%);
+}
+
+.desafio-panel {
+  margin: 4px auto 10px;
+}
+
+.desafio-toggle {
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: #fff;
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  text-align: left;
+  font-family: "Poppins", system-ui, sans-serif;
+}
+
+.desafio-toggle-head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.desafio-etiqueta,
+.ruleta-lego-kicker {
+  color: var(--udd-green);
+  font-size: .92rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+.desafio-titulo {
+  color: #FFFFFF;
+  font-size: clamp(1rem, 1.4vw, 1.14rem);
+  font-weight: 900;
+}
+
+.desafio-icono {
+  color: var(--udd-green);
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.desafio-body {
+  border-top: 1px solid rgba(255,255,255,.12);
+  padding: 16px 18px 18px;
+}
+
+.desafio-descripcion {
+  margin: 0;
+  color: #d9e6f2;
+  line-height: 1.5;
+  font-size: .98rem;
+  font-weight: 650;
+}
+
+.ruleta-lego-card {
+  padding: 18px;
+  margin: 4px auto 10px;
+}
+
+.ruleta-lego-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  text-align: left;
+}
+
+.ruleta-lego-title {
+  margin: 2px 0 6px;
+  color: #FFFFFF;
+  font-size: clamp(1.05rem, 1.6vw, 1.22rem);
+  font-weight: 900;
+}
+
+.ruleta-lego-texto {
+  margin: 0;
+  color: #d9e6f2;
+  line-height: 1.48;
+  font-size: .96rem;
+  font-weight: 650;
+}
+
+.ruleta-lego-resumen {
+  margin-top: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  color: #fff;
+  font-weight: 750;
+  font-size: .95rem;
+  text-align: left;
+}
+
+#ruletaUltimoResultado {
+  color: #A7FFC8;
+}
+
 .ideas-list {
   list-style: none;
-  margin: 6px 0 18px;
+  margin: 2px 0 6px;
   padding: 0;
-  width: 100%;
-  max-width: 640px;
+  width: min(100%, 900px);
+  display: grid;
+  gap: 10px;
 }
 
 .ideas-list li {
-  background: rgba(0, 140, 255, 0.12);
-  border: 1px solid rgba(0, 180, 255, 0.38);
-  padding: 10px 14px;
-  margin-bottom: 12px;
-  border-radius: 12px;
-  font-size: 15px;
-  text-align: left;
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  white-space: normal;
-  word-wrap: break-word;
-  overflow-wrap: anywhere;
-}
-
-/* ── Timer ── */
-#timer {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  margin-top: 6px;
-  margin-bottom: 18px;
-  width: clamp(180px, 36vw, 260px);
-  height: clamp(72px, 12vw, 98px);
-  background: #0a0a0a;
-  color: #fff;
-  font-weight: 800;
-  font-size: var(--fs-timer);
-  font-variant-numeric: tabular-nums;
-  letter-spacing: .04em;
-  border: clamp(3px, .8vw, 6px) solid #00d4ff;
-  border-radius: 24px;
-  box-shadow: 0 0 20px #00d4ff, 0 0 40px #0077ff inset;
-  text-shadow: 0 0 8px #00d4ff;
-  animation: neonPulse 1.2s ease-in-out infinite;
-}
-
-@keyframes neonPulse {
-  0%, 100% { box-shadow: 0 0 20px #00d4ff, 0 0 40px #0077ff inset; }
-  50%       { box-shadow: 0 0 40px #00ffff, 0 0 60px #00aaff inset; }
-}
-
-/* ── Modal ── */
-.modal {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.65);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  justify-content: center;
-  align-items: center;
-  z-index: 99;
-}
-
-.modal-content {
-  background: #081A2D;
-  padding: 30px 22px;
-  border-radius: var(--radius);
-  width: clamp(260px, 80vw, 350px);
-  text-align: center;
-  box-shadow: var(--shadow);
-  animation: pop 0.25s ease-out;
-}
-
-.modal-content h2 {
-  color: var(--primary);
-  margin-bottom: 10px;
-  font-weight: 700;
-}
-
-.modal-content p {
-  font-size: 16px;
-  color: var(--muted);
-  margin-bottom: 20px;
-}
-
-#buttonContinuar {
-  background: var(--accent);
-  color: white;
-  border: none;
-  padding: 12px 26px;
-  font-size: 16px;
-  font-weight: 700;
+  width: 100%;
+  padding: 12px 14px;
   border-radius: 14px;
-  cursor: pointer;
-  width: 100%;
-  transition: 0.2s ease;
+  background: rgba(0, 242, 109, .10);
+  border: 1px solid rgba(0, 242, 109, .32);
+  color: #FFFFFF;
+  font-size: clamp(14px, 1.25vw, 16px);
+  font-weight: 650;
+  line-height: 1.45;
+  text-align: left;
+  overflow-wrap: anywhere;
+  box-shadow: inset 0 0 18px rgba(0, 242, 109, .04);
 }
 
-#buttonContinuar:hover {
-  background: #ff8f3d;
-  transform: translateY(-2px);
-}
-
-/* ── Foto panel ── */
 .foto-panel {
-  width: 100%;
-  max-width: 640px;
-  margin-top: 0;
   padding: 18px;
-  border-radius: 16px;
-  border: 2px solid rgba(255, 122, 26, 0.70);
-  background: rgba(255, 255, 255, 0.08);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
+  margin: 4px auto 0;
   text-align: center;
 }
 
 .foto-panel h3 {
-  margin: 0 0 10px 0;
+  margin: 0 0 10px;
+  color: #FFFFFF;
   font-size: 1.05rem;
-  color: #fff;
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  font-weight: 900;
+}
+
+.texto-espera-foto,
+.ayuda-foto {
+  color: var(--muted);
+  font-size: .95rem;
+  line-height: 1.45;
+  font-weight: 650;
+}
+
+.foto-input {
+  margin: 10px 0 12px;
+  width: 100%;
+  max-width: 300px;
+  color: #FFFFFF;
+}
+
+.preview-wrapper {
+  display: none;
+  margin: 12px auto 0;
+}
+
+.preview-wrapper.visible {
+  display: block;
+}
+
+.preview-label {
+  margin-bottom: 8px;
+  font-size: .92rem;
+  opacity: .9;
+  color: var(--text);
+}
+
+.preview-img {
+  max-width: 240px;
+  max-height: 240px;
+  width: auto;
+  height: auto;
+  border-radius: 16px;
+  border: 2px solid rgba(0, 242, 109, .62);
+  background: #FFFFFF;
+  object-fit: cover;
 }
 
 .sin-foto-wrap {
@@ -228,10 +650,10 @@ body {
   gap: 10px;
   padding: 10px 14px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.16);
   color: var(--text);
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
 }
 
@@ -240,75 +662,934 @@ body {
   cursor: pointer;
 }
 
-.ayuda-foto {
-  margin-top: 10px;
-  color: var(--muted);
-  font-size: 0.9rem;
-  line-height: 1.35;
-}
-
 .error-foto {
   margin-top: 10px;
   color: #ffd6d6;
-  font-size: 0.92rem;
-  font-weight: 600;
+  font-size: .92rem;
+  font-weight: 750;
 }
 
-/* ── Recordatorio desafío ── */
-.recordatorio-desafio {
-  width: 100%;
-  max-width: 640px;
-  margin: 6px auto 14px;
-  padding: 14px 16px;
-  border-radius: 16px;
-  border: 2px solid rgba(0, 200, 255, 0.55);
-  background: rgba(0, 90, 140, 0.16);
-  text-align: left;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+.estado-grupos-lego {
+  margin-top: 14px;
+  color: #FFFFFF;
+  font-weight: 900;
+  text-align: center;
 }
 
-.recordatorio-desafio h3 {
-  margin: 0 0 8px 0;
-  color: var(--primary);
+.detalle-grupos-lego {
+  margin-top: 6px;
+  font-size: .9rem;
+  color: #d9e6f2;
+  opacity: .92;
+  text-align: center;
+}
+
+/* ─────────────────────────────────────────────
+   TIMER
+───────────────────────────────────────────── */
+
+#timer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  width: clamp(190px, 25vw, 280px);
+  height: clamp(76px, 8vw, 105px);
+  margin: 4px auto;
+  border-radius: 24px;
+  border: clamp(3px, .6vw, 5px) solid var(--udd-green);
+  background: rgba(0, 16, 74, .86);
+  color: #FFFFFF;
+  font-weight: 900;
+  font-size: var(--fs-timer);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .04em;
+  box-shadow:
+    0 0 20px rgba(0, 242, 109, .52),
+    0 0 40px rgba(0, 200, 255, .26) inset;
+  text-shadow: 0 0 8px rgba(0, 242, 109, .78);
+  animation: neonPulse 1.2s ease-in-out infinite;
+}
+
+/* ─────────────────────────────────────────────
+   MODALES
+───────────────────────────────────────────── */
+
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9997;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background:
+    radial-gradient(circle at top, rgba(0, 242, 109, .10), transparent 35%),
+    rgba(2, 10, 22, .78);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.modal-content {
+  width: min(94vw, 560px);
+  max-height: 88vh;
+  overflow: auto;
+  border-radius: 26px;
+  padding: 24px;
+  background:
+    radial-gradient(circle at top left, rgba(0,242,109,.14), transparent 38%),
+    linear-gradient(180deg, rgba(8,26,45,.98), rgba(4,18,35,.98));
+  border: 1.6px solid rgba(0,242,109,.34);
+  color: #FFFFFF;
+  box-shadow:
+    0 22px 54px rgba(0,0,0,.52),
+    0 0 26px rgba(0,242,109,.16);
+  text-align: center;
+  animation: pop .24s ease both;
+}
+
+.modal-content h2 {
+  color: var(--udd-green);
+  margin-bottom: 10px;
+  font-weight: 900;
+}
+
+.modal-content p {
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.5;
+  margin-bottom: 18px;
+  font-weight: 650;
+}
+
+.btn-guardar-foto,
+#buttonGuardarFoto,
+#buttonContinuar {
+  margin-top: 14px;
+  border: none;
+  border-radius: 14px;
+  padding: 12px 22px;
+  min-height: 48px;
   font-size: 1rem;
-  font-weight: 700;
+  font-weight: 900;
+  cursor: pointer;
+  background: linear-gradient(135deg, var(--udd-green), var(--udd-cyan));
+  color: #00104A;
+  box-shadow:
+    0 10px 22px rgba(0, 242, 109, .24),
+    0 0 18px rgba(0, 200, 255, .18);
 }
 
-.recordatorio-desafio p {
-  margin: 0;
-  color: var(--text);
+.btn-guardar-foto:disabled,
+#buttonGuardarFoto:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* ─────────────────────────────────────────────
+   MÚSICA + OBJETOS / ASTRONAUTA
+───────────────────────────────────────────── */
+
+#btn-musica-lego {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 500;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(0, 242, 109, .62);
+  background: rgba(0, 20, 40, .85);
+  color: #FFFFFF;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    0 0 14px rgba(0, 242, 109, .25),
+    0 0 28px rgba(0, 200, 255, .10);
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+
+#btn-musica-lego:hover {
+  transform: translateY(-2px) scale(1.06);
+  box-shadow:
+    0 0 20px rgba(0, 242, 109, .42),
+    0 0 32px rgba(0, 200, 255, .18);
+}
+
+.astro-lego-trigger {
+  position: fixed;
+  right: clamp(18px, 4vw, 54px);
+  bottom: clamp(92px, 15vh, 150px);
+  z-index: 60;
+  width: 78px;
+  height: 78px;
+  border-radius: 26px;
+  border: 1px solid rgba(0, 242, 109, .34);
+  background: rgba(0, 16, 74, .88);
+  box-shadow:
+    0 12px 26px rgba(0,0,0,.30),
+    0 0 18px rgba(0,242,109,.18);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: astroLegoFloat 4.2s ease-in-out infinite alternate;
+}
+
+.astro-lego-trigger:hover {
+  transform: scale(1.06);
+  box-shadow:
+    0 14px 30px rgba(0,0,0,.34),
+    0 0 24px rgba(0,242,109,.30);
+}
+
+.astro-lego-icon {
+  width: 105px;
+  height: auto;
+  object-fit: contain;
+  animation: astroLegoBounce 1.4s ease-in-out infinite alternate;
+  filter: drop-shadow(0 0 16px rgba(0, 242, 109, .55));
+}
+
+.astro-lego-trigger.oculto {
+  display: none;
+}
+
+.astro-lego-overlay {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  z-index: 9999;
+  background: rgba(0, 0, 0, .58);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.astro-lego-overlay.activo {
+  display: flex;
+}
+
+.astro-lego-card {
+  width: min(92vw, 720px);
+  border-radius: 26px;
+  padding: 22px;
+  background:
+    radial-gradient(circle at top left, rgba(0,242,109,.18), transparent 40%),
+    rgba(0, 16, 74, .97);
+  border: 1px solid rgba(0, 242, 109, .36);
+  box-shadow: 0 18px 44px rgba(0,0,0,.45);
+  color: #FFFFFF;
+  text-align: left;
+  animation: astroCardIn .28s ease both;
+}
+
+.astro-lego-flex {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.astro-lego-standing {
+  width: 145px;
+  height: auto;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 18px rgba(0, 242, 109, .38));
+}
+
+.astro-lego-text {
+  flex: 1;
+}
+
+.astro-lego-card h3 {
+  margin: 0 0 10px;
+  font-size: 1.35rem;
+  color: var(--udd-green);
+}
+
+.astro-lego-card p {
+  margin: 0 0 12px;
+  line-height: 1.5;
+  color: #d9e6f2;
+  font-weight: 650;
+}
+
+.astro-lego-opciones {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.astro-lego-opcion {
+  width: 100%;
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 16px;
+  padding: 12px 14px;
+  background: rgba(255,255,255,.08);
+  color: #FFFFFF;
+  font-family: "Poppins", system-ui, sans-serif;
+  font-weight: 850;
+  text-align: left;
+  cursor: pointer;
+  transition: .2s ease;
+}
+
+.astro-lego-opcion:hover {
+  background: rgba(0,242,109,.16);
+  transform: translateY(-1px);
+}
+
+.astro-lego-opcion.correcta {
+  border-color: rgba(34,197,94,.65);
+  background: rgba(34,197,94,.18);
+}
+
+.astro-lego-opcion.incorrecta {
+  border-color: rgba(239,68,68,.65);
+  background: rgba(239,68,68,.18);
+}
+
+.astro-lego-feedback {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  font-weight: 900;
   line-height: 1.45;
-  font-size: 0.98rem;
-  white-space: normal;
-  overflow-wrap: anywhere;
+  display: none;
 }
 
-/* ── Animaciones ── */
+.astro-lego-feedback.visible {
+  display: block;
+}
+
+.astro-lego-feedback.ok {
+  background: rgba(34,197,94,.18);
+  border: 1px solid rgba(34,197,94,.55);
+  color: #bbf7d0;
+}
+
+.astro-lego-feedback.error {
+  background: rgba(239,68,68,.18);
+  border: 1px solid rgba(239,68,68,.55);
+  color: #fecaca;
+}
+
+.astro-lego-close {
+  margin-top: 14px;
+  border: 1px solid rgba(0, 242, 109, .42);
+  border-radius: 999px;
+  padding: 11px 18px;
+  background: linear-gradient(135deg, rgba(0,242,109,.90), rgba(0,200,255,.90));
+  color: #00104A;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 10px 22px rgba(0,242,109,.20);
+  display: none;
+}
+
+.astro-lego-close.visible {
+  display: inline-flex;
+}
+
+/* ─────────────────────────────────────────────
+   RULETA
+───────────────────────────────────────────── */
+
+.ruleta-modal {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  background: rgba(1,12,28,.78);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 18px;
+}
+
+.ruleta-modal-content {
+  position: relative;
+  width: min(860px, 94vw);
+  max-height: 92vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border-radius: 26px;
+  padding: 26px 24px 28px;
+  background:
+    radial-gradient(circle at top left, rgba(0,242,109,.18), transparent 38%),
+    linear-gradient(135deg, rgba(0,16,74,.98), rgba(0,35,110,.96));
+  color: #FFFFFF;
+  border: 1px solid rgba(0,242,109,.28);
+  box-shadow: 0 18px 44px rgba(0,0,0,.48);
+}
+
+.ruleta-cerrar {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  font-size: 1.1rem;
+  font-weight: 900;
+  cursor: pointer;
+  color: #dff7ff;
+  background: rgba(255,255,255,.10);
+  border: 1px solid rgba(255,255,255,.18);
+}
+
+.ruleta-modal-title {
+  margin: 0;
+  text-align: center;
+  color: var(--udd-green) !important;
+  font-size: clamp(1.45rem, 3vw, 2rem);
+  font-weight: 900;
+  text-shadow: 0 2px 10px rgba(0,0,0,.28);
+}
+
+.ruleta-modal-subtitle {
+  margin: 8px 0 18px;
+  text-align: center;
+  color: #d9e6f2 !important;
+  font-size: 1rem;
+}
+
+.ruleta-layout-nuevo {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  align-items: center;
+}
+
+.ruleta-zona-nueva {
+  width: 100%;
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 14px 20px;
+  border-radius: 22px;
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.13);
+  box-shadow: inset 0 0 24px rgba(0,242,109,.06);
+}
+
+.ruleta-puntero-nuevo {
+  width: 0;
+  height: 0;
+  border-left: 18px solid transparent;
+  border-right: 18px solid transparent;
+  border-top: 30px solid var(--udd-green);
+  filter: drop-shadow(0 0 8px rgba(0,242,109,.45));
+  margin-bottom: -4px;
+  z-index: 2;
+}
+
+.ruleta-wheel-wrap-nuevo {
+  position: relative;
+  width: 330px;
+  height: 330px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ruleta-wheel-nueva {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 7px solid rgba(255,255,255,.86);
+  position: relative;
+  overflow: hidden;
+  transition: transform 4.2s cubic-bezier(.17,.67,.18,1);
+  box-shadow:
+    0 16px 30px rgba(0,0,0,.35),
+    0 0 28px rgba(0,242,109,.20);
+  background: conic-gradient(
+    #003BFF 0deg 45deg,
+    #00F26D 45deg 90deg,
+    #FFFFFF 90deg 135deg,
+    #00104A 135deg 180deg,
+    #2D5BFF 180deg 225deg,
+    #00B955 225deg 270deg,
+    #DCE6FF 270deg 315deg,
+    #001A70 315deg 360deg
+  );
+}
+
+.ruleta-op {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 54px;
+  height: 54px;
+  margin-left: -27px;
+  margin-top: -27px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 1.18rem;
+  color: #FFFFFF;
+  text-shadow: 0 2px 5px rgba(0,0,0,.45);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.ruleta-op-1 { transform: rotate(22.5deg) translateY(-112px) rotate(-22.5deg); }
+.ruleta-op-2 { transform: rotate(67.5deg) translateY(-112px) rotate(-67.5deg); }
+.ruleta-op-3 { transform: rotate(112.5deg) translateY(-112px) rotate(-112.5deg); }
+.ruleta-op-4 { transform: rotate(157.5deg) translateY(-112px) rotate(-157.5deg); }
+.ruleta-op-5 { transform: rotate(202.5deg) translateY(-112px) rotate(-202.5deg); }
+.ruleta-op-6 { transform: rotate(247.5deg) translateY(-112px) rotate(-247.5deg); }
+.ruleta-op-7 { transform: rotate(292.5deg) translateY(-112px) rotate(-292.5deg); }
+.ruleta-op-8 { transform: rotate(337.5deg) translateY(-112px) rotate(-337.5deg); }
+
+.ruleta-centro-nuevo {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: #07152b;
+  border: 5px solid rgba(255,255,255,.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  color: #FFFFFF;
+  z-index: 4;
+  box-shadow: 0 0 18px rgba(0,242,109,.26);
+}
+
+.ruleta-intentos-nuevo {
+  color: #A7FFC8;
+  font-weight: 900;
+  font-size: 1rem;
+}
+
+.ruleta-resultado-nuevo {
+  width: min(100%, 460px);
+  min-height: 52px;
+  padding: 14px;
+  border-radius: 16px;
+  background: rgba(0,242,109,.12);
+  border: 1px solid rgba(0,242,109,.35);
+  color: #FFFFFF;
+  font-weight: 800;
+  text-align: center;
+  line-height: 1.35;
+}
+
+.ruleta-tabla-nueva {
+  width: 100%;
+  max-width: 760px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.ruleta-tabla-nueva h3 {
+  grid-column: 1 / -1;
+  margin: 0 0 4px;
+  color: var(--udd-green) !important;
+  text-align: center;
+  font-size: 1.35rem;
+  font-weight: 900;
+}
+
+.ruleta-item-nuevo {
+  display: grid;
+  grid-template-columns: 54px 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.14);
+  text-align: left;
+}
+
+.ruleta-item-nuevo strong {
+  display: block;
+  color: #FFFFFF;
+  font-size: .95rem;
+  margin-bottom: 3px;
+}
+
+.ruleta-item-nuevo small {
+  display: block;
+  color: #d9e6f2;
+  line-height: 1.3;
+  font-size: .84rem;
+}
+
+.ruleta-mini {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 1.15rem;
+}
+
+.ruleta-mini.positivo {
+  background: rgba(34,197,94,.18);
+  color: #86efac;
+}
+
+.ruleta-mini.negativo {
+  background: rgba(239,68,68,.18);
+  color: #fca5a5;
+}
+
+.ruleta-mini.neutro {
+  background: rgba(59,130,246,.16);
+  color: #bfdbfe;
+}
+
+/* ─────────────────────────────────────────────
+   ANIMACIONES Y RESPONSIVE
+───────────────────────────────────────────── */
+
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(.99);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 @keyframes pop {
-  from { transform: scale(0.9); opacity: 0; }
-  to   { transform: scale(1);   opacity: 1; }
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
-/* ── Responsive ── */
-@media (max-width: 480px) {
-  .title    { font-size: 22px; }
-  .subtitle { font-size: 16px; }
+@keyframes neonPulse {
+  0%, 100% {
+    box-shadow:
+      0 0 20px rgba(0, 242, 109, .52),
+      0 0 40px rgba(0, 200, 255, .26) inset;
+  }
+  50% {
+    box-shadow:
+      0 0 34px rgba(0, 242, 109, .78),
+      0 0 58px rgba(0, 200, 255, .42) inset;
+  }
+}
+
+@keyframes edemyFloat {
+  from { transform: translateY(0); }
+  to { transform: translateY(-12px); }
+}
+
+@keyframes astroLegoFloat {
+  from { translate: 0 0; }
+  to { translate: -30px -24px; }
+}
+
+@keyframes astroLegoBounce {
+  from { transform: translateY(0) rotate(-4deg); }
+  to { transform: translateY(-8px) rotate(4deg); }
+}
+
+@keyframes astroCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 1100px) {
+  body {
+    padding: 16px 16px 16px 110px;
+  }
 
   .phone {
-    padding: 28px 18px 40px;
-    gap: 12px;
+    width: min(900px, calc(100vw - 128px));
+    padding: 32px 24px;
+  }
+
+  .lego-dialogo-card {
+    grid-template-columns: minmax(190px, 300px) 1fr;
+    gap: 28px;
+  }
+
+  .lego-dialogo-img {
+    width: clamp(190px, 24vw, 300px);
+  }
+
+  .lego-dialogo-title {
+    font-size: clamp(30px, 4.5vw, 52px);
+  }
+
+  .lego-dialogo-text {
+    font-size: clamp(20px, 2.4vw, 29px);
+  }
+}
+
+@media (max-width: 820px) {
+  body {
+    padding: 14px 14px 14px 104px;
+  }
+
+  .phone {
+    width: calc(100vw - 120px);
+    min-height: 680px;
+    border-radius: 24px;
+    padding: 28px 18px;
+  }
+
+  .ruleta-lego-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .ruleta-lego-resumen {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .lego-dialogo-card {
+    width: 94vw;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    min-height: auto;
+  }
+
+  .lego-dialogo-personaje {
+    max-height: 230px;
+  }
+
+  .lego-dialogo-img {
+    width: clamp(160px, 34vw, 240px);
+  }
+
+  .lego-dialogo-burbuja {
+    min-height: auto;
+    padding: 26px;
+  }
+
+  .lego-dialogo-title {
+    font-size: clamp(28px, 6vw, 44px);
+  }
+
+  .lego-dialogo-text {
+    font-size: clamp(19px, 3.2vw, 26px);
+  }
+}
+
+@media (max-width: 720px) {
+  .ruleta-modal-content {
+    width: min(94vw, 680px);
+    padding: 22px 16px;
+  }
+
+  .ruleta-wheel-wrap-nuevo {
+    width: 280px;
+    height: 280px;
+  }
+
+  .ruleta-op {
+    font-size: 1.02rem;
+  }
+
+  .ruleta-op-1 { transform: rotate(22.5deg) translateY(-94px) rotate(-22.5deg); }
+  .ruleta-op-2 { transform: rotate(67.5deg) translateY(-94px) rotate(-67.5deg); }
+  .ruleta-op-3 { transform: rotate(112.5deg) translateY(-94px) rotate(-112.5deg); }
+  .ruleta-op-4 { transform: rotate(157.5deg) translateY(-94px) rotate(-157.5deg); }
+  .ruleta-op-5 { transform: rotate(202.5deg) translateY(-94px) rotate(-202.5deg); }
+  .ruleta-op-6 { transform: rotate(247.5deg) translateY(-94px) rotate(-247.5deg); }
+  .ruleta-op-7 { transform: rotate(292.5deg) translateY(-94px) rotate(-292.5deg); }
+  .ruleta-op-8 { transform: rotate(337.5deg) translateY(-94px) rotate(-337.5deg); }
+
+  .ruleta-tabla-nueva {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  body {
+    align-items: flex-start;
+    padding: 12px 12px 94px;
+  }
+
+  .phone {
+    width: 100%;
+    min-height: 720px;
+    border-radius: 22px;
+    padding: 24px 14px 30px;
+  }
+
+  .phone::before {
+    inset: 8px;
+    border-radius: 18px;
+  }
+
+  .title {
+    font-size: clamp(32px, 10vw, 46px);
+  }
+
+  .subtitle {
+    font-size: 17px;
+  }
+
+  .body {
+    font-size: 14px;
+  }
+
+  .lego-dialogo-card {
+    width: 94vw;
+  }
+
+  .lego-dialogo-burbuja {
+    padding: 22px 18px;
+    border-radius: 22px;
+  }
+
+  .lego-dialogo-title {
+    font-size: clamp(27px, 8vw, 38px);
+  }
+
+  .lego-dialogo-text {
+    font-size: clamp(18px, 5vw, 24px);
+  }
+
+  .lego-dialogo-btn,
+  .lego-dialogo-ready .btn-chip {
+    width: min(100%, 290px);
+  }
+
+  .contador-fase {
+    text-align: left;
+  }
+
+  .astro-lego-trigger {
+    width: 64px;
+    height: 64px;
+    border-radius: 20px;
+    bottom: 82px;
+  }
+
+  .astro-lego-flex {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .astro-lego-standing {
+    width: 115px;
+  }
+
+  .astro-lego-card {
+    padding: 18px 16px;
+  }
+
+  .astro-lego-text {
+    text-align: center;
+  }
+
+  .astro-lego-opcion {
+    font-size: .92rem;
+  }
+}
+
+@media (max-width: 430px) {
+  body {
+    padding: 10px 10px 90px;
+  }
+
+  .phone {
+    padding: 22px 12px 28px;
+    border-radius: 20px;
+  }
+
+  .logo {
+    width: 84px;
+  }
+
+  .title {
+    font-size: clamp(29px, 11vw, 40px);
+  }
+
+  .desafio-toggle {
+    padding: 14px;
+  }
+
+  .ruleta-lego-card,
+  .foto-panel,
+  .desafio-panel {
+    border-radius: 18px;
+  }
+
+  .ideas-list li {
+    font-size: 13px;
   }
 
   #timer {
-    width: 82%;
-    height: clamp(80px, 16vw, 110px);
-    font-size: clamp(30px, 9vw, 40px);
+    width: min(86%, 240px);
   }
 
-  .ideas-list { margin-bottom: 14px; }
+  .lego-dialogo-overlay {
+    padding: 12px;
+  }
+}
+
+@media (max-height: 640px) and (min-width: 701px) {
+  body {
+    align-items: flex-start;
+    overflow-y: auto;
+  }
+
+  .phone {
+    margin: 14px 0;
+    min-height: 560px;
+  }
+
+  .lego-dialogo-card {
+    min-height: auto;
+  }
+
+  .lego-dialogo-img {
+    width: clamp(180px, 20vw, 280px);
+  }
+
+  .lego-dialogo-burbuja {
+    min-height: 250px;
+  }
+
+  .lego-dialogo-text {
+    font-size: clamp(18px, 1.8vw, 26px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
 }

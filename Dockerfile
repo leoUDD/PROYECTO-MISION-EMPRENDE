@@ -5,12 +5,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# Dependencias para mysqlclient
-RUN apt-get update && \
-    apt-get install -y build-essential default-libmysqlclient-dev pkg-config && \
-    rm -rf /var/lib/apt/lists/*
-
 # Copiar requirements e instalarlos
+# (Se conecta a MySQL con PyMySQL, que es Python puro: no requiere
+#  compilar mysqlclient ni instalar build-essential.)
 COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 

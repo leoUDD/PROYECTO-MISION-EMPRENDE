@@ -6,102 +6,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Misión Emprende UDD — Desafíos</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/estilo_desafios.css' %}">
-
-  <style>
-    .challenge-card.seleccionado {
-      outline: 3px solid #00c8ff;
-      transform: scale(1.01);
-      box-shadow: 0 0 0 4px rgba(0, 200, 255, 0.12);
-    }
-
-    .challenge-card.bloqueada {
-      opacity: 0.88;
-    }
-
-    .timer-box {
-      margin-top: 14px;
-      padding: 12px 16px;
-      border-radius: 14px;
-      background: rgba(255,255,255,.12);
-      color: white;
-      font-weight: 700;
-      line-height: 1.45;
-    }
-
-    .timer-box strong {
-      color: #ffe29a;
-    }
-
-    .timer-box span {
-      font-weight: 500;
-      opacity: 0.95;
-    }
-
-    .estado-seleccion {
-      margin: 18px auto 0;
-      max-width: 860px;
-      padding: 14px 16px;
-      border-radius: 14px;
-      background: rgba(0, 200, 255, 0.10);
-      border: 1px solid rgba(0, 200, 255, 0.35);
-      color: #e8f7ff;
-      line-height: 1.45;
-      display: none;
-    }
-
-    .estado-seleccion.visible {
-      display: block;
-    }
-
-    .estado-espera-profesor {
-      margin-top: 14px;
-      padding: 12px 14px;
-      border-radius: 12px;
-      background: rgba(255, 209, 102, 0.12);
-      border: 1px solid rgba(255, 209, 102, 0.35);
-      color: #ffe29a;
-      font-weight: 700;
-    }
-
-    .estado-error {
-      margin: 12px auto 0;
-      max-width: 860px;
-      padding: 12px 14px;
-      border-radius: 12px;
-      background: rgba(255, 77, 77, 0.12);
-      border: 1px solid rgba(255, 77, 77, 0.35);
-      color: #ffd8d8;
-      display: none;
-    }
-
-    .estado-error.visible {
-      display: block;
-    }
-
-    .contador-grupos-listos {
-      margin-top: 10px;
-      font-size: 16px;
-      color: #ffffff;
-      font-weight: 600;
-    }
-
-    .btn-volver-tematica {
-      display: inline-block;
-      border: 1px solid rgba(0, 200, 255, .36);
-      border-radius: 999px;
-      padding: 8px 14px;
-      background: rgba(7, 21, 43, .82);
-      color: #ffffff;
-      font-weight: 800;
-      text-decoration: none;
-      cursor: pointer;
-    }
-
-    .btn-volver-tematica:hover {
-      background: rgba(0, 200, 255, .16);
-    }
-  </style>
 </head>
 
 <body
@@ -110,21 +16,21 @@
 >
   <main class="selector-container" role="main" aria-labelledby="page-title">
     <header class="header">
+      <div class="header-badge" data-i18n="desafios_badge">SELECCIÓN DE DESAFÍO</div>
       <h1 id="page-title">{{ tematica.title|default:slug|title }}</h1>
       <p class="subtitle">{{ tematica.hero }}</p>
 
       <div class="timer-box">
-        <span data-i18n="desafios_timer_label">
-          ⏱️ Tiempo para elegir temática y desafío:
-        </span>
-        <strong id="timerTematica">--</strong>
-        <br>
-        <span data-i18n="desafios_timer_hint">
+        <div class="timer-line">
+          <span data-i18n="desafios_timer_label">⏱️ Tiempo para elegir temática y desafío:</span>
+          <strong id="timerTematica">--</strong>
+        </div>
+        <span class="timer-hint" data-i18n="desafios_timer_hint">
           Si no eligen a tiempo, el sistema asignará una temática y desafío al azar.
         </span>
       </div>
 
-      <div style="margin-top: 12px;">
+      <div class="header-actions">
         <a href="{% url 'cambiar_tematica' %}" class="btn-volver-tematica" data-i18n="desafios_volver_tematica">
           ↩ Volver y cambiar temática
         </a>
@@ -132,7 +38,6 @@
     </header>
 
     <section class="challenges-grid" aria-label="Desafíos disponibles">
-
       {% for challenge in desafios %}
         <article
           class="challenge-card {% if desafio_confirmado and desafio_id_actual == challenge.iddesafio|stringformat:'s' %}seleccionado bloqueada{% endif %}"
@@ -143,6 +48,16 @@
           data-desc="{{ challenge.descripciondesafio|escape }}"
           data-slug="{{ slug }}"
         >
+          {% if challenge.imagen_desafio %}
+            <div class="challenge-img-wrap">
+              <img
+                src="{{ challenge.imagen_desafio.url }}"
+                alt="Imagen de {{ challenge.nombredesafio }}"
+                class="challenge-img"
+              >
+            </div>
+          {% endif %}
+
           <div class="content">
             <h2 class="title">{{ challenge.nombredesafio }}</h2>
             <p class="desc">{{ challenge.summary|default:challenge.descripciondesafio }}</p>
@@ -164,16 +79,15 @@
           </div>
         </article>
       {% empty %}
-        <p data-i18n="desafios_sin_disponibles">No hay desafíos disponibles.</p>
+        <p class="empty-state" data-i18n="desafios_sin_disponibles">No hay desafíos disponibles.</p>
       {% endfor %}
-
     </section>
 
     <div id="estadoSeleccion" class="estado-seleccion" aria-live="polite">
       <strong data-i18n="desafios_estado_label">Desafío seleccionado:</strong>
       <span id="nombreDesafioSeleccionado">-</span>
 
-      <div id="descripcionDesafioSeleccionado" style="margin-top:8px;"></div>
+      <div id="descripcionDesafioSeleccionado" class="descripcion-desafio-seleccionado"></div>
 
       <div id="estadoEsperaProfesor" class="estado-espera-profesor" data-i18n="desafios_espera_equipos">
         Esperando a que los demás equipos seleccionen su desafío.

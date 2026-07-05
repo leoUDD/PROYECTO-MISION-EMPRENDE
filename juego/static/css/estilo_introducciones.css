@@ -1,6 +1,6 @@
 /* ================== Variables ================== */
 :root{
-  --bg: #000712 url('/static/images/fondo_bienvenida.png') center/cover no-repeat fixed;
+  --bg: #000712 url('/static/images/fondo_bienvenida.webp') center/cover no-repeat fixed;
   --card:#081A2D;
   --text:#fff;
   --muted:#E6EEF8;
@@ -37,7 +37,7 @@ body{
 /* ================== CARD PRINCIPAL ================== */
 .phone{
   width: clamp(320px, 90vw, 1100px);
-  background: url('/static/images/fondo_card.png') center/cover no-repeat;
+  background: url('/static/images/fondo_card.webp') center/cover no-repeat;
   border-radius:var(--radius);
   box-shadow:var(--shadow);
   padding:40px 30px;
@@ -69,7 +69,7 @@ body{
   max-width:360px;
   aspect-ratio: 3 / 5;
 
-  background:url('/static/images/intro.png') no-repeat;
+  background:url('/static/images/intro.webp') no-repeat;
   background-size: contain;
   background-position: right var(--pos-y);
 

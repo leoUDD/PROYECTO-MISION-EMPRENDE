@@ -16,7 +16,7 @@
 
   <style>
     /* ═══════════════════════════════════════════
-       RANKING PARCIAL — sin cambios
+       RANKING PARCIAL — base + override verde/azul
     ═══════════════════════════════════════════ */
     .ranking-parcial-wrap {
       width: min(980px, 92vw);
@@ -1033,10 +1033,426 @@
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation: none !important; transition: none !important; }
     }
-  </style>
+
+    /* =====================================================
+       FIX DEFINITIVO — RANKING PARCIAL VERDE/AZUL
+       Debe ir DESPUÉS de los estilos antiguos del ranking parcial.
+       Corrige amarillo, rojo y botón morado.
+    ===================================================== */
+
+    body.ranking-parcial {
+      --rank-green: #00FC98;
+      --rank-green-soft: #26FFC2;
+      --rank-blue: #00C8FF;
+      --rank-blue-soft: #5BE7FF;
+      --rank-panel: rgba(4, 17, 40, .88);
+    }
+
+    body.ranking-parcial .ranking-parcial-card {
+      background:
+        radial-gradient(circle at top left, rgba(0, 252, 152, .12), transparent 34%),
+        linear-gradient(180deg, rgba(5, 17, 36, .90), rgba(2, 10, 24, .96)) !important;
+      border: 1.5px solid rgba(0, 200, 255, .34) !important;
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, .04) inset,
+        0 20px 60px rgba(0, 0, 0, .38),
+        0 0 28px rgba(0, 200, 255, .14) !important;
+    }
+
+    body.ranking-parcial .ranking-parcial-card .titulo {
+      color: var(--rank-green) !important;
+      text-shadow:
+        0 0 14px rgba(0, 252, 152, .68),
+        0 0 32px rgba(0, 200, 255, .24) !important;
+    }
+
+    body.ranking-parcial .ranking-parcial-card .subtitulo {
+      color: rgba(230, 238, 248, .94) !important;
+      font-weight: 700 !important;
+      text-shadow: 0 0 10px rgba(0, 200, 255, .22) !important;
+    }
+
+    body.ranking-parcial .ranking-fila,
+    body.ranking-parcial .ranking-fila.ranking-primero,
+    body.ranking-parcial .ranking-fila.ranking-ultimo,
+    body.ranking-parcial .ranking-fila.es-mi-equipo {
+      --rank-alpha: .15;
+      --rank-border: .24;
+      --rank-glow: .08;
+
+      background:
+        linear-gradient(
+          90deg,
+          rgba(0, 252, 152, var(--rank-alpha)),
+          rgba(0, 200, 255, calc(var(--rank-alpha) * .34)),
+          rgba(3, 14, 32, .34)
+        ) !important;
+
+      border: 1px solid rgba(0, 200, 255, .14) !important;
+      border-left: 4px solid rgba(0, 252, 152, var(--rank-border)) !important;
+
+      box-shadow:
+        0 0 14px rgba(0, 252, 152, var(--rank-glow)),
+        inset 0 0 0 1px rgba(255,255,255,.035) !important;
+
+      color: #F3FAFF !important;
+    }
+
+    body.ranking-parcial .ranking-fila:nth-child(1) {
+      --rank-alpha: .58;
+      --rank-border: .98;
+      --rank-glow: .34;
+      box-shadow:
+        0 0 0 1px rgba(0, 252, 152, .36),
+        0 0 24px rgba(0, 252, 152, .34),
+        0 0 42px rgba(0, 200, 255, .17),
+        inset 0 0 0 1px rgba(255,255,255,.07) !important;
+    }
+
+    body.ranking-parcial .ranking-fila:nth-child(2) {
+      --rank-alpha: .48;
+      --rank-border: .84;
+      --rank-glow: .28;
+    }
+
+    body.ranking-parcial .ranking-fila:nth-child(3) {
+      --rank-alpha: .40;
+      --rank-border: .70;
+      --rank-glow: .23;
+    }
+
+    body.ranking-parcial .ranking-fila:nth-child(4) {
+      --rank-alpha: .33;
+      --rank-border: .58;
+      --rank-glow: .18;
+    }
+
+    body.ranking-parcial .ranking-fila:nth-child(5) {
+      --rank-alpha: .27;
+      --rank-border: .48;
+      --rank-glow: .14;
+    }
+
+    body.ranking-parcial .ranking-fila:nth-child(6) {
+      --rank-alpha: .22;
+      --rank-border: .40;
+      --rank-glow: .11;
+    }
+
+    body.ranking-parcial .ranking-fila:nth-child(7) {
+      --rank-alpha: .18;
+      --rank-border: .34;
+      --rank-glow: .09;
+    }
+
+    body.ranking-parcial .ranking-fila:nth-child(n+8) {
+      --rank-alpha: .13;
+      --rank-border: .26;
+      --rank-glow: .06;
+    }
+
+    body.ranking-parcial .ranking-fila:hover {
+      transform: translateX(4px) !important;
+      border-left-color: rgba(0, 252, 152, .95) !important;
+      box-shadow:
+        0 0 20px rgba(0, 252, 152, .22),
+        0 0 32px rgba(0, 200, 255, .14),
+        inset 0 0 0 1px rgba(255,255,255,.06) !important;
+    }
+
+    body.ranking-parcial .ranking-fila-top,
+    body.ranking-parcial .ranking-fila-nombre,
+    body.ranking-parcial .ranking-fila-nombre span:first-child {
+      color: #F3FAFF !important;
+    }
+
+    body.ranking-parcial .ranking-fila:nth-child(1) .ranking-fila-nombre span:first-child {
+      font-weight: 900 !important;
+      text-shadow:
+        0 0 10px rgba(0, 252, 152, .68),
+        0 0 18px rgba(0, 200, 255, .24) !important;
+    }
+
+    body.ranking-parcial .ranking-fila-tokens {
+      color: var(--rank-green-soft) !important;
+      font-weight: 900 !important;
+      text-shadow: 0 0 8px rgba(0, 252, 152, .32) !important;
+    }
+
+    body.ranking-parcial .ranking-barra-wrap {
+      background: rgba(255, 255, 255, .08) !important;
+      border: 1px solid rgba(0, 200, 255, .16) !important;
+      box-shadow: inset 0 0 10px rgba(0,0,0,.35) !important;
+    }
+
+    body.ranking-parcial .ranking-fila .ranking-barra-fill,
+    body.ranking-parcial .ranking-fila.ranking-primero .ranking-barra-fill,
+    body.ranking-parcial .ranking-fila.ranking-ultimo .ranking-barra-fill,
+    body.ranking-parcial .ranking-fila:nth-child(1) .ranking-barra-fill,
+    body.ranking-parcial .ranking-fila:nth-child(2) .ranking-barra-fill,
+    body.ranking-parcial .ranking-fila:nth-child(3) .ranking-barra-fill,
+    body.ranking-parcial .ranking-fila:nth-child(4) .ranking-barra-fill,
+    body.ranking-parcial .ranking-fila:nth-child(5) .ranking-barra-fill {
+      background:
+        linear-gradient(
+          90deg,
+          var(--rank-green),
+          var(--rank-green-soft),
+          var(--rank-blue)
+        ) !important;
+      box-shadow:
+        0 0 12px rgba(0, 252, 152, .42),
+        0 0 22px rgba(0, 200, 255, .18) !important;
+    }
+
+    body.ranking-parcial .ranking-fila:nth-child(1) .ranking-barra-fill {
+      box-shadow:
+        0 0 18px rgba(0, 252, 152, .72),
+        0 0 32px rgba(0, 200, 255, .28) !important;
+    }
+
+    body.ranking-parcial .ranking-fila.es-mi-equipo {
+      outline: 2px solid rgba(0, 200, 255, .48) !important;
+      outline-offset: 2px !important;
+    }
+
+    body.ranking-parcial .tag-mi-equipo {
+      color: #001626 !important;
+      background:
+        linear-gradient(135deg, var(--rank-green), var(--rank-blue)) !important;
+      border: 1px solid rgba(230, 255, 248, .55) !important;
+      box-shadow: 0 0 12px rgba(0, 252, 152, .32) !important;
+      font-weight: 900 !important;
+    }
+
+    body.ranking-parcial .btn-ranking-listo {
+      color: #001626 !important;
+      background:
+        linear-gradient(135deg, var(--rank-green), var(--rank-blue)) !important;
+      border: 1px solid rgba(230, 255, 248, .58) !important;
+      box-shadow:
+        0 14px 30px rgba(0, 252, 152, .20),
+        0 0 22px rgba(0, 200, 255, .18) !important;
+    }
+
+    body.ranking-parcial .btn-ranking-listo:hover:not(:disabled) {
+      transform: translateY(-2px) scale(1.02) !important;
+      background:
+        linear-gradient(135deg, var(--rank-green-soft), var(--rank-blue-soft)) !important;
+      box-shadow:
+        0 18px 34px rgba(0, 252, 152, .28),
+        0 0 30px rgba(0, 200, 255, .22) !important;
+    }
+
+    body.ranking-parcial .btn-ranking-listo:disabled {
+      opacity: .75 !important;
+      cursor: not-allowed !important;
+      transform: none !important;
+    }
+
+    body.ranking-parcial .ranking-estado {
+      color: rgba(230, 238, 248, .88) !important;
+    }
+
+  
+/* =====================================================
+   PATCH FINAL — DEGRADÉ VERDE MÁS VISIBLE POR POSICIÓN
+   Solo afecta ranking parcial. Ranking final intacto.
+===================================================== */
+
+html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .ranking-parcial-card {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(0, 252, 152, .16), transparent 32%),
+    linear-gradient(180deg, rgba(4, 18, 38, .72), rgba(2, 10, 24, .90)) !important;
+  border: 1.5px solid rgba(0, 200, 255, .42) !important;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, .04) inset,
+    0 24px 64px rgba(0, 0, 0, .42),
+    0 0 34px rgba(0, 200, 255, .16) !important;
+}
+
+html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .ranking-parcial-card .ranking-barras {
+  gap: 18px !important;
+}
+
+html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .ranking-parcial-card .ranking-barras .ranking-fila,
+html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .ranking-parcial-card .ranking-barras .ranking-fila.ranking-primero,
+html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .ranking-parcial-card .ranking-barras .ranking-fila.ranking-ultimo,
+html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .ranking-parcial-card .ranking-barras .ranking-fila.es-mi-equipo {
+  --row-green: .10;
+  --row-cyan: .035;
+  --row-border: .24;
+  --row-glow: .08;
+  --bar-a: #009B61;
+  --bar-b: #008D86;
+  --bar-c: #007C9C;
+  --bar-glow: .12;
+
+  position: relative !important;
+  overflow: hidden !important;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(0, 252, 152, var(--row-green)) 0%,
+      rgba(0, 200, 255, var(--row-cyan)) 58%,
+      rgba(2, 10, 24, .82) 100%
+    ) !important;
+
+  border: 1px solid rgba(0, 200, 255, .14) !important;
+  border-left: 6px solid rgba(0, 252, 152, var(--row-border)) !important;
+  box-shadow:
+    0 0 18px rgba(0, 252, 152, var(--row-glow)),
+    inset 0 0 0 1px rgba(255, 255, 255, .035) !important;
+}
+
+html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .ranking-parcial-card .ranking-barras .ranking-fila::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(255,255,255,.13), transparent 24%, transparent 100%);
+  opacity: var(--row-shine, .06);
+  pointer-events: none;
+}
+
+/* 1°: verde más fuerte y resplandeciente */
+html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .ranking-parcial-card .ranking-barras .ranking-fila:nth-child(1),
+html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .ranking-parcial-card .ranking-barras .ranking-fila.ranking-primero:nth-child(1) {
+  --row-green: .62;
+  --row-cyan: .30;
+  --row-border: 1;
+  --row-glow: .48;
+  --row-shine: .20;
+  --bar-a: #00FF88;
+  --bar-b: #26FFC2;
+  --bar-c: #00E7FF;
+  --bar-glow: .76;
+
+  border-color: rgba(0, 252, 152, .78) !important;
+  box-shadow:
+    0 0 0 1px rgba(0, 252, 152, .44),
+    0 0 26px rgba(0, 252, 152, .48),
+    0 0 48px rgba(0, 200, 255, .22),
+    inset 0 0 20px rgba(0, 252, 152, .16) !important;
+}
+
+/* 2°: claramente más suave que el primero */
+html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .ranking-parcial-card .ranking-barras .ranking-fila:nth-child(2) {
+  --row-green: .28;
+  --row-cyan: .12;
+  --row-border: .62;
+  --row-glow: .20;
+  --row-shine: .10;
+  --bar-a: #00D47C;
+  --bar-b: #00B695;
+  --bar-c: #00A2CF;
+  --bar-glow: .34;
+}
+
+html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .ranking-parcial-card .ranking-barras .ranking-fila:nth-child(3) {
+  --row-green: .20;
+  --row-cyan: .08;
+  --row-border: .48;
+  --row-glow: .15;
+  --row-shine: .08;
+  --bar-a: #00B86F;
+  --bar-b: #009A7B;
+  --bar-c: #0087AD;
+  --bar-glow: .25;
+}
+
+html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .ranking-parcial-card .ranking-barras .ranking-fila:nth-child(4) {
+  --row-green: .15;
+  --row-cyan: .06;
+  --row-border: .38;
+  --row-glow: .11;
+  --row-shine: .06;
+  --bar-a: #009F61;
+  --bar-b: #00866D;
+  --bar-c: #007997;
+  --bar-glow: .18;
+}
+
+html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .ranking-parcial-card .ranking-barras .ranking-fila:nth-child(5) {
+  --row-green: .12;
+  --row-cyan: .045;
+  --row-border: .31;
+  --row-glow: .08;
+  --row-shine: .05;
+  --bar-a: #008C55;
+  --bar-b: #007461;
+  --bar-c: #006D87;
+  --bar-glow: .14;
+}
+
+html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .ranking-parcial-card .ranking-barras .ranking-fila:nth-child(n+6) {
+  --row-green: .085;
+  --row-cyan: .03;
+  --row-border: .22;
+  --row-glow: .055;
+  --row-shine: .035;
+  --bar-a: #007746;
+  --bar-b: #006050;
+  --bar-c: #005D72;
+  --bar-glow: .10;
+}
+
+html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .ranking-parcial-card .ranking-barras .ranking-fila .ranking-barra-fill,
+html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .ranking-parcial-card .ranking-barras .ranking-fila.ranking-primero .ranking-barra-fill,
+html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .ranking-parcial-card .ranking-barras .ranking-fila.ranking-ultimo .ranking-barra-fill {
+  background:
+    linear-gradient(90deg, var(--bar-a), var(--bar-b), var(--bar-c)) !important;
+  box-shadow:
+    0 0 16px rgba(0, 252, 152, var(--bar-glow)),
+    0 0 28px rgba(0, 200, 255, calc(var(--bar-glow) * .55)) !important;
+}
+
+html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .ranking-parcial-card .ranking-barras .ranking-fila:nth-child(1) .ranking-fila-nombre span:first-child,
+html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .ranking-parcial-card .ranking-barras .ranking-fila:nth-child(1) .ranking-fila-tokens {
+  color: #FFFFFF !important;
+  text-shadow:
+    0 0 10px rgba(0, 252, 152, .82),
+    0 0 20px rgba(0, 200, 255, .30) !important;
+}
+
+html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .ranking-parcial-card .ranking-barras .ranking-fila:nth-child(n+2) .ranking-fila-nombre span:first-child {
+  color: rgba(230, 255, 248, .92) !important;
+  text-shadow: none !important;
+}
+
+html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .ranking-parcial-card .ranking-barras .ranking-fila:nth-child(n+2) .ranking-fila-tokens {
+  color: rgba(38, 255, 194, .82) !important;
+  text-shadow: 0 0 6px rgba(0, 252, 152, .16) !important;
+}
+
+html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .tag-mi-equipo {
+  background: linear-gradient(135deg, #00FC98, #00C8FF) !important;
+  color: #001626 !important;
+  border: 1px solid rgba(230, 255, 248, .70) !important;
+  box-shadow: 0 0 12px rgba(0, 252, 152, .36) !important;
+}
+
+html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .btn-ranking-listo {
+  background: linear-gradient(135deg, #00FC98, #00C8FF) !important;
+  color: #001626 !important;
+  border: 1px solid rgba(230, 255, 248, .68) !important;
+  box-shadow:
+    0 14px 30px rgba(0, 252, 152, .22),
+    0 0 24px rgba(0, 200, 255, .20) !important;
+}
+
+html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .btn-ranking-listo:hover:not(:disabled) {
+  background: linear-gradient(135deg, #26FFC2, #5BE7FF) !important;
+  transform: translateY(-2px) scale(1.02) !important;
+  box-shadow:
+    0 18px 34px rgba(0, 252, 152, .30),
+    0 0 30px rgba(0, 200, 255, .24) !important;
+}
+
+</style>
 </head>
 
-<body>
+<body class="{% if grupo.sesion.fase_actual == 'f6_ranking' %}ranking-final{% else %}ranking-parcial{% endif %}">
   {% include "includes/selector_idioma.html" %}
 
   <!-- Música de fondo -->
@@ -1124,7 +1540,7 @@
 
       <!-- VIDEO CINEMÁTICO — mismo ancho que podio, dentro del flujo -->
       <div id="videoOverlay">
-        <video id="videoMisionCumplida" src="{% static 'videos/ranking.mp4' %}" preload="auto" playsinline></video>
+        <video id="videoMisionCumplida" src="{% static 'videos/ranking.webm' %}" preload="auto" playsinline></video>
         <button id="btnSaltarVideo" onclick="saltarVideo()" data-i18n="ranking_saltar">Saltar &rsaquo;</button>
       </div>
 
@@ -1219,19 +1635,38 @@
 
     {% else %}
 
-      <!-- RANKING PARCIAL — sin cambios -->
+      <!-- RANKING PARCIAL — paleta verde/azul -->
       <section class="ranking-parcial-wrap">
         <div class="ranking-parcial-card">
-          <h1 class="titulo" data-i18n="ranking_parcial_titulo">Ranking parcial</h1>
-          <p class="subtitulo" data-i18n="ranking_parcial_subtitulo">
-            Así van los equipos en este momento.
-          </p>
+          {% if grupo.sesion.fase_actual == "f1_ranking" %}
+  <h1 class="titulo">Así van los equipos</h1>
+  <p class="subtitulo">
+    ¡Aún pueden quedar primeros! La misión recién comienza.
+  </p>
+
+{% elif grupo.sesion.fase_actual == "f2_ranking" %}
+  <h1 class="titulo">La misión sigue abierta</h1>
+  <p class="subtitulo">
+    Cada decisión puede cambiar el tablero.
+  </p>
+
+{% elif grupo.sesion.fase_actual == "f3_ranking" %}
+  <h1 class="titulo">Nada está definido todavía</h1>
+  <p class="subtitulo">
+    El próximo desafío puede llevarlos a la cima.
+  </p>
+
+{% else %}
+  <h1 class="titulo">Así va la misión</h1>
+  <p class="subtitulo">
+    Sigan avanzando: todavía pueden llegar arriba.
+  </p>
+{% endif %}
 
           <div class="ranking-barras">
             {% for equipo in rankings %}
               <div class="ranking-fila
                 {% if equipo.rank == 1 %}ranking-primero{% endif %}
-                {% if forloop.last %}ranking-ultimo{% endif %}
                 {% if equipo.is_me %}es-mi-equipo{% endif %}">
                 <div class="ranking-fila-top">
                   <div class="ranking-fila-nombre">

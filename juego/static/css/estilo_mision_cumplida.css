@@ -3,7 +3,7 @@ body {
   margin: 0;
   padding: 0;
   font-family: "Poppins", sans-serif;
-  background: #000712 url('/static/images/fondo_bienvenida.png') center/cover no-repeat fixed;
+  background: #000712 url('/static/images/fondo_bienvenida.webp') center/cover no-repeat fixed;
   color: #E6EEF8;
   overflow-x: hidden;
 }
@@ -42,7 +42,7 @@ body {
 .mission-card {
   max-width: 820px;
   margin: 60px auto;
-  background: url('/static/images/fondo_card.png');
+  background: url('/static/images/fondo_card.webp');
   padding: 40px 50px;
   border-radius: 26px;
   text-align: center;

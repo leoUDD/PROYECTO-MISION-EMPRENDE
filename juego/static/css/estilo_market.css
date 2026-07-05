@@ -1,6 +1,6 @@
 /* ================== Variables globales ================== */
 :root {
-  --bg: #000712 url('/static/images/fondo_bienvenida.png') center/cover no-repeat fixed;
+  --bg: #000712 url('/static/images/fondo_bienvenida.webp') center/cover no-repeat fixed;
   --card: #081A2D;
   --card-soft: #0b2540;
   --text: #E6EEF8;
