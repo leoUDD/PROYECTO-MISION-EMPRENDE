@@ -115,6 +115,9 @@ if (Number.isNaN(timeLeft) || timeLeft <= 0) {
   timeLeft = 300;
 }
 
+// NUEVO: guarda el tiempo total inicial (no se muta) para calcular el % de la barra
+const TIEMPO_TOTAL_SOPA = timeLeft;
+
 let timerStartedByProfesor = false;
 let ultimaFaseDetectada = null;
 
@@ -423,6 +426,16 @@ function renderTimer() {
     timerEl.classList.add("low-time");
   } else {
     timerEl.classList.remove("low-time");
+  }
+
+  // NUEVO: actualizar la barra de tiempo (si existe en el HTML; si no, no hace nada)
+  const fillEl = document.getElementById("timer-bar-fill");
+  if (fillEl) {
+    const pct = TIEMPO_TOTAL_SOPA > 0
+      ? Math.max(0, Math.min(100, (tiempoSeguro / TIEMPO_TOTAL_SOPA) * 100))
+      : 0;
+    fillEl.style.width = pct + "%";
+    fillEl.classList.toggle("low-time", tiempoSeguro <= 10);
   }
 }
 

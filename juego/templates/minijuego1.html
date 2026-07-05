@@ -19,8 +19,12 @@
     <h1 id="tituloSopa" class="blur-target-bloqueado" data-i18n="sopa_titulo">Trabajo En Equipo</h1>
     <p id="subtituloSopa" class="blur-target-bloqueado" data-i18n="sopa_subtitulo">Encuentra las palabras ocultas relacionadas con el emprendimiento</p>
 
+    <!-- ===== TIEMPO: ahora como barra que se va vaciando + número (NUEVO) ===== -->
     <div id="timer-container" class="blur-target-bloqueado timer-esperando">
-      <span data-i18n="sopa_tiempo_restante">Tiempo restante:</span><span> </span>
+      <span data-i18n="sopa_tiempo_restante">Tiempo restante:</span>
+      <div id="timer-bar-track" class="timer-bar-track">
+        <div id="timer-bar-fill" class="timer-bar-fill"></div>
+      </div>
       <span id="timer" class="timer">00:00</span>
     </div>
 
@@ -184,6 +188,8 @@
     ];
 
     (function instalarDialogoEdemy() {
+      /* NOTA: verifica el texto completo de la primera línea contra tu archivo
+         original; la reconstrucción no pudo confirmar el final exacto de esa frase. */
       const GUION = [
         { texto: "Escuadrón, atención." },
         { texto: "El sistema ocultó conceptos clave del emprendimiento dentro de una sopa de letras." },

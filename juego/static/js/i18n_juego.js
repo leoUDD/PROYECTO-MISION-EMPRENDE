@@ -145,7 +145,7 @@ sopa_esperando: "Esperando a los demás equipos...",
 sopa_grupos_listos: "grupos listos",
 sopa_error_listo: "No se pudo registrar. Intenta nuevamente.",
 
-sopa_titulo: "Sopa de Letras",
+sopa_titulo: "Trabajo en equipo",
 sopa_subtitulo: "Encuentra las palabras ocultas relacionadas con el emprendimiento",
 sopa_tiempo_restante: "Tiempo restante:",
 sopa_tiempo_terminado_titulo: "⏰ ¡Tiempo terminado!",
