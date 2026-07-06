@@ -1,5 +1,4 @@
 {% load static %}
-{% include "atajos.html" %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -11,38 +10,40 @@
 </head>
 
 <body class="tematicas-page">
+  {% include "atajos.html" %}
 
   <!-- Música de fondo -->
   <audio id="musica-desafios" src="{% static 'sounds/musica_desafios.mp3' %}" loop preload="auto"></audio>
   <button id="btn-musica-desafios" class="music-btn" title="Silenciar música" aria-label="Silenciar música" onclick="toggleMusicaDesafios()">🔊</button>
+
+  <div id="inicio-fase-overlay" class="inicio-fase-overlay" aria-modal="true" role="dialog" aria-label="Instrucciones de EdEmy">
+    <div class="edemy-intro-backdrop" aria-hidden="true"></div>
+
+    <section id="inicio-fase-card" class="inicio-fase-card edemy-intro-card">
+      <div class="edemy-intro-personaje" aria-hidden="true">
+        <img class="edemy-intro-img" src="{% static 'images/EdemFeliz.png' %}" alt="">
+      </div>
+
+      <div class="edemy-intro-burbuja">
+        <div class="inicio-fase-badge" id="edemyIntroBadge" data-i18n="tematicas_overlay_badge">ASIGNACIÓN DE OBJETIVO</div>
+        <h3 id="edemyIntroTitulo">Antes de comenzar</h3>
+        <p id="edemyIntroTexto" class="edemy-intro-texto">Agentes, definan el campo de acción de su próxima misión.</p>
+
+        <div class="edemy-intro-pager" aria-label="Progreso de instrucciones">
+          <span class="edemy-intro-dot activo" id="edemyIntroDot1"></span>
+          <span class="edemy-intro-dot" id="edemyIntroDot2"></span>
+        </div>
+
+        <div class="edemy-intro-actions">
+          <button id="btnListoTematica" class="btn-chip edemy-intro-next" type="button">Continuar</button>
+          <div id="textoEsperaTematica" class="contador-fase" data-i18n="tematicas_esperando">Esperando a los demás equipos...</div>
+          <div id="contadorListosTematica" class="contador-fase">0/0 grupos listos</div>
+        </div>
+      </div>
+    </section>
+  </div>
+
   <main class="selector-container" role="main" aria-labelledby="page-title">
-    <div id="inicio-fase-overlay" class="inicio-fase-overlay" aria-modal="true" role="dialog" aria-label="Instrucciones de EdEmy">
-      <div class="edemy-intro-backdrop" aria-hidden="true"></div>
-
-      <section id="inicio-fase-card" class="inicio-fase-card edemy-intro-card">
-        <div class="edemy-intro-personaje" aria-hidden="true">
-          <img class="edemy-intro-img" src="{% static 'images/EdemFeliz.png' %}" alt="">
-        </div>
-
-        <div class="edemy-intro-burbuja">
-          <div class="inicio-fase-badge" id="edemyIntroBadge" data-i18n="tematicas_overlay_badge">ASIGNACIÓN DE OBJETIVO</div>
-          <h3 id="edemyIntroTitulo">Antes de comenzar</h3>
-          <p id="edemyIntroTexto" class="edemy-intro-texto">Agentes, definan el campo de acción de su próxima misión.</p>
-
-          <div class="edemy-intro-pager" aria-label="Progreso de instrucciones">
-            <span class="edemy-intro-dot activo" id="edemyIntroDot1"></span>
-            <span class="edemy-intro-dot" id="edemyIntroDot2"></span>
-          </div>
-
-          <div class="edemy-intro-actions">
-            <button id="btnListoTematica" class="btn-chip edemy-intro-next" type="button">Continuar</button>
-            <div id="textoEsperaTematica" class="contador-fase" data-i18n="tematicas_esperando">Esperando a los demás equipos...</div>
-            <div id="contadorListosTematica" class="contador-fase">0/0 grupos listos</div>
-          </div>
-        </div>
-      </section>
-    </div>
-
     <div id="contenidoTematicas" class="contenido-tematicas blur-tematicas">
       <header class="header">
         <h1 id="page-title" data-i18n="tematicas_titulo">Elige la temática del desafío</h1>
@@ -159,9 +160,12 @@
         if (edemyIntroTitulo) edemyIntroTitulo.textContent = paso.titulo;
         if (edemyIntroTexto) {
           edemyIntroTexto.classList.remove("texto-cambiando");
-          void edemyIntroTexto.offsetWidth;
           edemyIntroTexto.textContent = paso.texto;
-          edemyIntroTexto.classList.add("texto-cambiando");
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              edemyIntroTexto.classList.add("texto-cambiando");
+            });
+          });
         }
         if (btnListoTematica && !btnListoTematica.disabled) {
           btnListoTematica.textContent = paso.boton;
@@ -191,7 +195,7 @@
       function getCSRFToken() { const name = "csrftoken="; const parts = document.cookie.split(";"); for (let c of parts) { c = c.trim(); if (c.startsWith(name)) return decodeURIComponent(c.substring(name.length)); } return ""; }
       async function iniciarTimerTematica() { if (!sesionId) return; try { await fetch(`/sesion/${sesionId}/iniciar-timer-inicio-fase/`, { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json", "X-CSRFToken": getCSRFToken() }, body: JSON.stringify({}) }); } catch (error) { console.error("Error iniciando timer:", error); timerTematicaSolicitado = false; } }
       function todosListosSegunData(data) { const total = Number(data.totalGrupos || 0); const listos = Number(data.gruposListosF2Tematicas || 0); if (data.todosListosF2Tematicas) return true; return total > 0 && listos >= total; }
-      async function actualizarTimerTematica() { if (!sesionId || !timerTematica) return; try { const res = await fetch(`/sesion/${sesionId}/estado/`, { cache: "no-store", credentials: "same-origin" }); if (!res.ok) return; const data = await res.json(); timerTematica.textContent = formatearTiempo(data.segundosRestantes); ultimoListos = Number(data.gruposListosF2Tematicas || 0); ultimoTotal = Number(data.totalGrupos || 0); if (contadorListosTematica) contadorListosTematica.textContent = textoGruposListos(ultimoListos, ultimoTotal); const miGrupo = (data.grupos || []).find(g => Number(g.id) === Number(grupoId)); if (miGrupo && miGrupo.listoF2Tematicas) { introPasoTematica = introPasosTematica().length - 1; actualizarDialogoIntroTematica(); yaListoTematica = true; if (btnListoTematica) { btnListoTematica.disabled = true; btnListoTematica.textContent = textoEsperando(); } if (textoEsperaTematica) textoEsperaTematica.textContent = textoEsperaEquipos(); } if (todosListosSegunData(data)) { habilitarTematicas(); if (!data.timerCorriendo && !timerTematicaSolicitado) { timerTematicaSolicitado = true; iniciarTimerTematica(); } } else { bloquearTematicas(); } if (data.faseActual && data.faseActual !== "f2_tematicas" && data.rutaAlumno) window.location.href = data.rutaAlumno; } catch (error) { console.error("Error actualizando timer:", error); } }
+      async function actualizarTimerTematica() { if (!sesionId || !timerTematica) return; try { const res = await fetch(`/sesion/${sesionId}/estado/`, { cache: "no-store", credentials: "same-origin" }); if (!res.ok) return; const data = await res.json(); timerTematica.textContent = formatearTiempo(data.segundosRestantes); ultimoListos = Number(data.gruposListosF2Tematicas || 0); ultimoTotal = Number(data.totalGrupos || 0); if (contadorListosTematica) contadorListosTematica.textContent = textoGruposListos(ultimoListos, ultimoTotal); const miGrupo = (data.grupos || []).find(g => Number(g.id) === Number(grupoId)); if (!yaListoTematica && miGrupo && miGrupo.listoF2Tematicas) { introPasoTematica = introPasosTematica().length - 1; actualizarDialogoIntroTematica(); yaListoTematica = true; if (btnListoTematica) { btnListoTematica.disabled = true; btnListoTematica.textContent = textoEsperando(); } if (textoEsperaTematica) textoEsperaTematica.textContent = textoEsperaEquipos(); } if (todosListosSegunData(data)) { habilitarTematicas(); if (!data.timerCorriendo && !timerTematicaSolicitado) { timerTematicaSolicitado = true; iniciarTimerTematica(); } } else { bloquearTematicas(); } if (data.faseActual && data.faseActual !== "f2_tematicas" && data.rutaAlumno) window.location.href = data.rutaAlumno; } catch (error) { console.error("Error actualizando timer:", error); } }
       async function marcarListoTematica() { if (yaListoTematica || !grupoId) return; yaListoTematica = true; if (btnListoTematica) { btnListoTematica.disabled = true; btnListoTematica.textContent = textoEsperando(); } if (textoEsperaTematica) textoEsperaTematica.textContent = textoEsperaEquipos(); try { const res = await fetch(`/grupo/${grupoId}/listo/`, { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json", "X-CSRFToken": getCSRFToken() }, body: JSON.stringify({ fase: "f2_tematicas" }) }); const data = await res.json(); ultimoListos = Number(data.gruposListosF2Tematicas || data.listos || 0); ultimoTotal = Number(data.totalGrupos || data.total || 0); if (contadorListosTematica) contadorListosTematica.textContent = textoGruposListos(ultimoListos, ultimoTotal); if (data.todos_listos || (ultimoTotal > 0 && ultimoListos >= ultimoTotal)) { habilitarTematicas(); if (!timerTematicaSolicitado) { timerTematicaSolicitado = true; iniciarTimerTematica(); } } } catch (error) { console.error("Error marcando listo:", error); yaListoTematica = false; if (btnListoTematica) { btnListoTematica.disabled = false; btnListoTematica.textContent = textoListo(); } } }
       function marcarTema(slug) { temaSeleccionadoActual = (slug || "").trim().toLowerCase(); cards.forEach(card => { const activo = (card.dataset.slug || "").trim().toLowerCase() === temaSeleccionadoActual; card.classList.toggle("selected", activo); const btn = card.querySelector(".btn.select"); if (btn) btn.textContent = activo ? textoSeleccionado() : textoElegir(); }); }
       window.guardarTema = async function (slug, boton) { if (enviando) return; enviando = true; marcarTema(slug); const botones = document.querySelectorAll(".btn.select"); botones.forEach(b => b.disabled = true); try { const res = await fetch("{% url 'guardar_tematica' %}", { method: "POST", headers: { "Content-Type": "application/json", "X-CSRFToken": getCSRFToken() }, credentials: "same-origin", body: JSON.stringify({ tema: slug }) }); const data = await res.json(); if (!res.ok || !data.ok) throw new Error(data.error || "No se pudo guardar."); window.location.href = data.redirect_url || "{% url 'desafios' %}"; } catch (error) { alert(error.message); botones.forEach(b => b.disabled = false); marcarTema(""); enviando = false; } };

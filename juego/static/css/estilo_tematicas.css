@@ -106,6 +106,39 @@ body::before{
   display: none !important;
 }
 
+/* Optimización de rendimiento (Chrome): mientras el overlay de EdEmy está
+   abierto, tapa por completo a .selector-container. No hay necesidad de que
+   siga calculando su propio backdrop-filter en cada frame de las animaciones
+   del diálogo (robot, dots, transición del botón). No cambia lo que se ve,
+   porque igual está cubierto por el overlay. */
+body:has(#inicio-fase-overlay:not(.overlay-hidden)) .selector-container{
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Optimización de rendimiento (Chrome): mientras el overlay de EdEmy está
+   activo, el contenido de atrás ya está blureado/atenuado por .blur-tematicas.
+   Quitamos el backdrop-filter individual de cada tarjeta y del carrusel para
+   no recalcular múltiples capas de blur superpuestas en cada frame de las
+   animaciones del diálogo (robot flotando, cursor, dots). No cambia lo que
+   se ve, porque ese contenido ya está oculto/atenuado detrás. */
+.blur-tematicas .theme-card,
+.blur-tematicas .carousel-btn{
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Optimización de rendimiento (Chrome): el botón flotante de la cámara sigue
+   animando y calculando su propio backdrop-filter en loop infinito incluso
+   mientras está tapado por el overlay de EdEmy. Lo pausamos y le quitamos el
+   blur mientras el diálogo está abierto para no competir por ciclos de
+   composición justo en el momento del click. */
+.blur-tematicas .objeto-camara-trigger{
+  animation-play-state: paused !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
 /* =====================================================
    HEADER
 ===================================================== */
@@ -412,6 +445,7 @@ body::before{
 
 /* =====================================================
    EDEMY — INSTRUCCIONES INICIALES GRANDES
+   (Medidas idénticas a conocidos.html)
 ===================================================== */
 .inicio-fase-overlay{
   position: fixed;
@@ -431,8 +465,10 @@ body::before{
   background:
     radial-gradient(circle at center, rgba(0,252,152,.10), transparent 42%),
     rgba(0,5,18,.78);
+  /* PRUEBA DE RENDIMIENTO: backdrop-filter deshabilitado temporalmente. Ver nota en dialogo_intro.html
   backdrop-filter: blur(8px) brightness(.55);
   -webkit-backdrop-filter: blur(8px) brightness(.55);
+  */
 }
 
 .inicio-fase-card.edemy-intro-card{
@@ -461,13 +497,15 @@ body::before{
 }
 
 .edemy-intro-img{
-  width: clamp(270px, 25vw, 440px);
+  width: clamp(260px, 25vw, 440px);
   height: auto;
   object-fit: contain;
   filter:
     drop-shadow(0 0 24px rgba(0,252,152,.48))
     drop-shadow(0 0 50px rgba(0,200,255,.24));
   animation: edemyFloat 3.8s ease-in-out infinite alternate;
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 @keyframes edemyFloat{
@@ -477,10 +515,10 @@ body::before{
 
 .edemy-intro-burbuja{
   flex: 1;
-  max-width: 830px;
-  min-height: 330px;
-  padding: clamp(32px, 3.4vw, 50px);
-  border-radius: 30px;
+  max-width: 820px;
+  min-height: 290px;
+  padding: clamp(30px, 3vw, 46px);
+  border-radius: 28px;
   background:
     radial-gradient(circle at top left, rgba(0,252,152,.13), transparent 34%),
     linear-gradient(160deg, rgba(0,16,74,.98), rgba(2,8,30,.98));
@@ -489,6 +527,7 @@ body::before{
     0 0 36px rgba(0,252,152,.26),
     0 0 92px rgba(0,59,255,.18),
     0 24px 70px rgba(0,0,0,.70);
+  contain: layout style;
 }
 
 .inicio-fase-badge{
@@ -509,23 +548,77 @@ body::before{
 }
 
 .edemy-intro-burbuja h3{
-  margin: 0 0 16px;
-  font-size: clamp(28px, 2.8vw, 46px);
+  margin: 0 0 20px;
+  font-size: clamp(16px, 1.35vw, 24px);
   line-height: 1.08;
   font-weight: 900;
-  color: #FFFFFF;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: #00FC98;
   text-shadow:
     0 0 12px rgba(0,252,152,.38),
     0 0 26px rgba(0,200,255,.20);
 }
 
 .edemy-intro-burbuja p{
-  margin: 0 0 14px;
+  margin: 0 0 30px;
   color: #F3FAFF;
-  font-size: clamp(22px, 1.75vw, 31px);
-  line-height: 1.38;
+  font-size: clamp(25px, 2.25vw, 40px);
+  line-height: 1.42;
+  min-height: 130px;
   font-weight: 800;
   text-shadow: 0 0 10px rgba(0,200,255,.16);
+}
+
+.edemy-intro-burbuja p.edemy-intro-texto,
+.edemy-intro-texto{
+  margin: 0 0 30px;
+  min-height: 130px;
+  font-size: clamp(25px, 2.25vw, 40px);
+  line-height: 1.42;
+  font-weight: 800;
+  color: #F3FAFF;
+  text-shadow: 0 0 10px rgba(0,200,255,.16);
+}
+
+.edemy-intro-texto.texto-cambiando{
+  animation: edemyTextoCambio .28s ease both;
+}
+
+@keyframes edemyTextoCambio{
+  from{ opacity: 0; transform: translateY(8px); }
+  to{ opacity: 1; transform: translateY(0); }
+}
+
+.edemy-intro-pager{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 11px;
+  margin: 20px 0 0;
+}
+
+.edemy-intro-dot{
+  width: 11px;
+  height: 11px;
+  border-radius: 999px;
+  background: rgba(0, 252, 152, .22);
+  border: 1px solid rgba(0, 252, 152, .42);
+  box-shadow: 0 0 8px rgba(0, 252, 152, .18);
+  transition: transform .22s ease, background .22s ease, box-shadow .22s ease, width .22s ease;
+  will-change: transform;
+}
+
+.edemy-intro-dot.activo{
+  background: linear-gradient(90deg, #00FC98, #00C8FF);
+  transform: scale(1.45);
+  box-shadow:
+    0 0 14px rgba(0, 252, 152, .58),
+    0 0 22px rgba(0, 200, 255, .22);
+}
+
+.edemy-intro-dot.hecho{
+  background: rgba(0, 252, 152, .72);
 }
 
 .edemy-intro-actions{
@@ -534,6 +627,11 @@ body::before{
   flex-direction: column;
   align-items: stretch;
   gap: 12px;
+}
+
+.edemy-intro-card:not(.intro-final) #textoEsperaTematica,
+.edemy-intro-card:not(.intro-final) #contadorListosTematica{
+  display: none;
 }
 
 .btn-chip{
@@ -545,6 +643,7 @@ body::before{
   font-weight: 900;
   letter-spacing: .03em;
   cursor: pointer;
+  will-change: transform;
 }
 
 .btn-chip:hover:not(:disabled){
@@ -552,6 +651,18 @@ body::before{
   box-shadow:
     0 0 26px rgba(0,252,152,.38),
     0 0 30px rgba(0,200,255,.16);
+}
+
+.edemy-intro-card:not(.intro-final) .edemy-intro-next{
+  background: linear-gradient(135deg, rgba(0, 252, 152, .18), rgba(0, 200, 255, .28));
+  color: #FFFFFF;
+  border: 2px solid rgba(0, 252, 152, .76);
+}
+
+.edemy-intro-card.intro-final .edemy-intro-next{
+  background: linear-gradient(135deg, #00FC98, #00C8FF);
+  color: #001626;
+  border: 2px solid rgba(0, 252, 152, .95);
 }
 
 .contador-fase{
@@ -743,6 +854,31 @@ body::before{
   }
 }
 
+@media (max-width: 900px){
+  .inicio-fase-card.edemy-intro-card{
+    width: 94vw;
+    min-height: auto;
+    gap: 28px;
+  }
+
+  .edemy-intro-img{
+    width: clamp(200px, 28vw, 310px);
+  }
+
+  .edemy-intro-burbuja{
+    max-width: 680px;
+    min-height: 250px;
+    padding: 28px;
+  }
+
+  .edemy-intro-burbuja p,
+  .edemy-intro-burbuja p.edemy-intro-texto,
+  .edemy-intro-texto{
+    font-size: clamp(21px, 3vw, 31px);
+    min-height: 115px;
+  }
+}
+
 @media (max-width: 820px){
   body{
     padding-left: 95px;
@@ -812,20 +948,20 @@ body::before{
 
   .inicio-fase-card.edemy-intro-card{
     width: 94vw;
-    min-height: auto;
     flex-direction: column;
+    align-items: center;
     gap: 18px;
     padding: 24px 0;
   }
 
   .edemy-intro-img{
-    width: clamp(170px, 44vw, 250px);
+    width: clamp(160px, 42vw, 250px);
   }
 
   .edemy-intro-burbuja{
     width: 100%;
     max-width: 100%;
-    min-height: 0;
+    min-height: 230px;
     padding: 24px 20px;
     border-radius: 24px;
   }
@@ -836,12 +972,15 @@ body::before{
   }
 
   .edemy-intro-burbuja h3{
-    font-size: clamp(24px, 7vw, 34px);
+    font-size: 15px;
   }
 
-  .edemy-intro-burbuja p{
-    font-size: clamp(18px, 4.8vw, 24px);
+  .edemy-intro-burbuja p,
+  .edemy-intro-burbuja p.edemy-intro-texto,
+  .edemy-intro-texto{
+    font-size: clamp(19px, 5vw, 27px);
     line-height: 1.36;
+    min-height: 105px;
   }
 
   .btn-chip{
@@ -905,7 +1044,9 @@ body::before{
     padding: 22px 17px;
   }
 
-  .edemy-intro-burbuja p{
+  .edemy-intro-burbuja p,
+  .edemy-intro-burbuja p.edemy-intro-texto,
+  .edemy-intro-texto{
     font-size: 18px;
   }
 }
@@ -942,7 +1083,9 @@ body::before{
     min-height: 270px;
   }
 
-  .edemy-intro-burbuja p{
+  .edemy-intro-burbuja p,
+  .edemy-intro-burbuja p.edemy-intro-texto,
+  .edemy-intro-texto{
     font-size: clamp(20px, 1.55vw, 27px);
   }
 }
@@ -954,213 +1097,5 @@ body::before{
     animation: none !important;
     transition: none !important;
     scroll-behavior: auto !important;
-  }
-}
-
-
-/* =====================================================
-   AJUSTE — EDEMY POR DIÁLOGOS / TEXTO DIVIDIDO
-   Mantiene robot, burbuja y texto grandes, pero evita saturar.
-===================================================== */
-.inicio-fase-card.edemy-intro-card{
-  width: min(1240px, 92vw) !important;
-  min-height: min(560px, 72vh) !important;
-  gap: clamp(34px, 5vw, 76px) !important;
-}
-
-.edemy-intro-img{
-  width: clamp(300px, 25vw, 430px) !important;
-}
-
-.edemy-intro-burbuja{
-  max-width: 700px !important;
-  min-height: 430px !important;
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: center !important;
-  padding: clamp(34px, 3.4vw, 48px) !important;
-}
-
-.edemy-intro-burbuja h3{
-  font-size: clamp(34px, 3.3vw, 54px) !important;
-  margin-bottom: 22px !important;
-}
-
-.edemy-intro-burbuja p.edemy-intro-texto,
-.edemy-intro-texto{
-  min-height: clamp(118px, 17vh, 170px) !important;
-  margin: 0 !important;
-  font-size: clamp(26px, 2.15vw, 36px) !important;
-  line-height: 1.35 !important;
-  font-weight: 900 !important;
-  color: #F6FBFF !important;
-  text-shadow:
-    0 0 10px rgba(0, 200, 255, .18),
-    0 2px 10px rgba(0,0,0,.34) !important;
-}
-
-.edemy-intro-texto.texto-cambiando{
-  animation: edemyTextoCambio .28s ease both;
-}
-
-@keyframes edemyTextoCambio{
-  from{ opacity: 0; transform: translateY(8px); }
-  to{ opacity: 1; transform: translateY(0); }
-}
-
-.edemy-intro-pager{
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
-  gap: 12px !important;
-  margin: clamp(18px, 2vw, 26px) 0 0 !important;
-}
-
-.edemy-intro-dot{
-  width: 12px !important;
-  height: 12px !important;
-  border-radius: 999px !important;
-  background: rgba(0, 252, 152, .22) !important;
-  border: 1px solid rgba(0, 252, 152, .42) !important;
-  box-shadow: 0 0 8px rgba(0, 252, 152, .18) !important;
-  transition: transform .22s ease, background .22s ease, box-shadow .22s ease, width .22s ease !important;
-}
-
-.edemy-intro-dot.activo{
-  width: 34px !important;
-  background: linear-gradient(90deg, #00FC98, #00C8FF) !important;
-  transform: scale(1.08) !important;
-  box-shadow:
-    0 0 14px rgba(0, 252, 152, .58),
-    0 0 22px rgba(0, 200, 255, .22) !important;
-}
-
-.edemy-intro-dot.hecho{
-  background: rgba(0, 252, 152, .72) !important;
-}
-
-.edemy-intro-actions{
-  margin-top: clamp(22px, 2.8vw, 34px) !important;
-}
-
-.edemy-intro-card:not(.intro-final) #textoEsperaTematica,
-.edemy-intro-card:not(.intro-final) #contadorListosTematica{
-  display: none !important;
-}
-
-.edemy-intro-next{
-  min-height: 66px !important;
-  font-size: clamp(20px, 1.65vw, 26px) !important;
-  letter-spacing: .02em !important;
-}
-
-.edemy-intro-card:not(.intro-final) .edemy-intro-next{
-  background: linear-gradient(135deg, rgba(0, 252, 152, .18), rgba(0, 200, 255, .28)) !important;
-  color: #FFFFFF !important;
-  border: 2px solid rgba(0, 252, 152, .76) !important;
-}
-
-.edemy-intro-card.intro-final .edemy-intro-next{
-  background: linear-gradient(135deg, #00FC98, #00C8FF) !important;
-  color: #001626 !important;
-  border: 2px solid rgba(0, 252, 152, .95) !important;
-}
-
-@media (max-width: 900px){
-  .inicio-fase-card.edemy-intro-card{
-    gap: 24px !important;
-  }
-
-  .edemy-intro-img{
-    width: clamp(210px, 30vw, 320px) !important;
-  }
-
-  .edemy-intro-burbuja{
-    max-width: 650px !important;
-    min-height: 360px !important;
-    padding: 30px !important;
-  }
-
-  .edemy-intro-burbuja h3{
-    font-size: clamp(30px, 4vw, 44px) !important;
-  }
-
-  .edemy-intro-burbuja p.edemy-intro-texto,
-  .edemy-intro-texto{
-    min-height: 115px !important;
-    font-size: clamp(22px, 3vw, 30px) !important;
-  }
-}
-
-@media (max-width: 700px){
-  .inicio-fase-overlay{
-    padding: 18px 14px 96px !important;
-    align-items: flex-start !important;
-    overflow-y: auto !important;
-  }
-
-  .inicio-fase-card.edemy-intro-card{
-    min-height: auto !important;
-    flex-direction: column !important;
-    gap: 14px !important;
-  }
-
-  .edemy-intro-img{
-    width: clamp(150px, 39vw, 220px) !important;
-  }
-
-  .edemy-intro-burbuja{
-    width: 100% !important;
-    max-width: 100% !important;
-    min-height: 330px !important;
-    padding: 24px 20px !important;
-    border-radius: 24px !important;
-  }
-
-  .inicio-fase-badge{
-    font-size: 11px !important;
-    margin-bottom: 14px !important;
-  }
-
-  .edemy-intro-burbuja h3{
-    font-size: clamp(28px, 8vw, 40px) !important;
-    margin-bottom: 16px !important;
-  }
-
-  .edemy-intro-burbuja p.edemy-intro-texto,
-  .edemy-intro-texto{
-    min-height: 118px !important;
-    font-size: clamp(21px, 5.6vw, 29px) !important;
-    line-height: 1.32 !important;
-  }
-
-  .edemy-intro-next{
-    min-height: 58px !important;
-    font-size: 18px !important;
-  }
-}
-
-@media (max-height: 720px) and (min-width: 901px){
-  .inicio-fase-card.edemy-intro-card{
-    min-height: auto !important;
-  }
-
-  .edemy-intro-img{
-    width: clamp(260px, 22vw, 360px) !important;
-  }
-
-  .edemy-intro-burbuja{
-    min-height: 360px !important;
-    padding: 30px 36px !important;
-  }
-
-  .edemy-intro-burbuja h3{
-    font-size: clamp(30px, 2.6vw, 44px) !important;
-  }
-
-  .edemy-intro-burbuja p.edemy-intro-texto,
-  .edemy-intro-texto{
-    min-height: 108px !important;
-    font-size: clamp(22px, 1.85vw, 31px) !important;
   }
 }

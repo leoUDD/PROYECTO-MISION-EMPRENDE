@@ -54,39 +54,43 @@
   position: absolute;
   inset: 0;
   background: rgba(0, 5, 15, 0.68);
-  backdrop-filter: blur(3px);
-  -webkit-backdrop-filter: blur(3px);
+  /* backdrop-filter (blur) removido a propósito por performance: un blur de
+     pantalla completa sobre un elemento cuyo padre anima opacity fuerza a
+     Chrome a recalcular el blur en cada frame de la transición. Confirmado
+     que mejora el INP sin cambio visual perceptible. */
 }
 
 /* ===== CAJA PRINCIPAL ===== */
 #dialogo-box {
   position: relative;
   z-index: 2;
-  width: min(760px, calc(100vw - 80px));
+  width: min(1320px, 92vw);
+  min-height: min(620px, 76vh);
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
+  gap: clamp(36px, 5vw, 90px);
 }
 
 /* ===== ROBOT ===== */
 .dialogo-personaje {
   flex-shrink: 0;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   position: relative;
   z-index: 3;
   opacity: 1;
-  transform: scale(1.05) translateY(0);
+  transform: scale(1) translateY(0);
   transition: opacity .4s, transform .4s, filter .4s;
 }
 
 .dialogo-img {
-  width: clamp(92px, 12vw, 155px);
+  width: clamp(260px, 25vw, 440px);
   height: auto;
   display: block;
   object-fit: contain;
-  margin-right: -12px;
-  margin-bottom: -10px;
+  margin-right: 0;
+  margin-bottom: 0;
   filter: drop-shadow(0 0 18px rgba(0, 242, 109, 0.35));
 }
 
@@ -94,11 +98,12 @@
 .dialogo-burbuja {
   flex: 1;
   min-width: 0;
-  max-width: 580px;
+  max-width: 820px;
+  min-height: 290px;
   background: linear-gradient(160deg, rgba(0,16,74,0.97), rgba(3,12,38,0.97));
-  border: 1.8px solid rgba(0,242,109,0.72);
-  border-radius: 20px;
-  padding: 20px 22px 14px;
+  border: 2.2px solid rgba(0,242,109,0.72);
+  border-radius: 28px;
+  padding: clamp(30px, 3vw, 46px);
   box-shadow:
     0 0 30px rgba(0,242,109,.22),
     0 0 80px rgba(0,59,255,.14),
@@ -120,8 +125,8 @@
 .dialogo-burbuja::after {
   content: "";
   position: absolute;
-  width: 14px;
-  height: 14px;
+  width: 18px;
+  height: 18px;
   border-color: rgba(0,242,109,.62);
   border-style: solid;
 }
@@ -130,42 +135,44 @@
   top: -1px;
   left: -1px;
   border-width: 2px 0 0 2px;
-  border-radius: 4px 0 0 0;
+  border-radius: 5px 0 0 0;
 }
 
 .dialogo-burbuja::after {
   top: -1px;
   right: -1px;
   border-width: 2px 2px 0 0;
-  border-radius: 0 4px 0 0;
+  border-radius: 0 5px 0 0;
 }
 
 .dialogo-hablante {
   font-family: "Poppins", sans-serif;
-  font-size: clamp(10px, 1.1vw, 12px);
-  font-weight: 800;
-  letter-spacing: 2.5px;
+  font-size: clamp(16px, 1.35vw, 24px);
+  font-weight: 900;
+  letter-spacing: 4px;
   color: #00F26D;
   text-transform: uppercase;
-  margin-bottom: 8px;
+  margin-bottom: 20px;
 }
 
 .dialogo-texto {
   font-family: "Poppins", sans-serif;
-  font-size: clamp(13px, 1.4vw, 16px);
+  font-size: clamp(25px, 2.25vw, 40px);
   color: #E6EEF8;
-  line-height: 1.6;
-  min-height: 56px;
-  margin: 0 0 14px 0;
+  line-height: 1.42;
+  min-height: 130px;
+  margin: 0 0 30px 0;
+  font-weight: 800;
 }
 
 .cursor-rpg {
   display: inline-block;
-  width: 2px;
-  height: 1.1em;
+  width: 4px;
+  height: 1.15em;
   background: #00F26D;
   vertical-align: text-bottom;
-  margin-left: 2px;
+  margin-left: 3px;
+  box-shadow: 0 0 10px rgba(0,242,109,.9);
   animation: parpadeo .65s step-end infinite;
 }
 
@@ -178,19 +185,20 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 10px;
   width: 100%;
-  padding: 10px 16px;
-  border-radius: 12px;
+  min-height: 62px;
+  padding: 17px 28px;
+  border-radius: 17px;
   background: linear-gradient(135deg, rgba(0,242,109,.18), rgba(0,59,255,.22));
-  border: 1.5px solid rgba(0,242,109,.62);
+  border: 2px solid rgba(0,242,109,.62);
   color: #E6EEF8;
   font-family: "Poppins", sans-serif;
-  font-size: clamp(12px, 1.3vw, 14px);
-  font-weight: 800;
+  font-size: clamp(17px, 1.5vw, 24px);
+  font-weight: 900;
   cursor: pointer;
   transition: background .2s, transform .15s, border-color .2s;
-  letter-spacing: .5px;
+  letter-spacing: .05em;
 }
 
 .dialogo-siguiente:hover {
@@ -213,17 +221,17 @@
 .dialogo-progreso {
   display: flex;
   justify-content: center;
-  margin-top: 10px;
+  margin-top: 20px;
 }
 
 #dialogo-dots {
   display: flex;
-  gap: 6px;
+  gap: 11px;
 }
 
 .d-dot {
-  width: 6px;
-  height: 6px;
+  width: 11px;
+  height: 11px;
   border-radius: 50%;
   background: rgba(0,242,109,.22);
   transition: background .3s, transform .3s;
@@ -231,7 +239,7 @@
 
 .d-dot.activo {
   background: #00F26D;
-  transform: scale(1.35);
+  transform: scale(1.45);
 }
 
 .d-dot.hecho {
@@ -241,36 +249,60 @@
 /* ===== RESPONSIVE ===== */
 @media (max-width: 900px) {
   #dialogo-box {
-    width: min(650px, calc(100vw - 44px));
+    width: 94vw;
+    min-height: auto;
+    gap: 28px;
   }
 
   .dialogo-img {
-    width: clamp(82px, 13vw, 125px);
+    width: clamp(200px, 28vw, 310px);
+  }
+
+  .dialogo-burbuja {
+    max-width: 680px;
+    min-height: 250px;
+    padding: 28px;
+  }
+
+  .dialogo-texto {
+    font-size: clamp(21px, 3vw, 31px);
+    min-height: 115px;
   }
 }
 
 @media (max-width: 700px) {
   #dialogo-box {
-    width: calc(100vw - 24px);
+    width: 94vw;
     flex-direction: column;
     align-items: center;
-    gap: 0;
+    gap: 18px;
   }
 
   .dialogo-img {
-    width: clamp(90px, 28vw, 130px);
+    width: clamp(160px, 42vw, 250px);
     margin-right: 0;
-    margin-bottom: -8px;
+    margin-bottom: 0;
   }
 
   .dialogo-burbuja {
     width: 100%;
-    max-width: none;
-    padding: 18px 18px 14px;
+    max-width: 100%;
+    min-height: 230px;
+    padding: 24px 20px;
+  }
+
+  .dialogo-hablante {
+    font-size: 15px;
   }
 
   .dialogo-texto {
-    min-height: 70px;
+    font-size: clamp(19px, 5vw, 27px);
+    min-height: 105px;
+  }
+
+  .dialogo-siguiente {
+    min-height: 56px;
+    font-size: 17px;
   }
 }
 
@@ -411,8 +443,11 @@
     textoEl.innerHTML = "";
     teclaCounter = 0;
 
+    const textoNodo = document.createTextNode("");
     const cursor = document.createElement("span");
     cursor.className = "cursor-rpg";
+    textoEl.appendChild(textoNodo);
+    textoEl.appendChild(cursor);
 
     let i = 0;
 
@@ -420,8 +455,7 @@
 
     timerEscritura = setInterval(() => {
       if (i < txt.length) {
-        textoEl.textContent = txt.slice(0, i + 1);
-        textoEl.appendChild(cursor);
+        textoNodo.data = txt.slice(0, i + 1);
 
         teclaCounter++;
 
@@ -433,7 +467,8 @@
       } else {
         clearInterval(timerEscritura);
         escribiendo = false;
-        textoEl.textContent = txt;
+        textoNodo.data = txt;
+        cursor.remove();
       }
     }, 30);
   }

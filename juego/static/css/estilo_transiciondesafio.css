@@ -537,8 +537,13 @@ body:has(#dialogo-inicial-overlay.visible) .team-container {
   background:
     radial-gradient(circle at center, rgba(0, 252, 152, .11), transparent 42%),
     rgba(0, 5, 18, .78) !important;
+  /* PERFORMANCE: backdrop-filter (blur) removido a propósito. Un blur de
+     pantalla completa sobre un elemento cuyo padre anima opacity fuerza a
+     recalcular el blur en cada frame de la transición. Confirmado que
+     mejora el INP sin cambio visual perceptible.
   backdrop-filter: blur(8px) brightness(.56) !important;
   -webkit-backdrop-filter: blur(8px) brightness(.56) !important;
+  */
 }
 
 #dialogo-inicial-overlay {
@@ -740,6 +745,18 @@ body:has(#dialogo-inicial-overlay.visible) .team-container {
    Este bloque va al final para pisar cualquier estilo del include.
 ===================================================== */
 
+/* PERFORMANCE: mientras el diálogo de EdEmy está abierto, .team-container
+   queda completamente tapado por el overlay. No hay necesidad de que siga
+   calculando su propio backdrop-filter en cada frame de las animaciones
+   del diálogo (robot, dots, botón). No cambia lo que se ve. */
+body:has(#dialogo-inicial-overlay.visible) .team-container,
+body:has(#dialogo-desafio-overlay.visible) .team-container,
+body:has(.dialogo-overlay.visible) .team-container,
+body:has(.dialogo-intro-overlay.visible) .team-container {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
 body:has(#dialogo-inicial-overlay.visible) .team-container,
 body:has(#dialogo-desafio-overlay.visible) .team-container,
 body:has(.dialogo-overlay.visible) .team-container,
@@ -772,8 +789,12 @@ body:has(.dialogo-intro-overlay.visible) .team-container {
     radial-gradient(circle at 36% 48%, rgba(0, 252, 152, .16), transparent 38%),
     radial-gradient(circle at 72% 34%, rgba(0, 200, 255, .13), transparent 34%),
     rgba(0, 5, 18, .82) !important;
+  /* PERFORMANCE: backdrop-filter (blur) removido a propósito. Ver nota arriba
+     en el bloque "EDEMY DIALOGO GRANDE". Esta era la capa más pesada: blur(10px)
+     sobre pantalla completa, con el padre animando opacity.
   backdrop-filter: blur(10px) brightness(.50) !important;
   -webkit-backdrop-filter: blur(10px) brightness(.50) !important;
+  */
 }
 
 #dialogo-box,
@@ -822,6 +843,7 @@ body:has(.dialogo-intro-overlay.visible) .team-container {
     drop-shadow(0 0 28px rgba(0, 252, 152, .58))
     drop-shadow(0 0 62px rgba(0, 200, 255, .30))
     drop-shadow(0 28px 36px rgba(0, 0, 0, .42)) !important;
+  will-change: transform !important;
 }
 
 .dialogo-burbuja,
@@ -845,6 +867,7 @@ body:has(.dialogo-intro-overlay.visible) .team-container {
     0 0 110px rgba(0, 59, 255, .22),
     0 30px 86px rgba(0, 0, 0, .78),
     inset 0 0 0 1px rgba(255,255,255,.08) !important;
+  contain: layout style;
 }
 
 .dialogo-hablante,
@@ -902,6 +925,7 @@ body:has(.dialogo-intro-overlay.visible) .team-container {
   box-shadow:
     0 0 22px rgba(0, 252, 152, .32),
     inset 0 0 24px rgba(0, 200, 255, .13) !important;
+  will-change: transform !important;
 }
 
 .dialogo-progreso,
@@ -1050,4 +1074,3 @@ body:has(.dialogo-intro-overlay.visible) .team-container {
     font-size: 18px !important;
   }
 }
-
