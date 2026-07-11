@@ -28,7 +28,8 @@ body{
   display:flex;
   align-items:center;
   justify-content:center;
-  padding:20px;
+  /* arriba: HUD (ESCUADRÓN/Ranking) · izquierda: ruta de misión */
+  padding:clamp(84px, 9vh, 104px) 20px 24px 168px;
   overflow:hidden;
 }
 
@@ -57,6 +58,34 @@ body::before{
     0 0 45px rgba(0,59,255,.12);
   padding:clamp(24px, 4vw, 44px);
   backdrop-filter: blur(5px);
+}
+
+/* Título de fase */
+.phase-title{
+  display:block;
+  width:fit-content;
+  max-width:100%;
+  margin:clamp(20px, 4vw, 44px) auto clamp(14px, 2.2vw, 22px);
+  padding:clamp(10px, 1.6vw, 16px) clamp(20px, 3vw, 40px);
+  text-align:center;
+  font-family:'Orbitron', sans-serif;
+  font-size:clamp(26px, 4.2vw, 42px);
+  font-weight:900;
+  letter-spacing:0.06em;
+  text-transform:uppercase;
+  color:var(--udd-green);
+  text-shadow:
+    0 0 16px rgba(0,242,109,.55),
+    0 0 34px rgba(0,242,109,.30),
+    0 2px 10px rgba(0,0,0,.6);
+  border:2px solid rgba(0,242,109,.40);
+  border-radius:18px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(0,242,109,.12), transparent 60%),
+    linear-gradient(160deg, rgba(0,16,74,.55), rgba(2,10,35,.45));
+  box-shadow:
+    0 0 22px rgba(0,242,109,.18),
+    inset 0 0 18px rgba(0,242,109,.06);
 }
 
 /* Encabezado */
@@ -109,6 +138,7 @@ body::before{
 .mode-grid{
   display:grid;
   grid-template-columns:1fr;
+  align-items:stretch;
   gap:clamp(14px, 2vw, 20px);
   margin-top:clamp(18px, 2.5vw, 26px);
 }
@@ -117,11 +147,11 @@ body::before{
   .mode-grid{ grid-template-columns:repeat(2, 1fr); }
 }
 
-/* Tarjeta con imagen de fondo */
+/* Tarjeta */
 .mode-card{
   position:relative;
   display:flex;
-  height:clamp(240px, 34vw, 320px);
+  width:100%;
   border-radius:20px;
   overflow:hidden;
   text-decoration:none;
@@ -138,13 +168,14 @@ body::before{
 .mode-grid .mode-card:nth-child(1){ animation-delay:0s; }
 .mode-grid .mode-card:nth-child(2){ animation-delay:1.3s; }
 
-/* imágenes por tarjeta */
-.mode-intro{
-  background-image:url("/static/images/Desconocidos.png");
-}
-
+/* Fondo neutro azul marino (reemplaza las fotos) */
+.mode-intro,
 .mode-known{
-  background-image:url("/static/images/Conocidos.png");
+  background-image:none;
+  background-color:#08183f;
+  background:
+    radial-gradient(circle at 30% 20%, rgba(0,242,109,.08), transparent 45%),
+    linear-gradient(160deg, #0a1c47 0%, #061334 100%);
 }
 
 /* overlay para contraste */
@@ -174,9 +205,10 @@ body::before{
   position:relative;
   display:flex;
   flex-direction:column;
-  justify-content:flex-end;
+  justify-content:flex-start;
   gap:8px;
   width:100%;
+  min-height:100%;
   padding:clamp(16px, 2.4vw, 22px);
   z-index:2;
 }
@@ -187,8 +219,8 @@ body::before{
   font-size:clamp(18px, 2.2vw, 23px);
   font-weight:900;
   line-height:1.2;
-  color:#fff;
-  text-shadow:0 2px 8px rgba(0,0,0,.65);
+  color:var(--udd-green);
+  text-shadow:0 0 12px rgba(0,242,109,.45), 0 2px 8px rgba(0,0,0,.65);
 }
 
 .mode-desc{
@@ -200,7 +232,7 @@ body::before{
 }
 
 .mode-cta{
-  margin-top:10px;
+  margin-top:auto;
   align-self:flex-start;
   background:var(--udd-green);
   color:var(--udd-dark);
@@ -248,28 +280,51 @@ body::before{
   }
 }
 
-/* Responsivo */
-@media (max-width: 720px){
+/* ==========================================================================
+   RESPONSIVE — coordinado con los breakpoints del sidebar "RUTA DE MISIÓN"
+   (linea_progreso_habilidades) y el HUD superior (ESCUADRÓN/Ranking).
+
+   Sidebar por rango:
+   · >=1101px  → left:22px  width:122px  (reservar ~168px izq)
+   · 701–1100  → left:10px  width:86px   (reservar ~110px izq)  ← iPad
+   · <=700px   → pasa ABAJO (píldora horizontal) → reservar espacio inferior
+   ========================================================================== */
+
+/* ── Tablet: sidebar angosto a la izquierda (701px – 1100px) ─────────────── */
+@media (min-width: 701px) and (max-width: 1100px){
   body{
-    padding:16px;
+    padding:clamp(80px, 8vh, 100px) 20px 24px 110px;
+  }
+
+  .mode-container{
+    width:100%;
+  }
+}
+
+/* ── Móvil / tablet chico: el sidebar se va ABAJO (<=700px) ──────────────── */
+@media (max-width: 700px){
+  body{
+    /* sin espacio izquierdo; sí abajo para la píldora del sidebar */
+    padding:clamp(72px, 8vh, 92px) 16px 96px 16px;
+    align-items:flex-start;
     overflow:auto;
   }
 
   .mode-container{
     width:100%;
     padding:24px 18px;
+    margin:auto;
   }
 
   .mode-card{
-    height:clamp(210px, 52vw, 280px);
     background-position:center center;
   }
 }
 
+/* ── Móvil (≤ 480px) ─────────────────────────────────────────────────────── */
 @media (max-width: 480px){
   body{
-    padding:12px;
-    align-items:center;
+    padding:clamp(64px, 7vh, 84px) 12px 90px 12px;
   }
 
   .mode-container{
@@ -277,8 +332,10 @@ body::before{
     padding:22px 14px;
   }
 
-  .mode-title{
-    font-size:clamp(22px, 7vw, 30px);
+  .phase-title{
+    font-size:clamp(24px, 8vw, 34px);
+    padding:10px 18px;
+    border-radius:14px;
   }
 
   .mode-subtitle{
@@ -286,7 +343,6 @@ body::before{
   }
 
   .mode-card{
-    height:220px;
     border-radius:18px;
   }
 
@@ -308,18 +364,29 @@ body::before{
   }
 }
 
+/* ── Móvil muy chico: la píldora del sidebar es más angosta (≤ 420px) ────── */
+@media (max-width: 420px){
+  body{
+    padding-bottom:84px;
+  }
+}
+
+/* ── Altura reducida: permite scroll y compacta el título ────────────────── */
 @media (max-height: 650px){
   body{
     overflow:auto;
     align-items:flex-start;
+    padding-top:clamp(70px, 8vh, 90px);
   }
 
   .mode-container{
-    margin:20px 0;
+    margin:auto;
   }
 
-  .mode-card{
-    height:220px;
+  .phase-title{
+    font-size:clamp(24px, 4.5vw, 40px);
+    margin-bottom:12px;
+    padding:8px 20px;
   }
 }
 
