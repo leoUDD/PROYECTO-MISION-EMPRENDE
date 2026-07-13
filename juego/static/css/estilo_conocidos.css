@@ -11,10 +11,10 @@
   --text: #E6EEF8;
   --muted: rgba(230,238,248,.78);
   --radius: 30px;
-  --fs-title: clamp(38px, 4.4vw, 68px);
-  --fs-body: clamp(16px, 1.35vw, 20px);
-  --fs-question: clamp(19px, 1.8vw, 28px);
-  --fs-timer: clamp(40px, 4.6vw, 64px);
+  --fs-title: clamp(44px, 5.2vw, 82px);
+  --fs-body: clamp(19px, 1.7vw, 26px);
+  --fs-question: clamp(24px, 2.3vw, 36px);
+  --fs-timer: clamp(48px, 5.4vw, 78px);
 }
 
 *, *::before, *::after{
@@ -126,7 +126,7 @@ body::before{
 }
 
 .title{
-  width: min(100%, 900px);
+  width: min(100%, 980px);
   margin: 0 auto;
   text-align: center;
   line-height: 1.04;
@@ -147,8 +147,8 @@ body::before{
 }
 
 .speech-bubble{
-  width: min(100%, 570px);
-  padding: clamp(24px, 2.6vw, 34px);
+  width: min(100%, 780px);
+  padding: clamp(30px, 3vw, 44px);
   border-radius: 22px;
   background: rgba(4,24,50,.50);
   border: 1.5px solid rgba(0,200,255,.46);
@@ -176,7 +176,7 @@ body::before{
 }
 
 .pregunta-random{
-  margin-top: 17px;
+  margin-top: 20px;
   font-weight: 900;
   color: #fff;
   font-size: var(--fs-question);
@@ -187,16 +187,16 @@ body::before{
 }
 
 .btn-random{
-  margin-top: 10px;
-  min-width: 230px;
-  min-height: 50px;
-  padding: 12px 22px;
+  margin-top: 14px;
+  min-width: 240px;
+  min-height: 56px;
+  padding: 14px 26px;
   border-radius: 999px;
   border: 1.7px solid rgba(0,252,152,.66);
   background: linear-gradient(135deg, rgba(0,252,152,.17), rgba(0,200,255,.15));
   color: #EAF8FF;
   font-weight: 900;
-  font-size: 15px;
+  font-size: 17px;
   letter-spacing: .01em;
   cursor: pointer;
   display: inline-flex;
@@ -212,7 +212,7 @@ body::before{
 
 .btn-random::before{
   content: "⚡";
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1;
 }
 
@@ -241,8 +241,8 @@ body::before{
   display: flex;
   justify-content: center;
   align-items: center;
-  width: clamp(210px, 25vw, 300px);
-  height: clamp(80px, 9vw, 102px);
+  width: clamp(230px, 27vw, 330px);
+  height: clamp(88px, 10vw, 116px);
   margin: 0;
   border-radius: 23px;
   border: 1.8px solid rgba(0,200,255,.64);
@@ -834,13 +834,16 @@ body:has(#dialogo-inicial-overlay.visible) .zona-juego{
 /* =========================
    RESPONSIVE
    ========================= */
+/* 1101–1280px: sidebar en modo desktop (≈144px a la izquierda).
+   Reservamos 320px totales (160px por lado) para que el .phone,
+   que va centrado, nunca quede debajo del sidebar. */
 @media (max-width: 1280px){
   .phone{
-    width: min(930px, calc(100vw - 230px));
+    width: min(930px, calc(100vw - 320px));
   }
 
   .title{
-    font-size: clamp(34px, 4.4vw, 60px);
+    font-size: clamp(40px, 5.2vw, 72px);
   }
 }
 
@@ -849,8 +852,10 @@ body:has(#dialogo-inicial-overlay.visible) .zona-juego{
     padding: 86px 18px 96px;
   }
 
+  /* Sidebar en modo tablet (≈96px a la izquierda). Reservamos 224px
+     totales (112px por lado) para librarlo con el .phone centrado. */
   .phone{
-    width: min(860px, 94vw);
+    width: min(860px, calc(100vw - 224px));
     min-height: clamp(560px, 76vh, 700px);
   }
 
@@ -868,7 +873,7 @@ body:has(#dialogo-inicial-overlay.visible) .zona-juego{
   }
 
   .speech-bubble{
-    width: min(100%, 560px);
+    width: min(100%, 720px);
   }
 
   #dialogo-box{
@@ -899,8 +904,10 @@ body:has(#dialogo-inicial-overlay.visible) .zona-juego{
     padding: 82px 12px 96px;
   }
 
+  /* 701–900px: el sidebar sigue en modo lateral (≈96px). Mantenemos la
+     reserva de 224px para que no se solape con el .phone. */
   .phone{
-    width: min(760px, 96vw);
+    width: min(760px, calc(100vw - 224px));
     min-width: 0;
     min-height: clamp(560px, 78vh, 720px);
   }
@@ -911,7 +918,7 @@ body:has(#dialogo-inicial-overlay.visible) .zona-juego{
 
   .title{
     padding: 0 58px;
-    font-size: clamp(31px, 7vw, 48px);
+    font-size: clamp(33px, 7vw, 52px);
   }
 
   .astro-card{
@@ -927,13 +934,16 @@ body:has(#dialogo-inicial-overlay.visible) .zona-juego{
 }
 
 @media (max-width: 700px){
+  /* Sidebar pasa a píldora fija abajo (~72px + 10px). El HUD superior
+     puede envolver en dos líneas. Reservamos arriba/abajo para que nada
+     quede tapado por los elementos fixed. */
   body{
-    padding: 76px 10px 92px;
+    padding: 88px 10px 104px;
   }
 
   .phone{
     width: 100%;
-    min-height: calc(100vh - 176px);
+    min-height: calc(100vh - 200px);
   }
 
   .zona-juego{
@@ -951,7 +961,7 @@ body:has(#dialogo-inicial-overlay.visible) .zona-juego{
 
   .title{
     padding: 0 48px 0 0;
-    font-size: clamp(28px, 8vw, 42px);
+    font-size: clamp(29px, 8vw, 44px);
   }
 
   .juego-contenido{
@@ -959,19 +969,19 @@ body:has(#dialogo-inicial-overlay.visible) .zona-juego{
   }
 
   .speech-bubble{
-    padding: 18px 16px;
+    padding: 20px 18px;
     width: 100%;
   }
 
   .pregunta-random{
-    font-size: clamp(16px, 4.5vw, 20px);
+    font-size: clamp(18px, 4.8vw, 23px);
   }
 
   .btn-random{
     width: 100%;
     min-width: 0;
-    min-height: 46px;
-    font-size: 14px;
+    min-height: 48px;
+    font-size: 15px;
   }
 
   .juego-footer{
@@ -979,8 +989,8 @@ body:has(#dialogo-inicial-overlay.visible) .zona-juego{
   }
 
   #timer{
-    width: min(82%, 310px);
-    height: 74px;
+    width: min(82%, 320px);
+    height: 78px;
   }
 
   .astro-trigger{
@@ -1092,8 +1102,9 @@ body:has(#dialogo-inicial-overlay.visible) .zona-juego{
 }
 
 @media (max-width: 430px){
+  /* La píldora inferior pasa a height 64px + bottom 8px. Reservamos 96px. */
   body{
-    padding: 70px 8px 88px;
+    padding: 82px 8px 96px;
   }
 
   .zona-juego{
@@ -1101,22 +1112,22 @@ body:has(#dialogo-inicial-overlay.visible) .zona-juego{
   }
 
   .title{
-    font-size: clamp(25px, 8.4vw, 36px);
+    font-size: clamp(26px, 8.4vw, 38px);
   }
 
   .speech-bubble{
-    padding: 16px 14px;
+    padding: 18px 15px;
   }
 
   .body{
-    font-size: 14px;
+    font-size: 16px;
     line-height: 1.45;
   }
 
   #timer{
     width: 88%;
-    height: 68px;
-    font-size: clamp(30px, 10vw, 42px);
+    height: 72px;
+    font-size: clamp(32px, 10vw, 46px);
   }
 
   .astro-card{
@@ -1149,7 +1160,7 @@ body:has(#dialogo-inicial-overlay.visible) .zona-juego{
   }
 
   .title{
-    font-size: clamp(34px, 4vw, 54px);
+    font-size: clamp(36px, 4.4vw, 60px);
   }
 
   .juego-contenido{
@@ -1157,7 +1168,7 @@ body:has(#dialogo-inicial-overlay.visible) .zona-juego{
   }
 
   #timer{
-    height: 76px;
+    height: 82px;
   }
 }
 

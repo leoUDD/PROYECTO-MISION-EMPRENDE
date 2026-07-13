@@ -36,7 +36,7 @@
 #dialogo-overlay {
   position: fixed;
   inset: 0;
-  z-index: 1000;
+  z-index: 9999; /* sobre el sidebar RUTA DE MISIÓN (9998), igual que conocidos */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -53,11 +53,14 @@
 #dialogo-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(0, 5, 15, 0.68);
+  background:
+    radial-gradient(circle at center, rgba(0,252,152,.10), transparent 42%),
+    rgba(0, 5, 18, 0.78);
   /* backdrop-filter (blur) removido a propósito por performance: un blur de
      pantalla completa sobre un elemento cuyo padre anima opacity fuerza a
      Chrome a recalcular el blur en cada frame de la transición. Confirmado
-     que mejora el INP sin cambio visual perceptible. */
+     que mejora el INP sin cambio visual perceptible. El fondo sólido a .78
+     ya oscurece el sidebar (que queda debajo del overlay) igual que conocidos. */
 }
 
 /* ===== CAJA PRINCIPAL ===== */

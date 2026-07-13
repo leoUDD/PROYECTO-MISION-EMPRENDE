@@ -195,11 +195,88 @@ main.team-container-wrap {
   text-shadow: 0 2px 8px rgba(0, 0, 0, .35);
 }
 
-.mission-panel .mission-lead {
-  color: #FFFFFF;
-  font-size: clamp(19px, 1.75vw, 24px);
+/* ── LAYOUT PARTIDO: gancho a la izquierda + objetivos a la derecha ── */
+.mission-split {
+  display: flex;
+  align-items: center;
+  gap: clamp(18px, 2.4vw, 26px);
+}
+
+.mission-hook {
+  flex: 1.1 1 0;
+  min-width: 0;
+}
+
+.mission-panel .mission-hook-title {
+  color: var(--udd-green);
+  font-size: clamp(20px, 2vw, 26px);
   font-weight: 900;
-  line-height: 1.32;
+  line-height: 1.16;
+  margin: 0 0 6px;
+  text-shadow: 0 0 14px rgba(0, 242, 109, .28);
+}
+
+.mission-panel .mission-hook-sub {
+  color: rgba(230, 238, 248, .82);
+  font-size: clamp(13px, 1.2vw, 15px);
+  line-height: 1.42;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* ── OBJETIVOS DEL ESCUADRÓN (lista de chips) ── */
+.mission-goals {
+  flex: 1 1 0;
+  min-width: 0;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.mission-goals li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 16px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(0, 242, 109, .14), rgba(0, 200, 255, .10));
+  border: 1.6px solid rgba(0, 242, 109, .60);
+  color: #EAFBF3;
+  font-family: "Poppins", sans-serif;
+  font-weight: 800;
+  font-size: clamp(14px, 1.3vw, 17px);
+  letter-spacing: .01em;
+  box-shadow:
+    0 0 16px rgba(0, 242, 109, .14),
+    inset 0 0 0 1px rgba(255, 255, 255, .04);
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+
+.mission-goals li::before {
+  content: "✓";
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(0, 242, 109, .18);
+  color: var(--udd-green);
+  font-size: 13px;
+  font-weight: 900;
+  text-shadow: 0 0 8px rgba(0, 242, 109, .7);
+}
+
+.mission-goals li:hover {
+  transform: translateY(-2px);
+  border-color: rgba(0, 242, 109, .95);
+  box-shadow:
+    0 0 22px rgba(0, 242, 109, .28),
+    inset 0 0 0 1px rgba(255, 255, 255, .06);
 }
 
 .tablet-reminder {
@@ -398,8 +475,26 @@ main.team-container-wrap {
     font-size: 15px;
   }
 
-  .mission-panel .mission-lead {
-    font-size: 18px;
+  .mission-split {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+    text-align: center;
+  }
+
+  .mission-panel .mission-hook-title {
+    font-size: 20px;
+  }
+
+  .mission-goals li {
+    padding: 11px 15px;
+    font-size: 15px;
+  }
+
+  .mission-goals li::before {
+    width: 18px;
+    height: 18px;
+    font-size: 12px;
   }
 
   .next-step button,
@@ -440,8 +535,13 @@ main.team-container-wrap {
     font-size: 14px;
   }
 
-  .mission-panel .mission-lead {
-    font-size: 16px;
+  .mission-panel .mission-hook-title {
+    font-size: 18px;
+  }
+
+  .mission-goals li {
+    padding: 10px 14px;
+    font-size: 14px;
   }
 
   .tablet-reminder {
@@ -473,218 +573,46 @@ main.team-container-wrap {
     font-size: 14px;
   }
 
-  .mission-panel .mission-lead {
-    font-size: 17px;
+  .mission-panel .mission-hook-title {
+    font-size: 19px;
+  }
+
+  .mission-goals {
+    gap: 7px;
+  }
+
+  .mission-goals li {
+    padding: 9px 15px;
+    font-size: 14px;
   }
 }
 
 /* =====================================================
-   EDEMY DIALOGO GRANDE + FONDO CAMUFLADO / BORROSO
+   FONDO AL DIÁLOGO — robot y card dominan
+   El overlay real es #dialogo-overlay (definido en el include
+   includes/dialogo_intro.html). Cuando tiene la clase .visible:
+   - se atenúa el panel de la misión (.team-container)
+   - se atenúa la barra lateral (.metro-progreso-habilidades),
+     que por tener su propio backdrop-filter forma un contexto de
+     apilamiento aislado imposible de difuminar desde el backdrop.
+   Todo el CSS del propio diálogo (robot, burbuja, dots, responsive)
+   vive en el include; aquí NO se duplica para no pisarlo.
 ===================================================== */
 
-body:has(#dialogo-inicial-overlay.visible) .team-container-wrap,
-body:has(#dialogo-inicial-overlay.visible) .team-container {
-  filter: blur(7px) brightness(.36) saturate(.76);
+body:has(#dialogo-overlay.visible) .team-container-wrap,
+body:has(#dialogo-overlay.visible) .team-container {
+  filter: blur(7px) brightness(.36) saturate(.75);
   transform: scale(1.012);
   pointer-events: none;
   user-select: none;
   transition: filter .35s ease, transform .35s ease;
 }
 
-#dialogo-backdrop,
-#dialogo-inicial-overlay.visible #dialogo-backdrop {
-  background:
-    radial-gradient(circle at center, rgba(0, 252, 152, .11), transparent 42%),
-    rgba(0, 5, 18, .78) !important;
-  backdrop-filter: blur(8px) brightness(.56) !important;
-  -webkit-backdrop-filter: blur(8px) brightness(.56) !important;
-}
-
-#dialogo-inicial-overlay {
-  position: fixed !important;
-  inset: 0 !important;
-  z-index: 9999 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  padding: clamp(24px, 4vw, 72px) !important;
-}
-
-#dialogo-box {
-  width: min(1320px, 92vw) !important;
-  min-height: min(620px, 76vh) !important;
-  margin-left: 0 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: clamp(36px, 5vw, 90px) !important;
-  position: relative !important;
-  z-index: 3 !important;
-}
-
-.dialogo-personaje {
-  flex: 0 0 auto !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-}
-
-.dialogo-personaje.activo {
-  transform: scale(1) translateY(0) !important;
-}
-
-.dialogo-img {
-  width: clamp(260px, 25vw, 440px) !important;
-  height: auto !important;
-  margin-bottom: 0 !important;
-  object-fit: contain !important;
-  filter:
-    drop-shadow(0 0 22px rgba(0, 252, 152, .45))
-    drop-shadow(0 0 46px rgba(0, 200, 255, .22)) !important;
-}
-
-.dialogo-burbuja {
-  flex: 1 !important;
-  max-width: 820px !important;
-  min-height: 290px !important;
-  padding: clamp(30px, 3vw, 46px) !important;
-  border-radius: 28px !important;
-  background:
-    radial-gradient(circle at top left, rgba(0, 252, 152, .12), transparent 34%),
-    linear-gradient(160deg, rgba(0, 16, 74, .98), rgba(2, 8, 30, .98)) !important;
-  border: 2.2px solid rgba(0, 252, 152, .82) !important;
-  box-shadow:
-    0 0 34px rgba(0, 252, 152, .25),
-    0 0 90px rgba(0, 59, 255, .18),
-    0 24px 70px rgba(0, 0, 0, .70) !important;
-}
-
-.dialogo-hablante {
-  font-size: clamp(16px, 1.35vw, 24px) !important;
-  font-weight: 900 !important;
-  letter-spacing: 4px !important;
-  color: #00FC98 !important;
-  margin-bottom: 20px !important;
-}
-
-.dialogo-texto-rpg {
-  font-size: clamp(25px, 2.25vw, 40px) !important;
-  line-height: 1.42 !important;
-  min-height: 130px !important;
-  font-weight: 800 !important;
-  color: #F3FAFF !important;
-  text-shadow: 0 0 10px rgba(0, 200, 255, .24) !important;
-  margin-bottom: 30px !important;
-}
-
-.cursor-rpg {
-  width: 4px !important;
-  height: 1.15em !important;
-  background: #00FC98 !important;
-  box-shadow: 0 0 10px rgba(0, 252, 152, .9) !important;
-}
-
-.dialogo-siguiente {
-  min-height: 62px !important;
-  padding: 17px 28px !important;
-  border-radius: 17px !important;
-  font-size: clamp(17px, 1.5vw, 24px) !important;
-  font-weight: 900 !important;
-  letter-spacing: .05em !important;
-  background: linear-gradient(135deg, rgba(0, 252, 152, .22), rgba(0, 59, 255, .26)) !important;
-  border: 2px solid rgba(0, 252, 152, .78) !important;
-  color: #FFFFFF !important;
-  box-shadow:
-    0 0 18px rgba(0, 252, 152, .25),
-    inset 0 0 20px rgba(0, 200, 255, .10) !important;
-}
-
-.dialogo-siguiente:hover {
-  transform: translateY(-2px) scale(1.02) !important;
-  border-color: rgba(0, 252, 152, 1) !important;
-  box-shadow:
-    0 0 26px rgba(0, 252, 152, .38),
-    inset 0 0 24px rgba(0, 200, 255, .14) !important;
-}
-
-.dialogo-progreso {
-  margin-top: 20px !important;
-}
-
-#dialogo-dots {
-  gap: 11px !important;
-}
-
-.d-dot {
-  width: 11px !important;
-  height: 11px !important;
-  background: rgba(0, 252, 152, .22) !important;
-}
-
-.d-dot.activo {
-  background: #00FC98 !important;
-  transform: scale(1.45) !important;
-  box-shadow: 0 0 12px rgba(0, 252, 152, .75) !important;
-}
-
-.d-dot.hecho {
-  background: rgba(0, 252, 152, .62) !important;
-}
-
-@media (max-width: 900px) {
-  #dialogo-box {
-    width: 94vw !important;
-    min-height: auto !important;
-    gap: 28px !important;
-  }
-
-  .dialogo-img {
-    width: clamp(200px, 28vw, 310px) !important;
-  }
-
-  .dialogo-burbuja {
-    max-width: 680px !important;
-    min-height: 250px !important;
-    padding: 28px !important;
-  }
-
-  .dialogo-texto-rpg {
-    font-size: clamp(21px, 3vw, 31px) !important;
-    min-height: 115px !important;
-  }
-}
-
-@media (max-width: 700px) {
-  #dialogo-box {
-    width: 94vw !important;
-    flex-direction: column !important;
-    gap: 18px !important;
-  }
-
-  .dialogo-img {
-    width: clamp(160px, 42vw, 250px) !important;
-  }
-
-  .dialogo-burbuja {
-    width: 100% !important;
-    max-width: 100% !important;
-    min-height: 230px !important;
-    padding: 24px 20px !important;
-  }
-
-  .dialogo-hablante {
-    font-size: 15px !important;
-  }
-
-  .dialogo-texto-rpg {
-    font-size: clamp(19px, 5vw, 27px) !important;
-    min-height: 105px !important;
-  }
-
-  .dialogo-siguiente {
-    min-height: 56px !important;
-    font-size: 17px !important;
-  }
+body:has(#dialogo-overlay.visible) .metro-progreso-habilidades {
+  filter: blur(8px) brightness(.4) saturate(.7) !important;
+  opacity: .6 !important;
+  pointer-events: none !important;
+  transition: filter .35s ease, opacity .35s ease !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
