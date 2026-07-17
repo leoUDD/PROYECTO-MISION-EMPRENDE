@@ -195,88 +195,11 @@ main.team-container-wrap {
   text-shadow: 0 2px 8px rgba(0, 0, 0, .35);
 }
 
-/* ── LAYOUT PARTIDO: gancho a la izquierda + objetivos a la derecha ── */
-.mission-split {
-  display: flex;
-  align-items: center;
-  gap: clamp(18px, 2.4vw, 26px);
-}
-
-.mission-hook {
-  flex: 1.1 1 0;
-  min-width: 0;
-}
-
-.mission-panel .mission-hook-title {
-  color: var(--udd-green);
-  font-size: clamp(20px, 2vw, 26px);
+.mission-panel .mission-lead {
+  color: #FFFFFF;
+  font-size: clamp(19px, 1.75vw, 24px);
   font-weight: 900;
-  line-height: 1.16;
-  margin: 0 0 6px;
-  text-shadow: 0 0 14px rgba(0, 242, 109, .28);
-}
-
-.mission-panel .mission-hook-sub {
-  color: rgba(230, 238, 248, .82);
-  font-size: clamp(13px, 1.2vw, 15px);
-  line-height: 1.42;
-  font-weight: 600;
-  margin: 0;
-}
-
-/* ── OBJETIVOS DEL ESCUADRÓN (lista de chips) ── */
-.mission-goals {
-  flex: 1 1 0;
-  min-width: 0;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 9px;
-}
-
-.mission-goals li {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 11px 16px;
-  border-radius: 999px;
-  background: linear-gradient(135deg, rgba(0, 242, 109, .14), rgba(0, 200, 255, .10));
-  border: 1.6px solid rgba(0, 242, 109, .60);
-  color: #EAFBF3;
-  font-family: "Poppins", sans-serif;
-  font-weight: 800;
-  font-size: clamp(14px, 1.3vw, 17px);
-  letter-spacing: .01em;
-  box-shadow:
-    0 0 16px rgba(0, 242, 109, .14),
-    inset 0 0 0 1px rgba(255, 255, 255, .04);
-  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
-}
-
-.mission-goals li::before {
-  content: "✓";
-  flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: rgba(0, 242, 109, .18);
-  color: var(--udd-green);
-  font-size: 13px;
-  font-weight: 900;
-  text-shadow: 0 0 8px rgba(0, 242, 109, .7);
-}
-
-.mission-goals li:hover {
-  transform: translateY(-2px);
-  border-color: rgba(0, 242, 109, .95);
-  box-shadow:
-    0 0 22px rgba(0, 242, 109, .28),
-    inset 0 0 0 1px rgba(255, 255, 255, .06);
+  line-height: 1.32;
 }
 
 .tablet-reminder {
@@ -475,26 +398,8 @@ main.team-container-wrap {
     font-size: 15px;
   }
 
-  .mission-split {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 16px;
-    text-align: center;
-  }
-
-  .mission-panel .mission-hook-title {
-    font-size: 20px;
-  }
-
-  .mission-goals li {
-    padding: 11px 15px;
-    font-size: 15px;
-  }
-
-  .mission-goals li::before {
-    width: 18px;
-    height: 18px;
-    font-size: 12px;
+  .mission-panel .mission-lead {
+    font-size: 18px;
   }
 
   .next-step button,
@@ -535,13 +440,8 @@ main.team-container-wrap {
     font-size: 14px;
   }
 
-  .mission-panel .mission-hook-title {
-    font-size: 18px;
-  }
-
-  .mission-goals li {
-    padding: 10px 14px;
-    font-size: 14px;
+  .mission-panel .mission-lead {
+    font-size: 16px;
   }
 
   .tablet-reminder {
@@ -573,51 +473,7 @@ main.team-container-wrap {
     font-size: 14px;
   }
 
-  .mission-panel .mission-hook-title {
-    font-size: 19px;
-  }
-
-  .mission-goals {
-    gap: 7px;
-  }
-
-  .mission-goals li {
-    padding: 9px 15px;
-    font-size: 14px;
-  }
-}
-
-/* =====================================================
-   FONDO AL DIÁLOGO — robot y card dominan
-   El overlay real es #dialogo-overlay (definido en el include
-   includes/dialogo_intro.html). Cuando tiene la clase .visible:
-   - se atenúa el panel de la misión (.team-container)
-   - se atenúa la barra lateral (.metro-progreso-habilidades),
-     que por tener su propio backdrop-filter forma un contexto de
-     apilamiento aislado imposible de difuminar desde el backdrop.
-   Todo el CSS del propio diálogo (robot, burbuja, dots, responsive)
-   vive en el include; aquí NO se duplica para no pisarlo.
-===================================================== */
-
-body:has(#dialogo-overlay.visible) .team-container-wrap,
-body:has(#dialogo-overlay.visible) .team-container {
-  filter: blur(7px) brightness(.36) saturate(.75);
-  transform: scale(1.012);
-  pointer-events: none;
-  user-select: none;
-  transition: filter .35s ease, transform .35s ease;
-}
-
-body:has(#dialogo-overlay.visible) .metro-progreso-habilidades {
-  filter: blur(8px) brightness(.4) saturate(.7) !important;
-  opacity: .6 !important;
-  pointer-events: none !important;
-  transition: filter .35s ease, opacity .35s ease !important;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation: none !important;
-    transition: none !important;
+  .mission-panel .mission-lead {
+    font-size: 17px;
   }
 }

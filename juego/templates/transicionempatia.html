@@ -1,5 +1,4 @@
 {% load static %}
-{% include "atajos.html" %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -11,26 +10,24 @@
 </head>
 
 <body class="dialogo-edemy-activo" data-sesion-id="{{ grupo.sesion.idsesion }}">
+
+  {% include "atajos.html" %}
+
   <main class="team-container-wrap">
     <div class="team-container" role="region" aria-label="Introducción a empatía">
       <section class="team-section">
 
         <div class="title-wrapper">
-          <span class="mission-badge">Objetivo de misión</span>
-          <h1>Empatía</h1>
+          <h1 class="title">Empatía</h1>
         </div>
 
         <div class="mission-panel">
           <p class="mission-lead">
-            Un emprendimiento no comienza con una idea.
+            ¡Escuadrón, hora de escuchar!
           </p>
 
           <p>
-            Comienza con un problema que alguien vive y que aún no ha sido resuelto de la mejor forma.
-          </p>
-
-          <p>
-            Ahora deberán observar, escuchar y comprender a su persona objetivo antes de crear una solución.
+            Observen, pregunten y comprendan a su persona objetivo antes de crear cualquier solución.
           </p>
 
           <div class="tablet-reminder">
@@ -115,7 +112,11 @@
           const texto = el.textContent || "";
           const match = texto.match(/(\d+)\/(\d+)/);
 
-          
+          if (match) {
+            el.textContent = `${match[1]}/${match[2]} ${tJuego("empatia_intro_grupos_listos", "grupos listos")}`;
+          } else if (texto.toLowerCase().includes("esperando") || texto.toLowerCase().includes("waiting")) {
+            el.textContent = tJuego("empatia_intro_esperando", "Esperando a los demás equipos...");
+          }
         });
       }
 

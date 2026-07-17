@@ -687,7 +687,10 @@ def autoavanzar_si_todos_listos(sesion):
     sesion.timer_inicio_at = None
     sesion.timer_fin_at = None
 
-    if nueva_fase in {"f5_evaluacion_pitch"}:
+    # f2_tematicas ya no tiene compuerta de listos propia: la sincronización se
+    # hace en f2_transicion, así que el timer arranca en el mismo instante en
+    # que el último grupo confirma ahí. Mismo criterio que profesor_siguiente_fase.
+    if nueva_fase in {"f2_tematicas", "f5_evaluacion_pitch"}:
         ahora = timezone.now()
         sesion.timer_corriendo = sesion.segundos_restantes > 0
         sesion.timer_inicio_at = ahora if sesion.timer_corriendo else None
@@ -2164,11 +2167,21 @@ def iniciar_timer_inicio_fase(request, sesion_id):
             "error": "La fase actual no usa inicio grupal."
         }, status=400)
 
+    # f2_tematicas se mantiene en FASES_CON_INICIO_POR_ALUMNOS solo para que
+    # siga corriendo reset_listos_inicio_fase (limpia listo_f2_desafio), pero
+    # ya no tiene compuerta de listos: la sincronización se hace en
+    # f2_transicion. Normalmente el timer ya viene corriendo desde
+    # autoavanzar_si_todos_listos; esto cubre el caso en que el profesor salte
+    # directo a la fase desde el panel.
     if not sesion.inicio_fase_habilitado:
-        return JsonResponse({
-            "ok": False,
-            "error": "La fase aún no está habilitada."
-        }, status=400)
+        if sesion.fase_actual == "f2_tematicas":
+            sesion.inicio_fase_habilitado = True
+            sesion.save(update_fields=["inicio_fase_habilitado"])
+        else:
+            return JsonResponse({
+                "ok": False,
+                "error": "La fase aún no está habilitada."
+            }, status=400)
 
     if not sesion.timer_corriendo:
         iniciar_timer_de_sesion(sesion)

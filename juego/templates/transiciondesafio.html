@@ -1,5 +1,4 @@
 {% load static %}
-{% include "atajos.html" %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -11,6 +10,8 @@
 </head>
 
 <body data-sesion-id="{{ grupo.sesion.idsesion }}">
+
+  {% include "atajos.html" %}
 
   <audio id="musica-desafios" src="{% static 'sounds/musica_desafios.mp3' %}" loop preload="auto"></audio>
 
@@ -28,21 +29,16 @@
       <section class="team-section">
 
         <div class="title-wrapper">
-          <span class="mission-badge">Desafío 2 · Definición del problema</span>
           <h1 class="title">Desafíos</h1>
         </div>
 
         <div class="mission-panel">
           <p class="mission-lead">
-            Toda misión comienza con un problema real por resolver.
+            ¡Escuadrón, hora de decidir!
           </p>
 
           <p>
-            Ahora elegirán el desafío que guiará su investigación, sus decisiones y la solución que construirán como equipo.
-          </p>
-
-          <p>
-            No busquen solo lo más fácil: elijan aquello que puedan comprender, observar y transformar con una propuesta de valor clara.
+            Debatan, pónganse de acuerdo y elijan el problema real que guiará su investigación y su solución.
           </p>
 
           <div class="tablet-reminder">

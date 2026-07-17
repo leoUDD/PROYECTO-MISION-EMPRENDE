@@ -16,35 +16,8 @@
   <audio id="musica-desafios" src="{% static 'sounds/musica_desafios.mp3' %}" loop preload="auto"></audio>
   <button id="btn-musica-desafios" class="music-btn" title="Silenciar música" aria-label="Silenciar música" onclick="toggleMusicaDesafios()">🔊</button>
 
-  <div id="inicio-fase-overlay" class="inicio-fase-overlay" aria-modal="true" role="dialog" aria-label="Instrucciones de EdEmy">
-    <div class="edemy-intro-backdrop" aria-hidden="true"></div>
-
-    <section id="inicio-fase-card" class="inicio-fase-card edemy-intro-card">
-      <div class="edemy-intro-personaje" aria-hidden="true">
-        <img class="edemy-intro-img" src="{% static 'images/EdemFeliz.png' %}" alt="">
-      </div>
-
-      <div class="edemy-intro-burbuja">
-        <div class="inicio-fase-badge" id="edemyIntroBadge" data-i18n="tematicas_overlay_badge">ASIGNACIÓN DE OBJETIVO</div>
-        <h3 id="edemyIntroTitulo">Antes de comenzar</h3>
-        <p id="edemyIntroTexto" class="edemy-intro-texto">Agentes, definan el campo de acción de su próxima misión.</p>
-
-        <div class="edemy-intro-pager" aria-label="Progreso de instrucciones">
-          <span class="edemy-intro-dot activo" id="edemyIntroDot1"></span>
-          <span class="edemy-intro-dot" id="edemyIntroDot2"></span>
-        </div>
-
-        <div class="edemy-intro-actions">
-          <button id="btnListoTematica" class="btn-chip edemy-intro-next" type="button">Continuar</button>
-          <div id="textoEsperaTematica" class="contador-fase" data-i18n="tematicas_esperando">Esperando a los demás equipos...</div>
-          <div id="contadorListosTematica" class="contador-fase">0/0 grupos listos</div>
-        </div>
-      </div>
-    </section>
-  </div>
-
   <main class="selector-container" role="main" aria-labelledby="page-title">
-    <div id="contenidoTematicas" class="contenido-tematicas blur-tematicas">
+    <div id="contenidoTematicas" class="contenido-tematicas">
       <header class="header">
         <h1 id="page-title" data-i18n="tematicas_titulo">Elige la temática del desafío</h1>
         <p class="subtitle" data-i18n="tematicas_subtitulo">Selecciona una categoría para continuar. Cada bloque explica de qué trata.</p>
@@ -107,103 +80,24 @@
   <script>
     (function () {
       function tJuego(clave, fallback = "") { const idioma = window.i18nJuego?.obtenerIdioma?.() || "es"; return window.i18nJuego?.traducciones?.[idioma]?.[clave] || fallback; }
-      function textoGruposListos(listos, total) { return `${listos}/${total} ${tJuego("tematicas_grupos_listos", "grupos listos")}`; }
-      function textoEsperando() { return tJuego("tematicas_boton_esperando", "Esperando..."); }
-      function textoListo() { return tJuego("tematicas_boton_listo", "⚡ Listo para comenzar"); }
-      function textoContinuarIntro() { return tJuego("tematicas_intro_continuar", "Continuar"); }
-      function introPasosTematica() {
-        return [
-          {
-            badge: tJuego("tematicas_overlay_badge", "ASIGNACIÓN DE OBJETIVO"),
-            titulo: tJuego("tematicas_overlay_titulo", "Antes de comenzar"),
-            texto: tJuego("tematicas_overlay_p1", "Agentes, definan el campo de acción de su próxima misión."),
-            boton: textoContinuarIntro(),
-          },
-          {
-            badge: tJuego("tematicas_overlay_badge_2", "PROTOCOLO DE MISIÓN"),
-            titulo: tJuego("tematicas_overlay_titulo_2", "Tiempo de elección"),
-            texto: tJuego("tematicas_overlay_p2", "Tendrán 2 minutos para elegir temática y desafío. Cuando todos estén listos, el temporizador se activará."),
-            boton: textoListo(),
-          },
-        ];
-      }
       function textoElegir() { return tJuego("tematicas_elegir", "Elegir"); }
       function textoSeleccionado() { return tJuego("tematicas_seleccionado", "Seleccionado ✅"); }
-      function textoEsperaEquipos() { return tJuego("tematicas_esperando", "Esperando a los demás equipos..."); }
       const cards = Array.from(document.querySelectorAll(".theme-card"));
       let enviando = false;
       const routesEl = document.getElementById("routes");
       const sesionId = routesEl?.dataset?.sesionId;
-      const grupoId = routesEl?.dataset?.grupoId;
       const timerTematica = document.getElementById("timerTematica");
-      const overlayInicio = document.getElementById("inicio-fase-overlay");
-      const contenidoTematicas = document.getElementById("contenidoTematicas");
-      const btnListoTematica = document.getElementById("btnListoTematica");
-      const contadorListosTematica = document.getElementById("contadorListosTematica");
-      const textoEsperaTematica = document.getElementById("textoEsperaTematica");
-      const edemyIntroBadge = document.getElementById("edemyIntroBadge");
-      const edemyIntroTitulo = document.getElementById("edemyIntroTitulo");
-      const edemyIntroTexto = document.getElementById("edemyIntroTexto");
-      const edemyIntroDot1 = document.getElementById("edemyIntroDot1");
-      const edemyIntroDot2 = document.getElementById("edemyIntroDot2");
-      let introPasoTematica = 0;
-      let yaListoTematica = false;
       let timerTematicaSolicitado = false;
-      let ultimoListos = 0;
-      let ultimoTotal = 0;
       let temaSeleccionadoActual = "{{ tema_actual|default:'' }}";
 
-      function actualizarDialogoIntroTematica() {
-        const pasos = introPasosTematica();
-        const paso = pasos[Math.min(introPasoTematica, pasos.length - 1)];
-        if (edemyIntroBadge) edemyIntroBadge.textContent = paso.badge;
-        if (edemyIntroTitulo) edemyIntroTitulo.textContent = paso.titulo;
-        if (edemyIntroTexto) {
-          edemyIntroTexto.classList.remove("texto-cambiando");
-          edemyIntroTexto.textContent = paso.texto;
-          requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-              edemyIntroTexto.classList.add("texto-cambiando");
-            });
-          });
-        }
-        if (btnListoTematica && !btnListoTematica.disabled) {
-          btnListoTematica.textContent = paso.boton;
-        }
-        if (edemyIntroDot1) edemyIntroDot1.classList.toggle("activo", introPasoTematica === 0);
-        if (edemyIntroDot2) edemyIntroDot2.classList.toggle("activo", introPasoTematica === 1);
-        if (edemyIntroDot1) edemyIntroDot1.classList.toggle("hecho", introPasoTematica > 0);
-        if (edemyIntroDot2) edemyIntroDot2.classList.toggle("hecho", introPasoTematica > 1);
-        const card = document.getElementById("inicio-fase-card");
-        if (card) card.classList.toggle("intro-final", introPasoTematica === pasos.length - 1);
-      }
-
-      async function avanzarDialogoIntroTematica() {
-        if (yaListoTematica) return;
-        const pasos = introPasosTematica();
-        if (introPasoTematica < pasos.length - 1) {
-          introPasoTematica += 1;
-          actualizarDialogoIntroTematica();
-          return;
-        }
-        await marcarListoTematica();
-      }
-
       function formatearTiempo(segundos) { segundos = Math.max(Number(segundos || 0), 0); const min = Math.floor(segundos / 60); const seg = segundos % 60; return `${min}:${String(seg).padStart(2, "0")}`; }
-      function habilitarTematicas() { if (overlayInicio) overlayInicio.classList.add("overlay-hidden"); if (contenidoTematicas) contenidoTematicas.classList.remove("blur-tematicas"); }
-      function bloquearTematicas() { if (overlayInicio) overlayInicio.classList.remove("overlay-hidden"); if (contenidoTematicas) contenidoTematicas.classList.add("blur-tematicas"); }
       function getCSRFToken() { const name = "csrftoken="; const parts = document.cookie.split(";"); for (let c of parts) { c = c.trim(); if (c.startsWith(name)) return decodeURIComponent(c.substring(name.length)); } return ""; }
-      async function iniciarTimerTematica() { if (!sesionId) return; try { await fetch(`/sesion/${sesionId}/iniciar-timer-inicio-fase/`, { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json", "X-CSRFToken": getCSRFToken() }, body: JSON.stringify({}) }); } catch (error) { console.error("Error iniciando timer:", error); timerTematicaSolicitado = false; } }
-      function todosListosSegunData(data) { const total = Number(data.totalGrupos || 0); const listos = Number(data.gruposListosF2Tematicas || 0); if (data.todosListosF2Tematicas) return true; return total > 0 && listos >= total; }
-      async function actualizarTimerTematica() { if (!sesionId || !timerTematica) return; try { const res = await fetch(`/sesion/${sesionId}/estado/`, { cache: "no-store", credentials: "same-origin" }); if (!res.ok) return; const data = await res.json(); timerTematica.textContent = formatearTiempo(data.segundosRestantes); ultimoListos = Number(data.gruposListosF2Tematicas || 0); ultimoTotal = Number(data.totalGrupos || 0); if (contadorListosTematica) contadorListosTematica.textContent = textoGruposListos(ultimoListos, ultimoTotal); const miGrupo = (data.grupos || []).find(g => Number(g.id) === Number(grupoId)); if (!yaListoTematica && miGrupo && miGrupo.listoF2Tematicas) { introPasoTematica = introPasosTematica().length - 1; actualizarDialogoIntroTematica(); yaListoTematica = true; if (btnListoTematica) { btnListoTematica.disabled = true; btnListoTematica.textContent = textoEsperando(); } if (textoEsperaTematica) textoEsperaTematica.textContent = textoEsperaEquipos(); } if (todosListosSegunData(data)) { habilitarTematicas(); if (!data.timerCorriendo && !timerTematicaSolicitado) { timerTematicaSolicitado = true; iniciarTimerTematica(); } } else { bloquearTematicas(); } if (data.faseActual && data.faseActual !== "f2_tematicas" && data.rutaAlumno) window.location.href = data.rutaAlumno; } catch (error) { console.error("Error actualizando timer:", error); } }
-      async function marcarListoTematica() { if (yaListoTematica || !grupoId) return; yaListoTematica = true; if (btnListoTematica) { btnListoTematica.disabled = true; btnListoTematica.textContent = textoEsperando(); } if (textoEsperaTematica) textoEsperaTematica.textContent = textoEsperaEquipos(); try { const res = await fetch(`/grupo/${grupoId}/listo/`, { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json", "X-CSRFToken": getCSRFToken() }, body: JSON.stringify({ fase: "f2_tematicas" }) }); const data = await res.json(); ultimoListos = Number(data.gruposListosF2Tematicas || data.listos || 0); ultimoTotal = Number(data.totalGrupos || data.total || 0); if (contadorListosTematica) contadorListosTematica.textContent = textoGruposListos(ultimoListos, ultimoTotal); if (data.todos_listos || (ultimoTotal > 0 && ultimoListos >= ultimoTotal)) { habilitarTematicas(); if (!timerTematicaSolicitado) { timerTematicaSolicitado = true; iniciarTimerTematica(); } } } catch (error) { console.error("Error marcando listo:", error); yaListoTematica = false; if (btnListoTematica) { btnListoTematica.disabled = false; btnListoTematica.textContent = textoListo(); } } }
+      async function iniciarTimerTematica() { if (!sesionId) return; try { const res = await fetch(`/sesion/${sesionId}/iniciar-timer-inicio-fase/`, { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json", "X-CSRFToken": getCSRFToken() }, body: JSON.stringify({}) }); if (!res.ok) timerTematicaSolicitado = false; } catch (error) { console.error("Error iniciando timer:", error); timerTematicaSolicitado = false; } }
+      async function actualizarTimerTematica() { if (!sesionId || !timerTematica) return; try { const res = await fetch(`/sesion/${sesionId}/estado/`, { cache: "no-store", credentials: "same-origin" }); if (!res.ok) return; const data = await res.json(); timerTematica.textContent = formatearTiempo(data.segundosRestantes); if (!data.timerCorriendo && !timerTematicaSolicitado) { timerTematicaSolicitado = true; iniciarTimerTematica(); } if (data.faseActual && data.faseActual !== "f2_tematicas" && data.rutaAlumno) window.location.href = data.rutaAlumno; } catch (error) { console.error("Error actualizando timer:", error); } }
       function marcarTema(slug) { temaSeleccionadoActual = (slug || "").trim().toLowerCase(); cards.forEach(card => { const activo = (card.dataset.slug || "").trim().toLowerCase() === temaSeleccionadoActual; card.classList.toggle("selected", activo); const btn = card.querySelector(".btn.select"); if (btn) btn.textContent = activo ? textoSeleccionado() : textoElegir(); }); }
       window.guardarTema = async function (slug, boton) { if (enviando) return; enviando = true; marcarTema(slug); const botones = document.querySelectorAll(".btn.select"); botones.forEach(b => b.disabled = true); try { const res = await fetch("{% url 'guardar_tematica' %}", { method: "POST", headers: { "Content-Type": "application/json", "X-CSRFToken": getCSRFToken() }, credentials: "same-origin", body: JSON.stringify({ tema: slug }) }); const data = await res.json(); if (!res.ok || !data.ok) throw new Error(data.error || "No se pudo guardar."); window.location.href = data.redirect_url || "{% url 'desafios' %}"; } catch (error) { alert(error.message); botones.forEach(b => b.disabled = false); marcarTema(""); enviando = false; } };
       if (temaSeleccionadoActual) marcarTema(temaSeleccionadoActual); else marcarTema("");
-      if (btnListoTematica) btnListoTematica.addEventListener("click", avanzarDialogoIntroTematica);
-      window.addEventListener("idiomaJuegoCambiado", () => { if (contadorListosTematica) contadorListosTematica.textContent = textoGruposListos(ultimoListos, ultimoTotal); if (btnListoTematica) btnListoTematica.textContent = btnListoTematica.disabled ? textoEsperando() : introPasosTematica()[Math.min(introPasoTematica, introPasosTematica().length - 1)].boton; if (textoEsperaTematica) textoEsperaTematica.textContent = textoEsperaEquipos(); actualizarDialogoIntroTematica(); marcarTema(temaSeleccionadoActual); });
-      actualizarDialogoIntroTematica();
-      bloquearTematicas();
+      window.addEventListener("idiomaJuegoCambiado", () => { marcarTema(temaSeleccionadoActual); });
       setInterval(actualizarTimerTematica, 1000);
       actualizarTimerTematica();
     })();

@@ -1071,6 +1071,6 @@ body:has(.dialogo-intro-overlay.visible) .team-container {
   #btn-dialogo-continuar,
   #btn-dialogo-desafio-continuar {
     min-height: 58px !important;
-    font-size: 18px !important;
+    font-size: 17px !important;
   }
 }

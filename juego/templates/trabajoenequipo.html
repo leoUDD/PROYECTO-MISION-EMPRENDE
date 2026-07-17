@@ -1,5 +1,4 @@
 {% load static %}
-{% include "atajos.html" %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -12,6 +11,8 @@
 
 <body data-sesion-id="{{ grupo.sesion.idsesion }}">
 
+  {% include "atajos.html" %}
+
   <main class="team-container-wrap">
     <div class="team-container" role="region" aria-label="Introducción a trabajo en equipo">
       <section class="team-section">
@@ -21,21 +22,16 @@
         </div>
 
         <div class="mission-panel">
-          <div class="mission-split">
-            <div class="mission-hook">
-              <p class="mission-hook-title">Comunicación y velocidad</p>
-              <p class="mission-hook-sub">Prepárense antes de la próxima prueba.</p>
-            </div>
+          <p class="mission-lead">
+            ¡Escuadrón, hora de coordinarse!
+          </p>
 
-            <ul class="mission-goals" aria-label="Objetivos del escuadrón">
-              <li>Repartan roles</li>
-              <li>Escúchense</li>
-              <li>Decidan rápido</li>
-            </ul>
-          </div>
+          <p>
+            Repartan roles, escúchense y decidan rápido: la próxima prueba se gana con comunicación y velocidad.
+          </p>
 
           <div class="tablet-reminder">
-            Protocolo: roten la tablet antes de continuar.
+            📱 Protocolo: recuerden rotar la tablet antes de continuar.
           </div>
 
           <div class="panel-divider"></div>
