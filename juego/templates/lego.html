@@ -1,5 +1,4 @@
 {% load static %}
-{% include "atajos.html" %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -14,6 +13,147 @@
   data-sesion-id="{{ grupo.sesion.idsesion }}"
   data-tiempo-inicial="{{ tiempo_inicial_lego|default:15 }}"
 >
+  {% include "atajos.html" %}
+
+  <div id="inicio-fase-overlay" class="inicio-fase-overlay" aria-live="polite">
+    <div class="edemy-intro-backdrop" aria-hidden="true"></div>
+
+    <section id="inicio-fase-card" class="inicio-fase-card edemy-intro-card" role="dialog" aria-modal="true" aria-labelledby="legoDialogText">
+      <div class="edemy-intro-personaje" aria-hidden="true">
+        <img src="{% static 'images/EdemFeliz.png' %}" class="edemy-intro-img" alt="">
+      </div>
+
+      <div class="edemy-intro-burbuja">
+        <div class="edemy-intro-hablante">EdEmy</div>
+
+        <p id="legoDialogText" class="edemy-intro-texto">
+          Agentes, llegó el momento de convertir la idea en algo visible.
+        </p>
+
+        <div class="edemy-intro-pager" id="legoDialogDots" aria-hidden="true"></div>
+
+        <button type="button" id="btn-lego-dialogo-continuar" class="edemy-intro-next">
+          Continuar
+        </button>
+
+        <div id="lego-dialogo-ready" class="edemy-intro-ready" hidden>
+          <button type="button" id="btn-listo-fase" class="btn-chip" data-i18n="lego_boton_listo">
+            ⚡ Listo para comenzar
+          </button>
+
+          <div id="texto-espera-fase" class="contador-fase" data-i18n="lego_esperando_equipos">
+            Esperando a los demás equipos...
+          </div>
+
+          <div id="contador-listos-fase" class="contador-fase">
+            0/0 grupos listos
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const texto = document.getElementById("legoDialogText");
+      const btnContinuar = document.getElementById("btn-lego-dialogo-continuar");
+      const ready = document.getElementById("lego-dialogo-ready");
+      const dots = document.getElementById("legoDialogDots");
+
+      if (!texto || !btnContinuar || !ready || !dots) return;
+
+      function tJuego(clave, fallback = "") {
+        const idioma = window.i18nJuego?.obtenerIdioma?.() || "es";
+        return window.i18nJuego?.traducciones?.[idioma]?.[clave] || fallback;
+      }
+
+      const pasos = [
+        { texto: "Agentes, llegó el momento de convertir la idea en algo visible." },
+        { texto: "Revisen el desafío seleccionado y recuerden a su persona objetivo antes de construir." },
+        { texto: "Cuando todos los equipos estén listos, el tiempo comenzará automáticamente." }
+      ];
+
+      let pasoActual = 0;
+      let escribiendo = false;
+      let textoCompleto = "";
+      let timerEscritura = null;
+
+      function renderDots() {
+        dots.innerHTML = "";
+        pasos.forEach((_, index) => {
+          const dot = document.createElement("span");
+          dot.className = "edemy-intro-dot";
+          if (index === pasoActual) dot.classList.add("activo");
+          if (index < pasoActual) dot.classList.add("hecho");
+          dots.appendChild(dot);
+        });
+      }
+
+      function escribirTexto(txt) {
+        clearInterval(timerEscritura);
+        textoCompleto = txt;
+        escribiendo = true;
+        texto.innerHTML = "";
+
+        const textoNodo = document.createTextNode("");
+        const cursor = document.createElement("span");
+        cursor.className = "cursor-rpg";
+        texto.appendChild(textoNodo);
+        texto.appendChild(cursor);
+
+        let i = 0;
+        timerEscritura = setInterval(() => {
+          if (i < txt.length) {
+            textoNodo.data = txt.slice(0, i + 1);
+            i += 1;
+          } else {
+            clearInterval(timerEscritura);
+            escribiendo = false;
+            cursor.remove();
+          }
+        }, 22);
+      }
+
+      function actualizarAcciones() {
+        if (pasoActual >= pasos.length - 1) {
+          btnContinuar.hidden = true;
+          ready.hidden = false;
+        } else {
+          btnContinuar.hidden = false;
+          ready.hidden = true;
+          btnContinuar.textContent = tJuego("lego_dialogo_continuar", "Continuar");
+        }
+      }
+
+      function renderPaso() {
+        renderDots();
+        actualizarAcciones();
+        escribirTexto(pasos[pasoActual].texto);
+      }
+
+      btnContinuar.addEventListener("click", () => {
+        if (escribiendo) {
+          clearInterval(timerEscritura);
+          escribiendo = false;
+          texto.textContent = textoCompleto;
+          return;
+        }
+        pasoActual = Math.min(pasoActual + 1, pasos.length - 1);
+        renderDots();
+        actualizarAcciones();
+        escribirTexto(pasos[pasoActual].texto);
+      });
+
+      window.addEventListener("idiomaJuegoCambiado", () => {
+        clearInterval(timerEscritura);
+        escribiendo = false;
+        renderPaso();
+      });
+
+      renderPaso();
+    });
+  </script>
+
 
   <!-- ═══ MÚSICA DE FONDO ═══ -->
   <audio id="musica-lego"
@@ -29,125 +169,6 @@
   </button>
 
   <main class="phone">
-
-    <div id="inicio-fase-overlay" class="inicio-fase-overlay" aria-live="polite">
-      <div class="lego-dialogo-backdrop" aria-hidden="true"></div>
-
-      <section id="inicio-fase-card" class="lego-dialogo-card" role="dialog" aria-modal="true" aria-labelledby="legoDialogTitle">
-        <div class="lego-dialogo-personaje" aria-hidden="true">
-          <img src="{% static 'images/Parado.webp' %}" class="lego-dialogo-img" alt="">
-        </div>
-
-        <div class="lego-dialogo-burbuja">
-          <div id="legoDialogBadge" class="lego-dialogo-badge">MISIÓN DE CREATIVIDAD</div>
-
-          <h2 id="legoDialogTitle" class="lego-dialogo-title">
-            Construcción de prototipo
-          </h2>
-
-          <p id="legoDialogText" class="lego-dialogo-text">
-            Agentes, llegó el momento de convertir la idea en algo visible.
-          </p>
-
-          <div class="lego-dialogo-progress" id="legoDialogDots" aria-hidden="true"></div>
-
-          <button type="button" id="btn-lego-dialogo-continuar" class="lego-dialogo-btn">
-            Continuar
-          </button>
-
-          <div id="lego-dialogo-ready" class="lego-dialogo-ready" hidden>
-            <button type="button" id="btn-listo-fase" class="btn-chip" data-i18n="lego_boton_listo">
-              ⚡ Listo para comenzar
-            </button>
-
-            <div id="texto-espera-fase" class="contador-fase" data-i18n="lego_esperando_equipos">
-              Esperando a los demás equipos...
-            </div>
-
-            <div id="contador-listos-fase" class="contador-fase">
-              0/0 grupos listos
-            </div>
-          </div>
-        </div>
-      </section>
-    </div>
-
-    <script>
-      document.addEventListener("DOMContentLoaded", () => {
-        const titulo = document.getElementById("legoDialogTitle");
-        const texto = document.getElementById("legoDialogText");
-        const badge = document.getElementById("legoDialogBadge");
-        const btnContinuar = document.getElementById("btn-lego-dialogo-continuar");
-        const ready = document.getElementById("lego-dialogo-ready");
-        const dots = document.getElementById("legoDialogDots");
-
-        if (!titulo || !texto || !badge || !btnContinuar || !ready || !dots) return;
-
-        function tJuego(clave, fallback = "") {
-          const idioma = window.i18nJuego?.obtenerIdioma?.() || "es";
-          return window.i18nJuego?.traducciones?.[idioma]?.[clave] || fallback;
-        }
-
-        const pasos = [
-          {
-            badge: "MISIÓN DE CREATIVIDAD",
-            titulo: "Construcción de prototipo",
-            texto: "Agentes, llegó el momento de convertir la idea en algo visible."
-          },
-          {
-            badge: "PROTOTIPO LEGO",
-            titulo: "Conecten con el usuario",
-            texto: "Revisen el desafío seleccionado y recuerden a su persona objetivo antes de construir."
-          },
-          {
-            badge: "PUNTO DE CONTROL",
-            titulo: "Preparen las piezas",
-            texto: "Cuando todos los equipos estén listos, el tiempo comenzará automáticamente."
-          }
-        ];
-
-        let pasoActual = 0;
-
-        function renderDots() {
-          dots.innerHTML = "";
-          pasos.forEach((_, index) => {
-            const dot = document.createElement("span");
-            dot.className = "lego-dialogo-dot";
-            if (index === pasoActual) dot.classList.add("activo");
-            if (index < pasoActual) dot.classList.add("hecho");
-            dots.appendChild(dot);
-          });
-        }
-
-        function renderPaso() {
-          const paso = pasos[pasoActual];
-
-          badge.textContent = paso.badge;
-          titulo.textContent = paso.titulo;
-          texto.textContent = paso.texto;
-
-          renderDots();
-
-          if (pasoActual >= pasos.length - 1) {
-            btnContinuar.hidden = true;
-            ready.hidden = false;
-          } else {
-            btnContinuar.hidden = false;
-            ready.hidden = true;
-            btnContinuar.textContent = tJuego("lego_dialogo_continuar", "Continuar");
-          }
-        }
-
-        btnContinuar.addEventListener("click", () => {
-          pasoActual = Math.min(pasoActual + 1, pasos.length - 1);
-          renderPaso();
-        });
-
-        window.addEventListener("idiomaJuegoCambiado", renderPaso);
-        renderPaso();
-      });
-    </script>
-
 
     <img id="legoLogo" src="{% static 'images/Lego-logo.webp' %}" class="logo blur-target-bloqueado" alt="Lego logo">
 

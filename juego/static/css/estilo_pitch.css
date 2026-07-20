@@ -575,17 +575,20 @@ textarea::placeholder {
 .astro-pitch-overlay.visible { display: flex; }
 
 .astro-pitch-card {
-  width: min(92vw, 560px);
-  min-height: 260px;
+  width: min(92vw, 680px);
+  min-height: auto;
   border-radius: 24px;
-  padding: 24px 24px 22px 160px;
+  padding: clamp(24px, 2.6vw, 34px);
+  display: flex;
+  align-items: center;
+  gap: clamp(20px, 2.8vw, 34px);
   background:
     radial-gradient(circle at top left, rgba(0, 242, 109, .18), transparent 42%),
     rgba(0, 16, 74, .96);
   border: 1px solid rgba(0, 200, 255, .34);
   box-shadow: 0 18px 44px rgba(0, 0, 0, .42);
   color: #ffffff;
-  position: relative;
+  text-align: left;
   animation: astroPitchIn .28s ease both;
 }
 
@@ -595,12 +598,17 @@ textarea::placeholder {
 }
 
 .astro-pitch-img {
-  position: absolute;
-  left: -35px;
-  bottom: -8px;
-  width: 185px;
+  flex: 0 0 auto;
+  width: clamp(110px, 14vw, 170px);
   height: auto;
+  object-fit: contain;
   filter: drop-shadow(0 0 20px rgba(0, 242, 109, .38));
+}
+
+.astro-pitch-text {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
 }
 
 .astro-pitch-text h3 {
@@ -608,6 +616,7 @@ textarea::placeholder {
   color: var(--udd-green);
   font-size: 1.28rem;
   font-weight: 900;
+  text-align: left;
 }
 
 .astro-pitch-text p {
@@ -615,6 +624,7 @@ textarea::placeholder {
   line-height: 1.55;
   color: rgba(255, 255, 255, .84);
   font-weight: 650;
+  text-align: left;
 }
 
 .astro-pitch-text strong { color: #A7FFC8; }
@@ -638,22 +648,34 @@ textarea::placeholder {
   padding: clamp(22px, 4vw, 64px);
   background:
     radial-gradient(circle at center, rgba(0, 252, 152, .10), transparent 42%),
-    rgba(0, 5, 18, .78);
-  backdrop-filter: blur(6px) brightness(.66);
-  -webkit-backdrop-filter: blur(6px) brightness(.66);
+    rgba(0, 5, 18, .68);
+  backdrop-filter: blur(10px) brightness(.6);
+  -webkit-backdrop-filter: blur(10px) brightness(.6);
 }
 
 .inicio-fase-overlay.overlay-hidden {
   display: none !important;
 }
 
+/* La barra lateral "RUTA DE MISIÓN" tiene su propio backdrop-filter,
+   lo que crea un contexto de apilamiento aislado: el blur del overlay
+   del diálogo no la alcanza por herencia. Hay que difuminarla
+   explícitamente mientras el diálogo esté visible (mismo patrón que
+   trabajoenequipo / estilo_trabajoenequipo.css). */
+body:has(#inicio-fase-overlay:not(.overlay-hidden)) .metro-progreso-habilidades {
+  filter: blur(8px) brightness(.4) saturate(.7) !important;
+  opacity: .6 !important;
+  pointer-events: none !important;
+  transition: filter .35s ease, opacity .35s ease !important;
+}
+
 .dialogo-box {
-  width: min(1180px, 92vw);
-  min-height: min(500px, 72vh);
+  width: min(1180px, 90vw);
+  min-height: auto;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: clamp(28px, 4.4vw, 76px);
+  gap: clamp(28px, 4vw, 64px);
   position: relative;
   z-index: 3;
 }
@@ -666,70 +688,75 @@ textarea::placeholder {
 }
 
 .dialogo-img {
-  width: clamp(220px, 22vw, 350px);
+  width: clamp(260px, 25vw, 440px);
   height: auto;
   object-fit: contain;
   filter:
-    drop-shadow(0 0 20px rgba(0, 252, 152, .44))
-    drop-shadow(0 0 40px rgba(0, 200, 255, .20));
+    drop-shadow(0 0 22px rgba(0, 252, 152, .48))
+    drop-shadow(0 0 50px rgba(0, 200, 255, .24))
+    drop-shadow(0 24px 38px rgba(0, 0, 0, .64));
   animation: edemyFloat 3.8s ease-in-out infinite alternate;
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 @keyframes edemyFloat {
-  from { transform: translateY(0); }
-  to { transform: translateY(-12px); }
+  from { transform: translateY(0) rotate(-1deg); }
+  to { transform: translateY(-14px) rotate(1.5deg); }
 }
 
 .dialogo-burbuja {
   flex: 1;
-  max-width: 760px;
-  min-height: 300px;
-  padding: clamp(28px, 3vw, 42px);
-  border-radius: 28px;
+  max-width: 680px;
+  min-height: auto;
+  padding: clamp(26px, 2.3vw, 38px);
+  border-radius: 26px;
+  text-align: left;
   background:
-    radial-gradient(circle at top left, rgba(0, 252, 152, .12), transparent 34%),
+    radial-gradient(circle at top left, rgba(0, 252, 152, .13), transparent 34%),
     linear-gradient(160deg, rgba(0, 16, 74, .98), rgba(2, 8, 30, .98));
-  border: 2px solid rgba(0, 252, 152, .82);
+  border: 2.2px solid rgba(0, 252, 152, .82);
   box-shadow:
-    0 0 34px rgba(0, 252, 152, .25),
-    0 0 80px rgba(0, 59, 255, .18),
+    0 0 36px rgba(0, 252, 152, .26),
+    0 0 92px rgba(0, 59, 255, .18),
     0 24px 70px rgba(0, 0, 0, .70);
 }
 
 .dialogo-hablante {
-  font-size: clamp(15px, 1.25vw, 22px);
+  font-size: clamp(17px, 1.5vw, 26px);
   font-weight: 900;
-  letter-spacing: 4px;
-  color: #00FC98;
-  margin-bottom: 14px;
-}
-
-.dialogo-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 18px;
-  padding: 8px 16px;
-  border-radius: 999px;
-  background: rgba(0, 242, 109, .12);
-  border: 1px solid rgba(0, 242, 109, .42);
-  color: var(--udd-green);
-  font-size: clamp(12px, 1.05vw, 14px);
-  font-weight: 900;
-  letter-spacing: .12em;
+  letter-spacing: .22em;
   text-transform: uppercase;
-  text-shadow: 0 0 10px rgba(0, 242, 109, .34);
+  color: #00FC98;
+  text-shadow: 0 0 12px rgba(0, 252, 152, .42);
+  margin-bottom: 18px;
 }
 
 .dialogo-texto-rpg {
   white-space: pre-line;
-  min-height: 138px;
+  min-height: 1.45em;
   margin-bottom: 24px;
   color: #F3FAFF;
-  font-size: clamp(22px, 2.0vw, 34px);
-  line-height: 1.56;
+  font-size: clamp(22px, 2vw, 33px);
+  line-height: 1.45;
   font-weight: 850;
-  text-shadow: 0 0 10px rgba(0, 200, 255, .22);
+  text-shadow: 0 0 10px rgba(0, 200, 255, .18);
+}
+
+.cursor-rpg {
+  display: inline-block;
+  width: 4px;
+  height: 1.15em;
+  background: #00FC98;
+  vertical-align: text-bottom;
+  margin-left: 3px;
+  box-shadow: 0 0 10px rgba(0, 252, 152, .9);
+  animation: parpadeoCursorPitch .65s step-end infinite;
+}
+
+@keyframes parpadeoCursorPitch {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
 }
 
 .dialogo-acciones {
@@ -742,28 +769,24 @@ textarea::placeholder {
 
 .dialogo-siguiente {
   min-height: 56px;
-  padding: 15px 26px;
+  padding: 15px 30px;
   border-radius: 16px;
-  border: 2px solid rgba(0, 252, 152, .78);
-  background: linear-gradient(135deg, rgba(0, 252, 152, .22), rgba(0, 59, 255, .26));
-  color: #FFFFFF;
+  border: 2px solid rgba(0, 252, 152, .62);
+  background: linear-gradient(135deg, rgba(0, 252, 152, .16), rgba(0, 59, 255, .20));
+  color: #F3FAFF;
   font-family: "Poppins", system-ui, sans-serif;
-  font-size: clamp(16px, 1.35vw, 22px);
+  font-size: clamp(16px, 1.3vw, 20px);
   font-weight: 900;
-  letter-spacing: .04em;
+  letter-spacing: .03em;
   cursor: pointer;
-  box-shadow:
-    0 0 18px rgba(0, 252, 152, .25),
-    inset 0 0 20px rgba(0, 200, 255, .10);
+  box-shadow: 0 0 16px rgba(0, 252, 152, .16);
   transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
 }
 
 .dialogo-siguiente:hover {
-  transform: translateY(-2px) scale(1.02);
-  border-color: rgba(0, 252, 152, 1);
-  box-shadow:
-    0 0 26px rgba(0, 252, 152, .38),
-    inset 0 0 24px rgba(0, 200, 255, .14);
+  transform: translateY(-2px);
+  border-color: rgba(0, 252, 152, .95);
+  box-shadow: 0 0 24px rgba(0, 252, 152, .30);
 }
 
 .dialogo-siguiente.oculto {
@@ -898,18 +921,18 @@ textarea::placeholder {
   }
 
   .dialogo-img {
-    width: clamp(190px, 27vw, 290px);
+    width: clamp(190px, 24vw, 300px);
   }
 
   .dialogo-burbuja {
     max-width: 680px;
-    min-height: 260px;
-    padding: 28px;
+    min-height: auto;
+    padding: 26px;
   }
 
   .dialogo-texto-rpg {
-    font-size: clamp(20px, 2.8vw, 29px);
-    min-height: 120px;
+    font-size: clamp(20px, 2.4vw, 29px);
+    min-height: 1.45em;
   }
 }
 
@@ -980,17 +1003,22 @@ textarea::placeholder {
   }
 
   .astro-pitch-card {
-    padding: 145px 18px 18px;
+    flex-direction: column;
+    align-items: center;
     text-align: center;
+    padding: 22px 18px;
+    gap: 16px;
     min-height: auto;
   }
 
   .astro-pitch-img {
-    left: 50%;
-    top: -40px;
-    bottom: auto;
-    transform: translateX(-50%);
-    width: 135px;
+    width: clamp(120px, 34vw, 160px);
+  }
+
+  .astro-pitch-text,
+  .astro-pitch-text h3,
+  .astro-pitch-text p {
+    text-align: center;
   }
 
   .dialogo-box {
@@ -1000,37 +1028,30 @@ textarea::placeholder {
   }
 
   .dialogo-img {
-    width: clamp(150px, 37vw, 220px);
+    width: clamp(160px, 34vw, 240px);
   }
 
   .dialogo-burbuja {
     width: 100%;
     max-width: 100%;
-    min-height: 230px;
+    min-height: auto;
     padding: 22px 18px;
     border-radius: 22px;
   }
 
   .dialogo-hablante {
-    font-size: 14px;
-    margin-bottom: 10px;
-  }
-
-  .dialogo-badge {
-    font-size: 11px;
+    font-size: 15px;
     margin-bottom: 14px;
   }
 
   .dialogo-texto-rpg {
-    font-size: clamp(18px, 4.7vw, 25px);
-    min-height: 106px;
-    line-height: 1.52;
+    font-size: clamp(18px, 5vw, 24px);
+    min-height: 1.45em;
+    line-height: 1.4;
   }
 
   .dialogo-siguiente {
-    width: 100%;
-    min-height: 54px;
-    font-size: 16px;
+    width: min(100%, 290px);
   }
 
   .dialogo-ready-area {
@@ -1072,6 +1093,7 @@ textarea::placeholder {
 
   .dialogo-texto-rpg {
     font-size: clamp(17px, 5vw, 22px);
+    min-height: 1.4em;
   }
 }
 
@@ -1091,17 +1113,17 @@ textarea::placeholder {
   }
 
   .dialogo-img {
-    width: clamp(180px, 20vw, 260px);
+    width: clamp(180px, 20vw, 280px);
   }
 
   .dialogo-burbuja {
-    min-height: 230px;
+    min-height: 250px;
     padding: 24px 28px;
   }
 
   .dialogo-texto-rpg {
     font-size: clamp(18px, 1.8vw, 26px);
-    min-height: 98px;
+    min-height: 1.45em;
   }
 }
 

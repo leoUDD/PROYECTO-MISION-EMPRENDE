@@ -129,28 +129,15 @@ main.team-container-wrap {
   gap: clamp(28px, 4vh, 44px);
 }
 
+/* Sin píldora sobre el título: el patrón de transiciones es título verde
+   grande + panel. El gap solo actúa entre hijos, así que con el h1 solo no
+   deja hueco. */
 .title-wrapper {
   width: min(100%, 780px);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 12px;
-}
-
-.mission-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px 16px;
-  border-radius: 999px;
-  background: rgba(0, 242, 109, .12);
-  border: 1px solid rgba(0, 242, 109, .42);
-  color: var(--udd-green);
-  font-size: clamp(12px, 1.1vw, 14px);
-  font-weight: 900;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  text-shadow: 0 0 10px rgba(0, 242, 109, .34);
 }
 
 .title-wrapper h1,
@@ -566,11 +553,6 @@ body.dialogo-activo .team-container {
   .team-section {
     min-height: 650px;
     gap: 24px;
-  }
-
-  .mission-badge {
-    font-size: 10px;
-    padding: 7px 12px;
   }
 
   .title-wrapper h1,

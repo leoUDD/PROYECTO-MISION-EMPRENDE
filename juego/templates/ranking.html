@@ -307,7 +307,7 @@
       position: absolute; inset: 9px;
       border-radius: 50%;
       border: 1.5px solid transparent;
-      border-top-color: rgba(255,122,26,.6);
+      border-top-color: rgba(0,252,152,.6);
       animation: susSpinA 1.7s linear infinite reverse;
     }
     @keyframes susSpinA { to { transform: rotate(360deg); } }
@@ -357,7 +357,7 @@
     #susBar {
       height: 100%;
       width: 0%;
-      background: linear-gradient(90deg, #00C8FF, #FF7A1A);
+      background: linear-gradient(90deg, #00C8FF, #00FC98);
       border-radius: 999px;
     }
 
@@ -411,72 +411,16 @@
       transition: opacity .1s;
     }
 
-    /* ── VIDEO CINEMÁTICO ── */
-    /* contenedor del video — mismo ancho que el podio-card, centrado en la escena */
-    #videoOverlay {
-      display: none;
-      width: min(900px, 92vw);
-      margin: 24px auto 0;
-      position: relative;
-      z-index: 10;
-      border-radius: 22px;
-      overflow: hidden;
-      border: 1px solid rgba(0,200,255,.22);
-      box-shadow:
-        0 0 0 1px rgba(0,200,255,.06) inset,
-        0 24px 64px rgba(0,0,0,.55);
-      opacity: 0;
-      transform: translateY(16px);
-      transition: opacity .6s ease, transform .6s ease;
-    }
-    #videoOverlay.visible {
-      display: block;
-      opacity: 1;
-      transform: translateY(0);
-    }
-    #videoOverlay.fade-out {
-      opacity: 0;
-      transform: translateY(-12px);
-      pointer-events: none;
-    }
-    #videoOverlay video {
-      width: 100%;
-      display: block;
-      border-radius: 22px;
-    }
-    #btnSaltarVideo {
-      position: absolute;
-      bottom: 16px;
-      right: 16px;
-      z-index: 2;
-      background: rgba(0,0,0,.55);
-      border: 1px solid rgba(0,200,255,.35);
-      border-radius: 999px;
-      padding: 7px 18px;
-      color: rgba(0,200,255,.85);
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: .1em;
-      text-transform: uppercase;
-      cursor: pointer;
-      font-family: inherit;
-      transition: background .2s, border-color .2s;
-    }
-    #btnSaltarVideo:hover {
-      background: rgba(0,200,255,.12);
-      border-color: rgba(0,200,255,.7);
-    }
-
     /* ═══════════════════════════════════════════
        CARRERA — barras con color por equipo
     ═══════════════════════════════════════════ */
 
-    /* variables de color por carril */
+    /* variables de color por carril — paleta verde/cian, igual al resto del ranking */
     .carril-race.c-slot-0 { --lane-c: #00C8FF; --lane-cd: rgba(0,200,255,.22); --lane-cs: rgba(0,200,255,.05); }
-    .carril-race.c-slot-1 { --lane-c: #FF7A1A; --lane-cd: rgba(255,122,26,.22); --lane-cs: rgba(255,122,26,.05); }
-    .carril-race.c-slot-2 { --lane-c: #a78bfa; --lane-cd: rgba(167,139,250,.22); --lane-cs: rgba(167,139,250,.05); }
-    .carril-race.c-slot-3 { --lane-c: #7dffb3; --lane-cd: rgba(125,255,179,.2);  --lane-cs: rgba(125,255,179,.04); }
-    .carril-race.c-slot-4 { --lane-c: #ff5533; --lane-cd: rgba(255,85,51,.22);   --lane-cs: rgba(255,85,51,.05); }
+    .carril-race.c-slot-1 { --lane-c: #00FC98; --lane-cd: rgba(0,252,152,.22); --lane-cs: rgba(0,252,152,.05); }
+    .carril-race.c-slot-2 { --lane-c: #5BE7FF; --lane-cd: rgba(91,231,255,.22); --lane-cs: rgba(91,231,255,.05); }
+    .carril-race.c-slot-3 { --lane-c: #26FFC2; --lane-cd: rgba(38,255,194,.2);  --lane-cs: rgba(38,255,194,.04); }
+    .carril-race.c-slot-4 { --lane-c: #00E4B8; --lane-cd: rgba(0,228,184,.22);   --lane-cs: rgba(0,228,184,.05); }
 
     .carril-race {
       margin-bottom: 22px;
@@ -549,12 +493,12 @@
     }
     .barra.glow::after { opacity: 1; }
 
-    /* degradados por slot */
+    /* degradados por slot — verde/cian */
     .c-slot-0 .barra { background: linear-gradient(90deg, #004a68, #00a8d8, #00C8FF); }
-    .c-slot-1 .barra { background: linear-gradient(90deg, #5a2800, #cc5500, #FF7A1A); }
-    .c-slot-2 .barra { background: linear-gradient(90deg, #2e1f6e, #7c5be0, #a78bfa); }
-    .c-slot-3 .barra { background: linear-gradient(90deg, #00401e, #18a860, #7dffb3); }
-    .c-slot-4 .barra { background: linear-gradient(90deg, #4a1000, #cc2200, #ff5533); }
+    .c-slot-1 .barra { background: linear-gradient(90deg, #00401e, #00a866, #00FC98); }
+    .c-slot-2 .barra { background: linear-gradient(90deg, #003a4a, #0093b8, #5BE7FF); }
+    .c-slot-3 .barra { background: linear-gradient(90deg, #00401e, #18a878, #26FFC2); }
+    .c-slot-4 .barra { background: linear-gradient(90deg, #00382e, #009176, #00E4B8); }
 
     /* ═══════════════════════════════════════════
        OVERLAY GANADOR
@@ -582,11 +526,11 @@
       border-radius: 28px;
       text-align: center;
       background:
-        radial-gradient(ellipse at 50% 0%, rgba(255,215,0,.14), transparent 55%),
+        radial-gradient(ellipse at 50% 0%, rgba(0,252,152,.14), transparent 55%),
         linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.03)),
         linear-gradient(180deg, #1a3d60 0%, #09192f 100%);
-      border: 1px solid rgba(255,215,0,.25);
-      box-shadow: 0 0 60px rgba(255,215,0,.15), 0 20px 60px rgba(0,0,0,.5);
+      border: 1px solid rgba(0,252,152,.25);
+      box-shadow: 0 0 60px rgba(0,252,152,.15), 0 20px 60px rgba(0,0,0,.5);
       animation: winnerPop .55s cubic-bezier(.22,1,.36,1);
     }
     @keyframes winnerPop {
@@ -605,7 +549,7 @@
       margin: 0;
       font-size: clamp(30px, 5vw, 54px);
       font-weight: 900;
-      background: linear-gradient(90deg, #00C8FF, #fff 40%, #ffd000);
+      background: linear-gradient(90deg, #00C8FF, #fff 40%, #00FC98);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -660,9 +604,9 @@
       content: '';
       position: absolute; inset: 0;
       background:
-        radial-gradient(ellipse at 50% 0%,  rgba(255,215,0,.10),  transparent 52%),
+        radial-gradient(ellipse at 50% 0%,  rgba(0,252,152,.10),  transparent 52%),
         radial-gradient(ellipse at 15% 90%, rgba(0,200,255,.08),  transparent 44%),
-        radial-gradient(ellipse at 85% 75%, rgba(255,122,26,.06), transparent 40%);
+        radial-gradient(ellipse at 85% 75%, rgba(38,255,194,.06), transparent 40%);
       pointer-events: none; z-index: 0;
     }
 
@@ -687,14 +631,14 @@
       display: inline-flex;
       align-items: center;
       gap: 7px;
-      background: linear-gradient(90deg, rgba(255,122,26,.12), rgba(0,200,255,.12));
-      border: 1px solid rgba(255,165,50,.35);
+      background: linear-gradient(90deg, rgba(0,252,152,.12), rgba(0,200,255,.12));
+      border: 1px solid rgba(0,252,152,.35);
       border-radius: 999px;
       padding: 5px 18px;
       font-size: 10px;
       font-weight: 700;
       letter-spacing: .18em;
-      color: #FF7A1A;
+      color: #00FC98;
       text-transform: uppercase;
       margin-bottom: 14px;
       animation: badgePop .6s .1s both;
@@ -707,7 +651,7 @@
       content: '';
       width: 7px; height: 7px;
       border-radius: 50%;
-      background: #FF7A1A;
+      background: #00FC98;
       animation: dotBlink 1s step-end infinite;
     }
     @keyframes dotBlink { 0%,100%{opacity:1;} 50%{opacity:0;} }
@@ -717,7 +661,7 @@
       font-weight: 900;
       letter-spacing: .04em;
       text-transform: uppercase;
-      background: linear-gradient(90deg, #00C8FF 0%, #fff 38%, #ffd000 65%, #FF7A1A 100%);
+      background: linear-gradient(90deg, #00C8FF 0%, #fff 38%, #00FC98 65%, #26FFC2 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -765,9 +709,9 @@
       pointer-events: none;
       z-index: 0;
     }
-    .puesto-1::after { width: 140px; height: 28px; background: rgba(255,215,0,.35); left: 50%; transform: translateX(-50%); }
+    .puesto-1::after { width: 140px; height: 28px; background: rgba(0,252,152,.35); left: 50%; transform: translateX(-50%); }
     .puesto-2::after { width: 110px; height: 22px; background: rgba(0,200,255,.28); left: 50%; transform: translateX(-50%); }
-    .puesto-3::after { width: 110px; height: 22px; background: rgba(255,122,26,.28); left: 50%; transform: translateX(-50%); }
+    .puesto-3::after { width: 110px; height: 22px; background: rgba(38,255,194,.28); left: 50%; transform: translateX(-50%); }
 
     /* medalla sobre el pedestal */
     .puesto-medal {
@@ -788,9 +732,9 @@
       100% { opacity: 1; transform: translateY(0) scale(1); }
     }
     .puesto-1 .puesto-medal {
-      background: linear-gradient(135deg, #ffe44a, #b87800);
-      color: #2a1800;
-      box-shadow: 0 0 22px rgba(255,215,0,.5);
+      background: linear-gradient(135deg, #00FC98, #00966B);
+      color: #00220F;
+      box-shadow: 0 0 22px rgba(0,252,152,.5);
       animation-delay: .55s;
     }
     .puesto-2 .puesto-medal {
@@ -800,9 +744,9 @@
       animation-delay: .7s;
     }
     .puesto-3 .puesto-medal {
-      background: linear-gradient(135deg, #ffc090, #c06030);
-      color: #1a0800;
-      box-shadow: 0 0 16px rgba(255,122,26,.35);
+      background: linear-gradient(135deg, #baffd9, #4ac89a);
+      color: #002018;
+      box-shadow: 0 0 16px rgba(38,255,194,.35);
       animation-delay: .85s;
     }
 
@@ -833,9 +777,9 @@
       position: relative; z-index: 2;
       animation: riseUp .7s both;
     }
-    .puesto-1 .puesto-tok-top { color: #ffd000; animation-delay: .65s; }
+    .puesto-1 .puesto-tok-top { color: #00FC98; animation-delay: .65s; }
     .puesto-2 .puesto-tok-top { color: #00C8FF; animation-delay: .8s; }
-    .puesto-3 .puesto-tok-top { color: #FF7A1A; animation-delay: .95s; }
+    .puesto-3 .puesto-tok-top { color: #26FFC2; animation-delay: .95s; }
 
     /* pedestal 3D */
     .caja {
@@ -908,10 +852,10 @@
       color: #000;
     }
 
-    /* tamaños y colores por posición */
+    /* tamaños y colores por posición — verde/cian */
     .puesto-1 .caja {
       width: 200px; height: 170px;
-      background: linear-gradient(165deg, #ffe44a 0%, #d4900a 55%, #9a6400 100%);
+      background: linear-gradient(165deg, #26FFC2 0%, #00C88F 55%, #007A5D 100%);
       color: #000;
       animation-delay: .3s;
     }
@@ -925,7 +869,7 @@
 
     .puesto-3 .caja {
       width: 172px; height: 112px;
-      background: linear-gradient(165deg, #ff9040 0%, #c05000 55%, #722e00 100%);
+      background: linear-gradient(165deg, #8ff5d9 0%, #1f9a86 55%, #0c5c50 100%);
       color: #000;
       animation-delay: .4s;
     }
@@ -933,7 +877,7 @@
     /* divisor HUD entre stage y tabla */
     .podio-hud-line {
       height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(0,200,255,.2), rgba(255,122,26,.15), transparent);
+      background: linear-gradient(90deg, transparent, rgba(0,200,255,.2), rgba(0,252,152,.15), transparent);
       margin: 0 24px 20px;
     }
 
@@ -976,8 +920,8 @@
     .tabla-final-row:last-child { border-bottom: none; }
     .tabla-final-row:hover { background: rgba(0,200,255,.04); }
     .tabla-final-row.es-me {
-      background: linear-gradient(90deg, rgba(255,122,26,.09), rgba(255,122,26,.03));
-      border-left: 3px solid #FF7A1A;
+      background: linear-gradient(90deg, rgba(0,252,152,.09), rgba(0,252,152,.03));
+      border-left: 3px solid #00FC98;
     }
 
     .tfr-rank { width: 50px; display: flex; align-items: center; }
@@ -990,9 +934,9 @@
       font-size: 16px;
       font-weight: 900;
     }
-    .rank-1 .tfr-badge { background: linear-gradient(135deg,#ffe44a,#b87800); color:#2a1800; box-shadow:0 0 10px rgba(255,215,0,.3); }
+    .rank-1 .tfr-badge { background: linear-gradient(135deg,#00FC98,#00966B); color:#00220F; box-shadow:0 0 10px rgba(0,252,152,.3); }
     .rank-2 .tfr-badge { background: linear-gradient(135deg,#55d8f0,#005870); color:#001820; }
-    .rank-3 .tfr-badge { background: linear-gradient(135deg,#ff9040,#722e00); color:#1a0800; }
+    .rank-3 .tfr-badge { background: linear-gradient(135deg,#8ff5d9,#1f9a86); color:#002018; }
     .rank-n .tfr-badge { background: rgba(255,255,255,.06); color: rgba(180,220,255,.6); border: 1px solid rgba(255,255,255,.08); }
 
     .tfr-name {
@@ -1006,9 +950,9 @@
       padding-left: 12px;
     }
     .tfr-yo-tag {
-      background: rgba(255,122,26,.15);
-      border: 1px solid rgba(255,122,26,.28);
-      color: #FF7A1A;
+      background: rgba(0,252,152,.15);
+      border: 1px solid rgba(0,252,152,.28);
+      color: #00FC98;
       border-radius: 999px;
       font-size: 10px;
       font-weight: 700;
@@ -1021,7 +965,7 @@
       text-align: right;
       font-size: 14px;
       font-weight: 700;
-      color: #ffd000;
+      color: #00FC98;
     }
 
     @media (max-width: 768px) {
@@ -1449,6 +1393,21 @@ html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .btn-r
     0 0 30px rgba(0, 200, 255, .24) !important;
 }
 
+/* =====================================================
+   PATCH RANKING FINAL — MISMA PALETA VERDE/AZUL
+   Recolorea el título "Gran final" para que combine con
+   el ranking parcial (carrera, podio y tabla ya recoloreados
+   directamente arriba, sin necesidad de !important porque
+   se editó cada regla original en vez de parchearla).
+===================================================== */
+
+body.ranking-final .titulo {
+  color: #00FC98 !important;
+  text-shadow:
+    0 0 14px rgba(0, 252, 152, .55),
+    0 0 32px rgba(0, 200, 255, .22) !important;
+}
+
 </style>
 </head>
 
@@ -1491,10 +1450,10 @@ html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .btn-r
       <div class="sus-teams">
         {% for equipo in rankings %}
           {% if forloop.counter == 1 %}<div class="sus-team-row" id="susTeam{{ forloop.counter0 }}"><div class="sus-dot" style="background:#00C8FF"></div>
-          {% elif forloop.counter == 2 %}<div class="sus-team-row" id="susTeam{{ forloop.counter0 }}"><div class="sus-dot" style="background:#FF7A1A"></div>
-          {% elif forloop.counter == 3 %}<div class="sus-team-row" id="susTeam{{ forloop.counter0 }}"><div class="sus-dot" style="background:#a78bfa"></div>
-          {% elif forloop.counter == 4 %}<div class="sus-team-row" id="susTeam{{ forloop.counter0 }}"><div class="sus-dot" style="background:#7dffb3"></div>
-          {% else %}<div class="sus-team-row" id="susTeam{{ forloop.counter0 }}"><div class="sus-dot" style="background:#ff5533"></div>
+          {% elif forloop.counter == 2 %}<div class="sus-team-row" id="susTeam{{ forloop.counter0 }}"><div class="sus-dot" style="background:#00FC98"></div>
+          {% elif forloop.counter == 3 %}<div class="sus-team-row" id="susTeam{{ forloop.counter0 }}"><div class="sus-dot" style="background:#5BE7FF"></div>
+          {% elif forloop.counter == 4 %}<div class="sus-team-row" id="susTeam{{ forloop.counter0 }}"><div class="sus-dot" style="background:#26FFC2"></div>
+          {% else %}<div class="sus-team-row" id="susTeam{{ forloop.counter0 }}"><div class="sus-dot" style="background:#00E4B8"></div>
           {% endif %}
             <div class="sus-team-name">{{ equipo.team_name }}</div>
             <div class="sus-question">?</div>
@@ -1538,13 +1497,7 @@ html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .btn-r
         </div>
       </section>
 
-      <!-- VIDEO CINEMÁTICO — mismo ancho que podio, dentro del flujo -->
-      <div id="videoOverlay">
-        <video id="videoMisionCumplida" src="{% static 'videos/ranking.webm' %}" preload="auto" playsinline></video>
-        <button id="btnSaltarVideo" onclick="saltarVideo()" data-i18n="ranking_saltar">Saltar &rsaquo;</button>
-      </div>
-
-      <!-- PODIO ÉPICO -->
+      <!-- PODIO ÉPICO (la carrera pasa directo aquí; sin video cinemático) -->
       <section class="podio-wrap" id="podioWrap">
         <div class="podio-card">
 
@@ -1741,8 +1694,8 @@ html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .btn-r
 
       const ctx = canvas.getContext("2d");
       const COLORS = [
-        "#00C8FF","#FF7A1A","#ffd000","#a78bfa",
-        "#7dffb3","#ffffff","#ff4488","#44ffdd","#ff5533"
+        "#00C8FF","#00FC98","#26FFC2","#5BE7FF",
+        "#00E4B8","#ffffff","#00FF88","#44ffdd","#009B87"
       ];
       let rockets = [], fwOn = false, raf = null;
 
@@ -2078,67 +2031,21 @@ html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .btn-r
           setTimeout(() => {
             if (carrera) carrera.classList.add("hidden");
             if (overlay) overlay.classList.remove("visible");
-            /* reproducir video cinemático antes del podio */
-            window.mostrarPodioFinal = function () {
-              const vo = document.getElementById("videoOverlay");
-              if (vo) {
-                vo.classList.remove("visible");
-                vo.classList.add("fade-out");
+            /* mostrar podio directamente (sin video cinemático) */
+            if (podio) podio.classList.add("visible");
+            if (window.fwStart) window.fwStart(true, 6);
+            try {
+              if (audio) {
+                audio.currentTime = 0;
+                audio.volume = 1;
+                audio.play().catch(() => {});
+                /* reanudar música de fondo cuando termine el sonido de victoria */
+                audio.onended = function () {
+                  const bg = document.getElementById("musica-ranking");
+                  if (bg && !bg.muted) bg.play().catch(() => {});
+                };
               }
-              setTimeout(() => {
-                if (vo) { vo.style.display = "none"; vo.classList.remove("fade-out"); }
-                if (podio) podio.classList.add("visible");
-                if (window.fwStart) window.fwStart(true, 6);
-                try {
-                  if (audio) {
-                    audio.currentTime = 0;
-                    audio.volume = 1;
-                    audio.play().catch(() => {});
-                    /* reanudar música de fondo cuando termine el sonido de victoria */
-                    audio.onended = function () {
-                      const bg = document.getElementById("musica-ranking");
-                      if (bg && !bg.muted) bg.play().catch(() => {});
-                    };
-                  }
-                } catch (e) {}
-              }, 700);
-            };
-            window.saltarVideo = function () {
-              const vid = document.getElementById("videoMisionCumplida");
-              if (vid) vid.pause();
-              window.mostrarPodioFinal();
-            };
-            const vo = document.getElementById("videoOverlay");
-            const vid = document.getElementById("videoMisionCumplida");
-            if (vo && vid) {
-              /* display:block antes de añadir .visible para que la transición funcione */
-              vo.style.display = "block";
-              requestAnimationFrame(() => {
-                vo.classList.add("visible");
-              });
-              vid.currentTime = 0;
-              /* pausar música de fondo para que no compita con el video */
-              const musicaBg = document.getElementById("musica-ranking");
-              if (musicaBg) musicaBg.pause();
-              vid.play().catch(() => {});
-              vid.onended = () => window.mostrarPodioFinal();
-            } else {
-              /* sin video: ir directo al podio */
-              if (podio) podio.classList.add("visible");
-              if (window.fwStart) window.fwStart(true, 6);
-              try {
-                if (audio) {
-                  audio.currentTime = 0;
-                  audio.volume = 1;
-                  audio.play().catch(() => {});
-                  /* reanudar música de fondo cuando termine el sonido de victoria */
-                  audio.onended = function () {
-                    const bg = document.getElementById("musica-ranking");
-                    if (bg && !bg.muted) bg.play().catch(() => {});
-                  };
-                }
-              } catch (e) {}
-            }
+            } catch (e) {}
           }, 2600);
           return;
         }

@@ -354,12 +354,12 @@ body.dialogo-activo .team-container {
 }
 
 #dialogo-box {
-  width: min(1260px, 92vw);
-  min-height: min(560px, 72vh);
+  width: min(1180px, 90vw);
+  min-height: auto;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: clamp(32px, 4vw, 74px);
+  gap: clamp(28px, 4vw, 64px);
   position: relative;
   z-index: 3;
 }
@@ -372,7 +372,7 @@ body.dialogo-activo .team-container {
 }
 
 .dialogo-img {
-  width: clamp(240px, 23vw, 410px);
+  width: clamp(260px, 25vw, 440px);
   height: auto;
   object-fit: contain;
   filter:
@@ -382,10 +382,10 @@ body.dialogo-activo .team-container {
 
 .dialogo-burbuja {
   flex: 1;
-  max-width: 900px;
-  min-height: 320px;
-  padding: clamp(34px, 3.3vw, 52px);
-  border-radius: 28px;
+  max-width: 680px;
+  min-height: auto;
+  padding: clamp(26px, 2.3vw, 38px);
+  border-radius: 26px;
   background:
     radial-gradient(circle at top left, rgba(0, 252, 152, .12), transparent 34%),
     linear-gradient(160deg, rgba(0, 16, 74, .98), rgba(2, 8, 30, .98));
@@ -397,23 +397,24 @@ body.dialogo-activo .team-container {
 }
 
 .dialogo-hablante {
-  font-size: clamp(16px, 1.35vw, 24px);
+  font-size: clamp(17px, 1.5vw, 26px);
   font-weight: 900;
-  letter-spacing: 4px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
   color: #00FC98;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 
 .dialogo-texto-rpg {
-  font-size: clamp(22px, 1.85vw, 32px);
-  line-height: 1.62;
-  min-height: 158px;
+  font-size: clamp(22px, 2vw, 33px);
+  line-height: 1.45;
+  min-height: 1.45em;
   font-weight: 800;
   letter-spacing: -0.01em;
   word-spacing: 0.04em;
   color: #F3FAFF;
   text-shadow: 0 0 10px rgba(0, 200, 255, .24);
-  margin-bottom: 30px;
+  margin-bottom: 24px;
 }
 
 .dialogo-texto-rpg #dialogo-texto {
@@ -436,12 +437,12 @@ body.dialogo-activo .team-container {
 }
 
 .dialogo-siguiente {
-  min-height: 60px;
-  padding: 16px 28px;
-  border-radius: 17px;
-  font-size: clamp(17px, 1.45vw, 23px);
+  min-height: 56px;
+  padding: 15px 30px;
+  border-radius: 16px;
+  font-size: clamp(16px, 1.3vw, 20px);
   font-weight: 900;
-  letter-spacing: .04em;
+  letter-spacing: .03em;
   cursor: pointer;
   background: linear-gradient(135deg, rgba(0, 252, 152, .22), rgba(0, 59, 255, .26));
   border: 2px solid rgba(0, 252, 152, .78);
@@ -515,18 +516,18 @@ body.dialogo-activo .team-container {
   }
 
   .dialogo-img {
-    width: clamp(200px, 28vw, 310px);
+    width: clamp(190px, 24vw, 300px);
   }
 
   .dialogo-burbuja {
-    max-width: 680px;
-    min-height: 250px;
-    padding: 28px;
+    max-width: 560px;
+    min-height: auto;
+    padding: 26px;
   }
 
   .dialogo-texto-rpg {
-    font-size: clamp(21px, 3vw, 31px);
-    min-height: 115px;
+    font-size: clamp(20px, 2.4vw, 29px);
+    min-height: 1.45em;
   }
 }
 
@@ -611,32 +612,34 @@ body.dialogo-activo .team-container {
   #dialogo-box {
     width: 94vw;
     flex-direction: column;
-    gap: 18px;
+    gap: 16px;
   }
 
   .dialogo-img {
-    width: clamp(160px, 42vw, 250px);
+    width: clamp(160px, 34vw, 240px);
   }
 
   .dialogo-burbuja {
     width: 100%;
     max-width: 100%;
-    min-height: 230px;
-    padding: 24px 20px;
+    min-height: auto;
+    padding: 22px 18px;
+    border-radius: 22px;
   }
 
   .dialogo-hablante {
     font-size: 15px;
+    margin-bottom: 14px;
   }
 
   .dialogo-texto-rpg {
-    font-size: clamp(19px, 5vw, 27px);
-    min-height: 105px;
+    font-size: clamp(18px, 5vw, 24px);
+    min-height: 1.45em;
+    margin-bottom: 20px;
   }
 
   .dialogo-siguiente {
-    min-height: 56px;
-    font-size: 17px;
+    width: min(100%, 290px);
   }
 }
 

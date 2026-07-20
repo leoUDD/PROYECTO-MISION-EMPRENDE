@@ -29,6 +29,33 @@ body{
   overflow-x:hidden;
 }
 
+/* La barra lateral "RUTA DE MISIÓN" es fixed y vive fuera de .pitch-container,
+   así que el body necesita reservarle espacio a la izquierda o el contenido
+   la solapa. Mismo patrón que estilo_lego.css / estilo_tematicas.css,
+   ajustado a los breakpoints propios de esta vista (980 / 720 / 430). */
+@media (min-width: 1101px) {
+  body {
+    padding-left: 155px;
+  }
+}
+
+@media (max-width: 1100px) {
+  body {
+    padding-left: 110px;
+  }
+}
+
+@media (max-width: 700px) {
+  /* La barra lateral pasa a ser una barra horizontal abajo del todo
+     (linea_progreso_habilidades.html, @media max-width:700px), así que
+     ya no hace falta espacio a la izquierda, pero sí abajo para no
+     taparla con el footer. */
+  body {
+    padding-left: 20px;
+    padding-bottom: 100px;
+  }
+}
+
 body::before{
   content:"";
   position:fixed;
@@ -532,7 +559,7 @@ a.btn:not(.ghost):hover{
 
 @media (max-width: 430px) {
   body {
-    padding: 10px;
+    padding: 10px 10px 90px;
   }
 
   .pitch-container {

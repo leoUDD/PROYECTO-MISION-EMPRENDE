@@ -19,7 +19,7 @@
   --orange-2: #ff7a48;
   /* paleta del juego */
   --primary:  #00C8FF;
-  --accent:   #FF7A1A;
+  --accent:   #00FC98;
   --card:     rgba(8, 26, 45, 0.92);
 }
 
@@ -116,12 +116,12 @@ body { overflow-x: hidden; }
 }
 .carril-race:last-child { margin-bottom: 0; }
 
-/* variables de color por slot (definidas en el HTML inline style) */
+/* variables de color por slot — paleta verde/cian (definidas también inline en el HTML) */
 .carril-race.c-slot-0 { --lane-c: #00C8FF; --lane-cd: rgba(0,200,255,.22);  --lane-cs: rgba(0,200,255,.05); }
-.carril-race.c-slot-1 { --lane-c: #FF7A1A; --lane-cd: rgba(255,122,26,.22); --lane-cs: rgba(255,122,26,.05); }
-.carril-race.c-slot-2 { --lane-c: #a78bfa; --lane-cd: rgba(167,139,250,.22);--lane-cs: rgba(167,139,250,.05); }
-.carril-race.c-slot-3 { --lane-c: #7dffb3; --lane-cd: rgba(125,255,179,.2); --lane-cs: rgba(125,255,179,.04); }
-.carril-race.c-slot-4 { --lane-c: #ff5533; --lane-cd: rgba(255,85,51,.22);  --lane-cs: rgba(255,85,51,.05); }
+.carril-race.c-slot-1 { --lane-c: #00FC98; --lane-cd: rgba(0,252,152,.22); --lane-cs: rgba(0,252,152,.05); }
+.carril-race.c-slot-2 { --lane-c: #5BE7FF; --lane-cd: rgba(91,231,255,.22);--lane-cs: rgba(91,231,255,.05); }
+.carril-race.c-slot-3 { --lane-c: #26FFC2; --lane-cd: rgba(38,255,194,.2); --lane-cs: rgba(38,255,194,.04); }
+.carril-race.c-slot-4 { --lane-c: #00E4B8; --lane-cd: rgba(0,228,184,.22);  --lane-cs: rgba(0,228,184,.05); }
 
 .carril-race.lit {
   border-color: var(--lane-cd);
@@ -186,12 +186,12 @@ body { overflow-x: hidden; }
 }
 .barra.glow::after { opacity: 1; }
 
-/* degradados por slot */
+/* degradados por slot — verde/cian */
 .c-slot-0 .barra { background: linear-gradient(90deg, #004a68, #00a8d8, #00C8FF); }
-.c-slot-1 .barra { background: linear-gradient(90deg, #5a2800, #cc5500, #FF7A1A); }
-.c-slot-2 .barra { background: linear-gradient(90deg, #2e1f6e, #7c5be0, #a78bfa); }
-.c-slot-3 .barra { background: linear-gradient(90deg, #00401e, #18a860, #7dffb3); }
-.c-slot-4 .barra { background: linear-gradient(90deg, #4a1000, #cc2200, #ff5533); }
+.c-slot-1 .barra { background: linear-gradient(90deg, #00401e, #00a866, #00FC98); }
+.c-slot-2 .barra { background: linear-gradient(90deg, #003a4a, #0093b8, #5BE7FF); }
+.c-slot-3 .barra { background: linear-gradient(90deg, #00401e, #18a878, #26FFC2); }
+.c-slot-4 .barra { background: linear-gradient(90deg, #00382e, #009176, #00E4B8); }
 
 /* elementos del CSS original que se ocultaban */
 .race-badges,
@@ -300,9 +300,9 @@ body { overflow-x: hidden; }
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse at 50% 0%,  rgba(255,215,0,.10),  transparent 52%),
+    radial-gradient(ellipse at 50% 0%,  rgba(0,252,152,.10),  transparent 52%),
     radial-gradient(ellipse at 15% 90%, rgba(0,200,255,.08),  transparent 44%),
-    radial-gradient(ellipse at 85% 75%, rgba(255,122,26,.06), transparent 40%);
+    radial-gradient(ellipse at 85% 75%, rgba(38,255,194,.06), transparent 40%);
   pointer-events: none;
   z-index: 0;
 }
@@ -325,7 +325,7 @@ body { overflow-x: hidden; }
   font-weight: 900;
   letter-spacing: .04em;
   text-transform: uppercase;
-  background: linear-gradient(90deg, #00C8FF 0%, #fff 38%, #ffd000 65%, #FF7A1A 100%);
+  background: linear-gradient(90deg, #00C8FF 0%, #fff 38%, #00FC98 65%, #26FFC2 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -390,9 +390,9 @@ body { overflow-x: hidden; }
 }
 @keyframes cajaSheen { 0%{left:-60%;} 100%{left:160%;} }
 
-.puesto-1 .caja { width:200px; height:170px; background:linear-gradient(165deg,#ffe44a 0%,#d4900a 55%,#9a6400 100%); color:#000; }
+.puesto-1 .caja { width:200px; height:170px; background:linear-gradient(165deg,#26FFC2 0%,#00C88F 55%,#007A5D 100%); color:#000; }
 .puesto-2 .caja { width:172px; height:132px; background:linear-gradient(165deg,#55d8f0 0%,#0088a8 55%,#005870 100%); color:#000; }
-.puesto-3 .caja { width:172px; height:112px; background:linear-gradient(165deg,#ff9040 0%,#c05000 55%,#722e00 100%); color:#000; }
+.puesto-3 .caja { width:172px; height:112px; background:linear-gradient(165deg,#8ff5d9 0%,#1f9a86 55%,#0c5c50 100%); color:#000; }
 
 /* tabla final */
 .tabla-final {

@@ -191,154 +191,176 @@ body::before {
   display: none !important;
 }
 
-.lego-dialogo-backdrop {
+.edemy-intro-backdrop {
   position: fixed;
   inset: 0;
   z-index: 0;
   background:
     radial-gradient(circle at center, rgba(0, 252, 152, .10), transparent 42%),
-    rgba(0, 5, 18, .72);
-  backdrop-filter: blur(4px) brightness(.62);
-  -webkit-backdrop-filter: blur(4px) brightness(.62);
+    rgba(0, 5, 18, .68);
+  backdrop-filter: blur(10px) brightness(.6);
+  -webkit-backdrop-filter: blur(10px) brightness(.6);
+  /* Leo pidió explícitamente el fondo difuminado (ver captura de referencia).
+     Ojo: esto reintroduce el costo de INP que se había quitado a propósito
+     en tematicas / dialogo_intro por el mismo motivo. Si el timer o la
+     sincronización se sienten más lentos al abrir este diálogo, este es el
+     primer sospechoso a revisar. */
 }
 
-.lego-dialogo-card {
+.inicio-fase-card.edemy-intro-card {
   position: relative;
-  z-index: 1;
-  width: min(1180px, 92vw);
-  min-height: min(520px, 70vh);
-  display: grid;
-  grid-template-columns: minmax(220px, 390px) minmax(420px, 1fr);
+  z-index: 2;
+  width: min(1180px, 90vw);
+  min-height: auto;
+  display: flex;
   align-items: center;
-  gap: clamp(28px, 4vw, 70px);
+  justify-content: center;
+  gap: clamp(28px, 4vw, 64px);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: #F3FAFF;
+  text-align: left;
+  pointer-events: auto;
 }
 
-.lego-dialogo-personaje {
+.edemy-intro-personaje {
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.lego-dialogo-img {
-  width: clamp(220px, 24vw, 390px);
+.edemy-intro-img {
+  width: clamp(260px, 25vw, 440px);
   height: auto;
   object-fit: contain;
   filter:
-    drop-shadow(0 0 22px rgba(0, 252, 152, .42))
-    drop-shadow(0 0 46px rgba(0, 200, 255, .20))
+    drop-shadow(0 0 24px rgba(0, 252, 152, .48))
+    drop-shadow(0 0 50px rgba(0, 200, 255, .24))
     drop-shadow(0 24px 38px rgba(0, 0, 0, .64));
-  animation: edemyFloat 3.6s ease-in-out infinite alternate;
+  animation: edemyFloat 3.8s ease-in-out infinite alternate;
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
-.lego-dialogo-burbuja {
-  width: 100%;
-  min-height: 300px;
-  padding: clamp(28px, 3vw, 44px);
-  border-radius: 28px;
+.edemy-intro-burbuja {
+  flex: 1;
+  max-width: 680px;
+  min-height: auto;
+  padding: clamp(26px, 2.3vw, 38px);
+  border-radius: 26px;
   text-align: left;
 
   background:
-    radial-gradient(circle at top left, rgba(0, 252, 152, .14), transparent 34%),
+    radial-gradient(circle at top left, rgba(0, 252, 152, .13), transparent 34%),
     linear-gradient(160deg, rgba(0, 16, 74, .98), rgba(2, 8, 30, .98));
-  border: 2px solid rgba(0, 252, 152, .82);
+  border: 2.2px solid rgba(0, 252, 152, .82);
   box-shadow:
-    0 0 32px rgba(0, 252, 152, .24),
-    0 0 82px rgba(0, 59, 255, .18),
-    var(--shadow-strong);
+    0 0 36px rgba(0, 252, 152, .26),
+    0 0 92px rgba(0, 59, 255, .18),
+    0 24px 70px rgba(0, 0, 0, .70);
+  contain: layout style;
 
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
 
-.lego-dialogo-badge {
+.edemy-intro-hablante {
   align-self: flex-start;
-  padding: 8px 16px;
   margin-bottom: 18px;
-  border-radius: 999px;
-  background: rgba(0, 252, 152, .12);
-  border: 1px solid rgba(0, 252, 152, .46);
-  color: var(--udd-green-2);
-  font-size: clamp(12px, 1vw, 15px);
+  font-size: clamp(17px, 1.5vw, 26px);
   font-weight: 900;
-  letter-spacing: .16em;
+  letter-spacing: .22em;
   text-transform: uppercase;
-  text-shadow: 0 0 10px rgba(0, 252, 152, .35);
+  color: var(--udd-green-2);
+  text-shadow: 0 0 12px rgba(0, 252, 152, .42);
 }
 
-.lego-dialogo-title {
-  color: #FFFFFF;
-  font-size: clamp(34px, 4.2vw, 62px);
-  line-height: 1.02;
-  font-weight: 900;
-  letter-spacing: -0.035em;
-  margin-bottom: 20px;
-  text-shadow:
-    0 0 12px rgba(0, 200, 255, .22),
-    0 4px 18px rgba(0, 0, 0, .45);
-}
-
-.lego-dialogo-text {
+.edemy-intro-texto {
+  margin: 0 0 24px;
   color: #F3FAFF;
-  font-size: clamp(23px, 2vw, 34px);
-  line-height: 1.48;
+  font-size: clamp(22px, 2vw, 33px);
+  line-height: 1.45;
   font-weight: 850;
-  text-shadow: 0 0 10px rgba(0, 200, 255, .20);
-  margin-bottom: 24px;
+  text-shadow: 0 0 10px rgba(0, 200, 255, .18);
+  min-height: 1.45em;
 }
 
-.lego-dialogo-progress {
+.cursor-rpg {
+  display: inline-block;
+  width: 4px;
+  height: 1.15em;
+  background: var(--udd-green-2);
+  vertical-align: text-bottom;
+  margin-left: 3px;
+  box-shadow: 0 0 10px rgba(0, 252, 152, .9);
+  animation: parpadeoCursorLego .65s step-end infinite;
+}
+
+@keyframes parpadeoCursorLego {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.edemy-intro-pager {
   display: flex;
   gap: 10px;
   margin-bottom: 20px;
 }
 
-.lego-dialogo-dot {
+.edemy-intro-dot {
   width: 10px;
   height: 10px;
   border-radius: 999px;
   background: rgba(0, 252, 152, .22);
 }
 
-.lego-dialogo-dot.activo {
+.edemy-intro-dot.activo {
   background: var(--udd-green-2);
   transform: scale(1.38);
   box-shadow: 0 0 12px rgba(0, 252, 152, .72);
 }
 
-.lego-dialogo-dot.hecho {
+.edemy-intro-dot.hecho {
   background: rgba(0, 252, 152, .62);
 }
 
-.lego-dialogo-btn {
+.edemy-intro-next {
   align-self: flex-start;
+  margin-top: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-height: 56px;
-  padding: 15px 28px;
+  padding: 15px 30px;
   border-radius: 16px;
-  border: 2px solid rgba(0, 252, 152, .78);
-  background: linear-gradient(135deg, rgba(0, 252, 152, .20), rgba(0, 200, 255, .24));
-  color: #FFFFFF;
+  border: 2px solid rgba(0, 252, 152, .62);
+  background: linear-gradient(135deg, rgba(0, 252, 152, .16), rgba(0, 59, 255, .20));
+  color: #F3FAFF;
   font-family: "Poppins", system-ui, sans-serif;
-  font-size: clamp(16px, 1.4vw, 21px);
+  font-size: clamp(16px, 1.3vw, 20px);
   font-weight: 900;
-  letter-spacing: .04em;
+  letter-spacing: .03em;
   cursor: pointer;
-  box-shadow:
-    0 0 18px rgba(0, 252, 152, .25),
-    inset 0 0 20px rgba(0, 200, 255, .10);
+  box-shadow: 0 0 16px rgba(0, 252, 152, .16);
   transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
 }
 
-.lego-dialogo-btn:hover {
-  transform: translateY(-2px) scale(1.02);
-  border-color: rgba(0, 252, 152, 1);
-  box-shadow:
-    0 0 26px rgba(0, 252, 152, .38),
-    inset 0 0 24px rgba(0, 200, 255, .14);
+.edemy-intro-next:hover {
+  transform: translateY(-2px);
+  border-color: rgba(0, 252, 152, .95);
+  box-shadow: 0 0 24px rgba(0, 252, 152, .30);
 }
 
-.lego-dialogo-ready {
-  margin-top: 4px;
+.edemy-intro-next[hidden] {
+  display: none !important;
+}
+
+.edemy-intro-ready {
+  margin-top: 18px;
   padding-top: 18px;
   border-top: 1px solid rgba(0, 252, 152, .30);
   display: flex;
@@ -347,7 +369,7 @@ body::before {
   gap: 8px;
 }
 
-.lego-dialogo-ready[hidden] {
+.edemy-intro-ready[hidden] {
   display: none !important;
 }
 
@@ -1300,8 +1322,8 @@ body::before {
 }
 
 @keyframes edemyFloat {
-  from { transform: translateY(0); }
-  to { transform: translateY(-12px); }
+  from { transform: translateY(0) rotate(-1deg); }
+  to { transform: translateY(-14px) rotate(1.5deg); }
 }
 
 @keyframes astroLegoFloat {
@@ -1335,20 +1357,15 @@ body::before {
     padding: 32px 24px;
   }
 
-  .lego-dialogo-card {
-    grid-template-columns: minmax(190px, 300px) 1fr;
+  .edemy-intro-card {
     gap: 28px;
   }
 
-  .lego-dialogo-img {
+  .edemy-intro-img {
     width: clamp(190px, 24vw, 300px);
   }
 
-  .lego-dialogo-title {
-    font-size: clamp(30px, 4.5vw, 52px);
-  }
-
-  .lego-dialogo-text {
+  .edemy-intro-texto {
     font-size: clamp(20px, 2.4vw, 29px);
   }
 }
@@ -1375,31 +1392,27 @@ body::before {
     flex-direction: column;
   }
 
-  .lego-dialogo-card {
+  .edemy-intro-card {
     width: 94vw;
-    grid-template-columns: 1fr;
+    flex-direction: column;
     gap: 16px;
     min-height: auto;
   }
 
-  .lego-dialogo-personaje {
+  .edemy-intro-personaje {
     max-height: 230px;
   }
 
-  .lego-dialogo-img {
+  .edemy-intro-img {
     width: clamp(160px, 34vw, 240px);
   }
 
-  .lego-dialogo-burbuja {
+  .edemy-intro-burbuja {
     min-height: auto;
     padding: 26px;
   }
 
-  .lego-dialogo-title {
-    font-size: clamp(28px, 6vw, 44px);
-  }
-
-  .lego-dialogo-text {
+  .edemy-intro-texto {
     font-size: clamp(19px, 3.2vw, 26px);
   }
 }
@@ -1463,25 +1476,21 @@ body::before {
     font-size: 14px;
   }
 
-  .lego-dialogo-card {
+  .edemy-intro-card {
     width: 94vw;
   }
 
-  .lego-dialogo-burbuja {
+  .edemy-intro-burbuja {
     padding: 22px 18px;
     border-radius: 22px;
   }
 
-  .lego-dialogo-title {
-    font-size: clamp(27px, 8vw, 38px);
-  }
-
-  .lego-dialogo-text {
+  .edemy-intro-texto {
     font-size: clamp(18px, 5vw, 24px);
   }
 
-  .lego-dialogo-btn,
-  .lego-dialogo-ready .btn-chip {
+  .edemy-intro-next,
+  .edemy-intro-ready .btn-chip {
     width: min(100%, 290px);
   }
 
@@ -1554,7 +1563,7 @@ body::before {
     width: min(86%, 240px);
   }
 
-  .lego-dialogo-overlay {
+  .inicio-fase-overlay {
     padding: 12px;
   }
 }
@@ -1570,19 +1579,19 @@ body::before {
     min-height: 560px;
   }
 
-  .lego-dialogo-card {
+  .edemy-intro-card {
     min-height: auto;
   }
 
-  .lego-dialogo-img {
+  .edemy-intro-img {
     width: clamp(180px, 20vw, 280px);
   }
 
-  .lego-dialogo-burbuja {
-    min-height: 250px;
+  .edemy-intro-burbuja {
+    min-height: auto;
   }
 
-  .lego-dialogo-text {
+  .edemy-intro-texto {
     font-size: clamp(18px, 1.8vw, 26px);
   }
 }

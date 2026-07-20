@@ -1,5 +1,4 @@
 {% load static %}
-{% include "atajos.html" %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -15,113 +14,155 @@
   data-sesion-id="{{ grupo.sesion.idsesion }}"
   data-tiempo-inicial="{{ tiempo_inicial_pitch|default:300 }}"
 >
-  <main class="pitch-editor">
+  {% include "atajos.html" %}
 
-    <div id="inicio-fase-overlay" class="inicio-fase-overlay" aria-modal="true" role="dialog" aria-label="Instrucciones iniciales de pitch">
-      <div id="dialogo-box" class="dialogo-box">
-        <div class="dialogo-personaje activo" aria-hidden="true">
-          <img src="{% static 'images/EdemFeliz.png' %}" class="dialogo-img" alt="">
+  <div id="inicio-fase-overlay" class="inicio-fase-overlay" aria-modal="true" role="dialog" aria-label="Instrucciones iniciales de pitch">
+    <div id="dialogo-box" class="dialogo-box">
+      <div class="dialogo-personaje activo" aria-hidden="true">
+        <img src="{% static 'images/EdemFeliz.png' %}" class="dialogo-img" alt="">
+      </div>
+
+      <section class="dialogo-burbuja" aria-live="polite">
+        <div class="dialogo-hablante">EDEMY</div>
+
+        <div id="dialogo-texto-rpg" class="dialogo-texto-rpg"></div>
+
+        <div class="dialogo-acciones">
+          <button type="button" id="dialogo-siguiente" class="dialogo-siguiente">
+            Continuar
+          </button>
+
+          <div id="dialogo-ready-area" class="dialogo-ready-area">
+            <button type="button" id="btn-listo-fase" class="btn-chip" data-i18n="pitch_boton_listo">
+              ⚡ Listo para comenzar
+            </button>
+            <div id="texto-espera-fase" class="contador-fase" data-i18n="pitch_esperando_equipos">
+              Esperando a los demás equipos...
+            </div>
+            <div id="contador-listos-fase" class="contador-fase">0/0 grupos listos</div>
+          </div>
         </div>
 
-        <section class="dialogo-burbuja" aria-live="polite">
-          <div class="dialogo-hablante">EDEMY</div>
-
-          <div class="dialogo-badge" data-i18n="pitch_overlay_badge">
-            MISIÓN FINAL — COMUNICACIÓN
-          </div>
-
-          <div id="dialogo-texto-rpg" class="dialogo-texto-rpg"></div>
-
-          <div class="dialogo-acciones">
-            <button type="button" id="dialogo-siguiente" class="dialogo-siguiente">
-              Continuar
-            </button>
-
-            <div id="dialogo-ready-area" class="dialogo-ready-area">
-              <button type="button" id="btn-listo-fase" class="btn-chip" data-i18n="pitch_boton_listo">
-                ⚡ Listo para comenzar
-              </button>
-              <div id="texto-espera-fase" class="contador-fase" data-i18n="pitch_esperando_equipos">
-                Esperando a los demás equipos...
-              </div>
-              <div id="contador-listos-fase" class="contador-fase">0/0 grupos listos</div>
-            </div>
-          </div>
-
-          <div class="dialogo-progreso" aria-hidden="true">
-            <div id="dialogo-dots"></div>
-          </div>
-        </section>
-      </div>
+        <div class="dialogo-progreso" aria-hidden="true">
+          <div id="dialogo-dots"></div>
+        </div>
+      </section>
     </div>
+  </div>
 
-    <script>
-      document.addEventListener("DOMContentLoaded", () => {
-        const texto = document.getElementById("dialogo-texto-rpg");
-        const btnSiguiente = document.getElementById("dialogo-siguiente");
-        const readyArea = document.getElementById("dialogo-ready-area");
-        const dots = document.getElementById("dialogo-dots");
-        const btnListo = document.getElementById("btn-listo-fase");
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const texto = document.getElementById("dialogo-texto-rpg");
+      const btnSiguiente = document.getElementById("dialogo-siguiente");
+      const readyArea = document.getElementById("dialogo-ready-area");
+      const dots = document.getElementById("dialogo-dots");
+      const btnListo = document.getElementById("btn-listo-fase");
 
-        if (!texto || !btnSiguiente || !readyArea || !dots) return;
+      if (!texto || !btnSiguiente || !readyArea || !dots) return;
 
-        function tJuego(clave, fallback = "") {
-          const idioma = window.i18nJuego?.obtenerIdioma?.() || "es";
-          return window.i18nJuego?.traducciones?.[idioma]?.[clave] || fallback;
+      function tJuego(clave, fallback = "") {
+        const idioma = window.i18nJuego?.obtenerIdioma?.() || "es";
+        return window.i18nJuego?.traducciones?.[idioma]?.[clave] || fallback;
+      }
+
+      const mensajes = [
+        {
+          key: "pitch_dialogo_1",
+          fallback: "Agentes, su solución ya existe.\nAhora deben comunicarla con claridad."
+        },
+        {
+          key: "pitch_dialogo_2",
+          fallback: "Ordenen el problema, la solución, el valor de la propuesta y un cierre convincente."
+        },
+        {
+          key: "pitch_dialogo_3",
+          fallback: "Cuando todos los equipos estén listos, el tiempo comenzará automáticamente."
         }
+      ];
 
-        const mensajes = [
-          {
-            key: "pitch_dialogo_1",
-            fallback: "Agentes, su solución ya existe.\nAhora deben comunicarla con claridad."
-          },
-          {
-            key: "pitch_dialogo_2",
-            fallback: "Ordenen el problema, la solución, el valor de la propuesta y un cierre convincente."
-          },
-          {
-            key: "pitch_dialogo_3",
-            fallback: "Cuando todos los equipos estén listos, el tiempo comenzará automáticamente."
-          }
-        ];
+      let paso = 0;
+      let escribiendo = false;
+      let textoCompleto = "";
+      let timerEscritura = null;
 
-        let paso = 0;
+      function renderDots() {
+        dots.innerHTML = mensajes.map((_, i) => {
+          const clase = i === paso ? "activo" : (i < paso ? "hecho" : "");
+          return `<span class="d-dot ${clase}"></span>`;
+        }).join("");
+      }
 
-        function renderDots() {
-          dots.innerHTML = mensajes.map((_, i) => {
-            const clase = i === paso ? "activo" : (i < paso ? "hecho" : "");
-            return `<span class="d-dot ${clase}"></span>`;
-          }).join("");
-        }
+      function escribirTexto(txt) {
+        clearInterval(timerEscritura);
+        textoCompleto = txt;
+        escribiendo = true;
+        texto.innerHTML = "";
 
-        function renderDialogo() {
-          texto.textContent = tJuego(mensajes[paso].key, mensajes[paso].fallback);
-          renderDots();
+        const textoNodo = document.createTextNode("");
+        const cursor = document.createElement("span");
+        cursor.className = "cursor-rpg";
+        texto.appendChild(textoNodo);
+        texto.appendChild(cursor);
 
-          if (paso >= mensajes.length - 1) {
-            btnSiguiente.classList.add("oculto");
-            readyArea.classList.add("visible");
-            if (btnListo && !btnListo.disabled) {
-              btnListo.textContent = tJuego("pitch_boton_listo", "⚡ Listo para comenzar");
-            }
+        let i = 0;
+        timerEscritura = setInterval(() => {
+          if (i < txt.length) {
+            textoNodo.data = txt.slice(0, i + 1);
+            i += 1;
           } else {
-            btnSiguiente.classList.remove("oculto");
-            readyArea.classList.remove("visible");
-            btnSiguiente.textContent = tJuego("pitch_dialogo_continuar", "Continuar");
+            clearInterval(timerEscritura);
+            escribiendo = false;
+            cursor.remove();
           }
+        }, 22);
+      }
+
+      function actualizarAcciones() {
+        if (paso >= mensajes.length - 1) {
+          btnSiguiente.classList.add("oculto");
+          readyArea.classList.add("visible");
+          if (btnListo && !btnListo.disabled) {
+            btnListo.textContent = tJuego("pitch_boton_listo", "⚡ Listo para comenzar");
+          }
+        } else {
+          btnSiguiente.classList.remove("oculto");
+          readyArea.classList.remove("visible");
+          btnSiguiente.textContent = tJuego("pitch_dialogo_continuar", "Continuar");
         }
+      }
 
-        btnSiguiente.addEventListener("click", () => {
-          if (paso < mensajes.length - 1) {
-            paso += 1;
-            renderDialogo();
-          }
-        });
+      function renderDialogo() {
+        renderDots();
+        actualizarAcciones();
+        escribirTexto(tJuego(mensajes[paso].key, mensajes[paso].fallback));
+      }
 
-        window.addEventListener("idiomaJuegoCambiado", renderDialogo);
+      btnSiguiente.addEventListener("click", () => {
+        if (escribiendo) {
+          clearInterval(timerEscritura);
+          escribiendo = false;
+          texto.textContent = textoCompleto;
+          return;
+        }
+        if (paso < mensajes.length - 1) {
+          paso += 1;
+          renderDots();
+          actualizarAcciones();
+          escribirTexto(tJuego(mensajes[paso].key, mensajes[paso].fallback));
+        }
+      });
+
+      window.addEventListener("idiomaJuegoCambiado", () => {
+        clearInterval(timerEscritura);
+        escribiendo = false;
         renderDialogo();
       });
-    </script>
+
+      renderDialogo();
+    });
+  </script>
+
+  <main class="pitch-editor">
 
     <h1 id="tituloPitch" class="title blur-target-bloqueado" data-i18n="pitch_titulo">Prepara tu pitch</h1>
 
@@ -196,22 +237,22 @@
       <img class="astro-img-falling-pitch" src="{% static 'images/Cayendo.webp' %}" alt="" aria-hidden="true">
     </button>
 
-    <div id="astroPitchOverlay" class="astro-pitch-overlay" aria-hidden="true">
-      <div class="astro-pitch-card">
-        <img src="{% static 'images/EdemFeliz.png' %}" alt="" aria-hidden="true" class="astro-pitch-img">
-        <div class="astro-pitch-text">
-          <h3 id="astroPitchTitulo" data-i18n="pitch_astro_titulo_inicio">Estructura recomendada</h3>
-          <p id="astroPitchMensaje" data-i18n="pitch_astro_mensaje_inicio">
-            Para el pitch, usen esta estructura: problema, solución, valor de la propuesta y cierre. No intenten decirlo todo: digan lo importante con claridad.
-          </p>
-          <button type="button" id="astroPitchCerrar" class="astro-pitch-btn" data-i18n="pitch_astro_cerrar">
-            Entendido
-          </button>
-        </div>
+  </main>
+
+  <div id="astroPitchOverlay" class="astro-pitch-overlay" aria-hidden="true">
+    <div class="astro-pitch-card">
+      <img src="{% static 'images/EdemFeliz.png' %}" alt="" aria-hidden="true" class="astro-pitch-img">
+      <div class="astro-pitch-text">
+        <h3 id="astroPitchTitulo" data-i18n="pitch_astro_titulo_inicio">Estructura recomendada</h3>
+        <p id="astroPitchMensaje" data-i18n="pitch_astro_mensaje_inicio">
+          Para el pitch, usen esta estructura: problema, solución, valor de la propuesta y cierre. No intenten decirlo todo: digan lo importante con claridad.
+        </p>
+        <button type="button" id="astroPitchCerrar" class="astro-pitch-btn" data-i18n="pitch_astro_cerrar">
+          Entendido
+        </button>
       </div>
     </div>
-
-  </main>
+  </div>
 
   <div id="modal-fin" class="modal-fin">
     <div class="modal-fin-box">

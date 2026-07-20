@@ -18,46 +18,6 @@
 
   <main class="bubblemap-container">
 
-    <div id="inicio-fase-overlay" class="inicio-fase-overlay dialogo-bubblemap">
-      <div id="dialogo-backdrop" class="dialogo-backdrop" aria-hidden="true"></div>
-
-      <div id="dialogo-box" class="dialogo-box" role="dialog" aria-modal="true" aria-label="Mensaje de EdEmy">
-        <div class="dialogo-personaje activo" id="pj-edemy">
-          <img class="dialogo-img" src="{% static 'images/EdemFeliz.png' %}" alt="EdEmy">
-        </div>
-
-        <section id="inicio-fase-card" class="inicio-fase-card dialogo-burbuja visible">
-          <div class="dialogo-hablante">EdEmy</div>
-
-          <p id="dialogo-bubble-texto" class="dialogo-texto-rpg">
-            Agentes, antes de responder observen bien a la persona objetivo.
-          </p>
-
-          <button type="button" id="btn-dialogo-bubble-continuar" class="dialogo-siguiente">
-            <span id="dialogo-bubble-label">Continuar</span>
-            <span class="dialogo-flecha">▶</span>
-          </button>
-
-          <div id="dialogo-listo-wrap" class="dialogo-listo-wrap">
-            <button type="button" id="btn-listo-fase" class="btn-chip" data-i18n="bubble_boton_listo">
-              ⚡ Listo para comenzar
-            </button>
-            <div id="texto-espera-fase" class="contador-fase" data-i18n="bubble_esperando">
-              Esperando a los demás equipos...
-            </div>
-            <div id="contador-listos-fase" class="contador-fase">0/0 grupos listos</div>
-          </div>
-
-          <div class="dialogo-progreso" aria-hidden="true">
-            <div id="dialogo-bubble-dots">
-              <span class="d-dot activo"></span>
-              <span class="d-dot"></span>
-            </div>
-          </div>
-        </section>
-      </div>
-    </div>
-
     <h1 id="tituloBubble" class="blur-target-bloqueado">
       💭 Misión de empatía
     </h1>
@@ -178,6 +138,53 @@
     </div>
   </main>
 
+  <!-- El diálogo de EdEmy va como hijo DIRECTO de <body>, nunca dentro de
+       <main class="bubblemap-container">: ese contenedor tiene position:relative
+       + z-index:1, o sea que crea un contexto de apilamiento y encierra el
+       z-index:9999 del overlay dentro de un z-index:1 en la raíz (el sidebar,
+       con 9998, le ganaba y se pintaba encima). Además el filter que difumina
+       el contenedor crearía un bloque contenedor para este fixed. -->
+  <div id="inicio-fase-overlay" class="inicio-fase-overlay dialogo-bubblemap">
+    <div id="dialogo-backdrop" class="dialogo-backdrop" aria-hidden="true"></div>
+
+    <div id="dialogo-box" class="dialogo-box" role="dialog" aria-modal="true" aria-label="Mensaje de EdEmy">
+      <div class="dialogo-personaje activo" id="pj-edemy">
+        <img class="dialogo-img" src="{% static 'images/EdemFeliz.png' %}" alt="EdEmy">
+      </div>
+
+      <section id="inicio-fase-card" class="inicio-fase-card dialogo-burbuja visible">
+        <div class="dialogo-hablante">EdEmy</div>
+
+        <!-- Vacío a propósito: lo llena escribirTextoDialogo() con el efecto
+             de máquina de escribir. Con texto quemado acá se vería un instante
+             el mensaje completo antes de empezar a tipear. -->
+        <p id="dialogo-bubble-texto" class="dialogo-texto-rpg"></p>
+
+        <button type="button" id="btn-dialogo-bubble-continuar" class="dialogo-siguiente">
+          <span id="dialogo-bubble-label">Continuar</span>
+          <span class="dialogo-flecha">▶</span>
+        </button>
+
+        <div id="dialogo-listo-wrap" class="dialogo-listo-wrap">
+          <button type="button" id="btn-listo-fase" class="btn-chip" data-i18n="bubble_boton_listo">
+            ⚡ Listo para comenzar
+          </button>
+          <div id="texto-espera-fase" class="contador-fase" data-i18n="bubble_esperando">
+            Esperando a los demás equipos...
+          </div>
+          <div id="contador-listos-fase" class="contador-fase">0/0 grupos listos</div>
+        </div>
+
+        <div class="dialogo-progreso" aria-hidden="true">
+          <div id="dialogo-bubble-dots">
+            <span class="d-dot activo"></span>
+            <span class="d-dot"></span>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
   <script>
     const BASE_STORAGE_KEY = "bubblemap_data_v3";
     const SESSION_KEY = "browser_session_id";
@@ -287,11 +294,59 @@
 
       let dialogoBubblePaso = 0;
 
+      /* ── Máquina de escribir de EdEmy ──
+         Mismo patrón que conocidos.html / transicionempatia.html: intervalo de
+         28ms, cursor .cursor-rpg reinsertado en cada carácter, sonido de tecla
+         cada 2 caracteres y click que completa el texto si aún está escribiendo. */
+      let dialogoEscribiendo = false;
+      let dialogoTextoCompleto = "";
+      let dialogoTimerEscritura = null;
+      let dialogoTeclaCounter = 0;
+
+      function escribirTextoDialogo(txt) {
+        if (!dialogoBubbleTexto) return;
+
+        dialogoTextoCompleto = txt;
+        dialogoEscribiendo = true;
+        dialogoBubbleTexto.innerHTML = "";
+        dialogoTeclaCounter = 0;
+
+        const cursor = document.createElement("span");
+        cursor.className = "cursor-rpg";
+
+        let i = 0;
+        clearInterval(dialogoTimerEscritura);
+
+        dialogoTimerEscritura = setInterval(() => {
+          if (i < txt.length) {
+            dialogoBubbleTexto.textContent = txt.slice(0, i + 1);
+            dialogoBubbleTexto.appendChild(cursor);
+
+            dialogoTeclaCounter++;
+
+            if (dialogoTeclaCounter % 2 === 0 && txt[i] !== " " && typeof window.sonarTecla === "function") {
+              window.sonarTecla();
+            }
+
+            i++;
+          } else {
+            clearInterval(dialogoTimerEscritura);
+            dialogoEscribiendo = false;
+            dialogoBubbleTexto.textContent = txt;
+          }
+        }, 28);
+      }
+
+      function completarTextoDialogo() {
+        clearInterval(dialogoTimerEscritura);
+        dialogoEscribiendo = false;
+        if (dialogoBubbleTexto) dialogoBubbleTexto.textContent = dialogoTextoCompleto;
+      }
+
       function actualizarDialogoBubble() {
         if (!dialogoBubbleTexto) return;
 
         const paso = dialogoBubblePasos[dialogoBubblePaso] || dialogoBubblePasos[0];
-        dialogoBubbleTexto.textContent = paso.texto;
 
         if (dialogoBubbleLabel) {
           dialogoBubbleLabel.textContent = paso.boton;
@@ -302,10 +357,21 @@
           dot.classList.toggle("hecho", idx < dialogoBubblePaso);
         });
 
+        escribirTextoDialogo(paso.texto);
       }
 
       if (dialogoBubbleContinuar) {
         dialogoBubbleContinuar.addEventListener("click", () => {
+          if (typeof window.sonarBoton === "function") {
+            window.sonarBoton();
+          }
+
+          // Primer click mientras tipea: muestra el texto completo y no avanza.
+          if (dialogoEscribiendo) {
+            completarTextoDialogo();
+            return;
+          }
+
           if (dialogoBubblePaso < dialogoBubblePasos.length - 1) {
             dialogoBubblePaso++;
             actualizarDialogoBubble();
@@ -318,12 +384,10 @@
             dialogoBubbleContinuar.classList.add("dialogo-info-oculta");
           }
 
-          if (dialogoBubbleTexto) {
-            dialogoBubbleTexto.textContent = tJuego(
-              "bubble_dialogo_confirmar",
-              "Cuando su equipo esté preparado, presionen listo. El mapa comenzará cuando todos los escuadrones estén listos."
-            );
-          }
+          escribirTextoDialogo(tJuego(
+            "bubble_dialogo_confirmar",
+            "Cuando su equipo esté preparado, presionen listo. El mapa comenzará cuando todos los escuadrones estén listos."
+          ));
         });
       }
 
@@ -671,6 +735,9 @@
       }
 
       function activarFase() {
+        // El overlay se oculta: si EdEmy seguía tipeando, se corta el intervalo.
+        clearInterval(dialogoTimerEscritura);
+        dialogoEscribiendo = false;
         blurTargets.forEach(el => { if (!el) return; el.classList.remove("blur-target-bloqueado", "timer-esperando"); el.classList.add("blur-target-activo"); });
         if (timerWrap) timerWrap.classList.remove("timer-esperando");
         if (overlay) overlay.classList.add("overlay-hidden");

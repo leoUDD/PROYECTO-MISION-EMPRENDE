@@ -3,7 +3,7 @@
 <style>
   .idioma-juego-box {
     position: fixed;
-    top: 46px;
+    top: 14px;
     left: 14px;
     z-index: 999999;
     display: inline-flex;
@@ -38,15 +38,34 @@
     color: #E6EEF8;
   }
 
-  @media (max-width: 640px) {
+  /* Misma altura que .hud-tokens-ranking (hud_tokens_ranking.html) en
+     cada breakpoint donde ambos conviven lado a lado. */
+  @media (max-width: 900px) {
     .idioma-juego-box {
-      top: 46px;
+      top: 10px;
+      left: 10px;
+    }
+  }
+
+  /* A partir de aquí el HUD (escuadrón/tokens/ranking) pasa a ocupar
+     todo el ancho superior (grid de 3 columnas, left:8px; right:8px;),
+     así que ya no hay espacio para el selector en la misma fila: se
+     ubica justo debajo, siempre en la esquina superior izquierda. */
+  @media (max-width: 620px) {
+    .idioma-juego-box {
+      top: 54px;
       left: 8px;
       padding: 6px 8px;
     }
 
     .idioma-juego-select {
       font-size: 11px;
+    }
+  }
+
+  @media (max-width: 430px) {
+    .idioma-juego-box {
+      top: 50px;
     }
   }
 </style>
