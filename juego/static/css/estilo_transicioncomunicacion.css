@@ -354,12 +354,12 @@ body.dialogo-activo .team-container {
 }
 
 #dialogo-box {
-  width: min(1180px, 90vw);
-  min-height: auto;
+  width: min(1320px, 92vw);
+  min-height: min(620px, 76vh);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: clamp(28px, 4vw, 64px);
+  gap: clamp(36px, 5vw, 90px);
   position: relative;
   z-index: 3;
 }
@@ -382,9 +382,9 @@ body.dialogo-activo .team-container {
 
 .dialogo-burbuja {
   flex: 1;
-  max-width: 680px;
-  min-height: auto;
-  padding: clamp(26px, 2.3vw, 38px);
+  max-width: 820px;
+  min-height: 290px;
+  padding: clamp(30px, 3vw, 46px);
   border-radius: 26px;
   background:
     radial-gradient(circle at top left, rgba(0, 252, 152, .12), transparent 34%),
@@ -408,7 +408,7 @@ body.dialogo-activo .team-container {
 .dialogo-texto-rpg {
   font-size: clamp(22px, 2vw, 33px);
   line-height: 1.45;
-  min-height: 1.45em;
+  min-height: 130px;
   font-weight: 800;
   letter-spacing: -0.01em;
   word-spacing: 0.04em;
@@ -516,18 +516,18 @@ body.dialogo-activo .team-container {
   }
 
   .dialogo-img {
-    width: clamp(190px, 24vw, 300px);
+    width: clamp(200px, 28vw, 310px);
   }
 
   .dialogo-burbuja {
-    max-width: 560px;
-    min-height: auto;
-    padding: 26px;
+    max-width: 680px;
+    min-height: 250px;
+    padding: 28px;
   }
 
   .dialogo-texto-rpg {
-    font-size: clamp(20px, 2.4vw, 29px);
-    min-height: 1.45em;
+    font-size: clamp(21px, 3vw, 31px);
+    min-height: 115px;
   }
 }
 
@@ -612,17 +612,17 @@ body.dialogo-activo .team-container {
   #dialogo-box {
     width: 94vw;
     flex-direction: column;
-    gap: 16px;
+    gap: 18px;
   }
 
   .dialogo-img {
-    width: clamp(160px, 34vw, 240px);
+    width: clamp(160px, 42vw, 250px);
   }
 
   .dialogo-burbuja {
     width: 100%;
     max-width: 100%;
-    min-height: auto;
+    min-height: 230px;
     padding: 22px 18px;
     border-radius: 22px;
   }
@@ -633,8 +633,8 @@ body.dialogo-activo .team-container {
   }
 
   .dialogo-texto-rpg {
-    font-size: clamp(18px, 5vw, 24px);
-    min-height: 1.45em;
+    font-size: clamp(19px, 5vw, 27px);
+    min-height: 105px;
     margin-bottom: 20px;
   }
 

@@ -4,6 +4,7 @@
   --udd-panel: #061735;
   --udd-green: #00F26D;
   --udd-white: #FFFFFF;
+  --green: #00F26D;
 
   --bg: #000712 url('/static/images/ConocidosONo.png') center/cover no-repeat fixed;
   --card: rgba(0, 16, 74, 0.86);
@@ -291,13 +292,34 @@ body::before{
    ========================================================================== */
 
 /* ── Tablet: sidebar angosto a la izquierda (701px – 1100px) ─────────────── */
-@media (min-width: 701px) and (max-width: 1100px){
+@media (max-width: 1100px){
   body{
-    padding:clamp(80px, 8vh, 100px) 20px 24px 110px;
+    padding:86px 18px 96px;
   }
 
   .mode-container{
     width:100%;
+  }
+
+  #dialogo-box{
+    width: 94vw;
+    min-height: auto;
+    gap: 28px;
+  }
+
+  .dialogo-img{
+    width: clamp(210px, 26vw, 320px);
+  }
+
+  .dialogo-burbuja{
+    max-width: 680px;
+    min-height: 250px;
+    padding: 28px;
+  }
+
+  .dialogo-texto-rpg{
+    font-size: clamp(21px, 3vw, 31px);
+    min-height: 115px;
   }
 }
 
@@ -318,6 +340,37 @@ body::before{
 
   .mode-card{
     background-position:center center;
+  }
+
+  #dialogo-box{
+    width: 94vw;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .dialogo-img{
+    width: clamp(160px, 42vw, 250px);
+  }
+
+  .dialogo-burbuja{
+    width: 100%;
+    max-width: 100%;
+    min-height: 230px;
+    padding: 24px 20px;
+  }
+
+  .dialogo-hablante{
+    font-size: 15px;
+  }
+
+  .dialogo-texto-rpg{
+    font-size: clamp(19px, 5vw, 27px);
+    min-height: 105px;
+  }
+
+  .dialogo-siguiente{
+    min-height: 56px;
+    font-size: 17px;
   }
 }
 
@@ -392,4 +445,257 @@ body::before{
 
 @media (prefers-reduced-motion: reduce){
   *{ animation:none !important; transition:none !important; }
+}
+
+/* =====================================================================
+   DIÁLOGO INICIAL EdEmy — mismo patrón que conocidos.html
+   (clases dialogo-*, overlay #dialogo-inicial-overlay con oculto/visible,
+   backdrop con blur, burbuja con animación de entrada).
+===================================================================== */
+
+/* Mientras el diálogo está visible, se atenúa y difumina el panel principal
+   (equivalente a .zona-juego en conocidos.html) y el sidebar, que tiene su
+   propio backdrop-filter y por eso necesita su propia regla. */
+body:has(#dialogo-inicial-overlay.visible) .mode-container{
+  filter: blur(7px) brightness(.36) saturate(.75);
+  transform: scale(1.012);
+  pointer-events: none;
+  user-select: none;
+  transition: filter .35s ease, transform .35s ease;
+}
+
+body:has(#dialogo-inicial-overlay.visible) .metro-progreso-habilidades{
+  filter: blur(7px) brightness(.36) saturate(.75);
+  transition: filter .35s ease;
+}
+
+#dialogo-inicial-overlay{
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(24px, 4vw, 72px);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .4s ease;
+}
+
+#dialogo-inicial-overlay.visible{
+  opacity: 1;
+  pointer-events: all;
+}
+
+#dialogo-inicial-overlay.oculto{
+  display: none !important;
+}
+
+#dialogo-backdrop{
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at center, rgba(0,252,152,.10), transparent 42%),
+    rgba(0,5,18,.78);
+  backdrop-filter: blur(8px) brightness(.55);
+  -webkit-backdrop-filter: blur(8px) brightness(.55);
+}
+
+#dialogo-box{
+  width: min(1320px, 92vw);
+  min-height: min(620px, 76vh);
+  margin-left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(36px, 5vw, 90px);
+  position: relative;
+  z-index: 3;
+}
+
+.dialogo-personaje{
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 3;
+  transition: opacity .4s, transform .4s, filter .4s;
+}
+
+.dialogo-personaje.activo{
+  opacity: 1;
+  filter: none;
+  transform: scale(1) translateY(0);
+}
+
+.dialogo-img{
+  width: clamp(260px, 25vw, 440px);
+  height: auto;
+  margin-bottom: 0;
+  object-fit: contain;
+  filter:
+    drop-shadow(0 0 22px rgba(0,252,152,.45))
+    drop-shadow(0 0 46px rgba(0,200,255,.22));
+}
+
+.dialogo-burbuja{
+  flex: 1;
+  min-width: 0;
+  max-width: 820px;
+  min-height: 290px;
+  padding: clamp(30px, 3vw, 46px);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at top left, rgba(0,252,152,.12), transparent 34%),
+    linear-gradient(160deg, rgba(0,16,74,.98), rgba(2,8,30,.98));
+  border: 2.2px solid rgba(0,252,152,.82);
+  box-shadow:
+    0 0 34px rgba(0,252,152,.25),
+    0 0 90px rgba(0,59,255,.18),
+    0 24px 70px rgba(0,0,0,.70);
+  position: relative;
+  z-index: 2;
+  transform: translateY(20px);
+  opacity: 0;
+  transition: transform .4s cubic-bezier(.34,1.2,.64,1), opacity .4s ease;
+}
+
+.dialogo-burbuja.visible{
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.dialogo-burbuja::before,
+.dialogo-burbuja::after{
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-color: rgba(0,252,152,.70);
+  border-style: solid;
+}
+
+.dialogo-burbuja::before{
+  top: -1px;
+  left: -1px;
+  border-width: 2px 0 0 2px;
+  border-radius: 5px 0 0 0;
+}
+
+.dialogo-burbuja::after{
+  top: -1px;
+  right: -1px;
+  border-width: 2px 2px 0 0;
+  border-radius: 0 5px 0 0;
+}
+
+.dialogo-hablante{
+  font-size: clamp(16px, 1.35vw, 24px);
+  font-weight: 900;
+  letter-spacing: 4px;
+  color: var(--green);
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+.dialogo-texto-rpg{
+  font-size: clamp(25px, 2.25vw, 40px);
+  color: #F3FAFF;
+  line-height: 1.42;
+  min-height: 130px;
+  margin: 0 0 30px;
+  font-weight: 800;
+  text-shadow: 0 0 10px rgba(0,200,255,.24);
+}
+
+.cursor-rpg{
+  display: inline-block;
+  width: 4px;
+  height: 1.15em;
+  background: var(--green);
+  vertical-align: text-bottom;
+  margin-left: 3px;
+  box-shadow: 0 0 10px rgba(0,252,152,.90);
+  animation: parpadeo .65s step-end infinite;
+}
+
+@keyframes parpadeo{
+  0%,100%{ opacity: 1; }
+  50%{ opacity: 0; }
+}
+
+.dialogo-siguiente{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 62px;
+  padding: 17px 28px;
+  border-radius: 17px;
+  background: linear-gradient(135deg, rgba(0,252,152,.22), rgba(0,200,255,.24));
+  border: 2px solid rgba(0,252,152,.78);
+  color: #fff;
+  font-size: clamp(17px, 1.5vw, 24px);
+  font-weight: 900;
+  letter-spacing: .05em;
+  cursor: pointer;
+  box-shadow:
+    0 0 18px rgba(0,252,152,.25),
+    inset 0 0 20px rgba(0,200,255,.10);
+  transition: background .2s, transform .15s, border-color .2s, box-shadow .2s;
+}
+
+.dialogo-siguiente:hover{
+  transform: translateY(-2px) scale(1.02);
+  border-color: rgba(0,252,152,1);
+  box-shadow:
+    0 0 26px rgba(0,252,152,.38),
+    inset 0 0 24px rgba(0,200,255,.14);
+}
+
+.dialogo-siguiente:disabled{
+  opacity: .62;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.dialogo-flecha{
+  font-size: .9em;
+  animation: flechaPulso 1s ease-in-out infinite;
+}
+
+@keyframes flechaPulso{
+  0%,100%{ transform: translateX(0); }
+  50%{ transform: translateX(4px); }
+}
+
+.dialogo-progreso{
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+#dialogo-dots{
+  display: flex;
+  gap: 11px;
+}
+
+.d-dot{
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: rgba(0,252,152,.22);
+  transition: background .3s, transform .3s;
+}
+
+.d-dot.activo{
+  background: var(--green);
+  transform: scale(1.45);
+  box-shadow: 0 0 12px rgba(0,252,152,.75);
+}
+
+.d-dot.hecho{
+  background: rgba(0,252,152,.62);
 }

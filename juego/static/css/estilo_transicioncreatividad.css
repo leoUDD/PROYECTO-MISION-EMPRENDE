@@ -341,12 +341,12 @@ body.dialogo-activo .team-container {
 }
 
 #dialogo-box {
-  width: min(1260px, 92vw);
-  min-height: min(560px, 72vh);
+  width: min(1320px, 92vw);
+  min-height: min(620px, 76vh);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: clamp(32px, 4vw, 74px);
+  gap: clamp(36px, 5vw, 90px);
   position: relative;
   z-index: 3;
 }
@@ -359,7 +359,7 @@ body.dialogo-activo .team-container {
 }
 
 .dialogo-img {
-  width: clamp(240px, 23vw, 410px);
+  width: clamp(260px, 25vw, 440px);
   height: auto;
   object-fit: contain;
   filter:
