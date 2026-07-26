@@ -521,7 +521,6 @@ def calcular_segundos_restantes(sesion):
 
         # ===================== F2 TEMATICAS =====================
         fases_con_autoavance = {
-            "f1_conocidos",
             "f1_sopa",
             "f4_construccion_pitch",
         }
@@ -1043,16 +1042,60 @@ def siguiente_grupo_pitch(request, sesion_id):
 def estado_sesion(request, sesion_id):
     sesion = get_object_or_404(Sesion, pk=sesion_id)
 
-    if sesion.fase_actual == "f5_evaluacion_pitch" and evaluacion_actual_completa(sesion):
+    # Actualiza el cronómetro.
+    calcular_segundos_restantes(sesion)
+    sesion.refresh_from_db()
+
+    # Si terminó la fase de preguntas, revisa si todos
+    # los grupos ya guardaron su fotografía.
+    if sesion.fase_actual == "f1_conocidos":
+        sincronizar_fotos_equipo_y_avanzar(sesion)
+        sesion.refresh_from_db()
+
+    if (
+        sesion.fase_actual == "f5_evaluacion_pitch"
+        and evaluacion_actual_completa(sesion)
+    ):
         avanzar_al_siguiente_pitch_o_ranking(sesion)
+        sesion.refresh_from_db()
 
     autoavanzar_si_todos_listos(sesion)
     sesion.refresh_from_db()
 
-    grupos = Grupo.objects.filter(sesion=sesion).order_by("idgrupo")
+    grupos = list(
+        Grupo.objects
+        .filter(sesion=sesion)
+        .order_by("idgrupo")
+    )
+
+    total_grupos = len(grupos)
+
+    # Grupos que ya tienen su fotografía correctamente subida a Drive.
+    grupos_con_foto_equipo_ids = set(
+        Grupo.objects
+        .filter(
+            sesion=sesion,
+            foto_equipo__subida_drive=True,
+        )
+        .values_list("idgrupo", flat=True)
+        .distinct()
+    )
+
+    grupos_fotos_equipo = len(
+        grupos_con_foto_equipo_ids
+    )
+
+    todos_fotos_equipo = (
+        total_grupos > 0
+        and grupos_fotos_equipo >= total_grupos
+    )
 
     fase_actual = sesion.fase_actual
-    nombre_url = RUTA_POR_FASE.get(fase_actual, "pantalla_espera")
+    nombre_url = RUTA_POR_FASE.get(
+        fase_actual,
+        "pantalla_espera",
+    )
+
     if fase_actual == "f1_conocidos":
         modo = request.session.get("modo_conocidos")
 
@@ -1068,75 +1111,249 @@ def estado_sesion(request, sesion_id):
             "esProfesor": True,
             "id": g.idgrupo,
             "nombre": g.nombregrupo,
-           "tokens": g.tokensgrupo or 0,
-           "temaElegido": g.tema_elegido or "",
+            "tokens": g.tokensgrupo or 0,
+
+            "temaElegido": g.tema_elegido or "",
             "desafioNombre": g.desafio_nombre or "",
-            "desafioDescripcion": g.desafio_descripcion or "",
-            "desafioIdExterno": g.desafio_id_externo or "",
-            "bubbleTokensOtorgados": getattr(g, "bubble_tokens_otorgados", False),
+            "desafioDescripcion": (
+                g.desafio_descripcion or ""
+            ),
+            "desafioIdExterno": (
+                g.desafio_id_externo or ""
+            ),
+
+            "bubbleTokensOtorgados": getattr(
+                g,
+                "bubble_tokens_otorgados",
+                False,
+            ),
+
             "listoLobby": g.listo_lobby,
             "listoF1": g.listo_f1,
             "listoF2": g.listo_f2_desafio,
-            "listoF2Tematicas": g.listo_f2_tematicas,
-           "listoF2Generico": g.listo_f2,
-            "listoF2Empatia": getattr(g, "listo_f2_empatia", False),
+            "listoF2Tematicas": (
+                g.listo_f2_tematicas
+            ),
+            "listoF2Generico": g.listo_f2,
+            "listoF2Empatia": getattr(
+                g,
+                "listo_f2_empatia",
+                False,
+            ),
+
             "listoF3": g.listo_f3,
-            "listoInicioF3": getattr(g, "listo_inicio_f3", False),
-           "listoF3Lego": getattr(g, "listo_f3_lego", False),
-           "legoSinFoto": getattr(g, "lego_sin_foto", False),
-           "legoConFoto": bool(getattr(g, "foto_lego", None)) and getattr(g, "listo_f3_lego", False),
-           "listoF4": g.listo_f4,
-           "listoF4Orden": getattr(g, "listo_f4_orden", False),
-           "listoF5": getattr(g, "listo_f5", False),
-          "listoF6": getattr(g, "listo_f6", False),
+            "listoInicioF3": getattr(
+                g,
+                "listo_inicio_f3",
+                False,
+            ),
+            "listoF3Lego": getattr(
+                g,
+                "listo_f3_lego",
+                False,
+            ),
+
+            "legoSinFoto": getattr(
+                g,
+                "lego_sin_foto",
+                False,
+            ),
+            "legoConFoto": (
+                bool(getattr(g, "foto_lego", None))
+                and getattr(
+                    g,
+                    "listo_f3_lego",
+                    False,
+                )
+            ),
+
+            # Foto de equipo de la fase de preguntas.
+            "fotoEquipoGuardada": (
+                g.idgrupo
+                in grupos_con_foto_equipo_ids
+            ),
+
+            "listoF4": g.listo_f4,
+            "listoF4Orden": getattr(
+                g,
+                "listo_f4_orden",
+                False,
+            ),
+            "listoF5": getattr(
+                g,
+                "listo_f5",
+                False,
+            ),
+            "listoF6": getattr(
+                g,
+                "listo_f6",
+                False,
+            ),
         }
         for g in grupos
-]
+    ]
 
-    total_grupos = len(grupos_data)
+    grupos_listos_lobby = sum(
+        1
+        for g in grupos_data
+        if g["listoLobby"]
+    )
+    todos_listos_lobby = (
+        total_grupos > 0
+        and grupos_listos_lobby == total_grupos
+    )
 
-    grupos_listos_lobby = sum(1 for g in grupos_data if g["listoLobby"])
-    todos_listos_lobby = total_grupos > 0 and grupos_listos_lobby == total_grupos
+    grupos_listos_f1 = sum(
+        1
+        for g in grupos_data
+        if g["listoF1"]
+    )
+    todos_listos_f1 = (
+        total_grupos > 0
+        and grupos_listos_f1 == total_grupos
+    )
 
-    grupos_listos_f1 = sum(1 for g in grupos_data if g["listoF1"])
-    todos_listos_f1 = total_grupos > 0 and grupos_listos_f1 == total_grupos
+    grupos_listos_f2_generico = sum(
+        1
+        for g in grupos_data
+        if g["listoF2Generico"]
+    )
+    todos_listos_f2_generico = (
+        total_grupos > 0
+        and grupos_listos_f2_generico
+        == total_grupos
+    )
 
-    grupos_listos_f2_generico = sum(1 for g in grupos_data if g["listoF2Generico"])
-    todos_listos_f2_generico = total_grupos > 0 and grupos_listos_f2_generico == total_grupos
+    grupos_listos_f2_tematicas = sum(
+        1
+        for g in grupos_data
+        if g["listoF2Tematicas"]
+    )
+    todos_listos_f2_tematicas = (
+        total_grupos > 0
+        and grupos_listos_f2_tematicas
+        == total_grupos
+    )
 
-    grupos_listos_f2_tematicas = sum(1 for g in grupos_data if g["listoF2Tematicas"])
-    todos_listos_f2_tematicas = total_grupos > 0 and grupos_listos_f2_tematicas == total_grupos
+    grupos_listos_f2 = sum(
+        1
+        for g in grupos_data
+        if g["listoF2"]
+    )
+    todos_listos_f2 = (
+        total_grupos > 0
+        and grupos_listos_f2 == total_grupos
+    )
 
-    grupos_listos_f2 = sum(1 for g in grupos_data if g["listoF2"])
-    todos_listos_f2 = total_grupos > 0 and grupos_listos_f2 == total_grupos
+    grupos_listos_f2_empatia = sum(
+        1
+        for g in grupos_data
+        if g["listoF2Empatia"]
+    )
+    todos_listos_f2_empatia = (
+        total_grupos > 0
+        and grupos_listos_f2_empatia
+        == total_grupos
+    )
 
-    grupos_listos_f2_empatia = sum(1 for g in grupos_data if g["listoF2Empatia"])
-    todos_listos_f2_empatia = total_grupos > 0 and grupos_listos_f2_empatia == total_grupos
+    grupos_listos_f3 = sum(
+        1
+        for g in grupos_data
+        if g["listoF3"]
+    )
+    todos_listos_f3 = (
+        total_grupos > 0
+        and grupos_listos_f3 == total_grupos
+    )
 
-    grupos_listos_f3 = sum(1 for g in grupos_data if g["listoF3"])
-    todos_listos_f3 = total_grupos > 0 and grupos_listos_f3 == total_grupos
-    grupos_listos_f3_lego = sum(1 for g in grupos_data if g["listoF3Lego"])
-    todos_listos_f3_lego = total_grupos > 0 and grupos_listos_f3_lego == total_grupos
+    grupos_listos_f3_lego = sum(
+        1
+        for g in grupos_data
+        if g["listoF3Lego"]
+    )
+    todos_listos_f3_lego = (
+        total_grupos > 0
+        and grupos_listos_f3_lego
+        == total_grupos
+    )
 
-    grupos_con_foto_lego = sum(1 for g in grupos_data if g["legoConFoto"])
-    grupos_sin_foto_lego = sum(1 for g in grupos_data if g["legoSinFoto"])
-    grupos_listos_f4 = sum(1 for g in grupos_data if g["listoF4"])
-    todos_listos_f4 = total_grupos > 0 and grupos_listos_f4 == total_grupos
-    grupos_listos_f4_orden = sum(1 for g in grupos_data if g["listoF4Orden"])
-    todos_listos_f4_orden = total_grupos > 0 and grupos_listos_f4_orden == total_grupos
+    grupos_con_foto_lego = sum(
+        1
+        for g in grupos_data
+        if g["legoConFoto"]
+    )
 
-    grupos_listos_f5 = sum(1 for g in grupos_data if g["listoF5"])
-    todos_listos_f5 = total_grupos > 0 and grupos_listos_f5 == total_grupos
+    grupos_sin_foto_lego = sum(
+        1
+        for g in grupos_data
+        if g["legoSinFoto"]
+    )
 
-    grupos_listos_f6 = sum(1 for g in grupos_data if g["listoF6"])
-    todos_listos_f6 = total_grupos > 0 and grupos_listos_f6 == total_grupos
+    grupos_listos_f4 = sum(
+        1
+        for g in grupos_data
+        if g["listoF4"]
+    )
+    todos_listos_f4 = (
+        total_grupos > 0
+        and grupos_listos_f4 == total_grupos
+    )
 
-    grupos_listos_ranking = Grupo.objects.filter(sesion=sesion, listo_ranking=True).count()
-    todos_listos_ranking = total_grupos > 0 and grupos_listos_ranking == total_grupos
-    total_inicio, listos_inicio, todos_inicio = contar_listos_inicio_fase(sesion, sesion.fase_actual)
+    grupos_listos_f4_orden = sum(
+        1
+        for g in grupos_data
+        if g["listoF4Orden"]
+    )
+    todos_listos_f4_orden = (
+        total_grupos > 0
+        and grupos_listos_f4_orden
+        == total_grupos
+    )
 
+    grupos_listos_f5 = sum(
+        1
+        for g in grupos_data
+        if g["listoF5"]
+    )
+    todos_listos_f5 = (
+        total_grupos > 0
+        and grupos_listos_f5 == total_grupos
+    )
+
+    grupos_listos_f6 = sum(
+        1
+        for g in grupos_data
+        if g["listoF6"]
+    )
+    todos_listos_f6 = (
+        total_grupos > 0
+        and grupos_listos_f6 == total_grupos
+    )
+
+    grupos_listos_ranking = (
+        Grupo.objects
+        .filter(
+            sesion=sesion,
+            listo_ranking=True,
+        )
+        .count()
+    )
+
+    todos_listos_ranking = (
+        total_grupos > 0
+        and grupos_listos_ranking
+        == total_grupos
+    )
+
+    total_inicio, listos_inicio, todos_inicio = (
+        contar_listos_inicio_fase(
+            sesion,
+            sesion.fase_actual,
+        )
+    )
 
     pitch_data = {}
+
     if fase_actual in {
         "f4_orden_pitch",
         "f4_presentacion_pitch",
@@ -1146,47 +1363,100 @@ def estado_sesion(request, sesion_id):
         "f3_ranking",
         "f6_ranking",
     }:
-        pitch_data = serializar_estado_pitch(sesion)
-
+        pitch_data = serializar_estado_pitch(
+            sesion
+        )
 
     data = {
         "sesionId": sesion.idsesion,
         "faseActual": fase_actual,
-        "faseEtiqueta": ETIQUETA_FASE.get(fase_actual, fase_actual),
+        "faseEtiqueta": ETIQUETA_FASE.get(
+            fase_actual,
+            fase_actual,
+        ),
         "rutaAlumno": reverse(nombre_url),
-        "timerCorriendo": sesion.timer_corriendo,
-        "segundosRestantes": calcular_segundos_restantes(sesion),
+
+        "timerCorriendo": (
+            sesion.timer_corriendo
+        ),
+        "segundosRestantes": (
+            calcular_segundos_restantes(
+                sesion
+            )
+        ),
 
         "totalGrupos": total_grupos,
         "grupos": grupos_data,
         "esProfesor": request.user.is_staff,
 
-        "gruposListosLobby": grupos_listos_lobby,
-        "todosListosLobby": todos_listos_lobby,
+        # Fotografías de equipo.
+        "gruposFotosEquipo": (
+            grupos_fotos_equipo
+        ),
+        "todosFotosEquipo": (
+            todos_fotos_equipo
+        ),
+
+        "gruposListosLobby": (
+            grupos_listos_lobby
+        ),
+        "todosListosLobby": (
+            todos_listos_lobby
+        ),
 
         "gruposListosF1": grupos_listos_f1,
         "todosListosF1": todos_listos_f1,
 
-        "gruposListosF2Tematicas": grupos_listos_f2_tematicas,
-    "todosListosF2Tematicas": todos_listos_f2_tematicas,
-        "gruposListosF2Generico": grupos_listos_f2_generico,
-        "todosListosF2Generico": todos_listos_f2_generico,
-        "gruposListosF2Empatia": grupos_listos_f2_empatia,
-        "todosListosF2Empatia": todos_listos_f2_empatia,
+        "gruposListosF2Tematicas": (
+            grupos_listos_f2_tematicas
+        ),
+        "todosListosF2Tematicas": (
+            todos_listos_f2_tematicas
+        ),
+
+        "gruposListosF2Generico": (
+            grupos_listos_f2_generico
+        ),
+        "todosListosF2Generico": (
+            todos_listos_f2_generico
+        ),
+
+        "gruposListosF2Empatia": (
+            grupos_listos_f2_empatia
+        ),
+        "todosListosF2Empatia": (
+            todos_listos_f2_empatia
+        ),
+
         "gruposListosF2": grupos_listos_f2,
         "todosListosF2": todos_listos_f2,
 
-        "gruposListosF3Lego": grupos_listos_f3_lego,
-        "todosListosF3Lego": todos_listos_f3_lego,
-        "gruposConFotoLego": grupos_con_foto_lego,
-        "gruposSinFotoLego": grupos_sin_foto_lego,
+        "gruposListosF3Lego": (
+            grupos_listos_f3_lego
+        ),
+        "todosListosF3Lego": (
+            todos_listos_f3_lego
+        ),
+
+        "gruposConFotoLego": (
+            grupos_con_foto_lego
+        ),
+        "gruposSinFotoLego": (
+            grupos_sin_foto_lego
+        ),
+
         "gruposListosF3": grupos_listos_f3,
         "todosListosF3": todos_listos_f3,
 
         "gruposListosF4": grupos_listos_f4,
         "todosListosF4": todos_listos_f4,
-        "gruposListosF4Orden": grupos_listos_f4_orden,
-        "todosListosF4Orden": todos_listos_f4_orden,
+
+        "gruposListosF4Orden": (
+            grupos_listos_f4_orden
+        ),
+        "todosListosF4Orden": (
+            todos_listos_f4_orden
+        ),
 
         "gruposListosF5": grupos_listos_f5,
         "todosListosF5": todos_listos_f5,
@@ -1194,14 +1464,24 @@ def estado_sesion(request, sesion_id):
         "gruposListosF6": grupos_listos_f6,
         "todosListosF6": todos_listos_f6,
 
-        "gruposListosRanking": grupos_listos_ranking,
-        "todosListosRanking": todos_listos_ranking,
+        "gruposListosRanking": (
+            grupos_listos_ranking
+        ),
+        "todosListosRanking": (
+            todos_listos_ranking
+        ),
 
-        "inicioFaseHabilitado": sesion.inicio_fase_habilitado,
+        "inicioFaseHabilitado": (
+            sesion.inicio_fase_habilitado
+        ),
         "totalListosInicio": total_inicio,
         "listosInicio": listos_inicio,
         "todosListosInicio": todos_inicio,
-        "faseRequiereInicio": sesion.fase_actual in FASES_CON_INICIO_POR_ALUMNOS,
+
+        "faseRequiereInicio": (
+            sesion.fase_actual
+            in FASES_CON_INICIO_POR_ALUMNOS
+        ),
 
         **pitch_data,
     }
@@ -2480,6 +2760,78 @@ def obtener_carpeta_drive_sesion(
 
         return carpeta_id
 
+def sincronizar_fotos_equipo_y_avanzar(sesion):
+    """
+    Cuenta las fotografías correctamente subidas a Drive.
+
+    Cuando todos los grupos tienen fotografía, cambia la sesión
+    desde f1_conocidos hacia f1_pre_sopa.
+    """
+
+    with transaction.atomic():
+        sesion_bloqueada = (
+            Sesion.objects
+            .select_for_update()
+            .get(pk=sesion.pk)
+        )
+
+        total_grupos = Grupo.objects.filter(
+            sesion=sesion_bloqueada
+        ).count()
+
+        grupos_con_foto = Grupo.objects.filter(
+            sesion=sesion_bloqueada,
+            foto_equipo__subida_drive=True,
+        ).distinct().count()
+
+        todos_listos = (
+            total_grupos > 0
+            and grupos_con_foto >= total_grupos
+        )
+
+        if (
+            todos_listos
+            and sesion_bloqueada.fase_actual == "f1_conocidos"
+        ):
+            # listo_f1 pertenece a la pantalla Trabajo en Equipo,
+            # no a la fotografía.
+            Grupo.objects.filter(
+                sesion=sesion_bloqueada
+            ).update(
+                listo_f1=False
+            )
+
+            sesion_bloqueada.fase_actual = "f1_pre_sopa"
+            sesion_bloqueada.segundos_restantes = 0
+            sesion_bloqueada.timer_corriendo = False
+            sesion_bloqueada.timer_inicio_at = None
+            sesion_bloqueada.timer_fin_at = None
+            sesion_bloqueada.inicio_fase_habilitado = True
+
+            sesion_bloqueada.save(
+                update_fields=[
+                    "fase_actual",
+                    "segundos_restantes",
+                    "timer_corriendo",
+                    "timer_inicio_at",
+                    "timer_fin_at",
+                    "inicio_fase_habilitado",
+                ]
+            )
+
+        return {
+            "totalGrupos": total_grupos,
+            "gruposFotosEquipo": grupos_con_foto,
+            "todosFotosEquipo": todos_listos,
+            "faseActual": sesion_bloqueada.fase_actual,
+            "rutaAlumno": reverse(
+                RUTA_POR_FASE.get(
+                    sesion_bloqueada.fase_actual,
+                    "pantalla_espera",
+                )
+            ),
+        }
+
 @require_POST
 def guardar_foto_equipo(request):
     """
@@ -2509,21 +2861,39 @@ def guardar_foto_equipo(request):
             status=400,
         )
 
-    if sesion.fase_actual != "f1_pre_sopa":
+    restantes = calcular_segundos_restantes(sesion)
+    sesion.refresh_from_db()
+
+    if sesion.fase_actual != "f1_conocidos":
+        return JsonResponse(
+            {
+               "ok": False,
+               "error": (
+                    "La fotografía solo puede guardarse "
+                    "al finalizar la actividad de preguntas."
+                ),
+            },
+            status=409,
+        )
+
+    if (
+        not sesion.inicio_fase_habilitado
+        or sesion.timer_corriendo
+        or restantes > 0
+    ):
         return JsonResponse(
             {
                 "ok": False,
                 "error": (
-                    "La foto solo puede guardarse durante "
-                    "la fase de trabajo en equipo."
+                    "La fotografía estará disponible "
+                    "cuando termine el tiempo de preguntas."
                 ),
             },
             status=409,
         )
 
     registro_existente = (
-        FotoEquipo.objects
-        .filter(
+        FotoEquipo.objects.filter(
             grupo=grupo,
             subida_drive=True,
         )
