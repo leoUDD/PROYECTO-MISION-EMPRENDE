@@ -45,6 +45,21 @@ from math import ceil
 from django.utils import timezone
 from django.db.models import F
 
+import logging
+
+from django.core.files.base import ContentFile
+from PIL import Image, ImageOps, UnidentifiedImageError
+
+from .models import FotoEquipo
+
+from .drive_service import (
+    buscar_o_crear_carpeta,
+    construir_servicio_drive,
+    nombre_seguro,
+    subir_o_reemplazar_archivo,
+)
+
+logger = logging.getLogger(__name__)
 
 
 FASES_ORDEN = [
@@ -2302,6 +2317,432 @@ def pantalla_inicio(request):
         return redirect("pantalla_espera")
     return render(request, "pantalla_inicio.html", {"grupo": grupo})
 
+def nombre_completo_alumno(alumno):
+    partes = [
+        alumno.nombrealumno,
+        alumno.apellidopaternoalumno,
+        alumno.apellidomaternoalumno,
+    ]
+
+    nombre = " ".join(
+        str(parte).strip()
+        for parte in partes
+        if parte and str(parte).strip()
+    )
+
+    return nombre or f"Alumno {alumno.idalumno}"
+
+
+def convertir_foto_equipo_a_jpeg(archivo):
+    """
+    Valida la imagen y la convierte a JPEG.
+
+    No se convierte a WebP.
+    """
+
+    tamanio_maximo = 15 * 1024 * 1024
+
+    if archivo.size > tamanio_maximo:
+        raise ValueError(
+            "La fotografía supera el máximo permitido de 15 MB."
+        )
+
+    contenido_original = archivo.read()
+
+    try:
+        with Image.open(io.BytesIO(contenido_original)) as imagen:
+            imagen = ImageOps.exif_transpose(imagen)
+
+            if imagen.mode != "RGB":
+                imagen = imagen.convert("RGB")
+
+            salida = io.BytesIO()
+
+            imagen.save(
+                salida,
+                format="JPEG",
+                quality=95,
+                optimize=True,
+            )
+
+            return salida.getvalue()
+
+    except UnidentifiedImageError as exc:
+        raise ValueError(
+            "El archivo recibido no es una imagen válida."
+        ) from exc
+
+    except OSError as exc:
+        raise ValueError(
+            "El formato de la fotografía no es compatible."
+        ) from exc
+
+
+def crear_txt_integrantes(
+    grupo,
+    integrantes,
+    fecha_captura,
+):
+    """
+    Genera el archivo TXT que acompañará a la fotografía.
+    """
+
+    lineas = [
+        "MISIÓN EMPRENDE",
+        "",
+        f"Sesión: {grupo.sesion.nombre}",
+        (
+            "Fecha de sesión: "
+            f"{fecha_captura.strftime('%d-%m-%Y')}"
+        ),
+        f"Grupo: {grupo.nombregrupo or 'Sin nombre'}",
+        f"ID interno del grupo: {grupo.idgrupo}",
+        "",
+        "Integrantes:",
+    ]
+
+    if integrantes:
+        for posicion, integrante in enumerate(
+            integrantes,
+            start=1,
+        ):
+            lineas.append(
+                f"{posicion}. {integrante['nombre']}"
+            )
+    else:
+        lineas.append(
+            "No se encontraron integrantes registrados."
+        )
+
+    lineas.extend([
+        "",
+        (
+            "Fotografía tomada: "
+            f"{fecha_captura.strftime('%d-%m-%Y %H:%M:%S')}"
+        ),
+    ])
+
+    return "\n".join(lineas).encode("utf-8")
+
+
+def obtener_carpeta_drive_sesion(
+    servicio,
+    sesion,
+    fecha_captura,
+):
+    """
+    Obtiene la carpeta de Drive asignada a la sesión.
+
+    Si todavía no existe, crea una carpeta dentro de
+    la carpeta principal Misión Emprende.
+    """
+
+    if sesion.drive_carpeta_id:
+        return sesion.drive_carpeta_id
+
+    carpeta_principal_id = (
+        settings.GOOGLE_DRIVE_ROOT_FOLDER_ID or ""
+    ).strip()
+
+    if not carpeta_principal_id:
+        raise RuntimeError(
+            "No está configurado "
+            "GOOGLE_DRIVE_ROOT_FOLDER_ID."
+        )
+
+    with transaction.atomic():
+        sesion_bloqueada = (
+            Sesion.objects
+            .select_for_update()
+            .get(pk=sesion.pk)
+        )
+
+        if sesion_bloqueada.drive_carpeta_id:
+            return sesion_bloqueada.drive_carpeta_id
+
+        nombre_carpeta = (
+            f"{fecha_captura.strftime('%Y-%m-%d')} - "
+            f"{nombre_seguro(sesion_bloqueada.nombre)} - "
+            f"Sesion {sesion_bloqueada.idsesion}"
+        )
+
+        carpeta_id = buscar_o_crear_carpeta(
+            servicio,
+            nombre_carpeta,
+            carpeta_principal_id,
+        )
+
+        sesion_bloqueada.drive_carpeta_id = carpeta_id
+
+        sesion_bloqueada.save(
+            update_fields=["drive_carpeta_id"]
+        )
+
+        return carpeta_id
+
+@require_POST
+def guardar_foto_equipo(request):
+    """
+    Recibe una foto del grupo activo, la guarda temporalmente,
+    la sube a Drive y genera el TXT de integrantes.
+    """
+
+    grupo = obtener_grupo_desde_session(request)
+
+    if not grupo:
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": "No se encontró un grupo activo.",
+            },
+            status=401,
+        )
+
+    sesion = grupo.sesion
+
+    if not sesion:
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": "El grupo no tiene una sesión asociada.",
+            },
+            status=400,
+        )
+
+    if sesion.fase_actual != "f1_pre_sopa":
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": (
+                    "La foto solo puede guardarse durante "
+                    "la fase de trabajo en equipo."
+                ),
+            },
+            status=409,
+        )
+
+    registro_existente = (
+        FotoEquipo.objects
+        .filter(
+            grupo=grupo,
+            subida_drive=True,
+        )
+        .first()
+    )
+
+    if registro_existente:
+        foto_url = ""
+
+        if registro_existente.foto_temporal:
+            foto_url = (
+                registro_existente.foto_temporal.url
+            )
+
+        return JsonResponse({
+            "ok": True,
+            "yaExistia": True,
+            "fotoUrl": foto_url,
+            "nombreArchivo": (
+                registro_existente.nombre_archivo
+            ),
+        })
+
+    archivo = request.FILES.get("foto_equipo")
+
+    if not archivo:
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": "No se recibió la fotografía.",
+            },
+            status=400,
+        )
+
+    try:
+        foto_jpeg = convertir_foto_equipo_a_jpeg(
+            archivo
+        )
+
+    except ValueError as exc:
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": str(exc),
+            },
+            status=400,
+        )
+
+    alumnos = (
+        Alumno.objects
+        .filter(
+            sesion=sesion,
+            grupo=grupo,
+        )
+        .order_by(
+            "nombrealumno",
+            "apellidopaternoalumno",
+            "idalumno",
+        )
+    )
+
+    integrantes = [
+        {
+            "id": alumno.idalumno,
+            "nombre": nombre_completo_alumno(alumno),
+        }
+        for alumno in alumnos
+    ]
+
+    fecha_captura = timezone.localtime(
+        timezone.now()
+    )
+
+    nombre_grupo = nombre_seguro(
+        grupo.nombregrupo or "Equipo"
+    )
+
+    nombre_base = (
+        f"{nombre_grupo} - Grupo {grupo.idgrupo}"
+    )
+
+    nombre_foto = f"{nombre_base}.jpg"
+
+    nombre_txt = (
+        f"{nombre_base} - integrantes.txt"
+    )
+
+    registro, _ = FotoEquipo.objects.get_or_create(
+        grupo=grupo,
+        defaults={
+            "sesion": sesion,
+        },
+    )
+
+    registro.sesion = sesion
+    registro.integrantes_snapshot = integrantes
+    registro.nombre_archivo = nombre_foto
+    registro.subida_drive = False
+    registro.error_drive = ""
+
+    if registro.foto_temporal:
+        try:
+            registro.foto_temporal.delete(
+                save=False
+            )
+        except Exception:
+            logger.exception(
+                "No se pudo eliminar la foto temporal anterior."
+            )
+
+    registro.foto_temporal.save(
+        f"grupo_{grupo.idgrupo}.jpg",
+        ContentFile(foto_jpeg),
+        save=False,
+    )
+
+    registro.save()
+
+    try:
+        servicio = construir_servicio_drive()
+
+        carpeta_sesion_id = (
+            obtener_carpeta_drive_sesion(
+                servicio,
+                sesion,
+                fecha_captura,
+            )
+        )
+
+        archivo_foto_drive = (
+            subir_o_reemplazar_archivo(
+                servicio,
+                nombre=nombre_foto,
+                contenido=foto_jpeg,
+                mime_type="image/jpeg",
+                carpeta_id=carpeta_sesion_id,
+            )
+        )
+
+        contenido_txt = crear_txt_integrantes(
+            grupo,
+            integrantes,
+            fecha_captura,
+        )
+
+        archivo_txt_drive = (
+            subir_o_reemplazar_archivo(
+                servicio,
+                nombre=nombre_txt,
+                contenido=contenido_txt,
+                mime_type="text/plain",
+                carpeta_id=carpeta_sesion_id,
+            )
+        )
+
+        registro.drive_carpeta_id = (
+            carpeta_sesion_id
+        )
+
+        registro.drive_foto_id = (
+            archivo_foto_drive["id"]
+        )
+
+        registro.drive_txt_id = (
+            archivo_txt_drive["id"]
+        )
+
+        registro.subida_drive = True
+        registro.error_drive = ""
+
+        registro.save(
+            update_fields=[
+                "sesion",
+                "foto_temporal",
+                "drive_carpeta_id",
+                "drive_foto_id",
+                "drive_txt_id",
+                "nombre_archivo",
+                "integrantes_snapshot",
+                "subida_drive",
+                "error_drive",
+                "actualizada_en",
+            ]
+        )
+
+    except Exception as exc:
+        logger.exception(
+            "Error subiendo la fotografía del grupo %s",
+            grupo.idgrupo,
+        )
+
+        registro.error_drive = str(exc)[:2000]
+
+        registro.save(
+            update_fields=[
+                "error_drive",
+                "actualizada_en",
+            ]
+        )
+
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": (
+                    "La fotografía quedó temporalmente "
+                    "guardada, pero no pudo subirse a "
+                    "Google Drive. Inténtalo nuevamente."
+                ),
+            },
+            status=502,
+        )
+
+    return JsonResponse({
+        "ok": True,
+        "yaExistia": False,
+        "fotoUrl": registro.foto_temporal.url,
+        "nombreArchivo": nombre_foto,
+        "integrantes": integrantes,
+    })
 
 def trabajoenequipo(request):
     grupo = obtener_grupo_desde_session(request)

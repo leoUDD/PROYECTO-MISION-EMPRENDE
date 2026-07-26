@@ -59,6 +59,11 @@ urlpatterns = [
     path("sesion/<int:sesion_id>/actualizar-estado/", views.profesor_actualizar_estado, name="profesor_actualizar_estado"),
     path("sesion/<int:sesion_id>/siguiente-fase/", views.profesor_siguiente_fase, name="profesor_siguiente_fase"),
     path("finalizar-mision/", views.finalizar_mision, name="finalizar_mision"),
+    path(
+        "foto-equipo/guardar/",
+        views.guardar_foto_equipo,
+        name="guardar_foto_equipo",
+    ),
     path("grupo/<int:grupo_id>/listo/", views.marcar_grupo_listo, name="marcar_grupo_listo"),
     path("salir/", views.salir_grupo, name="salir_grupo"),
     path("sesion/<int:sesion_id>/control/", views.control_sesion, name="control_sesion"),
