@@ -1,4 +1,5 @@
 from django.db import models
+import uuid
 from .image_utils import convertir_imagen_a_webp
 
 class PreguntaRompehielo(models.Model):
@@ -332,6 +333,13 @@ class Sesion(models.Model):
     profesor = models.ForeignKey('Profesor', on_delete=models.CASCADE, db_column='profesor_idProfesor')
     nombre = models.CharField(max_length=120)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
+
+    drive_carpeta_id = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+    )
+
     grupo_presentando = models.ForeignKey(
     'Grupo',
     on_delete=models.SET_NULL,
@@ -462,3 +470,88 @@ class TiempoFase(models.Model):
 
     def __str__(self):
         return f"{self.nombre} - {self.segundos}s"
+
+def ruta_foto_equipo_temporal(instance, filename):
+    """
+    Genera una ruta temporal única para la fotografía.
+
+    La fotografía se elimina después de finalizar la misión,
+    pero la copia de Google Drive permanece.
+    """
+
+    return (
+        "fotos_equipo_temporales/"
+        f"sesion_{instance.sesion_id}/"
+        f"grupo_{instance.grupo_id}_"
+        f"{uuid.uuid4().hex}.jpg"
+    )
+
+
+class FotoEquipo(models.Model):
+    grupo = models.OneToOneField(
+        "Grupo",
+        on_delete=models.CASCADE,
+        related_name="foto_equipo",
+    )
+
+    sesion = models.ForeignKey(
+        "Sesion",
+        on_delete=models.CASCADE,
+        related_name="fotos_equipo",
+    )
+
+    foto_temporal = models.ImageField(
+        upload_to=ruta_foto_equipo_temporal,
+        null=True,
+        blank=True,
+    )
+
+    drive_carpeta_id = models.CharField(
+        max_length=255,
+        blank=True,
+    )
+
+    drive_foto_id = models.CharField(
+        max_length=255,
+        blank=True,
+    )
+
+    drive_txt_id = models.CharField(
+        max_length=255,
+        blank=True,
+    )
+
+    nombre_archivo = models.CharField(
+        max_length=255,
+        blank=True,
+    )
+
+    integrantes_snapshot = models.JSONField(
+        default=list,
+        blank=True,
+    )
+
+    subida_drive = models.BooleanField(
+        default=False,
+    )
+
+    error_drive = models.TextField(
+        blank=True,
+    )
+
+    fecha_captura = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    actualizada_en = models.DateTimeField(
+        auto_now=True,
+    )
+
+    class Meta:
+        db_table = "foto_equipo"
+
+    def __str__(self):
+        return (
+            f"Foto del grupo {self.grupo_id} "
+            f"- sesión {self.sesion_id}"
+        )
