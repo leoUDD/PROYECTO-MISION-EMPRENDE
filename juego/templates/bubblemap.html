@@ -18,15 +18,15 @@
 
   <main class="bubblemap-container">
 
-    <h1 id="tituloBubble" class="blur-target-bloqueado">
-      💭 Misión de empatía
+    <h1 id="tituloBubble">
+      Empatía
     </h1>
 
-    <p id="subtituloBubble" class="subtitle blur-target-bloqueado" data-i18n="bubble_subtitulo">
+    <p id="subtituloBubble" class="subtitle" data-i18n="bubble_subtitulo">
       Presiona una burbuja para analizar a la persona objetivo.
     </p>
 
-    <section id="desafioPanel" class="desafio-panel blur-target-bloqueado">
+    <section id="desafioPanel" class="desafio-panel">
       <button type="button" class="desafio-toggle" id="desafioToggle">
         <div class="desafio-toggle-head">
           <span class="desafio-etiqueta" data-i18n="bubble_desafio_label">Desafío seleccionado</span>
@@ -39,7 +39,7 @@
       </div>
     </section>
 
-    <button id="objetoCelularTrigger" class="objeto-celular-trigger blur-target-bloqueado" type="button" aria-label="Encontrar tablet perdida" data-i18n="bubble_objeto_aria" data-i18n-attr="aria-label">
+    <button id="objetoCelularTrigger" class="objeto-celular-trigger" type="button" aria-label="Encontrar tablet perdida" data-i18n="bubble_objeto_aria" data-i18n-attr="aria-label">
       <img src="{% static 'images/Tablet.webp' %}" class="objeto-celular-icon" alt="" aria-hidden="true">
     </button>
 
@@ -58,7 +58,7 @@
       </div>
     </div>
 
-    <details id="reglasBubble" class="reglas-bubble blur-target-bloqueado">
+    <details id="reglasBubble" class="reglas-bubble">
       <summary data-i18n="bubble_reglas_titulo">📌 ¿Cómo ganar más tokens?</summary>
       <ul>
         <li data-i18n-html="true" data-i18n="bubble_regla_1">Mientras más <strong>burbujas completas</strong>, más tokens ganan.</li>
@@ -75,23 +75,23 @@
       data-foto="{{ desafio_foto_actual|default:'' }}"
       hidden></div>
 
-    <div class="timer-wrap blur-target-bloqueado timer-esperando" id="timerWrap">
+    <div class="timer-wrap" id="timerWrap">
       <div class="timer-bubblemap" id="timer">03:00</div>
     </div>
 
-    <section id="bubblesSection" class="bubble-stage blur-target-bloqueado">
+    <section id="bubblesSection" class="bubble-stage">
       <div class="bubble central" id="bubbleCentral">
         <img id="personaObjetivoImg" alt="Persona objetivo" />
       </div>
     </section>
 
-    <div id="bubbleActions" class="bubble-actions blur-target-bloqueado">
+    <div id="bubbleActions" class="bubble-actions">
       <button type="button" id="btnAgregarOtro" class="bubble-action-btn" data-i18n="bubble_boton_otro">➕ Agregar idea en Otros</button>
       <button type="button" id="btnAbrirRelato" class="bubble-action-btn" data-i18n="bubble_boton_relato">📖 Relato breve</button>
       <button type="button" id="btnAbrirLink" class="bubble-action-btn" data-i18n="bubble_boton_link">🔗 Link o noticia</button>
     </div>
 
-    <footer id="footerBubble" class="footer-actions blur-target-bloqueado"></footer>
+    <footer id="footerBubble" class="footer-actions"></footer>
 
     <div id="editorModal" class="editor-modal" aria-hidden="true">
       <div class="editor-card">
@@ -137,53 +137,6 @@
       data-otorgar-tokens-url="{% url 'otorgar_tokens_bubblemap' %}">
     </div>
   </main>
-
-  <!-- El diálogo de EdEmy va como hijo DIRECTO de <body>, nunca dentro de
-       <main class="bubblemap-container">: ese contenedor tiene position:relative
-       + z-index:1, o sea que crea un contexto de apilamiento y encierra el
-       z-index:9999 del overlay dentro de un z-index:1 en la raíz (el sidebar,
-       con 9998, le ganaba y se pintaba encima). Además el filter que difumina
-       el contenedor crearía un bloque contenedor para este fixed. -->
-  <div id="inicio-fase-overlay" class="inicio-fase-overlay dialogo-bubblemap">
-    <div id="dialogo-backdrop" class="dialogo-backdrop" aria-hidden="true"></div>
-
-    <div id="dialogo-box" class="dialogo-box" role="dialog" aria-modal="true" aria-label="Mensaje de EdEmy">
-      <div class="dialogo-personaje activo" id="pj-edemy">
-        <img class="dialogo-img" src="{% static 'images/EdemFeliz.png' %}" alt="EdEmy">
-      </div>
-
-      <section id="inicio-fase-card" class="inicio-fase-card dialogo-burbuja visible">
-        <div class="dialogo-hablante">EdEmy</div>
-
-        <!-- Vacío a propósito: lo llena escribirTextoDialogo() con el efecto
-             de máquina de escribir. Con texto quemado acá se vería un instante
-             el mensaje completo antes de empezar a tipear. -->
-        <p id="dialogo-bubble-texto" class="dialogo-texto-rpg"></p>
-
-        <button type="button" id="btn-dialogo-bubble-continuar" class="dialogo-siguiente">
-          <span id="dialogo-bubble-label">Continuar</span>
-          <span class="dialogo-flecha">▶</span>
-        </button>
-
-        <div id="dialogo-listo-wrap" class="dialogo-listo-wrap">
-          <button type="button" id="btn-listo-fase" class="btn-chip" data-i18n="bubble_boton_listo">
-            ⚡ Listo para comenzar
-          </button>
-          <div id="texto-espera-fase" class="contador-fase" data-i18n="bubble_esperando">
-            Esperando a los demás equipos...
-          </div>
-          <div id="contador-listos-fase" class="contador-fase">0/0 grupos listos</div>
-        </div>
-
-        <div class="dialogo-progreso" aria-hidden="true">
-          <div id="dialogo-bubble-dots">
-            <span class="d-dot activo"></span>
-            <span class="d-dot"></span>
-          </div>
-        </div>
-      </section>
-    </div>
-  </div>
 
   <script>
     const BASE_STORAGE_KEY = "bubblemap_data_v3";
@@ -234,13 +187,6 @@
         return window.i18nJuego?.traducciones?.[idioma]?.[clave] || fallback;
       }
 
-      function textoGruposListos(listos, total) {
-        return `${listos}/${total} ${tJuego("bubble_grupos_listos", "grupos listos")}`;
-      }
-      function textoEsperando() { return tJuego("bubble_boton_esperando", "Esperando..."); }
-      function textoListo() { return tJuego("bubble_boton_listo", "⚡ Listo para comenzar"); }
-      function textoEsperaEquipos() { return tJuego("bubble_esperando", "Esperando a los demás equipos..."); }
-
       function actualizarBadgeDesafio(data) {
         const miGrupo = (data.grupos || []).find(g => Number(g.id) === Number(grupoId));
         if (!miGrupo) return;
@@ -265,133 +211,6 @@
           else { desafioBody.removeAttribute("hidden"); desafioIcono.textContent = "▲"; }
         });
       }
-
-      const boton = document.getElementById("btn-listo-fase");
-      const textoEspera = document.getElementById("texto-espera-fase");
-      const contador = document.getElementById("contador-listos-fase");
-      const overlay = document.getElementById("inicio-fase-overlay");
-      const dialogoBubbleTexto = document.getElementById("dialogo-bubble-texto");
-      const dialogoBubbleContinuar = document.getElementById("btn-dialogo-bubble-continuar");
-      const dialogoBubbleLabel = document.getElementById("dialogo-bubble-label");
-      const dialogoBubbleDots = Array.from(document.querySelectorAll("#dialogo-bubble-dots .d-dot"));
-
-      const dialogoBubblePasos = [
-        {
-          texto: tJuego(
-            "bubble_dialogo_paso_1",
-            "Agentes, observen a la persona objetivo. Piensen qué necesita, qué siente y qué obstáculos enfrenta."
-          ),
-          boton: tJuego("bubble_dialogo_continuar", "Continuar")
-        },
-        {
-          texto: tJuego(
-            "bubble_dialogo_paso_2",
-            "Completen las burbujas con ideas claras. Cada respuesta ayudará a crear una mejor solución."
-          ),
-          boton: tJuego("bubble_dialogo_continuar", "Continuar")
-        }
-      ];
-
-      let dialogoBubblePaso = 0;
-
-      /* ── Máquina de escribir de EdEmy ──
-         Mismo patrón que conocidos.html / transicionempatia.html: intervalo de
-         28ms, cursor .cursor-rpg reinsertado en cada carácter, sonido de tecla
-         cada 2 caracteres y click que completa el texto si aún está escribiendo. */
-      let dialogoEscribiendo = false;
-      let dialogoTextoCompleto = "";
-      let dialogoTimerEscritura = null;
-      let dialogoTeclaCounter = 0;
-
-      function escribirTextoDialogo(txt) {
-        if (!dialogoBubbleTexto) return;
-
-        dialogoTextoCompleto = txt;
-        dialogoEscribiendo = true;
-        dialogoBubbleTexto.innerHTML = "";
-        dialogoTeclaCounter = 0;
-
-        const cursor = document.createElement("span");
-        cursor.className = "cursor-rpg";
-
-        let i = 0;
-        clearInterval(dialogoTimerEscritura);
-
-        dialogoTimerEscritura = setInterval(() => {
-          if (i < txt.length) {
-            dialogoBubbleTexto.textContent = txt.slice(0, i + 1);
-            dialogoBubbleTexto.appendChild(cursor);
-
-            dialogoTeclaCounter++;
-
-            if (dialogoTeclaCounter % 2 === 0 && txt[i] !== " " && typeof window.sonarTecla === "function") {
-              window.sonarTecla();
-            }
-
-            i++;
-          } else {
-            clearInterval(dialogoTimerEscritura);
-            dialogoEscribiendo = false;
-            dialogoBubbleTexto.textContent = txt;
-          }
-        }, 28);
-      }
-
-      function completarTextoDialogo() {
-        clearInterval(dialogoTimerEscritura);
-        dialogoEscribiendo = false;
-        if (dialogoBubbleTexto) dialogoBubbleTexto.textContent = dialogoTextoCompleto;
-      }
-
-      function actualizarDialogoBubble() {
-        if (!dialogoBubbleTexto) return;
-
-        const paso = dialogoBubblePasos[dialogoBubblePaso] || dialogoBubblePasos[0];
-
-        if (dialogoBubbleLabel) {
-          dialogoBubbleLabel.textContent = paso.boton;
-        }
-
-        dialogoBubbleDots.forEach((dot, idx) => {
-          dot.classList.toggle("activo", idx === dialogoBubblePaso);
-          dot.classList.toggle("hecho", idx < dialogoBubblePaso);
-        });
-
-        escribirTextoDialogo(paso.texto);
-      }
-
-      if (dialogoBubbleContinuar) {
-        dialogoBubbleContinuar.addEventListener("click", () => {
-          if (typeof window.sonarBoton === "function") {
-            window.sonarBoton();
-          }
-
-          // Primer click mientras tipea: muestra el texto completo y no avanza.
-          if (dialogoEscribiendo) {
-            completarTextoDialogo();
-            return;
-          }
-
-          if (dialogoBubblePaso < dialogoBubblePasos.length - 1) {
-            dialogoBubblePaso++;
-            actualizarDialogoBubble();
-            return;
-          }
-
-          if (overlay) {
-            overlay.classList.add("dialogo-final");
-            overlay.classList.remove("dialogo-esperando");
-            dialogoBubbleContinuar.classList.add("dialogo-info-oculta");
-          }
-
-          escribirTextoDialogo(tJuego(
-            "bubble_dialogo_confirmar",
-            "Cuando su equipo esté preparado, presionen listo. El mapa comenzará cuando todos los escuadrones estén listos."
-          ));
-        });
-      }
-
-      actualizarDialogoBubble();
 
       const timerWrap = document.getElementById("timerWrap");
       const routesEl = document.getElementById("routes");
@@ -447,18 +266,6 @@
       const fotoDesafio = dataNode?.dataset?.foto || "";
       if (fotoDesafio && personaObjetivoImg) personaObjetivoImg.src = fotoDesafio;
 
-      const blurTargets = [
-        document.getElementById("tituloBubble"),
-        document.getElementById("subtituloBubble"),
-        document.getElementById("desafioPanel"),
-        document.getElementById("reglasBubble"),
-        document.getElementById("timerWrap"),
-        document.getElementById("bubblesSection"),
-        document.getElementById("bubbleActions"),
-        document.getElementById("footerBubble"),
-        document.getElementById("objetoCelularTrigger"),
-      ];
-
       const burbujasBase = [
         { id: "gustos",     clase: "bubble-gustos",     tituloKey: "bubble_cat_gustos",     preguntaKey: "bubble_q_gustos",     titulo: "Gustos",     pregunta: "¿Qué actividades, intereses o preferencias parecen importantes para esta persona?" },
         { id: "emociones",  clase: "bubble-emociones",  tituloKey: "bubble_cat_emociones",  preguntaKey: "bubble_q_emociones",  titulo: "Emociones",  pregunta: "¿Qué podría sentir esta persona frente al problema o necesidad del desafío?" },
@@ -480,10 +287,6 @@
       let timerIniciado = false;
       let redirigiendo = false;
       let tokensBubbleEnviados = false;
-      let timerLiberadoTrasCountdown = false;
-      let timerRealSolicitado = false;
-      let countdownMostrado = false;
-      let countdownEnCurso = false;
       let resultadoMostrado = false;
 
       function guardarEstadoLocal() { localStorage.setItem(STORAGE_KEY, JSON.stringify(estado)); }
@@ -719,36 +522,6 @@
         if (data?.todos_terminaron && data?.rutaAlumno) { redirigiendo = true; window.location.href = data.rutaAlumno; }
       });
 
-      async function iniciarTimerRealDespuesCountdown() {
-        if (timerRealSolicitado) return;
-        timerRealSolicitado = true;
-        try {
-          const res = await fetch(`/sesion/${sesionId}/iniciar-timer-inicio-fase/`, { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json", "X-CSRFToken": csrfToken }, body: JSON.stringify({ fase: "f2_bubblemap" }) });
-          const data = await res.json();
-          if (!res.ok || !data.ok) throw new Error(data.error || tJuego("bubble_error_timer", "No se pudo iniciar el timer real."));
-          const backendSeconds = Number(data.segundosRestantes);
-          if (!Number.isNaN(backendSeconds)) { timeLeft = backendSeconds; pintarTiempo(); }
-        } catch (err) {
-          console.error("Error iniciando timer real bubblemap:", err);
-          timerRealSolicitado = false;
-        }
-      }
-
-      function activarFase() {
-        // El overlay se oculta: si EdEmy seguía tipeando, se corta el intervalo.
-        clearInterval(dialogoTimerEscritura);
-        dialogoEscribiendo = false;
-        blurTargets.forEach(el => { if (!el) return; el.classList.remove("blur-target-bloqueado", "timer-esperando"); el.classList.add("blur-target-activo"); });
-        if (timerWrap) timerWrap.classList.remove("timer-esperando");
-        if (overlay) overlay.classList.add("overlay-hidden");
-      }
-
-      function bloquearFase() {
-        blurTargets.forEach(el => { if (!el) return; el.classList.remove("blur-target-activo"); el.classList.add("blur-target-bloqueado"); });
-        if (timerWrap) timerWrap.classList.add("timer-esperando");
-        if (overlay) overlay.classList.remove("overlay-hidden");
-      }
-
       function pintarTiempo() {
         const minutes = Math.floor(Math.max(0, timeLeft) / 60);
         const seconds = Math.max(0, timeLeft) % 60;
@@ -768,41 +541,29 @@
         }, 1000);
       }
 
+      // El backend ya arranca el timer de bubblemap en el instante en que el
+      // último grupo confirma "empatía" (o cuando el profesor salta de fase
+      // manualmente), así que acá solo hay que sincronizar con lo que reporte
+      // /sesion/{id}/estado/ — no hace falta gate de "listo" ni countdown local.
       function procesarEstadoSesion(data) {
         if (!data) return;
-        if (contador) contador.textContent = textoGruposListos(data.listosInicio || 0, data.totalListosInicio || 0);
-        const miGrupo = (data.grupos || []).find(g => Number(g.id) === Number(grupoId));
-        if (miGrupo && miGrupo.listoF2Generico) {
-          if (overlay) overlay.classList.add("dialogo-final", "dialogo-esperando");
-          if (dialogoBubbleContinuar) dialogoBubbleContinuar.classList.add("dialogo-info-oculta");
-          boton.disabled = true;
-          boton.textContent = textoEsperando();
-          if (textoEspera) textoEspera.textContent = textoEsperaEquipos();
-        }
-        if (data.inicioFaseHabilitado) { if (countdownMostrado && !countdownEnCurso) activarFase(); }
-        else { countdownMostrado = false; countdownEnCurso = false; timerLiberadoTrasCountdown = false; timerRealSolicitado = false; bloquearFase(); }
+
         const backendSeconds = Number(data.segundosRestantes);
-        if ((!timerIniciado || !data.timerCorriendo) && !Number.isNaN(backendSeconds)) {
-          if (!countdownEnCurso && !timerLiberadoTrasCountdown && !resultadoMostrado) { timeLeft = backendSeconds; pintarTiempo(); }
+
+        if (!Number.isNaN(backendSeconds) && (!timerIniciado || !data.timerCorriendo) && !resultadoMostrado) {
+          timeLeft = backendSeconds;
+          pintarTiempo();
         }
-        if (data.inicioFaseHabilitado && backendSeconds <= 0 && !data.timerCorriendo) { mostrarResultadoFinal(); return; }
-        if (!timerIniciado && data.inicioFaseHabilitado) {
-          if (!countdownMostrado && !countdownEnCurso) {
-            countdownEnCurso = true;
-            window.oaiCountdown.run(async () => {
-              countdownMostrado = true; countdownEnCurso = false; timerLiberadoTrasCountdown = true;
-              await iniciarTimerRealDespuesCountdown();
-              activarFase();
-            });
-            return;
-          }
-          if (!countdownMostrado || countdownEnCurso || !timerLiberadoTrasCountdown) return;
-          if (!data.timerCorriendo) return;
-          if (!Number.isNaN(backendSeconds)) { timeLeft = backendSeconds; pintarTiempo(); }
-          timerIniciado = true;
-          iniciarTimerLocal();
+
+        if (!Number.isNaN(backendSeconds) && backendSeconds <= 0 && !data.timerCorriendo && !resultadoMostrado) {
+          mostrarResultadoFinal();
           return;
         }
+
+        if (!timerIniciado && data.timerCorriendo) {
+          iniciarTimerLocal();
+        }
+
         if (timerIniciado && !data.timerCorriendo && !resultadoMostrado) {
           pausarTimerLocal();
           if (!Number.isNaN(backendSeconds)) { timeLeft = backendSeconds; pintarTiempo(); }
@@ -820,50 +581,17 @@
             if (data.rutaAlumno && window.location.pathname !== data.rutaAlumno) { redirigiendo = true; window.location.href = data.rutaAlumno; }
             return;
           }
+          actualizarBadgeDesafio(data);
           procesarEstadoSesion(data);
         } catch (err) { console.error("Error consultando estado de sesión:", err); }
       }
 
-      if (boton) {
-        boton.addEventListener("click", async () => {
-          boton.disabled = true;
-          boton.textContent = textoEsperando();
-          if (overlay) overlay.classList.add("dialogo-final", "dialogo-esperando");
-          if (dialogoBubbleContinuar) dialogoBubbleContinuar.classList.add("dialogo-info-oculta");
-          try {
-            const res = await fetch(`/grupo/${grupoId}/listo/`, { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json", "X-CSRFToken": csrfToken }, body: JSON.stringify({ fase: "f2_bubblemap" }) });
-            const data = await res.json();
-            actualizarBadgeDesafio(data);
-            const resultadoEspera = document.getElementById("resultadoEspera");
-            if (resultadoMostrado && resultadoEspera) {
-              const terminados = (data.grupos || []).filter(g => g.bubbleTokensOtorgados).length;
-              const total = Number(data.totalGrupos || 0);
-              resultadoEspera.textContent = `${tJuego("bubble_equipos_confirmados", "Equipos confirmados:")} ${terminados}/${total}`;
-            }
-            if (!res.ok || !data.ok) throw new Error(data.error || tJuego("bubble_error_listo", "No se pudo marcar listo."));
-            if (contador) contador.textContent = textoGruposListos(data.listos || 0, data.total || 0);
-            if (textoEspera) textoEspera.textContent = textoEsperaEquipos();
-            if (data.inicio_fase_habilitado) consultarEstadoSesion();
-          } catch (err) {
-            console.error("Error marcando listo:", err);
-            boton.disabled = false;
-            boton.textContent = textoListo();
-            if (overlay) overlay.classList.add("dialogo-final");
-            if (textoEspera) textoEspera.textContent = tJuego("bubble_error_registro", "No se pudo registrar. Intenta nuevamente.");
-          }
-        });
-      }
-
       window.addEventListener("idiomaJuegoCambiado", () => {
         renderBurbujas();
-        if (boton) boton.textContent = boton.disabled ? textoEsperando() : textoListo();
-        if (textoEspera) textoEspera.textContent = textoEsperaEquipos();
-        if (contador) { const partes = contador.textContent.match(/(\d+)\/(\d+)/); if (partes) contador.textContent = textoGruposListos(partes[1], partes[2]); }
         if (resultadoMostrado) mostrarResultadoFinal();
       });
 
       renderBurbujas();
-      bloquearFase();
       pintarTiempo();
       setInterval(consultarEstadoSesion, 1500);
       consultarEstadoSesion();
@@ -871,6 +599,5 @@
   </script>
 
   {% include "includes/sincronizacion_fase.html" %}
-  {% include "includes/countdown_inicio_fase.html" %}
 </body>
 </html>

@@ -138,10 +138,21 @@ FASES_CON_INICIO_POR_ALUMNOS = {
     "f1_conocidos",
     "f1_sopa",
     "f2_tematicas",
-    "f2_bubblemap",
-    "f3_lego",
     "f4_construccion_pitch",
 }
+# f2_bubblemap salió de este set: la confirmación de "empatía" en
+# transicionempatia.html ya implica que todos están listos para bubblemap
+# (autoavanzar_si_todos_listos solo cambia de fase cuando el último grupo
+# confirma), así que un segundo gate adentro del bubble map era redundante.
+# El timer ahora arranca solo al entrar a la fase (ver autoavanzar_si_todos_listos
+# y profesor_siguiente_fase).
+# f3_lego salió por el mismo motivo: la confirmación "¡Estoy listo!" en
+# transicioncreatividad.html (fase_clave="f3") ya es la señal de que todos
+# están listos para lego.
+# f4_construccion_pitch volvió a este set: pitch.html tiene un diálogo de
+# EdEmy que no debe dejar avanzar el tiempo mientras se lee, así que necesita
+# su propio gate otra vez — a diferencia de bubblemap/lego, acá sí hace falta
+# esperar a que cada grupo termine de leer antes de arrancar el timer real.
 
 
 def reset_listos_inicio_fase(sesion, fase):
@@ -157,13 +168,6 @@ def reset_listos_inicio_fase(sesion, fase):
             sopa_tiempo_segundos=None,
             sopa_completada_en=None,
         )
-
-    elif fase == "f2_bubblemap":
-        grupos.update(listo_f2=False, bubble_tokens_otorgados=False)
-
-    elif fase == "f3_lego":
-        grupos.update(listo_inicio_f3=False)
-        grupos.update(listo_f3=False)
 
     elif fase == "f2_tematicas":
         grupos.update(
@@ -690,11 +694,31 @@ def autoavanzar_si_todos_listos(sesion):
     # f2_tematicas ya no tiene compuerta de listos propia: la sincronización se
     # hace en f2_transicion, así que el timer arranca en el mismo instante en
     # que el último grupo confirma ahí. Mismo criterio que profesor_siguiente_fase.
-    if nueva_fase in {"f2_tematicas", "f5_evaluacion_pitch"}:
+    # f2_bubblemap y f3_lego se agregan por el mismo motivo: la confirmación en
+    # su transición previa ya es la confirmación de entrar a la fase, no hace
+    # falta un segundo gate. f4_construccion_pitch NO se agrega acá: tiene su
+    # propio diálogo de EdEmy que debe leerse antes de que el tiempo corra, así
+    # que sigue el flujo clásico (inicio_fase_habilitado + iniciar-timer-inicio-fase).
+    if nueva_fase in {"f2_tematicas", "f5_evaluacion_pitch", "f2_bubblemap", "f3_lego"}:
         ahora = timezone.now()
         sesion.timer_corriendo = sesion.segundos_restantes > 0
         sesion.timer_inicio_at = ahora if sesion.timer_corriendo else None
         sesion.timer_fin_at = ahora + timedelta(seconds=sesion.segundos_restantes) if sesion.timer_corriendo else None
+
+    if nueva_fase == "f2_bubblemap":
+        # bubble_tokens_otorgados debe limpiarse cada vez que se entra a la fase
+        # (por ejemplo si el profesor retrocede y vuelve a avanzar), o
+        # otorgar_tokens_bubblemap la va a tratar como ya completada.
+        Grupo.objects.filter(sesion=sesion).update(
+            listo_f2=False,
+            bubble_tokens_otorgados=False,
+        )
+
+    if nueva_fase == "f3_lego":
+        Grupo.objects.filter(sesion=sesion).update(
+            listo_inicio_f3=False,
+            listo_f3=False,
+        )
 
     if nueva_fase in {"f1_ranking", "f2_ranking", "f3_ranking", "f6_ranking"}:
         Grupo.objects.filter(sesion=sesion).update(
@@ -1493,6 +1517,18 @@ def profesor_actualizar_estado(request, sesion_id):
         else:
             sesion.inicio_fase_habilitado = True
 
+            if nueva_fase == "f2_bubblemap":
+                Grupo.objects.filter(sesion=sesion).update(
+                    listo_f2=False,
+                    bubble_tokens_otorgados=False,
+                )
+
+            if nueva_fase == "f3_lego":
+                Grupo.objects.filter(sesion=sesion).update(
+                    listo_inicio_f3=False,
+                    listo_f3=False,
+                )
+
             if nueva_fase == "f5_evaluacion_pitch":
                 Grupo.objects.filter(sesion=sesion).update(
                     listo_ranking=False,
@@ -1607,11 +1643,23 @@ def profesor_siguiente_fase(request, sesion_id):
     sesion.timer_fin_at = None
 
 
-    if nueva_fase in {"f2_tematicas", "f5_evaluacion_pitch"}:
+    if nueva_fase in {"f2_tematicas", "f5_evaluacion_pitch", "f2_bubblemap", "f3_lego"}:
         ahora = timezone.now()
         sesion.timer_corriendo = sesion.segundos_restantes > 0
         sesion.timer_inicio_at = ahora if sesion.timer_corriendo else None
         sesion.timer_fin_at = ahora + timedelta(seconds=sesion.segundos_restantes) if sesion.timer_corriendo else None
+
+    if nueva_fase == "f2_bubblemap":
+        Grupo.objects.filter(sesion=sesion).update(
+            listo_f2=False,
+            bubble_tokens_otorgados=False,
+        )
+
+    if nueva_fase == "f3_lego":
+        Grupo.objects.filter(sesion=sesion).update(
+            listo_inicio_f3=False,
+            listo_f3=False,
+        )
 
     if nueva_fase == "f4_orden_pitch":
         Grupo.objects.filter(sesion=sesion).update(listo_f4_orden=False, orden_presentacion=None)
@@ -1849,37 +1897,6 @@ def marcar_grupo_listo(request, grupo_id):
         })
 
     # ============================================================
-    # F2 — BUBBLE MAP
-    # ============================================================
-    if fase_actual == "f2_bubblemap" and fase_clave == "f2_bubblemap":
-        if not grupo.listo_f2:
-            grupo.listo_f2 = True
-            grupo.save(update_fields=["listo_f2"])
-
-        total = Grupo.objects.filter(sesion=sesion).count()
-        listos = Grupo.objects.filter(sesion=sesion, listo_f2=True).count()
-        todos = total > 0 and listos == total
-
-        if todos and not sesion.inicio_fase_habilitado:
-            sesion.inicio_fase_habilitado = True
-            sesion.save(update_fields=["inicio_fase_habilitado"])
-
-        return JsonResponse({
-            "ok": True,
-            "fase": fase_actual,
-            "faseActual": sesion.fase_actual,
-            "total": total,
-            "listos": listos,
-            "gruposListos": listos,
-            "totalGrupos": total,
-            "todos_listos": todos,
-            "gruposListosF2": listos,
-            "todosListosF2": todos,
-            "inicio_fase_habilitado": sesion.inicio_fase_habilitado,
-            "segundosRestantes": sesion.segundos_restantes,
-        })
-
-    # ============================================================
     # F3 — TRANSICIÓN CREATIVIDAD
     # ============================================================
     if fase_actual == "f3_transicion_creatividad" and fase_clave == "f3":
@@ -1902,37 +1919,6 @@ def marcar_grupo_listo(request, grupo_id):
             "todos_listos": todos,
             "gruposListosF3": listos,
             "todosListosF3": todos,
-        })
-
-    # ============================================================
-    # F3 — INICIO LEGO
-    # ============================================================
-    if fase_actual == "f3_lego" and fase_clave in ["inicio_f3", "f3_lego", "f3", None, ""]:
-        if not grupo.listo_inicio_f3:
-            grupo.listo_inicio_f3 = True
-            grupo.save(update_fields=["listo_inicio_f3"])
-
-        total = Grupo.objects.filter(sesion=sesion).count()
-        listos = Grupo.objects.filter(sesion=sesion, listo_inicio_f3=True).count()
-        todos = total > 0 and listos == total
-
-        if todos and not sesion.inicio_fase_habilitado:
-            sesion.inicio_fase_habilitado = True
-            sesion.save(update_fields=["inicio_fase_habilitado"])
-
-        return JsonResponse({
-            "ok": True,
-            "fase": fase_actual,
-            "faseActual": sesion.fase_actual,
-            "total": total,
-            "listos": listos,
-            "gruposListos": listos,
-            "totalGrupos": total,
-            "todos_listos": todos,
-            "gruposListosInicioF3": listos,
-            "todosListosInicioF3": todos,
-            "inicio_fase_habilitado": sesion.inicio_fase_habilitado,
-            "segundosRestantes": sesion.segundos_restantes,
         })
 
     # ============================================================
@@ -1962,6 +1948,8 @@ def marcar_grupo_listo(request, grupo_id):
 
     # ============================================================
     # F4 — INICIO CONSTRUCCIÓN PITCH
+    # Se dispara automáticamente cuando cada grupo termina de leer el
+    # diálogo de EdEmy en pitch.html (ya no hay botón "Listo" propio).
     # ============================================================
     if fase_actual == "f4_construccion_pitch" and fase_clave in ["f4_pitch", "f4_construccion_pitch", "f4", None, ""]:
         if not grupo.listo_f4:

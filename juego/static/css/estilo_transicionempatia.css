@@ -137,17 +137,33 @@ main.team-container-wrap {
   gap: 12px;
 }
 
+.mission-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: rgba(0, 242, 109, .12);
+  border: 1px solid rgba(0, 242, 109, .42);
+  color: var(--udd-green);
+  font-size: clamp(12px, 1.1vw, 14px);
+  font-weight: 900;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  text-shadow: 0 0 10px rgba(0, 242, 109, .34);
+}
+
 .title-wrapper h1,
 .title {
   color: var(--udd-green);
-  font-size: clamp(46px, 5.5vw, 78px);
+  font-size: clamp(42px, 5.1vw, 72px);
   font-weight: 900;
   line-height: .98;
   text-align: center;
   letter-spacing: -0.035em;
   text-shadow:
-    0 0 14px rgba(0, 242, 109, .56),
-    0 0 30px rgba(0, 200, 255, .26);
+    0 0 14px rgba(0, 242, 109, .52),
+    0 0 28px rgba(0, 200, 255, .24);
 }
 
 .mission-panel {
@@ -313,7 +329,7 @@ main.team-container-wrap {
 
   .title-wrapper h1,
   .title {
-    font-size: clamp(40px, 5.8vw, 64px);
+    font-size: clamp(36px, 5.4vw, 60px);
   }
 
   .mission-panel {
@@ -365,9 +381,14 @@ main.team-container-wrap {
     gap: 24px;
   }
 
+  .mission-badge {
+    font-size: 10px;
+    padding: 7px 12px;
+  }
+
   .title-wrapper h1,
   .title {
-    font-size: clamp(36px, 10vw, 52px);
+    font-size: clamp(34px, 10vw, 48px);
   }
 
   .mission-panel {
@@ -412,7 +433,7 @@ main.team-container-wrap {
 
   .title-wrapper h1,
   .title {
-    font-size: clamp(32px, 11vw, 46px);
+    font-size: clamp(30px, 11vw, 42px);
   }
 
   .mission-panel {
@@ -473,14 +494,29 @@ body:has(#dialogo-inicial-overlay.visible) .team-container {
   -webkit-backdrop-filter: none !important;
 }
 
-/* Cuando el diálogo está visible, oscurece y desenfoca el fondo */
+/* Cuando el diálogo está visible, oscurece y desenfoca el fondo.
+   Valores unificados con las demás vistas de transición (creatividad,
+   comunicación, trabajo en equipo): blur(5px) brightness(.42) saturate(.80),
+   scale(1.01). Antes esta vista tenía sus propios números (7px/.35/.75/1.015);
+   se alinearon para que las cuatro transiciones se vean igual. */
 body:has(#dialogo-inicial-overlay.visible) .team-container-wrap,
 body:has(#dialogo-inicial-overlay.visible) .team-container {
-  filter: blur(7px) brightness(.35) saturate(.75) !important;
-  transform: scale(1.015) !important;
+  filter: blur(5px) brightness(.42) saturate(.80) !important;
+  transform: scale(1.01) !important;
   pointer-events: none !important;
   user-select: none !important;
   transition: filter .35s ease, transform .35s ease !important;
+}
+
+/* La sidebar "RUTA DE MISIÓN" vive fuera de <main> (la inyecta atajos.html) y
+   tiene su propio z-index (9998) por debajo del diálogo (9999). Mismos
+   valores que se usan en trabajoenequipo/dialogo_intro.html y en
+   transicioncomunicacion, para que las tres vistas con sidebar se vean igual. */
+body:has(#dialogo-inicial-overlay.visible) .metro-progreso-habilidades {
+  filter: blur(8px) brightness(.5) saturate(.75) !important;
+  opacity: .7 !important;
+  pointer-events: none !important;
+  transition: filter .35s ease, opacity .35s ease !important;
 }
 
 /* Capa oscura encima del fondo cuando habla EdEmy */

@@ -15,146 +15,6 @@
 >
   {% include "atajos.html" %}
 
-  <div id="inicio-fase-overlay" class="inicio-fase-overlay" aria-live="polite">
-    <div class="edemy-intro-backdrop" aria-hidden="true"></div>
-
-    <section id="inicio-fase-card" class="inicio-fase-card edemy-intro-card" role="dialog" aria-modal="true" aria-labelledby="legoDialogText">
-      <div class="edemy-intro-personaje" aria-hidden="true">
-        <img src="{% static 'images/EdemFeliz.png' %}" class="edemy-intro-img" alt="">
-      </div>
-
-      <div class="edemy-intro-burbuja">
-        <div class="edemy-intro-hablante">EdEmy</div>
-
-        <p id="legoDialogText" class="edemy-intro-texto">
-          Agentes, llegó el momento de convertir la idea en algo visible.
-        </p>
-
-        <div class="edemy-intro-pager" id="legoDialogDots" aria-hidden="true"></div>
-
-        <button type="button" id="btn-lego-dialogo-continuar" class="edemy-intro-next">
-          Continuar
-        </button>
-
-        <div id="lego-dialogo-ready" class="edemy-intro-ready" hidden>
-          <button type="button" id="btn-listo-fase" class="btn-chip" data-i18n="lego_boton_listo">
-            ⚡ Listo para comenzar
-          </button>
-
-          <div id="texto-espera-fase" class="contador-fase" data-i18n="lego_esperando_equipos">
-            Esperando a los demás equipos...
-          </div>
-
-          <div id="contador-listos-fase" class="contador-fase">
-            0/0 grupos listos
-          </div>
-        </div>
-      </div>
-    </section>
-  </div>
-
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const texto = document.getElementById("legoDialogText");
-      const btnContinuar = document.getElementById("btn-lego-dialogo-continuar");
-      const ready = document.getElementById("lego-dialogo-ready");
-      const dots = document.getElementById("legoDialogDots");
-
-      if (!texto || !btnContinuar || !ready || !dots) return;
-
-      function tJuego(clave, fallback = "") {
-        const idioma = window.i18nJuego?.obtenerIdioma?.() || "es";
-        return window.i18nJuego?.traducciones?.[idioma]?.[clave] || fallback;
-      }
-
-      const pasos = [
-        { texto: "Agentes, llegó el momento de convertir la idea en algo visible." },
-        { texto: "Revisen el desafío seleccionado y recuerden a su persona objetivo antes de construir." },
-        { texto: "Cuando todos los equipos estén listos, el tiempo comenzará automáticamente." }
-      ];
-
-      let pasoActual = 0;
-      let escribiendo = false;
-      let textoCompleto = "";
-      let timerEscritura = null;
-
-      function renderDots() {
-        dots.innerHTML = "";
-        pasos.forEach((_, index) => {
-          const dot = document.createElement("span");
-          dot.className = "edemy-intro-dot";
-          if (index === pasoActual) dot.classList.add("activo");
-          if (index < pasoActual) dot.classList.add("hecho");
-          dots.appendChild(dot);
-        });
-      }
-
-      function escribirTexto(txt) {
-        clearInterval(timerEscritura);
-        textoCompleto = txt;
-        escribiendo = true;
-        texto.innerHTML = "";
-
-        const textoNodo = document.createTextNode("");
-        const cursor = document.createElement("span");
-        cursor.className = "cursor-rpg";
-        texto.appendChild(textoNodo);
-        texto.appendChild(cursor);
-
-        let i = 0;
-        timerEscritura = setInterval(() => {
-          if (i < txt.length) {
-            textoNodo.data = txt.slice(0, i + 1);
-            i += 1;
-          } else {
-            clearInterval(timerEscritura);
-            escribiendo = false;
-            cursor.remove();
-          }
-        }, 22);
-      }
-
-      function actualizarAcciones() {
-        if (pasoActual >= pasos.length - 1) {
-          btnContinuar.hidden = true;
-          ready.hidden = false;
-        } else {
-          btnContinuar.hidden = false;
-          ready.hidden = true;
-          btnContinuar.textContent = tJuego("lego_dialogo_continuar", "Continuar");
-        }
-      }
-
-      function renderPaso() {
-        renderDots();
-        actualizarAcciones();
-        escribirTexto(pasos[pasoActual].texto);
-      }
-
-      btnContinuar.addEventListener("click", () => {
-        if (escribiendo) {
-          clearInterval(timerEscritura);
-          escribiendo = false;
-          texto.textContent = textoCompleto;
-          return;
-        }
-        pasoActual = Math.min(pasoActual + 1, pasos.length - 1);
-        renderDots();
-        actualizarAcciones();
-        escribirTexto(pasos[pasoActual].texto);
-      });
-
-      window.addEventListener("idiomaJuegoCambiado", () => {
-        clearInterval(timerEscritura);
-        escribiendo = false;
-        renderPaso();
-      });
-
-      renderPaso();
-    });
-  </script>
-
-
   <!-- ═══ MÚSICA DE FONDO ═══ -->
   <audio id="musica-lego"
          src="{% static 'sounds/musica_lego.mp3' %}"
@@ -170,17 +30,16 @@
 
   <main class="phone">
 
-    <img id="legoLogo" src="{% static 'images/Lego-logo.webp' %}" class="logo blur-target-bloqueado" alt="Lego logo">
 
-    <h1 id="legoTitle" class="title blur-target-bloqueado" data-i18n="lego_titulo">
+    <h1 id="legoTitle" class="title" data-i18n="lego_titulo">
       Construye tu prototipo
     </h1>
 
-    <section id="ruletaLegoCard" class="ruleta-lego-card blur-target-bloqueado">
+    <section id="ruletaLegoCard" class="ruleta-lego-card">
       <div class="ruleta-lego-head">
         <div>
           <div class="ruleta-lego-kicker" data-i18n="lego_ruleta_opcional">Opcional</div>
-          <h3 class="ruleta-lego-title" data-i18n="lego_ruleta_titulo">🎡 Ruleta LEGO</h3>
+          <h3 class="ruleta-lego-title" data-i18n="lego_ruleta_titulo">🎡 Ruleta</h3>
           <p class="ruleta-lego-texto" data-i18n="lego_ruleta_texto">
             Pueden lanzar la ruleta hasta 3 veces para obtener ventajas, desafíos rápidos o pequeñas penalizaciones.
           </p>
@@ -197,7 +56,7 @@
 
     <button
       id="astroLegoTrigger"
-      class="astro-lego-trigger blur-target-bloqueado"
+      class="astro-lego-trigger"
       type="button"
       aria-label="Encontrar astronauta"
       data-i18n="lego_astro_aria"
@@ -239,7 +98,7 @@
       </div>
     </div>
 
-    <section id="desafioPanel" class="desafio-panel blur-target-bloqueado">
+    <section id="desafioPanel" class="desafio-panel">
       <button type="button" class="desafio-toggle" id="desafioToggle">
         <div class="desafio-toggle-head">
           <span class="desafio-etiqueta" data-i18n="lego_desafio_label">Desafío seleccionado</span>
@@ -252,21 +111,21 @@
       </div>
     </section>
 
-    <h2 id="legoSubtitle" class="subtitle blur-target-bloqueado" data-i18n="lego_subtitulo">
+    <h2 id="legoSubtitle" class="subtitle" data-i18n="lego_subtitulo">
       Recuerda a tu persona objetivo
     </h2>
 
-    <ul id="ideasList" class="ideas-list blur-target-bloqueado"></ul>
+    <ul id="ideasList" class="ideas-list"></ul>
 
-    <p id="legoBody" class="body blur-target-bloqueado" data-i18n="lego_body">
+    <p id="legoBody" class="body" data-i18n="lego_body">
       Usen las piezas LEGO para representar una solución clara, útil y conectada con el problema elegido.
     </p>
 
     <audio id="alarm-audio" src="{% static 'sounds/alarma.mp3' %}" preload="auto"></audio>
 
-    <div id="timer" class="timer blur-target-bloqueado timer-esperando">00:15</div>
+    <div id="timer" class="timer">00:15</div>
 
-    <div id="fotoPanel" class="foto-panel blur-target-bloqueado">
+    <div id="fotoPanel" class="foto-panel">
       <h3 data-i18n="lego_foto_titulo">Prepara la foto del prototipo</h3>
       <p class="texto-espera-foto" data-i18n="lego_foto_texto">
         Al terminar el tiempo, suban una foto de su construcción. Esta imagen podrá servirles más adelante para presentar su solución.
@@ -411,38 +270,9 @@
     document.addEventListener("DOMContentLoaded", () => {
       const sesionId   = "{{ grupo.sesion.idsesion }}";
       const grupoId    = "{{ grupo.idgrupo }}";
-      const csrfToken  = "{{ csrf_token }}";
-      const boton      = document.getElementById("btn-listo-fase");
-      const textoEspera= document.getElementById("texto-espera-fase");
-      const contador   = document.getElementById("contador-listos-fase");
       const timerEl    = document.getElementById("timer");
       const modalFin   = document.getElementById("modal-fin");
       const alarmAudio = document.getElementById("alarm-audio");
-      const overlay    = document.getElementById("inicio-fase-overlay");
-
-      let timerLiberadoTrasCountdown = false;
-      let countdownMostrado  = false;
-      let countdownEnCurso   = false;
-
-      const blurTargets = [
-        document.getElementById("legoLogo"),
-        document.getElementById("legoTitle"),
-        document.getElementById("ruletaLegoCard"),
-        document.getElementById("desafioPanel"),
-        document.getElementById("legoSubtitle"),
-        document.getElementById("ideasList"),
-        document.getElementById("legoBody"),
-        document.getElementById("timer"),
-        document.getElementById("fotoPanel"),
-        document.getElementById("astroLegoTrigger"),
-      ];
-
-      let timeLeft = Number(document.body.dataset.tiempoInicial || 15);
-      let timerInterval = null;
-      let timerStartedByProfesor = false;
-      let modalMostrado = false;
-      let redirigiendo  = false;
-      let timerRealSolicitado = false;
 
       function tJuego(clave, fallback="") {
         const idioma = window.i18nJuego?.obtenerIdioma?.() || "es";
@@ -450,39 +280,14 @@
       }
       function textoGruposListos(l,t)   { return `${l}/${t} ${tJuego("lego_grupos_listos","grupos listos")}`; }
       function textoDetalleLego(c,s)    { return `${c} ${tJuego("lego_con_foto","con foto")} · ${s} ${tJuego("lego_sin_foto_detalle","sin foto")}`; }
-      function textoBotonListo()        { return tJuego("lego_boton_listo","⚡ Listo para comenzar"); }
-      function textoEsperando()         { return tJuego("lego_boton_esperando","Esperando..."); }
-      function textoEsperandoEquipos()  { return tJuego("lego_esperando_equipos","Esperando a los demás equipos..."); }
 
       function aplicarTraduccionDinamicaLego() {
-        if (boton) boton.textContent = boton.disabled ? textoEsperando() : textoBotonListo();
-        if (textoEspera) {
-          const t = (textoEspera.textContent||"").toLowerCase();
-          textoEspera.textContent = (t.includes("no se pudo")||t.includes("could not"))
-            ? tJuego("lego_error_registro","No se pudo registrar. Intenta nuevamente.")
-            : textoEsperandoEquipos();
-        }
-        if (contador) {
-          const m = (contador.textContent||"").match(/(\d+)\/(\d+)/);
-          if (m) contador.textContent = textoGruposListos(m[1],m[2]);
-        }
         const estado  = document.getElementById("estadoGruposLego");
         const detalle = document.getElementById("detalleGruposLego");
         if (estado)  { const m=(estado.textContent||"").match(/(\d+)\/(\d+)/);  if(m) estado.textContent=textoGruposListos(m[1],m[2]); }
         if (detalle) { const m=(detalle.textContent||"").match(/(\d+).*?(\d+)/); if(m) detalle.textContent=textoDetalleLego(m[1],m[2]); }
         const bg = document.getElementById("buttonGuardarFoto");
         if (bg && !bg.disabled) bg.textContent = tJuego("lego_guardar_continuar","Guardar y continuar");
-      }
-
-      function activarFase() {
-        blurTargets.forEach(el=>{ if(!el)return; el.classList.remove("blur-target-bloqueado","timer-esperando"); el.classList.add("blur-target-activo"); });
-        if (overlay) overlay.classList.add("overlay-hidden");
-      }
-
-      function bloquearFase() {
-        blurTargets.forEach(el=>{ if(!el)return; el.classList.remove("blur-target-activo"); el.classList.add("blur-target-bloqueado"); });
-        if (timerEl) timerEl.classList.add("timer-esperando");
-        if (overlay) overlay.classList.remove("overlay-hidden");
       }
 
       function renderTimer() {
@@ -506,22 +311,6 @@
         if (btnMusica)  btnMusica.style.display = "none";
       }
 
-      async function iniciarTimerRealDespuesCountdown() {
-        if (timerRealSolicitado) return;
-        timerRealSolicitado = true;
-        try {
-          const res  = await fetch(`/sesion/${sesionId}/iniciar-timer-inicio-fase/`, {
-            method:"POST", credentials:"same-origin",
-            headers:{"Content-Type":"application/json","X-CSRFToken":csrfToken},
-            body: JSON.stringify({fase:"f3_lego"})
-          });
-          const data = await res.json();
-          if (!res.ok||!data.ok) throw new Error(data.error||"Error timer");
-          const b = Number(data.segundosRestantes);
-          if (!Number.isNaN(b)) { timeLeft=b; renderTimer(); }
-        } catch(err) { console.error("Error timer lego:",err); timerRealSolicitado=false; }
-      }
-
       function startTimer() {
         if (timerInterval) return;
         renderTimer();
@@ -536,52 +325,49 @@
         detalle.textContent = textoDetalleLego(data.gruposConFotoLego||0, data.gruposSinFotoLego||0);
       }
 
+      let timeLeft = Number(document.body.dataset.tiempoInicial || 15);
+      let timerInterval = null;
+      let timerIniciado = false;
+      let modalMostrado = false;
+      let redirigiendo  = false;
+
+      // El backend arranca el timer de lego en el instante en que el último
+      // grupo confirma "¡Estoy listo!" en transicioncreatividad.html (o
+      // cuando el profesor salta de fase manualmente), así que acá solo hay
+      // que sincronizar con /sesion/{id}/estado/ — no hace falta gate propio
+      // ni countdown local.
       function procesarEstadoSesion(data) {
         if (!data) return;
         actualizarEstadoGrupos(data);
-        if (contador) contador.textContent = textoGruposListos(data.listosInicio||0, data.totalListosInicio||0);
-        const miGrupo = (data.grupos||[]).find(g=>Number(g.id)===Number(grupoId));
-        if (miGrupo?.listoInicioF3) {
-          boton.disabled=true; boton.textContent=textoEsperando();
-          if (textoEspera) textoEspera.textContent=textoEsperandoEquipos();
-        }
-        if (data.faseActual && data.faseActual!=="f3_lego") {
-          if (data.rutaAlumno && window.location.pathname!==data.rutaAlumno) { redirigiendo=true; window.location.href=data.rutaAlumno; }
+
+        if (data.faseActual && data.faseActual !== "f3_lego") {
+          if (data.rutaAlumno && window.location.pathname !== data.rutaAlumno) { redirigiendo=true; window.location.href=data.rutaAlumno; }
           return;
         }
-        if (data.inicioFaseHabilitado) {
-          if (!countdownMostrado&&!countdownEnCurso) {
-            countdownEnCurso=true;
-            window.oaiCountdown.run(async()=>{
-              countdownMostrado=true; countdownEnCurso=false; timerLiberadoTrasCountdown=true;
-              await iniciarTimerRealDespuesCountdown();
-              activarFase();
-            });
-            return;
-          }
-          if (countdownMostrado&&!countdownEnCurso) activarFase();
-        } else {
-          countdownMostrado=false; countdownEnCurso=false;
-          timerLiberadoTrasCountdown=false; timerRealSolicitado=false;
-          bloquearFase();
-        }
+
         const bs = Number(data.segundosRestantes);
-        if ((!timerStartedByProfesor||!data.timerCorriendo)&&!Number.isNaN(bs)) {
-          if (!countdownEnCurso&&!timerLiberadoTrasCountdown) { timeLeft=bs; renderTimer(); }
+
+        if ((!timerIniciado || !data.timerCorriendo) && !Number.isNaN(bs)) {
+          timeLeft = bs; renderTimer();
         }
-        if (!timerStartedByProfesor&&data.timerCorriendo&&data.inicioFaseHabilitado) {
-          if (!countdownMostrado||countdownEnCurso||!timerLiberadoTrasCountdown) return;
-          timerStartedByProfesor=true;
-          if (!Number.isNaN(bs)&&bs>=0) { timeLeft=bs; renderTimer(); }
-          startTimer(); return;
+
+        if (!Number.isNaN(bs) && bs <= 0 && !data.timerCorriendo) {
+          mostrarModalFin();
+          return;
         }
-        if (timerStartedByProfesor&&!data.timerCorriendo) {
+
+        if (!timerIniciado && data.timerCorriendo) {
+          timerIniciado = true;
+          startTimer();
+        }
+
+        if (timerIniciado && !data.timerCorriendo) {
           pauseTimerLocally();
-          if (!Number.isNaN(bs)&&bs>=0) { timeLeft=bs; renderTimer(); }
-          timerStartedByProfesor=false;
+          if (!Number.isNaN(bs)) { timeLeft = bs; renderTimer(); }
+          timerIniciado = false;
         }
-        if (Number(data.segundosRestantes)<=0) mostrarModalFin();
-        if (data.todosListosF3Lego&&data.rutaAlumno) { redirigiendo=true; window.location.href=data.rutaAlumno; }
+
+        if (data.todosListosF3Lego && data.rutaAlumno) { redirigiendo=true; window.location.href=data.rutaAlumno; }
       }
 
       async function revisarEstadoProfesor() {
@@ -593,30 +379,8 @@
         } catch(error) { console.error("Error sincronizando lego:",error); }
       }
 
-      if (boton) {
-        boton.addEventListener("click", async()=>{
-          boton.disabled=true; boton.textContent=textoEsperando();
-          try {
-            const res  = await fetch(`/grupo/${grupoId}/listo/`, {
-              method:"POST", credentials:"same-origin",
-              headers:{"Content-Type":"application/json","X-CSRFToken":csrfToken},
-              body: JSON.stringify({fase:"inicio_f3"})
-            });
-            const data = await res.json();
-            if (!res.ok||!data.ok) throw new Error(data.error||tJuego("lego_error_listo","No se pudo marcar listo."));
-            if (contador) contador.textContent=textoGruposListos(data.listos||0,data.total||0);
-            if (textoEspera) textoEspera.textContent=textoEsperandoEquipos();
-            revisarEstadoProfesor();
-          } catch(err) {
-            console.error("Error marcando listo:",err);
-            boton.disabled=false; boton.textContent=textoBotonListo();
-            if (textoEspera) textoEspera.textContent=tJuego("lego_error_registro","No se pudo registrar. Intenta nuevamente.");
-          }
-        });
-      }
-
       window.addEventListener("idiomaJuegoCambiado",()=>aplicarTraduccionDinamicaLego());
-      bloquearFase(); renderTimer(); aplicarTraduccionDinamicaLego();
+      renderTimer(); aplicarTraduccionDinamicaLego();
       revisarEstadoProfesor();
       setInterval(revisarEstadoProfesor, 1500);
     });
@@ -879,6 +643,5 @@
   </script>
 
   {% include "includes/sincronizacion_fase.html" %}
-  {% include "includes/countdown_inicio_fase.html" %}
 </body>
 </html>

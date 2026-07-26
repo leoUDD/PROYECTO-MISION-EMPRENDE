@@ -12,6 +12,149 @@
 
 <body>
 
+  <!-- El diálogo va como hijo DIRECTO de <body>, nunca dentro de
+       <main class="results-wrap">: ese contenedor tiene backdrop-filter +
+       position:relative, o sea que crea un contexto de apilamiento que
+       encierra el z-index de un overlay fixed anidado adentro. -->
+  <div id="inicio-fase-overlay" class="inicio-fase-overlay" aria-modal="true" role="dialog" aria-label="Mensaje final de EdEmy">
+    <div class="dialogo-backdrop" aria-hidden="true"></div>
+
+    <div class="dialogo-box">
+      <div class="dialogo-personaje" aria-hidden="true">
+        <img src="{% static 'images/EdemFeliz.png' %}" class="dialogo-img" alt="">
+      </div>
+
+      <section class="dialogo-burbuja" aria-live="polite">
+        <div class="dialogo-hablante">EDEMY</div>
+
+        <div id="dialogo-texto-rpg" class="dialogo-texto-rpg"></div>
+
+        <button type="button" id="dialogo-siguiente" class="dialogo-siguiente">
+          Continuar
+        </button>
+
+        <div class="dialogo-progreso" aria-hidden="true">
+          <div id="dialogo-dots"></div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const overlay = document.getElementById("inicio-fase-overlay");
+      const texto = document.getElementById("dialogo-texto-rpg");
+      const btnSiguiente = document.getElementById("dialogo-siguiente");
+      const dots = document.getElementById("dialogo-dots");
+
+      if (!overlay || !texto || !btnSiguiente || !dots) return;
+
+      function tJuego(clave, fallback = "") {
+        const idioma = window.i18nJuego?.obtenerIdioma?.() || "es";
+        return window.i18nJuego?.traducciones?.[idioma]?.[clave] || fallback;
+      }
+
+      const mensajes = [
+        {
+          key: "reflexion_dialogo_1",
+          fallback: "¡Agentes, Misión completada!"
+        },
+        {
+          key: "reflexion_dialogo_2",
+          fallback: "¡Han recuperado el trabajo en equipo, la empatía, la creatividad y la comunicación!"
+        },
+        {
+          key: "reflexion_dialogo_3",
+          fallback: "Los registros indican que el futuro ya no es el mismo que cuando inicié este viaje al pasado."
+        },
+        {
+          key: "reflexion_dialogo_4",
+          fallback: "¡Gracias, agentes! Hoy demostraron que el futuro no se construye solo con tecnología, sino con personas capaces de crear, colaborar y transformar el mundo."
+        }
+      ];
+
+      let paso = 0;
+      let escribiendo = false;
+      let textoCompleto = "";
+      let timerEscritura = null;
+
+      function renderDots() {
+        dots.innerHTML = mensajes.map((_, i) => {
+          const clase = i === paso ? "activo" : (i < paso ? "hecho" : "");
+          return `<span class="d-dot ${clase}"></span>`;
+        }).join("");
+      }
+
+      function escribirTexto(txt) {
+        clearInterval(timerEscritura);
+        textoCompleto = txt;
+        escribiendo = true;
+        texto.innerHTML = "";
+
+        const textoNodo = document.createTextNode("");
+        const cursor = document.createElement("span");
+        cursor.className = "cursor-rpg";
+        texto.appendChild(textoNodo);
+        texto.appendChild(cursor);
+
+        let i = 0;
+        timerEscritura = setInterval(() => {
+          if (i < txt.length) {
+            textoNodo.data = txt.slice(0, i + 1);
+            i += 1;
+          } else {
+            clearInterval(timerEscritura);
+            escribiendo = false;
+            cursor.remove();
+          }
+        }, 22);
+      }
+
+      function actualizarBoton() {
+        btnSiguiente.textContent = paso === mensajes.length - 1
+          ? tJuego("reflexion_dialogo_cerrar", "Continuar")
+          : tJuego("reflexion_dialogo_continuar", "Continuar");
+      }
+
+      function renderDialogo() {
+        renderDots();
+        actualizarBoton();
+        escribirTexto(tJuego(mensajes[paso].key, mensajes[paso].fallback));
+      }
+
+      function cerrarDialogo() {
+        overlay.classList.add("overlay-hidden");
+        overlay.setAttribute("aria-hidden", "true");
+      }
+
+      btnSiguiente.addEventListener("click", () => {
+        if (escribiendo) {
+          clearInterval(timerEscritura);
+          escribiendo = false;
+          texto.textContent = textoCompleto;
+          return;
+        }
+
+        if (paso < mensajes.length - 1) {
+          paso += 1;
+          renderDialogo();
+          return;
+        }
+
+        cerrarDialogo();
+      });
+
+      window.addEventListener("idiomaJuegoCambiado", () => {
+        if (overlay.classList.contains("overlay-hidden")) return;
+        clearInterval(timerEscritura);
+        escribiendo = false;
+        renderDialogo();
+      });
+
+      renderDialogo();
+    });
+  </script>
+
   <canvas id="confeti-canvas" aria-hidden="true"></canvas>
 
   <audio id="musica-reflexion"

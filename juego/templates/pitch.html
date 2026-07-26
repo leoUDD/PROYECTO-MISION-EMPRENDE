@@ -16,7 +16,7 @@
 >
   {% include "atajos.html" %}
 
-  <div id="inicio-fase-overlay" class="inicio-fase-overlay" aria-modal="true" role="dialog" aria-label="Instrucciones iniciales de pitch">
+  <div id="inicio-fase-overlay" class="inicio-fase-overlay" aria-modal="true" role="dialog" aria-label="Instrucciones de pitch">
     <div id="dialogo-box" class="dialogo-box">
       <div class="dialogo-personaje activo" aria-hidden="true">
         <img src="{% static 'images/EdemFeliz.png' %}" class="dialogo-img" alt="">
@@ -33,9 +33,6 @@
           </button>
 
           <div id="dialogo-ready-area" class="dialogo-ready-area">
-            <button type="button" id="btn-listo-fase" class="btn-chip" data-i18n="pitch_boton_listo">
-              ⚡ Listo para comenzar
-            </button>
             <div id="texto-espera-fase" class="contador-fase" data-i18n="pitch_esperando_equipos">
               Esperando a los demás equipos...
             </div>
@@ -56,7 +53,6 @@
       const btnSiguiente = document.getElementById("dialogo-siguiente");
       const readyArea = document.getElementById("dialogo-ready-area");
       const dots = document.getElementById("dialogo-dots");
-      const btnListo = document.getElementById("btn-listo-fase");
 
       if (!texto || !btnSiguiente || !readyArea || !dots) return;
 
@@ -68,15 +64,23 @@
       const mensajes = [
         {
           key: "pitch_dialogo_1",
-          fallback: "Agentes, su solución ya existe.\nAhora deben comunicarla con claridad."
+          fallback: "Agentes, ha llegado la etapa final de la misión."
         },
         {
           key: "pitch_dialogo_2",
-          fallback: "Ordenen el problema, la solución, el valor de la propuesta y un cierre convincente."
+          fallback: "Una idea solo puede cambiar el futuro cuando es compartida con los demás."
         },
         {
           key: "pitch_dialogo_3",
-          fallback: "Cuando todos los equipos estén listos, el tiempo comenzará automáticamente."
+          fallback: "Presenten su solución con claridad. Expliquen qué problema resuelve, cómo lo hace y por qué merece existir."
+        },
+        {
+          key: "pitch_dialogo_4",
+          fallback: "Después, escuchen las propuestas de los otros equipos. "
+        },
+        {
+          key: "pitch_dialogo_5",
+          fallback: "Evalúen con respeto, entreguen retroalimentación que ayude a mejorar y aprendan de cada presentación. Así es como las grandes ideas evolucionan."
         }
       ];
 
@@ -84,6 +88,7 @@
       let escribiendo = false;
       let textoCompleto = "";
       let timerEscritura = null;
+      let marcadoListo = false;
 
       function renderDots() {
         dots.innerHTML = mensajes.map((_, i) => {
@@ -121,8 +126,10 @@
         if (paso >= mensajes.length - 1) {
           btnSiguiente.classList.add("oculto");
           readyArea.classList.add("visible");
-          if (btnListo && !btnListo.disabled) {
-            btnListo.textContent = tJuego("pitch_boton_listo", "⚡ Listo para comenzar");
+
+          if (!marcadoListo) {
+            marcadoListo = true;
+            window.pitchMarcarListo?.();
           }
         } else {
           btnSiguiente.classList.remove("oculto");
@@ -267,7 +274,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const grupoId = "{{ grupo.idgrupo }}";
   const csrfToken = "{{ csrf_token }}";
 
-  const boton = document.getElementById("btn-listo-fase");
   const textoEspera = document.getElementById("texto-espera-fase");
   const contador = document.getElementById("contador-listos-fase");
   const timerContainer = document.getElementById("timer-wrap-pitch");
@@ -305,6 +311,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let astroMitadMostrado = false;
   let astroActivo = false;
   let astroModo = "inicio";
+  let listoEnviado = false;
 
   function tJuego(clave, fallback = "") {
     const idioma = window.i18nJuego?.obtenerIdioma?.() || "es";
@@ -312,18 +319,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function textoGruposListos(listos, total) { return `${listos}/${total} ${tJuego("pitch_grupos_listos", "grupos listos")}`; }
-  function textoBotonListo()      { return tJuego("pitch_boton_listo", "⚡ Listo para comenzar"); }
-  function textoEsperando()       { return tJuego("pitch_boton_esperando", "Esperando..."); }
   function textoEsperandoEquipos(){ return tJuego("pitch_esperando_equipos", "Esperando a los demás equipos..."); }
-
-  function aplicarTraduccionDinamicaPitch() {
-    if (boton) boton.textContent = boton.disabled ? textoEsperando() : textoBotonListo();
-    if (textoEspera) textoEspera.textContent = textoEsperandoEquipos();
-    if (contador) {
-      const match = (contador.textContent || "").match(/(\d+)\/(\d+)/);
-      if (match) contador.textContent = textoGruposListos(match[1], match[2]);
-    }
-  }
 
   function actualizarBadgeDesafio(data) {
     const miGrupo = (data.grupos || []).find(g => Number(g.id) === Number(grupoId));
@@ -425,8 +421,6 @@ document.addEventListener("DOMContentLoaded", () => {
     blurTargets.forEach(el => { if (!el) return; el.classList.remove("blur-target-activo"); el.classList.add("blur-target-bloqueado"); });
     if (timerContainer) timerContainer.classList.add("timer-esperando");
     if (overlay) overlay.classList.remove("overlay-hidden");
-    ocultarAstroFlotando();
-    cerrarAstroPitch();
   }
 
   function renderTimer() {
@@ -460,6 +454,30 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (err) { console.error("Error iniciando timer pitch:", err); timerRealSolicitado = false; }
   }
 
+  // Disparado por el script del diálogo cuando el grupo termina de leer el
+  // último mensaje de EdEmy. Es el equivalente al viejo botón "Listo para
+  // comenzar", pero automático.
+  window.pitchMarcarListo = async function () {
+    if (listoEnviado) return;
+    listoEnviado = true;
+    try {
+      const res = await fetch(`/grupo/${grupoId}/listo/`, {
+        method: "POST", credentials: "same-origin",
+        headers: { "Content-Type": "application/json", "X-CSRFToken": csrfToken },
+        body: JSON.stringify({ fase: "f4_construccion_pitch" })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) throw new Error(data.error || tJuego("pitch_error_listo", "No se pudo marcar listo."));
+      if (contador) contador.textContent = textoGruposListos(data.listos || 0, data.total || 0);
+      if (textoEspera) textoEspera.textContent = textoEsperandoEquipos();
+      syncTimer();
+    } catch (err) {
+      console.error("Error marcando listo pitch:", err);
+      listoEnviado = false;
+      if (textoEspera) textoEspera.textContent = tJuego("pitch_error_registro", "No se pudo registrar. Intenta nuevamente.");
+    }
+  };
+
   async function syncTimer() {
     try {
       const res = await fetch(`/sesion/${sesionId}/estado/`, { cache: "no-store", credentials: "same-origin" });
@@ -468,9 +486,6 @@ document.addEventListener("DOMContentLoaded", () => {
       actualizarBadgeDesafio(data);
 
       if (contador) contador.textContent = textoGruposListos(data.listosInicio || 0, data.totalListosInicio || 0);
-
-      const miGrupo = (data.grupos || []).find(g => Number(g.id) === Number(grupoId));
-      if (miGrupo?.listoF4) { boton.disabled = true; boton.textContent = textoEsperando(); }
 
       if (data.faseActual && data.faseActual !== "f4_construccion_pitch") {
         if (data.rutaAlumno && window.location.pathname !== data.rutaAlumno && !redirigiendo) { redirigiendo = true; window.location.href = data.rutaAlumno; }
@@ -515,29 +530,8 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (e) { console.error("Error timer pitch:", e); }
   }
 
-  boton?.addEventListener("click", async () => {
-    boton.disabled = true; boton.textContent = textoEsperando();
-    try {
-      const res = await fetch(`/grupo/${grupoId}/listo/`, {
-        method: "POST", credentials: "same-origin",
-        headers: { "Content-Type": "application/json", "X-CSRFToken": csrfToken },
-        body: JSON.stringify({ fase: "f4" })
-      });
-      const data = await res.json();
-      if (!res.ok || !data.ok) throw new Error(data.error || tJuego("pitch_error_listo", "No se pudo marcar listo."));
-      syncTimer();
-    } catch (err) {
-      console.error("Error marcando listo pitch:", err);
-      boton.disabled = false; boton.textContent = textoBotonListo();
-      if (textoEspera) textoEspera.textContent = tJuego("pitch_error_registro", "No se pudo registrar. Intenta nuevamente.");
-    }
-  });
-
-  window.addEventListener("idiomaJuegoCambiado", () => aplicarTraduccionDinamicaPitch());
-
   bloquearFase();
   renderTimer();
-  aplicarTraduccionDinamicaPitch();
   setInterval(syncTimer, 1000);
   syncTimer();
 });

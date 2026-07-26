@@ -329,6 +329,17 @@ body.dialogo-activo .team-container {
   transition: filter .35s ease, transform .35s ease;
 }
 
+/* La sidebar "RUTA DE MISIÓN" vive fuera de <main> (la inyecta atajos.html) y
+   tiene su propio z-index (9998) por debajo del diálogo (9999). Mismos
+   valores que trabajoenequipo/dialogo_intro.html y transicionempatia, para
+   que las tres vistas con sidebar se vean igual. */
+body.dialogo-activo .metro-progreso-habilidades {
+  filter: blur(8px) brightness(.5) saturate(.75);
+  opacity: .7;
+  pointer-events: none;
+  transition: filter .35s ease, opacity .35s ease;
+}
+
 #dialogo-inicial-overlay {
   position: fixed;
   inset: 0;

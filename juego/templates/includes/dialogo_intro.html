@@ -55,12 +55,24 @@
   inset: 0;
   background:
     radial-gradient(circle at center, rgba(0,252,152,.10), transparent 42%),
-    rgba(0, 5, 18, 0.78);
+    rgba(0, 5, 18, 0.45);
   /* backdrop-filter (blur) removido a propósito por performance: un blur de
      pantalla completa sobre un elemento cuyo padre anima opacity fuerza a
      Chrome a recalcular el blur en cada frame de la transición. Confirmado
-     que mejora el INP sin cambio visual perceptible. El fondo sólido a .78
-     ya oscurece el sidebar (que queda debajo del overlay) igual que conocidos. */
+     que mejora el INP sin cambio visual perceptible.
+
+     El efecto de vidrio esmerilado ahora se logra distinto: filter (no
+     backdrop-filter) aplicado directo sobre <main> y sobre la sidebar más
+     abajo, gatillado por body:has(#dialogo-overlay.visible). filter procesa
+     el bitmap ya renderizado del propio elemento — no muestrea en vivo lo
+     que hay detrás como backdrop-filter — así que no sufre el mismo
+     problema de recalcularse en cada frame aunque el overlay esté animando
+     su opacity.
+
+     La opacidad de esta cortina bajó de .66 a .45: el brightness() del
+     filter de abajo ya oscurece el contenido; si esta cortina se queda muy
+     opaca encima, el resultado es doble-oscurecido y lo que debería verse
+     borroso se ve directamente negro. */
 }
 
 /* ===== CAJA PRINCIPAL ===== */
@@ -249,6 +261,43 @@
   background: rgba(0,242,109,.55);
 }
 
+/* =====================================================
+   BLUR DE FONDO MIENTRAS EDEMY HABLA
+   filter (no backdrop-filter) sobre <main> y sobre la sidebar, gatillado
+   por :has() en vez de JS. Se rasteriza una vez por cambio de estado (no en
+   cada frame), así que no reintroduce el problema de performance que
+   motivó sacar el backdrop-filter de #dialogo-backdrop arriba. El target de
+   <main> es genérico a propósito: este include se comparte entre vistas, y
+   todas envuelven su contenido en <main> (team-container-wrap en
+   trabajoenequipo.html y afines), así que no hace falta apuntar a una clase
+   específica de cada página.
+
+   OJO: el diálogo (#dialogo-box, hasta 1320px) es más ancho que la tarjeta
+   de misión (.team-container, hasta 980px), ambos centrados — a resoluciones
+   de escritorio normales la tarjeta queda completamente tapada por el
+   diálogo. Este blur sí se nota en los márgenes que asoman a los costados
+   del diálogo, pero no va a mostrar la tarjeta completa detrás salvo que se
+   angoste el diálogo. */
+body:has(#dialogo-overlay.visible) main {
+  filter: blur(5px) brightness(.42) saturate(.80);
+  transform: scale(1.01);
+  pointer-events: none;
+  user-select: none;
+  transition: filter .35s ease, transform .35s ease;
+}
+
+/* La sidebar "RUTA DE MISIÓN" vive fuera de <main> (la inyecta atajos.html
+   antes) y tiene su propio z-index (9998) por debajo del diálogo (9999),
+   así que necesita su propia regla. A diferencia de la tarjeta de misión,
+   la sidebar SIEMPRE queda fuera del ancho del diálogo, así que este blur
+   sí se ve completo. */
+body:has(#dialogo-overlay.visible) .metro-progreso-habilidades {
+  filter: blur(8px) brightness(.5) saturate(.75);
+  opacity: .7;
+  pointer-events: none;
+  transition: filter .35s ease, opacity .35s ease;
+}
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 900px) {
   #dialogo-box {
@@ -313,6 +362,15 @@
   * {
     animation: none !important;
     transition: none !important;
+  }
+
+  body:has(#dialogo-overlay.visible) main {
+    filter: brightness(.42) saturate(.80);
+    transform: none;
+  }
+
+  body:has(#dialogo-overlay.visible) .metro-progreso-habilidades {
+    filter: brightness(.5) saturate(.75);
   }
 }
 </style>
@@ -393,23 +451,19 @@
   const GUION = [
     {
       nombre: "EdEmy",
-      texto: "Inicio de protocolo: Trabajo en Equipo."
+      texto: "El futuro perdió la capacidad de colaborar. Cada persona dependía únicamente de la tecnología."
     },
     {
       nombre: "EdEmy",
-      texto: "Una misión no avanza solo con buenas ideas. También necesita coordinación."
+      texto: "Hoy recuperaremos esa habilidad."
     },
     {
       nombre: "EdEmy",
-      texto: "Repartan tareas según las fortalezas de cada integrante."
+      texto: "Organicen sus fortalezas y trabajen como un solo equipo."
     },
     {
       nombre: "EdEmy",
-      texto: "Escuchen antes de decidir. Una mirada distinta puede mejorar toda la solución."
-    },
-    {
-      nombre: "EdEmy",
-      texto: "Si el equipo se coordina, la misión avanza. Cuando estén preparados, presionen «¡Estoy listo!»."
+      texto: "Activando la primera prueba..."
     }
   ];
 
