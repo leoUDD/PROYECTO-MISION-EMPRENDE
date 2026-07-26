@@ -11,6 +11,7 @@ pymysql.install_as_MySQLdb()
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / ".env")
 
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'dev-secret-unsafe')
 DEBUG = os.getenv('DJANGO_DEBUG', 'True').lower() == 'true'
@@ -89,3 +90,28 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media" 
+
+GOOGLE_CLIENT_ID = os.getenv(
+    "GOOGLE_CLIENT_ID",
+    "",
+).strip()
+
+GOOGLE_CLIENT_SECRET = os.getenv(
+    "GOOGLE_CLIENT_SECRET",
+    "",
+).strip()
+
+GOOGLE_REFRESH_TOKEN = os.getenv(
+    "GOOGLE_REFRESH_TOKEN",
+    "",
+).strip()
+
+GOOGLE_DRIVE_ROOT_NAME = os.getenv(
+    "GOOGLE_DRIVE_ROOT_NAME",
+    "Misión Emprende",
+).strip()
+
+GOOGLE_DRIVE_ROOT_FOLDER_ID = os.getenv(
+    "GOOGLE_DRIVE_ROOT_FOLDER_ID",
+    "",
+).strip()
