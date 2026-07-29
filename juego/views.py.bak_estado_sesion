@@ -2867,13 +2867,8 @@ def sincronizar_fotos_equipo_y_avanzar(sesion):
 @require_POST
 def guardar_foto_equipo(request):
     """
-    Recibe una foto del grupo activo después de la sopa de letras,
-    la guarda temporalmente, la sube a Drive y genera el TXT
-    de integrantes.
-
-    El grupo puede tomar la fotografía cuando:
-    - completó la sopa de letras; o
-    - se terminó el tiempo de la sopa.
+    Recibe una foto del grupo activo, la guarda temporalmente,
+    la sube a Drive y genera el TXT de integrantes.
     """
 
     grupo = obtener_grupo_desde_session(request)
@@ -2898,7 +2893,6 @@ def guardar_foto_equipo(request):
             status=400,
         )
 
-    # Actualiza el temporizador en el backend.
     restantes = calcular_segundos_restantes(sesion)
 
     sesion.refresh_from_db()
@@ -2910,41 +2904,55 @@ def guardar_foto_equipo(request):
                 "ok": False,
                 "error": (
                     "La fotografía solo puede guardarse "
-                    "al finalizar la sopa de letras."
+                   "al finalizar la sopa de letras."
                 ),
             },
             status=409,
         )
 
-    tiempo_terminado = (
-        sesion.inicio_fase_habilitado
-        and not sesion.timer_corriendo
-        and restantes <= 0
+tiempo_terminado = (
+    sesion.inicio_fase_habilitado
+    and not sesion.timer_corriendo
+    and restantes <= 0
+)
+
+puede_tomar_foto = (
+    grupo.sopa_ganada
+    or tiempo_terminado
+)
+
+if not puede_tomar_foto:
+    return JsonResponse(
+        {
+            "ok": False,
+            "error": (
+                "La fotografía estará disponible cuando "
+                "completen la sopa de letras o cuando "
+                "termine el tiempo."
+            ),
+        },
+        status=409,
     )
 
-    puede_tomar_foto = (
-        bool(grupo.sopa_ganada)
-        or tiempo_terminado
-    )
-
-    if not puede_tomar_foto:
+    if (
+        not sesion.inicio_fase_habilitado
+        or sesion.timer_corriendo
+        or restantes > 0
+    ):
         return JsonResponse(
             {
                 "ok": False,
                 "error": (
-                    "La fotografía estará disponible cuando "
-                    "completen la sopa de letras o cuando "
-                    "termine el tiempo."
+                    "La fotografía estará disponible "
+                    "cuando termine el tiempo de preguntas."
                 ),
             },
             status=409,
         )
 
     registro_existente = (
-        FotoEquipo.objects
-        .filter(
+        FotoEquipo.objects.filter(
             grupo=grupo,
-            sesion=sesion,
             subida_drive=True,
         )
         .first()
@@ -2954,40 +2962,18 @@ def guardar_foto_equipo(request):
         foto_url = ""
 
         if registro_existente.foto_temporal:
-            try:
-                foto_url = registro_existente.foto_temporal.url
-            except ValueError:
-                foto_url = ""
+            foto_url = (
+                registro_existente.foto_temporal.url
+            )
 
-        estado_fotos = sincronizar_fotos_equipo_y_avanzar(
-            sesion
-        )
-
-        return JsonResponse(
-            {
-                "ok": True,
-                "yaExistia": True,
-                "fotoUrl": foto_url,
-                "nombreArchivo": (
-                    registro_existente.nombre_archivo
-                ),
-                "gruposFotosEquipo": (
-                    estado_fotos["gruposFotosEquipo"]
-                ),
-                "totalGrupos": (
-                    estado_fotos["totalGrupos"]
-                ),
-                "todosFotosEquipo": (
-                    estado_fotos["todosFotosEquipo"]
-                ),
-                "faseActual": (
-                    estado_fotos["faseActual"]
-                ),
-                "rutaAlumno": (
-                    estado_fotos["rutaAlumno"]
-                ),
-            }
-        )
+        return JsonResponse({
+            "ok": True,
+            "yaExistia": True,
+            "fotoUrl": foto_url,
+            "nombreArchivo": (
+                registro_existente.nombre_archivo
+            ),
+        })
 
     archivo = request.FILES.get("foto_equipo")
 
@@ -3030,9 +3016,7 @@ def guardar_foto_equipo(request):
     integrantes = [
         {
             "id": alumno.idalumno,
-            "nombre": nombre_completo_alumno(
-                alumno
-            ),
+            "nombre": nombre_completo_alumno(alumno),
         }
         for alumno in alumnos
     ]
@@ -3075,9 +3059,7 @@ def guardar_foto_equipo(request):
             )
         except Exception:
             logger.exception(
-                "No se pudo eliminar la foto "
-                "temporal anterior del grupo %s.",
-                grupo.idgrupo,
+                "No se pudo eliminar la foto temporal anterior."
             )
 
     registro.foto_temporal.save(
@@ -3128,12 +3110,15 @@ def guardar_foto_equipo(request):
         registro.drive_carpeta_id = (
             carpeta_sesion_id
         )
+
         registro.drive_foto_id = (
             archivo_foto_drive["id"]
         )
+
         registro.drive_txt_id = (
             archivo_txt_drive["id"]
         )
+
         registro.subida_drive = True
         registro.error_drive = ""
 
@@ -3154,8 +3139,7 @@ def guardar_foto_equipo(request):
 
     except Exception as exc:
         logger.exception(
-            "Error subiendo la fotografía "
-            "del grupo %s",
+            "Error subiendo la fotografía del grupo %s",
             grupo.idgrupo,
         )
 
@@ -3180,34 +3164,13 @@ def guardar_foto_equipo(request):
             status=502,
         )
 
-    estado_fotos = sincronizar_fotos_equipo_y_avanzar(
-        sesion
-    )
-
-    return JsonResponse(
-        {
-            "ok": True,
-            "yaExistia": False,
-            "fotoUrl": registro.foto_temporal.url,
-            "nombreArchivo": nombre_foto,
-            "integrantes": integrantes,
-            "gruposFotosEquipo": (
-                estado_fotos["gruposFotosEquipo"]
-            ),
-            "totalGrupos": (
-                estado_fotos["totalGrupos"]
-            ),
-            "todosFotosEquipo": (
-                estado_fotos["todosFotosEquipo"]
-            ),
-            "faseActual": (
-                estado_fotos["faseActual"]
-            ),
-            "rutaAlumno": (
-                estado_fotos["rutaAlumno"]
-            ),
-        }
-    )
+    return JsonResponse({
+        "ok": True,
+        "yaExistia": False,
+        "fotoUrl": registro.foto_temporal.url,
+        "nombreArchivo": nombre_foto,
+        "integrantes": integrantes,
+    })
 
 def trabajoenequipo(request):
     grupo = obtener_grupo_desde_session(request)

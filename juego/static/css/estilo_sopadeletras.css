@@ -1068,3 +1068,88 @@ body.dialogo-edemy-activo .game-container {
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
 }
+
+
+.resultado-tiempo-sopa[hidden] {
+  display: none !important;
+}
+
+.resultado-tiempo-sopa {
+  position: fixed;
+  inset: 0;
+  z-index: 10020;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.resultado-tiempo-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 5, 18, 0.84);
+  backdrop-filter: blur(9px);
+}
+
+.resultado-tiempo-panel {
+  position: relative;
+  z-index: 2;
+  width: min(620px, 94vw);
+  padding: clamp(28px, 4vw, 46px);
+  border: 2px solid rgba(0, 252, 152, 0.8);
+  border-radius: 28px;
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(0, 252, 152, 0.13),
+      transparent 36%
+    ),
+    linear-gradient(
+      160deg,
+      rgba(0, 16, 74, 0.98),
+      rgba(2, 8, 30, 0.99)
+    );
+  color: white;
+  text-align: center;
+  box-shadow:
+    0 0 36px rgba(0, 252, 152, 0.24),
+    0 24px 70px rgba(0, 0, 0, 0.7);
+}
+
+.resultado-tiempo-etiqueta {
+  color: #00fc98;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+.resultado-tiempo-panel h2 {
+  margin: 14px 0;
+  color: #00fc98;
+  font-size: clamp(28px, 4vw, 44px);
+}
+
+.resultado-tiempo-panel p {
+  font-size: clamp(17px, 2vw, 21px);
+  line-height: 1.5;
+}
+
+#resultado-tiempo-palabras {
+  display: block;
+  margin: 20px 0 8px;
+  font-size: clamp(22px, 3vw, 30px);
+}
+
+#resultado-tiempo-aceptar {
+  margin-top: 20px;
+  min-height: 56px;
+  padding: 14px 28px;
+  border: 2px solid #00fc98;
+  border-radius: 999px;
+  background: linear-gradient(
+    135deg,
+    #00fc98,
+    #00c8ff
+  );
+  color: #031424;
+  font-weight: 900;
+  cursor: pointer;
+}

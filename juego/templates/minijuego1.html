@@ -7,12 +7,317 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Misión Emprende UDD — Sopa de Letras</title>
   <link rel="stylesheet" href="{% static 'css/estilo_sopadeletras.css' %}">
+
+  <style>
+    body.foto-equipo-abierta {
+      overflow: hidden;
+    }
+
+    body.foto-equipo-abierta .game-container {
+      filter: blur(7px) brightness(.34) saturate(.72);
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .foto-equipo-modal[hidden],
+    .foto-equipo-confirmacion[hidden],
+    .foto-equipo-placeholder[hidden],
+    .foto-equipo-acciones[hidden],
+    .foto-equipo-alternativa[hidden],
+    .foto-equipo-espera[hidden] {
+      display: none !important;
+    }
+
+    .foto-equipo-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 12000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: clamp(12px, 2.4vw, 32px);
+    }
+
+    .foto-equipo-backdrop {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 50% 18%, rgba(0,252,152,.12), transparent 34%),
+        radial-gradient(circle at 50% 82%, rgba(0,200,255,.13), transparent 38%),
+        rgba(0,5,18,.90);
+      backdrop-filter: blur(10px) brightness(.52);
+    }
+
+    .foto-equipo-panel {
+      position: relative;
+      z-index: 2;
+      width: min(920px, 96vw);
+      max-height: 94vh;
+      overflow-y: auto;
+      padding: clamp(22px, 3vw, 38px);
+      border: 2px solid rgba(0,252,152,.78);
+      border-radius: 28px;
+      background:
+        radial-gradient(circle at top left, rgba(0,252,152,.12), transparent 32%),
+        radial-gradient(circle at bottom right, rgba(0,200,255,.10), transparent 34%),
+        linear-gradient(155deg, rgba(3,20,48,.98), rgba(2,8,28,.99));
+      color: #fff;
+      text-align: center;
+      box-shadow:
+        0 0 34px rgba(0,252,152,.24),
+        0 0 90px rgba(0,59,255,.18),
+        0 28px 80px rgba(0,0,0,.72);
+    }
+
+    .foto-equipo-etiqueta {
+      display: inline-flex;
+      padding: 6px 13px;
+      border: 1px solid rgba(0,200,255,.54);
+      border-radius: 999px;
+      background: rgba(0,200,255,.10);
+      color: #5be7ff;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .16em;
+    }
+
+    .foto-equipo-panel h2 {
+      margin: 13px 0 8px;
+      color: #00fc98;
+      font-size: clamp(30px, 4vw, 52px);
+      font-weight: 900;
+    }
+
+    .foto-equipo-encabezado p {
+      margin: 0 auto;
+      max-width: 760px;
+      color: rgba(230,238,248,.84);
+      font-size: clamp(15px, 1.25vw, 19px);
+      line-height: 1.48;
+    }
+
+    .foto-equipo-nombre {
+      display: inline-flex;
+      margin-top: 17px;
+      padding: 8px 17px;
+      border: 1px solid rgba(0,252,152,.46);
+      border-radius: 999px;
+      background: rgba(0,252,152,.09);
+      font-weight: 900;
+    }
+
+    .foto-equipo-visor {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: min(100%, 760px);
+      min-height: clamp(260px, 42vh, 470px);
+      margin: 20px auto 12px;
+      overflow: hidden;
+      border: 1.8px solid rgba(0,200,255,.56);
+      border-radius: 22px;
+      background: rgba(0,6,18,.84);
+    }
+
+    .foto-equipo-visor video,
+    .foto-equipo-visor img {
+      width: 100%;
+      max-height: 58vh;
+      object-fit: contain;
+    }
+
+    .foto-equipo-visor video[hidden],
+    .foto-equipo-visor img[hidden] {
+      display: none !important;
+    }
+
+    .foto-equipo-placeholder,
+    .foto-equipo-confirmacion {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: min(100%, 520px);
+      padding: 30px;
+      gap: 8px;
+    }
+
+    .foto-equipo-camara {
+      font-size: clamp(56px, 7vw, 84px);
+    }
+
+    .foto-equipo-check {
+      display: grid;
+      place-items: center;
+      width: 86px;
+      height: 86px;
+      border: 2px solid rgba(0,252,152,.82);
+      border-radius: 50%;
+      background: rgba(0,252,152,.14);
+      color: #00fc98;
+      font-size: 52px;
+      font-weight: 900;
+    }
+
+    .foto-equipo-mensaje {
+      min-height: 24px;
+      margin: 8px 0 4px;
+      color: rgba(230,238,248,.82);
+      font-weight: 700;
+    }
+
+    .foto-equipo-mensaje.es-error {
+      color: #ffbfc8;
+    }
+
+    .foto-equipo-mensaje.es-exito {
+      color: #26ffc2;
+    }
+
+    .foto-equipo-acciones,
+    .foto-equipo-alternativa {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 11px;
+      margin-top: 15px;
+    }
+
+    .foto-equipo-boton {
+      min-height: 52px;
+      padding: 13px 23px;
+      border-radius: 999px;
+      color: #fff;
+      font: inherit;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .foto-equipo-boton:disabled {
+      opacity: .55;
+      cursor: wait;
+    }
+
+    .foto-equipo-boton-principal {
+      border: 1.8px solid rgba(0,252,152,.76);
+      background: linear-gradient(135deg, rgba(0,252,152,.24), rgba(0,200,255,.24));
+    }
+
+    .foto-equipo-boton-secundario,
+    .foto-equipo-boton-archivo {
+      border: 1.5px solid rgba(0,200,255,.62);
+      background: rgba(0,200,255,.10);
+    }
+
+    .foto-equipo-alternativa {
+      color: rgba(230,238,248,.70);
+      font-size: 14px;
+    }
+
+    .foto-equipo-boton-archivo {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 42px;
+      padding: 9px 17px;
+      font-size: 14px;
+    }
+
+    .foto-equipo-espera {
+      width: min(100%, 720px);
+      margin: 18px auto 0;
+      padding: 16px 18px;
+      border: 1px solid rgba(0,252,152,.42);
+      border-radius: 17px;
+      background: rgba(0,252,152,.07);
+    }
+
+    .foto-equipo-espera-texto {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 11px;
+      text-align: left;
+    }
+
+    .foto-equipo-espera-texto span {
+      color: #26ffc2;
+      font-weight: 900;
+    }
+
+    .foto-equipo-progreso {
+      width: 100%;
+      height: 10px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: rgba(255,255,255,.10);
+    }
+
+    .foto-equipo-progreso span {
+      display: block;
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #00fc98, #00c8ff);
+      transition: width .35s ease;
+    }
+
+    #btnWinFoto,
+    #btnRetry {
+      margin-top: 18px;
+      min-height: 52px;
+      padding: 13px 26px;
+      border: 2px solid #00fc98;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #00fc98, #00c8ff);
+      color: #031424;
+      font: inherit;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    @media (max-width: 640px) {
+      .foto-equipo-modal {
+        padding: 8px;
+      }
+
+      .foto-equipo-panel {
+        width: 100%;
+        max-height: 97vh;
+        padding: 18px 12px 20px;
+        border-radius: 21px;
+      }
+
+      .foto-equipo-visor {
+        min-height: 235px;
+      }
+
+      .foto-equipo-acciones {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+
+      .foto-equipo-boton {
+        width: 100%;
+      }
+
+      .foto-equipo-espera-texto {
+        flex-direction: column;
+        gap: 4px;
+      }
+    }
+  </style>
+
 </head>
 
 <body
   data-sesion-id="{{ grupo.sesion.idsesion }}"
   data-tiempo-inicial="{{ grupo.sesion.segundos_restantes|default:grupo.sesion.t_diferencias|default:300 }}"
   data-sopa-ganada="{{ sopa_ganada|yesno:'true,false' }}"
+  data-foto-guardada="{{ foto_equipo_guardada|yesno:'true,false' }}"
+  data-palabras-encontradas="{{ palabras_encontradas|default:0 }}"
 >
   <main class="game-container">
 
@@ -32,11 +337,14 @@
     <audio id="victory-sound" src="{% static 'sounds/victory.mp3' %}" preload="auto"></audio>
     <audio id="musica-fondo"  src="{% static 'sounds/musica_sopa.mp3' %}" loop preload="auto"></audio>
 
-    <div id="timeModal" class="modal" aria-hidden="true" role="dialog">
+    <div id="timeModal" class="modal" aria-hidden="true" role="dialog" aria-labelledby="timeModalTitle">
       <div class="modal-content">
-        <h2 data-i18n="sopa_tiempo_terminado_titulo">⏰ ¡Tiempo terminado!</h2>
-        <p data-i18n="sopa_tiempo_terminado_texto">Se acabó el tiempo para completar la sopa de letras.</p>
-        <button id="btnRetry" type="button" data-i18n="sopa_ok">Continuar</button>
+        <h2 id="timeModalTitle">⏰ ¡Tiempo terminado!</h2>
+        <p id="timeModalText">
+          No alcanzaron a completar la sopa, pero cada palabra encontrada fue recompensada.
+        </p>
+        <p id="timeModalReward"><strong>0 palabras encontradas · 0 tokens obtenidos</strong></p>
+        <button id="btnRetry" type="button">Aceptar y tomar foto</button>
       </div>
     </div>
 
@@ -46,8 +354,11 @@
       <div class="modal-content">
         <img src="{% static 'gifs/token_dorado_clean_grande.gif' %}" alt="Token de recompensa" class="token-animado">
         <h2 id="winTitle" data-i18n="sopa_win_titulo">¡Buen trabajo!</h2>
-        <p id="winText" data-i18n="sopa_win_texto">Se han encontrado todas las palabras. ¡Impresionante!</p>
-        <p id="winEspera" class="win-espera">
+        <p id="winText" data-i18n="sopa_win_texto">
+          Encontraron todas las palabras y recibieron su recompensa.
+        </p>
+        <button id="btnWinFoto" type="button">Aceptar y tomar foto</button>
+        <p id="winEspera" class="win-espera" hidden>
           Esperando a los demás escuadrones...
         </p>
       </div>
@@ -112,7 +423,704 @@
     </div>
   </div>
 
+
+  <!-- Fotografía obligatoria después de la sopa de letras -->
+  <div
+    id="foto-equipo-modal"
+    class="foto-equipo-modal"
+    data-guardada="{{ foto_equipo_guardada|yesno:'true,false' }}"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="foto-equipo-titulo"
+    hidden
+  >
+    <div class="foto-equipo-backdrop" aria-hidden="true"></div>
+
+    <section class="foto-equipo-panel">
+      <div class="foto-equipo-encabezado">
+        <span class="foto-equipo-etiqueta">REGISTRO DE MISIÓN</span>
+        <h2 id="foto-equipo-titulo">¡Foto del equipo!</h2>
+        <p>
+          Reúnanse frente a la cámara. Al guardar la fotografía quedarán listos
+          y esperarán hasta que todos los equipos terminen.
+        </p>
+      </div>
+
+      <div class="foto-equipo-nombre">
+        {{ grupo.nombregrupo|default:"Equipo" }}
+      </div>
+
+      <div class="foto-equipo-visor">
+        <video id="foto-equipo-video" autoplay playsinline muted hidden></video>
+
+        <img
+          id="foto-equipo-preview"
+          alt="Vista previa de la fotografía del equipo"
+          hidden
+        >
+
+        <canvas id="foto-equipo-canvas" hidden></canvas>
+
+        <div id="foto-equipo-placeholder" class="foto-equipo-placeholder">
+          <span class="foto-equipo-camara" aria-hidden="true">📷</span>
+          <strong id="foto-equipo-placeholder-titulo">
+            Registren a todo el equipo
+          </strong>
+          <span id="foto-equipo-placeholder-texto">
+            Presionen “Activar cámara” para comenzar.
+          </span>
+        </div>
+
+        <div
+          id="foto-equipo-confirmacion"
+          class="foto-equipo-confirmacion"
+          hidden
+        >
+          <span class="foto-equipo-check" aria-hidden="true">✓</span>
+          <strong>Fotografía guardada</strong>
+          <span>El registro ya está seguro en Google Drive.</span>
+        </div>
+      </div>
+
+      <p
+        id="foto-equipo-mensaje"
+        class="foto-equipo-mensaje"
+        aria-live="polite"
+      ></p>
+
+      <div id="foto-equipo-acciones" class="foto-equipo-acciones">
+        <button
+          type="button"
+          id="foto-equipo-activar"
+          class="foto-equipo-boton foto-equipo-boton-principal"
+        >
+          Activar cámara
+        </button>
+
+        <button
+          type="button"
+          id="foto-equipo-capturar"
+          class="foto-equipo-boton foto-equipo-boton-principal"
+          hidden
+        >
+          Tomar foto
+        </button>
+
+        <button
+          type="button"
+          id="foto-equipo-repetir"
+          class="foto-equipo-boton foto-equipo-boton-secundario"
+          hidden
+        >
+          Repetir
+        </button>
+
+        <button
+          type="button"
+          id="foto-equipo-guardar"
+          class="foto-equipo-boton foto-equipo-boton-principal"
+          hidden
+        >
+          Guardar foto y quedar listo
+        </button>
+      </div>
+
+      <div id="foto-equipo-alternativa" class="foto-equipo-alternativa">
+        <span>¿No se pudo abrir la cámara?</span>
+
+        <label class="foto-equipo-boton foto-equipo-boton-archivo">
+          Tomar o seleccionar foto
+          <input
+            type="file"
+            id="foto-equipo-archivo"
+            accept="image/*"
+            capture="user"
+            hidden
+          >
+        </label>
+      </div>
+
+      <div id="foto-equipo-espera" class="foto-equipo-espera" hidden>
+        <div class="foto-equipo-espera-texto">
+          <strong>Esperando a los demás equipos…</strong>
+          <span id="foto-equipo-contador">0/0 equipos con foto</span>
+        </div>
+
+        <div
+          class="foto-equipo-progreso"
+          role="progressbar"
+          aria-label="Equipos con fotografía guardada"
+          aria-valuemin="0"
+          aria-valuemax="0"
+          aria-valuenow="0"
+        >
+          <span id="foto-equipo-progreso-barra"></span>
+        </div>
+      </div>
+    </section>
+  </div>
+
+
   <script src="{% static 'js/sopadeletras.js' %}"></script>
+
+
+  <script>
+  /* Resultado de la sopa: primero se acepta la recompensa y después se toma la foto. */
+  (function () {
+    const timeModal = document.getElementById("timeModal");
+    const winModal = document.getElementById("winModal");
+    const timeText = document.getElementById("timeModalText");
+    const timeReward = document.getElementById("timeModalReward");
+    const winText = document.getElementById("winText");
+
+    let resultadoAceptado = false;
+    let resultadoMostrado = false;
+
+    function mostrarModal(modal) {
+      if (!modal) return;
+      modal.style.display = "flex";
+      modal.classList.add("show", "visible");
+      modal.setAttribute("aria-hidden", "false");
+    }
+
+    function ocultarModal(modal) {
+      if (!modal) return;
+      modal.style.display = "none";
+      modal.classList.remove("show", "visible");
+      modal.setAttribute("aria-hidden", "true");
+    }
+
+    window.ocultarResultadosSopa = function () {
+      ocultarModal(timeModal);
+      ocultarModal(winModal);
+    };
+
+    window.mostrarResultadoTiempoSopa = function (palabrasEncontradas = 0) {
+      if (resultadoAceptado || resultadoMostrado) return;
+
+      resultadoMostrado = true;
+
+      const cantidad = Math.max(0, Number(palabrasEncontradas) || 0);
+      const palabraTexto = cantidad === 1 ? "palabra" : "palabras";
+      const tokenTexto = cantidad === 1 ? "token" : "tokens";
+
+      if (timeText) {
+        timeText.textContent =
+          "No alcanzaron a completar la sopa de letras, pero cada palabra encontrada fue recompensada.";
+      }
+
+      if (timeReward) {
+        timeReward.innerHTML =
+          `<strong>${cantidad} ${palabraTexto} encontrada${cantidad === 1 ? "" : "s"} · ` +
+          `${cantidad} ${tokenTexto} obtenido${cantidad === 1 ? "" : "s"}</strong>`;
+      }
+
+      mostrarModal(timeModal);
+    };
+
+    window.mostrarResultadoGanadorSopa = function (palabrasEncontradas = 8) {
+      if (resultadoAceptado || resultadoMostrado) return;
+
+      resultadoMostrado = true;
+
+      const cantidad = Math.max(0, Number(palabrasEncontradas) || 0);
+
+      if (
+        winText &&
+        !/token|bono|recompensa/i.test(winText.textContent || "")
+      ) {
+        winText.textContent =
+          `Encontraron las ${cantidad || 8} palabras. ` +
+          "Los tokens por palabra y el bono final ya fueron agregados al equipo.";
+      }
+
+      mostrarModal(winModal);
+    };
+
+    function aceptarResultado(event) {
+      const boton = event.target.closest("#btnRetry, #btnWinFoto");
+      if (!boton) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+
+      resultadoAceptado = true;
+      window.ocultarResultadosSopa?.();
+      window.abrirPopupFotoEquipo?.();
+    }
+
+    // Se usa captura para evitar que el botón antiguo de “Continuar”
+    // ejecute una redirección registrada en sopadeletras.js.
+    document.addEventListener("click", aceptarResultado, true);
+  })();
+  </script>
+
+  <script>
+  /* Captura y guardado de la fotografía del equipo. */
+  (function () {
+    const modal = document.getElementById("foto-equipo-modal");
+    if (!modal) return;
+
+    const video = document.getElementById("foto-equipo-video");
+    const preview = document.getElementById("foto-equipo-preview");
+    const canvas = document.getElementById("foto-equipo-canvas");
+    const placeholder = document.getElementById("foto-equipo-placeholder");
+    const placeholderTitulo = document.getElementById("foto-equipo-placeholder-titulo");
+    const placeholderTexto = document.getElementById("foto-equipo-placeholder-texto");
+    const confirmacion = document.getElementById("foto-equipo-confirmacion");
+    const mensaje = document.getElementById("foto-equipo-mensaje");
+
+    const btnActivar = document.getElementById("foto-equipo-activar");
+    const btnCapturar = document.getElementById("foto-equipo-capturar");
+    const btnRepetir = document.getElementById("foto-equipo-repetir");
+    const btnGuardar = document.getElementById("foto-equipo-guardar");
+    const acciones = document.getElementById("foto-equipo-acciones");
+
+    const alternativa = document.getElementById("foto-equipo-alternativa");
+    const inputArchivo = document.getElementById("foto-equipo-archivo");
+
+    const espera = document.getElementById("foto-equipo-espera");
+    const contador = document.getElementById("foto-equipo-contador");
+    const progreso = modal.querySelector(".foto-equipo-progreso");
+    const progresoBarra = document.getElementById("foto-equipo-progreso-barra");
+
+    let stream = null;
+    let fotoBlob = null;
+    let previewUrl = null;
+    let guardada = modal.dataset.guardada === "true";
+    let guardando = false;
+
+    function mostrarMensaje(texto, tipo = "") {
+      if (!mensaje) return;
+
+      mensaje.textContent = texto || "";
+      mensaje.classList.toggle("es-error", tipo === "error");
+      mensaje.classList.toggle("es-exito", tipo === "exito");
+    }
+
+    function detenerCamara() {
+      if (!stream) return;
+
+      stream.getTracks().forEach(track => track.stop());
+      stream = null;
+
+      if (video) {
+        video.srcObject = null;
+      }
+    }
+
+    function limpiarPreviewUrl() {
+      if (!previewUrl) return;
+      URL.revokeObjectURL(previewUrl);
+      previewUrl = null;
+    }
+
+    function ocultarElementosVisor() {
+      if (video) video.hidden = true;
+      if (preview) preview.hidden = true;
+      if (placeholder) placeholder.hidden = true;
+      if (confirmacion) confirmacion.hidden = true;
+    }
+
+    function prepararEstadoInicial() {
+      ocultarElementosVisor();
+
+      if (placeholder) placeholder.hidden = false;
+
+      if (placeholderTitulo) {
+        placeholderTitulo.textContent = "Registren a todo el equipo";
+      }
+
+      if (placeholderTexto) {
+        placeholderTexto.textContent =
+          "Presionen “Activar cámara” para comenzar.";
+      }
+
+      if (acciones) acciones.hidden = false;
+      if (alternativa) alternativa.hidden = false;
+      if (espera) espera.hidden = true;
+
+      if (btnActivar) {
+        btnActivar.hidden = false;
+        btnActivar.disabled = false;
+      }
+
+      if (btnCapturar) btnCapturar.hidden = true;
+      if (btnRepetir) btnRepetir.hidden = true;
+      if (btnGuardar) btnGuardar.hidden = true;
+
+      mostrarMensaje("");
+    }
+
+    function mostrarVistaPrevia(blob) {
+      if (!blob) return;
+
+      fotoBlob = blob;
+      limpiarPreviewUrl();
+      previewUrl = URL.createObjectURL(blob);
+
+      ocultarElementosVisor();
+
+      if (preview) {
+        preview.src = previewUrl;
+        preview.hidden = false;
+      }
+
+      if (btnActivar) btnActivar.hidden = true;
+      if (btnCapturar) btnCapturar.hidden = true;
+
+      if (btnRepetir) {
+        btnRepetir.hidden = false;
+        btnRepetir.disabled = false;
+      }
+
+      if (btnGuardar) {
+        btnGuardar.hidden = false;
+        btnGuardar.disabled = false;
+      }
+
+      mostrarMensaje(
+        "Revisen que aparezca todo el equipo antes de guardar."
+      );
+    }
+
+    function mostrarEstadoGuardado() {
+      guardada = true;
+      guardando = false;
+      detenerCamara();
+
+      if (inputArchivo) {
+        inputArchivo.value = "";
+        inputArchivo.disabled = true;
+      }
+
+      if (acciones) acciones.hidden = true;
+      if (alternativa) alternativa.hidden = true;
+      if (espera) espera.hidden = false;
+
+      if (!preview || preview.hidden || !preview.src) {
+        ocultarElementosVisor();
+
+        if (confirmacion) {
+          confirmacion.hidden = false;
+        }
+      }
+
+      mostrarMensaje(
+        "Fotografía guardada correctamente.",
+        "exito"
+      );
+    }
+
+    function actualizarProgreso(listos, total) {
+      const listosNumero = Math.max(0, Number(listos) || 0);
+      const totalNumero = Math.max(0, Number(total) || 0);
+      const porcentaje = totalNumero > 0
+        ? Math.min(100, (listosNumero / totalNumero) * 100)
+        : 0;
+
+      if (contador) {
+        contador.textContent =
+          `${listosNumero}/${totalNumero} equipos con foto`;
+      }
+
+      if (progreso) {
+        progreso.setAttribute("aria-valuemax", String(totalNumero));
+        progreso.setAttribute("aria-valuenow", String(listosNumero));
+      }
+
+      if (progresoBarra) {
+        progresoBarra.style.width = `${porcentaje}%`;
+      }
+    }
+
+    window.actualizarEstadoFotoEquipo = function ({
+      guardada: estaGuardada = false,
+      gruposListos = 0,
+      totalGrupos = 0
+    } = {}) {
+      actualizarProgreso(gruposListos, totalGrupos);
+
+      if (estaGuardada && !guardada) {
+        mostrarEstadoGuardado();
+      } else if (guardada && espera) {
+        espera.hidden = false;
+      }
+    };
+
+    window.abrirPopupFotoEquipo = function () {
+      window.ocultarResultadosSopa?.();
+      window.ocultarDialogoInicial?.();
+
+      modal.hidden = false;
+      document.body.classList.add("foto-equipo-abierta");
+
+      if (guardada) {
+        mostrarEstadoGuardado();
+      } else if (!stream && !fotoBlob) {
+        prepararEstadoInicial();
+      }
+    };
+
+    async function activarCamara() {
+      mostrarMensaje("");
+
+      if (!navigator.mediaDevices?.getUserMedia) {
+        if (placeholderTitulo) {
+          placeholderTitulo.textContent =
+            "La cámara directa no está disponible";
+        }
+
+        if (placeholderTexto) {
+          placeholderTexto.textContent =
+            "Usen el botón “Tomar o seleccionar foto”.";
+        }
+
+        mostrarMensaje(
+          "El navegador no permitió abrir la cámara directamente.",
+          "error"
+        );
+        return;
+      }
+
+      if (btnActivar) btnActivar.disabled = true;
+
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          audio: false,
+          video: {
+            facingMode: "user",
+            width: { ideal: 1920 },
+            height: { ideal: 1080 }
+          }
+        });
+
+        ocultarElementosVisor();
+
+        if (video) {
+          video.srcObject = stream;
+          video.hidden = false;
+          await video.play();
+        }
+
+        if (btnActivar) btnActivar.hidden = true;
+        if (btnCapturar) btnCapturar.hidden = false;
+
+        mostrarMensaje(
+          "Cuando estén listos, presionen “Tomar foto”."
+        );
+      } catch (error) {
+        console.error("No se pudo abrir la cámara:", error);
+
+        if (placeholder) placeholder.hidden = false;
+
+        if (placeholderTitulo) {
+          placeholderTitulo.textContent = "No se pudo abrir la cámara";
+        }
+
+        if (placeholderTexto) {
+          placeholderTexto.textContent =
+            "Usen el botón “Tomar o seleccionar foto”.";
+        }
+
+        mostrarMensaje(
+          "Revisen el permiso de cámara o utilicen la opción alternativa.",
+          "error"
+        );
+      } finally {
+        if (btnActivar) btnActivar.disabled = false;
+      }
+    }
+
+    function capturarFoto() {
+      if (
+        !video ||
+        !video.videoWidth ||
+        !video.videoHeight ||
+        !canvas
+      ) {
+        mostrarMensaje(
+          "La cámara todavía no está lista.",
+          "error"
+        );
+        return;
+      }
+
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+
+      const contexto = canvas.getContext("2d");
+
+      contexto.drawImage(
+        video,
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      );
+
+      canvas.toBlob(
+        blob => {
+          if (!blob) {
+            mostrarMensaje(
+              "No fue posible generar la fotografía.",
+              "error"
+            );
+            return;
+          }
+
+          mostrarVistaPrevia(blob);
+        },
+        "image/jpeg",
+        0.95
+      );
+    }
+
+    function repetirFoto() {
+      if (guardando || guardada) return;
+
+      fotoBlob = null;
+      limpiarPreviewUrl();
+
+      if (preview) {
+        preview.removeAttribute("src");
+        preview.hidden = true;
+      }
+
+      if (stream) {
+        ocultarElementosVisor();
+
+        if (video) video.hidden = false;
+        if (btnCapturar) btnCapturar.hidden = false;
+        if (btnRepetir) btnRepetir.hidden = true;
+        if (btnGuardar) btnGuardar.hidden = true;
+
+        mostrarMensaje(
+          "Cuando estén listos, tomen una nueva foto."
+        );
+      } else {
+        prepararEstadoInicial();
+      }
+    }
+
+    async function guardarFoto() {
+      if (!fotoBlob || guardando || guardada) {
+        if (!fotoBlob) {
+          mostrarMensaje(
+            "Primero deben tomar o seleccionar una fotografía.",
+            "error"
+          );
+        }
+        return;
+      }
+
+      guardando = true;
+
+      if (btnGuardar) btnGuardar.disabled = true;
+      if (btnRepetir) btnRepetir.disabled = true;
+      if (inputArchivo) inputArchivo.disabled = true;
+
+      mostrarMensaje(
+        "Guardando la fotografía y el registro del equipo…"
+      );
+
+      const formulario = new FormData();
+
+      formulario.append(
+        "foto_equipo",
+        fotoBlob,
+        "foto_equipo.jpg"
+      );
+
+      try {
+        const respuesta = await fetch(
+          "{% url 'guardar_foto_equipo' %}",
+          {
+            method: "POST",
+            credentials: "same-origin",
+            headers: {
+              "X-CSRFToken": "{{ csrf_token }}"
+            },
+            body: formulario
+          }
+        );
+
+        let datos = {};
+
+        try {
+          datos = await respuesta.json();
+        } catch (_) {
+          datos = {};
+        }
+
+        if (!respuesta.ok || !datos.ok) {
+          throw new Error(
+            datos.error ||
+            "No fue posible guardar la fotografía."
+          );
+        }
+
+        mostrarEstadoGuardado();
+
+        actualizarProgreso(
+          Number(datos.gruposFotosEquipo ?? 0),
+          Number(datos.totalGrupos ?? 0)
+        );
+
+        if (
+          datos.faseActual &&
+          datos.faseActual !== "f1_sopa" &&
+          datos.rutaAlumno
+        ) {
+          window.location.href = datos.rutaAlumno;
+        }
+      } catch (error) {
+        console.error("Error guardando la foto:", error);
+
+        guardando = false;
+
+        if (btnGuardar) btnGuardar.disabled = false;
+        if (btnRepetir) btnRepetir.disabled = false;
+        if (inputArchivo) inputArchivo.disabled = false;
+
+        mostrarMensaje(
+          error.message ||
+          "No fue posible guardar la fotografía.",
+          "error"
+        );
+      }
+    }
+
+    btnActivar?.addEventListener("click", activarCamara);
+    btnCapturar?.addEventListener("click", capturarFoto);
+    btnRepetir?.addEventListener("click", repetirFoto);
+    btnGuardar?.addEventListener("click", guardarFoto);
+
+    inputArchivo?.addEventListener("change", () => {
+      const archivo = inputArchivo.files?.[0];
+
+      if (!archivo) return;
+
+      if (!archivo.type.startsWith("image/")) {
+        inputArchivo.value = "";
+        mostrarMensaje(
+          "El archivo seleccionado no es una imagen.",
+          "error"
+        );
+        return;
+      }
+
+      mostrarVistaPrevia(archivo);
+    });
+
+    window.addEventListener("beforeunload", () => {
+      detenerCamara();
+      limpiarPreviewUrl();
+    });
+  })();
+  </script>
+
 
   <script>
   /* ── Música de fondo ── */
@@ -466,27 +1474,66 @@
         });
 
         if (!res.ok) return;
+
         const data = await res.json();
 
-        const textoContador = textoGruposListos(data.listosInicio || 0, data.totalListosInicio || 0);
+        const textoContador = textoGruposListos(
+          data.listosInicio || 0,
+          data.totalListosInicio || 0
+        );
+
         if (contador) contador.textContent = textoContador;
         window.actualizarContadorDialogo?.(textoContador);
 
-        const miGrupo = (data.grupos || []).find(g => Number(g.id) === Number(grupoId));
-        if (miGrupo && miGrupo.listoF1) {
-          yaListo = true;
-          window.marcarDialogoComoEsperando?.();
-        }
+        const miGrupo = (data.grupos || []).find(
+          g => Number(g.id) === Number(grupoId)
+        ) || null;
 
-        if (data.faseActual && data.faseActual !== "f1_sopa" && data.rutaAlumno) {
+        window.actualizarEstadoFotoEquipo?.({
+          guardada: Boolean(miGrupo?.fotoEquipoGuardada),
+          gruposListos: Number(data.gruposFotosEquipo ?? 0),
+          totalGrupos: Number(data.totalGrupos ?? 0)
+        });
+
+        if (
+          data.faseActual &&
+          data.faseActual !== "f1_sopa" &&
+          data.rutaAlumno
+        ) {
           if (window.location.pathname !== data.rutaAlumno) {
             window.location.href = data.rutaAlumno;
           }
           return;
         }
 
+        if (miGrupo?.fotoEquipoGuardada) {
+          window.abrirPopupFotoEquipo?.();
+          return;
+        }
+
+        if (miGrupo?.sopaGanada) {
+          window.mostrarResultadoGanadorSopa?.(
+            miGrupo.palabrasSopa ?? 8
+          );
+          return;
+        }
+
+        if (data.sopaTiempoTerminado) {
+          window.mostrarResultadoTiempoSopa?.(
+            miGrupo?.palabrasSopa ?? 0
+          );
+          return;
+        }
+
+        if (miGrupo?.listoF1) {
+          yaListo = true;
+          window.marcarDialogoComoEsperando?.();
+        }
+
         if (data.inicioFaseHabilitado) {
-          if (countdownMostrado && !countdownEnCurso) activarFase();
+          if (countdownMostrado && !countdownEnCurso) {
+            activarFase();
+          }
         } else {
           countdownMostrado = false;
           countdownEnCurso = false;
@@ -495,7 +1542,11 @@
           bloquearFase();
         }
 
-        if (data.inicioFaseHabilitado && !countdownMostrado && !countdownEnCurso) {
+        if (
+          data.inicioFaseHabilitado &&
+          !countdownMostrado &&
+          !countdownEnCurso
+        ) {
           countdownEnCurso = true;
 
           window.oaiCountdown.run(async () => {
