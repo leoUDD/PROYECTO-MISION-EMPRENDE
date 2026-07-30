@@ -6,645 +6,644 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <title>Misión Emprende UDD — Evaluación de Proyectos</title>
 
-  <link rel="stylesheet" href="{% static 'css/estilo_peer_review.css' %}">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-  <style>
-    body {
-      font-family: "Poppins", system-ui, sans-serif;
-    }
-
-    .peer-card {
-      border-radius: 22px;
-      overflow: hidden;
-      background: rgba(3, 18, 38, 0.96) !important;
-      border: 1px solid rgba(0, 200, 255, 0.34) !important;
-      color: #e5eef8 !important;
-      box-shadow: 0 18px 40px rgba(0,0,0,.55);
-    }
-
-    .peer-card .card-body {
-      padding: clamp(20px, 3vw, 34px);
-    }
-
-    .peer-title {
-      color: #00C8FF !important;
-      font-weight: 900;
-      text-shadow: 0 0 16px rgba(0,200,255,.35);
-    }
-
-    .texto-secundario {
-      color: #dbe7f5 !important;
-    }
-
-    .texto-secundario strong {
-      color: #ffffff !important;
-    }
-
-    .bloque-instrucciones {
-      background: rgba(255, 247, 230, 0.97);
-      border: 1px solid #ffd27a;
-      border-radius: 16px;
-      padding: 14px 16px;
-      margin-bottom: 18px;
-      color: #3f2a00 !important;
-      line-height: 1.45;
-    }
-
-    .bloque-instrucciones strong {
-      color: #3f2a00 !important;
-    }
-
-    .bloque-progreso {
-      background: rgba(238, 246, 255, 0.97);
-      border: 1px solid #b8d7ff;
-      border-radius: 16px;
-      padding: 14px 16px;
-      margin-bottom: 18px;
-      color: #1f2937 !important;
-    }
-
-    .bloque-progreso strong,
-    .bloque-progreso p,
-    .bloque-progreso .texto-ayuda {
-      color: #1f2937 !important;
-    }
-
-    .timer-evaluacion {
-      font-size: 1.15rem;
-      font-weight: 900;
-      color: #7c3aed !important;
-    }
-
-    .equipo-objetivo-box {
-      background: rgba(236, 253, 255, 0.98);
-      border: 1px solid #67e8f9;
-      border-radius: 16px;
-      padding: 14px 16px;
-      margin-bottom: 18px;
-      color: #083344 !important;
-    }
-
-    .equipo-objetivo-box label,
-    .equipo-objetivo-box strong {
-      color: #083344 !important;
-    }
-
-    .criterio-box {
-      border: 1px solid rgba(0, 200, 255, 0.45) !important;
-      border-radius: 18px !important;
-      padding: 18px !important;
-      background: #07182b !important;
-      color: #f8fbff !important;
-    }
-
-    .criterio-box h2 {
-      color: #00C8FF !important;
-      font-weight: 900;
-      margin-bottom: 16px;
-    }
-
-    .criterio-slider-item {
-      padding: 18px !important;
-      border-radius: 16px !important;
-      background: #102944 !important;
-      border: 1px solid rgba(0, 200, 255, 0.28) !important;
-      margin-bottom: 16px !important;
-    }
-
-    .criterio-slider-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 14px;
-      margin-bottom: 14px;
-    }
-
-    .criterio-label {
-      color: #FF7A1A !important;
-      font-weight: 900;
-      margin: 0;
-      font-size: 1.12rem;
-    }
-
-    .score-pill {
-      min-width: 132px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      border-radius: 999px;
-      padding: 9px 14px;
-      background: linear-gradient(135deg, rgba(0, 200, 255, 0.26), rgba(0, 110, 255, 0.24));
-      border: 1px solid rgba(0, 200, 255, 0.78);
-      color: #ffffff !important;
-      font-weight: 900;
-      white-space: nowrap;
-      box-shadow: 0 0 14px rgba(0, 200, 255, 0.25);
-      transition: transform .18s ease, box-shadow .18s ease;
-    }
-
-    .score-emoji {
-      font-size: 1.32rem;
-      line-height: 1;
-    }
-
-    .score-text {
-      font-size: 0.9rem;
-      color: #ffffff !important;
-    }
-
-    .range-wrap {
-      display: grid;
-      grid-template-columns: 34px 1fr 34px;
-      gap: 12px;
-      align-items: center;
-    }
-
-    .range-min,
-    .range-max {
-      color: #ffffff !important;
-      font-weight: 900;
-      text-align: center;
-      font-size: 1rem;
-    }
-
-    .score-range {
-      width: 100%;
-      cursor: pointer;
-      appearance: none;
-      -webkit-appearance: none;
-      height: 10px;
-      border-radius: 999px;
-      background: linear-gradient(to right, #00C8FF 0%, #00C8FF 50%, #334155 50%, #334155 100%);
-      outline: none;
-    }
-
-    .score-range::-webkit-slider-runnable-track {
-      height: 10px;
-      border-radius: 999px;
-      background: transparent;
-    }
-
-    .score-range::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 22px;
-      height: 22px;
-      margin-top: -6px;
-      border-radius: 50%;
-      background: #00C8FF;
-      border: 3px solid #ffffff;
-      box-shadow:
-        0 0 0 4px rgba(0,200,255,.20),
-        0 0 16px rgba(0,200,255,.55);
-    }
-
-    .score-range::-moz-range-track {
-      height: 10px;
-      border-radius: 999px;
-      background: #334155;
-    }
-
-    .score-range::-moz-range-progress {
-      height: 10px;
-      border-radius: 999px;
-      background: #00C8FF;
-    }
-
-    .score-range::-moz-range-thumb {
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      background: #00C8FF;
-      border: 3px solid #ffffff;
-      box-shadow:
-        0 0 0 4px rgba(0,200,255,.20),
-        0 0 16px rgba(0,200,255,.55);
-    }
-
-    .range-help {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 9px;
-      color: #d5e5f8 !important;
-      font-size: 0.86rem;
-      font-weight: 700;
-    }
-
-    .comentario-box {
-      margin-top: 18px;
-    }
-
-    .comentario-box label {
-      color: #ffffff !important;
-      font-weight: 800;
-    }
-
-    textarea.form-control {
-      background: rgba(3, 14, 30, 0.98) !important;
-      color: #f8fafc !important;
-      border: 1px solid rgba(0, 200, 255, 0.38) !important;
-      border-radius: 16px !important;
-      padding: 13px !important;
-    }
-
-    textarea.form-control::placeholder {
-      color: #94a3b8 !important;
-      opacity: 1;
-    }
-
-    textarea.form-control:focus {
-      border-color: #00C8FF !important;
-      box-shadow: 0 0 0 .18rem rgba(0,200,255,.18) !important;
-    }
-
-    .form-text {
-      color: #AAB7C8 !important;
-    }
-
-    .btn-enviar-peer {
-      border: none !important;
-      border-radius: 999px !important;
-      padding: 12px 26px !important;
-      background: linear-gradient(135deg, #00C8FF, #4be4ff) !important;
-      color: #00151f !important;
-      font-weight: 900 !important;
-      box-shadow: 0 0 18px rgba(0, 200, 255, .45);
-    }
-
-    .btn-enviar-peer:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 0 26px rgba(0, 200, 255, .65);
-    }
-
-    .alert {
-      border-radius: 16px;
-      font-weight: 700;
-    }
-
-    @media (max-width: 640px) {
-      .criterio-slider-header {
-        flex-direction: column;
-      }
-
-      .score-pill {
-        width: 100%;
-      }
-
-      .range-wrap {
-        grid-template-columns: 26px 1fr 26px;
-      }
-    }
-  </style>
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  >
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800;900&display=swap"
+    rel="stylesheet"
+  >
+  <link
+    rel="stylesheet"
+    href="{% static 'css/estilo_peer_review.css' %}"
+  >
 </head>
 
-<body>
-<div class="container py-4">
-  <div class="row justify-content-center w-100">
-    <div class="col-lg-10">
-      <div class="card shadow-sm peer-card">
-        <div class="card-body">
+<body
+  class="peer-review-page"
+  data-metro-habilidad="comunicacion"
+>
 
-          <h1 class="h4 mb-2 peer-title" data-i18n="peer_titulo">Evaluación de Proyectos</h1>
 
-          <div class="bloque-instrucciones">
-            <strong data-i18n="peer_antes_evaluar">Antes de evaluar:</strong><br>
-            <span data-i18n="peer_instruccion_1">1) Solo se evalúa al equipo que está presentando en esta ronda.</span><br>
-            <span data-i18n="peer_instruccion_2_html">2) Tienen <strong>1 minuto y 30 segundos</strong> para evaluar.</span><br>
-            <span data-i18n="peer_instruccion_3">3) Si todos evalúan antes, el juego avanza automáticamente.</span><br>
-            <span data-i18n="peer_instruccion_4_html">4) Si un equipo no termina a tiempo, las áreas faltantes se completarán con nota máxima y ese equipo perderá <strong>2 tokens</strong>.</span>
+
+  <main class="peer-layout">
+    <section class="peer-stage" aria-labelledby="peerTitulo">
+
+      <header class="peer-hero">
+        <div class="peer-hero-copy">
+          <span class="peer-kicker">
+          </span>
+
+          <h1
+            id="peerTitulo"
+            class="peer-title"
+            data-i18n="peer_titulo"
+          >
+            Evaluación de Proyectos
+          </h1>
+
+          <p class="peer-subtitle">
+  Asignen una puntuación por criterio y envíen su evaluación
+  antes de que termine la ronda.
+</p>
+
+<div class="peer-penalty-note">
+  <span class="peer-penalty-icon" aria-hidden="true">⚠</span>
+
+  <p>
+    Si un equipo no termina a tiempo, las áreas faltantes se
+    completarán con nota máxima y ese equipo perderá
+    <strong>2 tokens</strong>.
+  </p>
+</div>
+        </div>
+
+        <div
+          id="timerPanelEvaluacion"
+          class="peer-timer-panel"
+          role="timer"
+          aria-live="polite"
+          aria-label="Tiempo restante para evaluar"
+        >
+          <span
+            class="peer-timer-label"
+            data-i18n="peer_tiempo_restante"
+          >
+            Tiempo restante
+          </span>
+
+          <strong
+            id="timerEvaluacion"
+            class="peer-timer-value"
+          >
+            01:30
+          </strong>
+
+          <span class="peer-timer-caption">
+            para enviar la evaluación
+          </span>
+        </div>
+      </header>
+
+      {% if messages %}
+        <div class="peer-messages" aria-live="polite">
+          {% for message in messages %}
+            <div
+              class="alert alert-{{ message.tags|default:'info' }} peer-alert"
+            >
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <section class="peer-round-card" aria-label="Equipo de la ronda">
+        <div class="peer-round-icon" aria-hidden="true">◆</div>
+
+        <div class="peer-round-copy">
+          <span
+            class="peer-round-label"
+            data-i18n="peer_equipo_presentando_ahora"
+          >
+            Equipo presentando ahora
+          </span>
+
+          <strong class="peer-round-team">
+            {{ grupo_objetivo.nombregrupo }}
+          </strong>
+        </div>
+
+        {% if mi_equipo_presenta %}
+          <span class="peer-status-chip es-presentando">
+            Presentando
+          </span>
+        {% elif ya_evaluo %}
+          <span class="peer-status-chip es-completado">
+            Evaluación enviada
+          </span>
+        {% else %}
+          <span class="peer-status-chip es-evaluando">
+            Evaluando
+          </span>
+        {% endif %}
+      </section>
+
+      {% if mi_equipo_presenta %}
+        <section class="peer-waiting-card" aria-live="polite">
+          <div class="peer-waiting-orbit" aria-hidden="true">
+            <span>◆</span>
           </div>
 
-          {% if messages %}
-            {% for message in messages %}
-              <div class="alert alert-{{ message.tags|default:'info' }} mb-2">
-                {{ message }}
-              </div>
-            {% endfor %}
-          {% endif %}
+          <div>
+            <h2>Su equipo está presentando</h2>
 
-          <div class="bloque-progreso">
-            <p class="mb-1">
-              <span data-i18n="peer_equipo_presentando_ahora">Equipo presentando ahora:</span>
-              <strong>{{ grupo_objetivo.nombregrupo }}</strong>
+            <p data-i18n="peer_mi_equipo_presenta_help">
+              Esperen mientras los demás equipos terminan
+              de evaluar esta presentación.
             </p>
+          </div>
+        </section>
 
-            <p class="mb-1">
-              ⏱️ <span data-i18n="peer_tiempo_restante">Tiempo restante:</span>
-              <strong id="timerEvaluacion" class="timer-evaluacion">1:30</strong>
-            </p>
-
-            {% if mi_equipo_presenta %}
-              <p class="mb-0 texto-ayuda" data-i18n="peer_mi_equipo_presenta_help">
-                Tu equipo está presentando. Espera a que los demás equipos terminen de evaluar.
-              </p>
-            {% else %}
-              <p class="mb-0 texto-ayuda" data-i18n="peer_evalua_este_equipo">
-                Evalúa solo a este equipo en esta ronda.
-              </p>
-            {% endif %}
+      {% elif ya_evaluo %}
+        <section class="peer-waiting-card es-exito" aria-live="polite">
+          <div class="peer-waiting-orbit" aria-hidden="true">
+            <span>✓</span>
           </div>
 
-          {% if mi_equipo_presenta %}
-            <div class="alert alert-info" data-i18n="peer_alert_mi_equipo_presenta">
-              Tu equipo está presentando en este momento. No debes completar esta evaluación.
-            </div>
+          <div>
+            <h2>Evaluación registrada</h2>
 
-          {% elif ya_evaluo %}
-            <div class="alert alert-success" data-i18n="peer_alert_ya_evaluo">
-              Tu equipo ya envió la evaluación de esta presentación. Espera a que termine la ronda.
-            </div>
+            <p data-i18n="peer_alert_ya_evaluo">
+              Su equipo ya envió la evaluación. Esperen a que
+              termine la ronda.
+            </p>
+          </div>
+        </section>
 
-          {% else %}
-            <div class="equipo-objetivo-box">
-              <label class="form-label fw-semibold mb-1" data-i18n="peer_equipo_evaluado_label">Equipo evaluado en esta ronda</label>
+      {% else %}
+        <form
+          method="post"
+          id="peerReviewForm"
+          class="peer-form"
+          action="{% url 'peer_review' %}"
+        >
+          {% csrf_token %}
+
+          <section class="criteria-panel" aria-labelledby="criteriosTitulo">
+            <div class="criteria-heading">
               <div>
-                <strong>{{ grupo_objetivo.nombregrupo }}</strong>
+                <span class="criteria-kicker">
+                  MATRIZ DE EVALUACIÓN
+                </span>
+
+                <h2
+                  id="criteriosTitulo"
+                  data-i18n="peer_evalua_presentacion"
+                >
+                  Evalúa la presentación
+                </h2>
               </div>
+
+              <p>
+                Deslicen cada criterio desde 1 hasta 5.
+              </p>
             </div>
 
-            <form method="post" id="peerReviewForm" action="{% url 'peer_review' %}">
-              {% csrf_token %}
+            <div class="criteria-list">
+              {% for c in criteria %}
+                <article class="criterio-slider-item">
+                  <div class="criterio-slider-header">
+                    <label
+                      class="criterio-label"
+                      for="score_{{ c.key }}"
+                      data-criterio-key="{{ c.key }}"
+                    >
+                      {{ c.label }}
+                    </label>
 
-              <div class="criterio-box mb-3">
-                <h2 class="h6" data-i18n="peer_evalua_presentacion">Evalúa la presentación</h2>
-
-                {% for c in criteria %}
-                  <div class="criterio-slider-item">
-                    <div class="criterio-slider-header">
-                      <label
-                        class="criterio-label"
-                        for="score_{{ c.key }}"
-                        data-criterio-key="{{ c.key }}"
+                    <div
+                      class="score-pill"
+                      id="score_pill_{{ c.key }}"
+                      aria-live="polite"
+                    >
+                      <span
+                        class="score-emoji"
+                        id="score_emoji_{{ c.key }}"
+                        aria-hidden="true"
                       >
-                        {{ c.label }}
-                      </label>
+                        😊
+                      </span>
 
-                      <div class="score-pill" id="score_pill_{{ c.key }}">
-                        <span class="score-emoji" id="score_emoji_{{ c.key }}">😊</span>
-                        <span class="score-text" id="score_text_{{ c.key }}">3 / 5</span>
-                      </div>
-                    </div>
-
-                    <div class="range-wrap">
-                      <span class="range-min">1</span>
-
-                      <input
-                        class="score-range"
-                        type="range"
-                        name="score_{{ c.key }}"
-                        id="score_{{ c.key }}"
-                        min="1"
-                        max="5"
-                        step="1"
-                        value="3"
-                        data-key="{{ c.key }}"
-                        required
+                      <span
+                        class="score-text"
+                        id="score_text_{{ c.key }}"
                       >
-
-                      <span class="range-max">5</span>
-                    </div>
-
-                    <div class="range-help">
-                      <span data-i18n="peer_muy_bajo">Muy bajo</span>
-                      <span data-i18n="peer_excelente">Excelente</span>
+                        3 / 5
+                      </span>
                     </div>
                   </div>
-                {% endfor %}
-              </div>
 
-              <div class="comentario-box mb-3">
-                <label class="form-label" for="comment">
-                  <span data-i18n="peer_comentario_label">Comentario para el equipo</span>
-                  <span style="font-weight:600; color:#AAB7C8;" data-i18n="peer_opcional">(opcional)</span>
+                  <div class="range-wrap">
+                    <span class="range-limit">1</span>
+
+                    <input
+                      class="score-range"
+                      type="range"
+                      name="score_{{ c.key }}"
+                      id="score_{{ c.key }}"
+                      min="1"
+                      max="5"
+                      step="1"
+                      value="3"
+                      data-key="{{ c.key }}"
+                      aria-label="{{ c.label }}"
+                      required
+                    >
+
+                    <span class="range-limit">5</span>
+                  </div>
+
+                  <div class="range-help">
+                    <span data-i18n="peer_muy_bajo">Muy bajo</span>
+                    <span data-i18n="peer_excelente">Excelente</span>
+                  </div>
+                </article>
+              {% endfor %}
+            </div>
+          </section>
+
+          <section class="comment-panel">
+            <div class="comment-heading">
+              <div>
+                <span class="comment-kicker">
+                  MENSAJE AL EQUIPO
+                </span>
+
+                <label for="comment">
+                  <span data-i18n="peer_comentario_label">
+                    Comentario
+                  </span>
+
+                  <span
+                    class="comment-optional"
+                    data-i18n="peer_opcional"
+                  >
+                    opcional
+                  </span>
                 </label>
-
-                <textarea
-                  id="comment"
-                  name="comment"
-                  rows="3"
-                  class="form-control"
-                  maxlength="600"
-                  placeholder="Puedes escribir una fortaleza o una sugerencia concreta para el equipo..."
-                ></textarea>
-
-                <div class="form-text" data-i18n="peer_comentario_help">
-                  Este comentario quedará guardado para mostrarse más adelante al profesor/admin.
-                </div>
               </div>
 
-              <div class="d-flex gap-2 flex-wrap">
-                <button type="submit" class="btn btn-primary btn-enviar-peer" id="btnEnviarEvaluacion" data-i18n="peer_boton_enviar">
-                  Enviar evaluación
-                </button>
-              </div>
-            </form>
-          {% endif %}
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+              <span id="commentCounter" class="comment-counter">
+                0/600
+              </span>
+            </div>
 
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const form = document.getElementById("peerReviewForm");
-    const btn = document.getElementById("btnEnviarEvaluacion");
-    const sesionId = "{{ session.idsesion }}";
-    const grupoObjetivoInicial = "{{ grupo_objetivo.idgrupo|default:'' }}";
-    const timerEvaluacion = document.getElementById("timerEvaluacion");
+            <textarea
+              id="comment"
+              name="comment"
+              rows="4"
+              class="form-control"
+              maxlength="600"
+              placeholder="Escriban una fortaleza o una sugerencia concreta para el equipo..."
+            ></textarea>
+          </section>
 
-    let redirigiendo = false;
-    let fallbackInicioEvaluacion = Date.now();
-    const FALLBACK_SEGUNDOS_EVALUACION = 90;
+          <div class="peer-actions">
+            <p class="peer-actions-note">
+              La ronda avanzará cuando todos los equipos hayan enviado.
+            </p>
 
-    function tPeer(clave, fallback) {
-      try {
-        const idioma = window.i18nJuego?.obtenerIdioma?.() || "es";
-        return window.i18nJuego?.traducciones?.[idioma]?.[clave] || fallback;
-      } catch (e) {
-        return fallback;
-      }
-    }
+            <button
+              type="submit"
+              class="btn-enviar-peer"
+              id="btnEnviarEvaluacion"
+              data-i18n="peer_boton_enviar"
+            >
+              Enviar evaluación
+            </button>
+          </div>
+        </form>
+      {% endif %}
+    </section>
+  </main>
 
-    function aplicarTextosPeer() {
-      document.title = tPeer("peer_document_title", "Misión Emprende UDD — Evaluación de Proyectos");
-
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const form = document.getElementById("peerReviewForm");
+      const btn = document.getElementById("btnEnviarEvaluacion");
+      const sesionId = "{{ session.idsesion }}";
+      const grupoObjetivoInicial = "{{ grupo_objetivo.idgrupo|default:'' }}";
+      const timerEvaluacion = document.getElementById("timerEvaluacion");
+      const timerPanel = document.getElementById("timerPanelEvaluacion");
       const comment = document.getElementById("comment");
-      if (comment) {
-        comment.placeholder = tPeer(
-          "peer_comentario_placeholder",
-          "Puedes escribir una fortaleza o una sugerencia concreta para el equipo..."
+      const commentCounter = document.getElementById("commentCounter");
+
+      let redirigiendo = false;
+      let fallbackInicioEvaluacion = Date.now();
+
+      const FALLBACK_SEGUNDOS_EVALUACION = 90;
+
+      function tPeer(clave, fallback) {
+        try {
+          const idioma =
+            window.i18nJuego?.obtenerIdioma?.() || "es";
+
+          return (
+            window.i18nJuego?.traducciones?.[idioma]?.[clave]
+            || fallback
+          );
+        } catch (error) {
+          return fallback;
+        }
+      }
+
+      function aplicarTextosPeer() {
+        document.title = tPeer(
+          "peer_document_title",
+          "Misión Emprende UDD — Evaluación de Proyectos"
+        );
+
+        if (comment) {
+          comment.placeholder = tPeer(
+            "peer_comentario_placeholder",
+            "Escriban una fortaleza o una sugerencia concreta para el equipo..."
+          );
+        }
+
+        document
+          .querySelectorAll("[data-criterio-key]")
+          .forEach((label) => {
+            const key = label.dataset.criterioKey;
+            const fallback = label.textContent.trim();
+
+            label.textContent = tPeer(
+              `peer_criterio_${key}`,
+              fallback
+            );
+          });
+      }
+
+      function formatearTiempo(segundos) {
+        const total = Math.max(
+          Math.floor(Number(segundos) || 0),
+          0
+        );
+
+        const minutos = Math.floor(total / 60);
+        const restantes = total % 60;
+
+        return (
+          `${String(minutos).padStart(2, "0")}:`
+          + `${String(restantes).padStart(2, "0")}`
         );
       }
 
-      document.querySelectorAll("[data-criterio-key]").forEach(label => {
-        const key = label.dataset.criterioKey;
-        const fallback = label.textContent.trim();
-        label.textContent = tPeer(`peer_criterio_${key}`, fallback);
-      });
-    }
+      function segundosFallback() {
+        const transcurridos = Math.floor(
+          (Date.now() - fallbackInicioEvaluacion) / 1000
+        );
 
-    function formatearTiempo(segundos) {
-      segundos = Math.max(Number(segundos || 0), 0);
-      const min = Math.floor(segundos / 60);
-      const seg = segundos % 60;
-      return `${min}:${String(seg).padStart(2, "0")}`;
-    }
-
-    function segundosFallback() {
-      const transcurridos = Math.floor((Date.now() - fallbackInicioEvaluacion) / 1000);
-      return Math.max(FALLBACK_SEGUNDOS_EVALUACION - transcurridos, 0);
-    }
-
-    function segundosParaMostrar(data) {
-      const segundosBackend = Number(data?.segundosRestantes || 0);
-
-      if (segundosBackend > 0) {
-        return segundosBackend;
+        return Math.max(
+          FALLBACK_SEGUNDOS_EVALUACION - transcurridos,
+          0
+        );
       }
 
-      if (data?.faseActual === "f5_evaluacion_pitch") {
-        return segundosFallback();
-      }
+      function segundosParaMostrar(data) {
+        const segundosBackend = Number(
+          data?.segundosRestantes || 0
+        );
 
-      return 0;
-    }
-
-    function textoScore(valor) {
-      const v = Number(valor);
-
-      if (v <= 1) {
-        return {
-          emoji: "😕",
-          texto: "1 / 5"
-        };
-      }
-
-      if (v === 2) {
-        return {
-          emoji: "🙂",
-          texto: "2 / 5"
-        };
-      }
-
-      if (v === 3) {
-        return {
-          emoji: "😊",
-          texto: "3 / 5"
-        };
-      }
-
-      if (v === 4) {
-        return {
-          emoji: "🤩",
-          texto: "4 / 5"
-        };
-      }
-
-      return {
-        emoji: "🚀",
-        texto: "5 / 5"
-      };
-    }
-
-    function actualizarSlider(slider) {
-      const key = slider.dataset.key;
-      const valor = Number(slider.value || 3);
-      const resultado = textoScore(valor);
-
-      const emoji = document.getElementById(`score_emoji_${key}`);
-      const text = document.getElementById(`score_text_${key}`);
-      const pill = document.getElementById(`score_pill_${key}`);
-
-      if (emoji) emoji.textContent = resultado.emoji;
-      if (text) text.textContent = resultado.texto;
-
-      const porcentaje = ((valor - 1) / 4) * 100;
-
-      slider.style.background =
-        `linear-gradient(to right, #00C8FF 0%, #00C8FF ${porcentaje}%, #334155 ${porcentaje}%, #334155 100%)`;
-
-      if (pill) {
-        pill.style.transform = `scale(${1 + (valor - 3) * 0.025})`;
-
-        if (valor <= 2) {
-          pill.style.boxShadow = "0 0 14px rgba(248, 113, 113, 0.35)";
-          pill.style.borderColor = "rgba(248, 113, 113, 0.75)";
-        } else if (valor === 3) {
-          pill.style.boxShadow = "0 0 14px rgba(0, 200, 255, 0.25)";
-          pill.style.borderColor = "rgba(0, 200, 255, 0.78)";
-        } else {
-          pill.style.boxShadow = "0 0 18px rgba(34, 197, 94, 0.42)";
-          pill.style.borderColor = "rgba(34, 197, 94, 0.78)";
+        if (segundosBackend > 0) {
+          return segundosBackend;
         }
+
+        if (data?.faseActual === "f5_evaluacion_pitch") {
+          return segundosFallback();
+        }
+
+        return 0;
       }
-    }
 
-    aplicarTextosPeer();
-
-    document.querySelectorAll(".score-range").forEach(slider => {
-      actualizarSlider(slider);
-      slider.addEventListener("input", () => actualizarSlider(slider));
-      slider.addEventListener("change", () => actualizarSlider(slider));
-    });
-
-    if (form && btn) {
-      form.addEventListener("submit", () => {
-        btn.disabled = true;
-        btn.textContent = tPeer("peer_boton_enviando", "Enviando...");
-      });
-    }
-
-    async function revisarEstadoEvaluacion() {
-      if (redirigiendo) return;
-
-      try {
-        const res = await fetch(`/sesion/${sesionId}/estado/`, {
-          credentials: "same-origin",
-          cache: "no-store"
-        });
-
-        if (!res.ok) return;
-
-        const data = await res.json();
+      function actualizarTimer(segundos) {
+        const valor = Math.max(
+          Math.floor(Number(segundos) || 0),
+          0
+        );
 
         if (timerEvaluacion) {
-          timerEvaluacion.textContent = formatearTiempo(segundosParaMostrar(data));
+          timerEvaluacion.textContent =
+            formatearTiempo(valor);
         }
 
-        if (data.faseActual !== "f5_evaluacion_pitch") {
-          if (data.rutaAlumno) {
-            redirigiendo = true;
-            window.location.replace(data.rutaAlumno);
+        if (timerPanel) {
+          timerPanel.classList.toggle(
+            "es-urgente",
+            valor > 0 && valor <= 30
+          );
+
+          timerPanel.classList.toggle(
+            "es-finalizado",
+            valor <= 0
+          );
+        }
+      }
+
+      function textoScore(valor) {
+        const valorNumero = Number(valor);
+
+        if (valorNumero <= 1) {
+          return {
+            emoji: "😕",
+            texto: "1 / 5"
+          };
+        }
+
+        if (valorNumero === 2) {
+          return {
+            emoji: "🙂",
+            texto: "2 / 5"
+          };
+        }
+
+        if (valorNumero === 3) {
+          return {
+            emoji: "😊",
+            texto: "3 / 5"
+          };
+        }
+
+        if (valorNumero === 4) {
+          return {
+            emoji: "🤩",
+            texto: "4 / 5"
+          };
+        }
+
+        return {
+          emoji: "🚀",
+          texto: "5 / 5"
+        };
+      }
+
+      function actualizarSlider(slider) {
+        const key = slider.dataset.key;
+        const valor = Number(slider.value || 3);
+        const resultado = textoScore(valor);
+
+        const emoji = document.getElementById(
+          `score_emoji_${key}`
+        );
+
+        const text = document.getElementById(
+          `score_text_${key}`
+        );
+
+        const pill = document.getElementById(
+          `score_pill_${key}`
+        );
+
+        if (emoji) {
+          emoji.textContent = resultado.emoji;
+        }
+
+        if (text) {
+          text.textContent = resultado.texto;
+        }
+
+        const porcentaje = (
+          (valor - 1) / 4
+        ) * 100;
+
+        slider.style.background =
+          `linear-gradient(`
+          + `to right, `
+          + `#00e7ff 0%, `
+          + `#00ff98 ${porcentaje}%, `
+          + `rgba(80, 111, 142, .42) ${porcentaje}%, `
+          + `rgba(80, 111, 142, .42) 100%`
+          + `)`;
+
+        if (pill) {
+          pill.classList.remove(
+            "puntaje-bajo",
+            "puntaje-medio",
+            "puntaje-alto"
+          );
+
+          if (valor <= 2) {
+            pill.classList.add("puntaje-bajo");
+          } else if (valor === 3) {
+            pill.classList.add("puntaje-medio");
+          } else {
+            pill.classList.add("puntaje-alto");
           }
+        }
+      }
+
+      function actualizarContadorComentario() {
+        if (!comment || !commentCounter) {
           return;
         }
 
-        const grupoActual = data.grupoActual;
-
-        if (!grupoActual || String(grupoActual.id) !== String(grupoObjetivoInicial)) {
-          redirigiendo = true;
-          window.location.reload();
-        }
-      } catch (error) {
-        console.error("Error sincronizando evaluación:", error);
+        commentCounter.textContent =
+          `${comment.value.length}/600`;
       }
-    }
 
-    setInterval(revisarEstadoEvaluacion, 1000);
-    revisarEstadoEvaluacion();
-  });
-</script>
+      aplicarTextosPeer();
+      actualizarTimer(FALLBACK_SEGUNDOS_EVALUACION);
+      actualizarContadorComentario();
 
-{% with grupo=evaluator_team %}
-  {% include "includes/sincronizacion_fase.html" %}
-{% endwith %}
+      document
+        .querySelectorAll(".score-range")
+        .forEach((slider) => {
+          actualizarSlider(slider);
+
+          slider.addEventListener(
+            "input",
+            () => actualizarSlider(slider)
+          );
+
+          slider.addEventListener(
+            "change",
+            () => actualizarSlider(slider)
+          );
+        });
+
+      comment?.addEventListener(
+        "input",
+        actualizarContadorComentario
+      );
+
+      window.addEventListener(
+        "idiomaJuegoCambiado",
+        aplicarTextosPeer
+      );
+
+      if (form && btn) {
+        form.addEventListener("submit", () => {
+          btn.disabled = true;
+
+          btn.textContent = tPeer(
+            "peer_boton_enviando",
+            "Enviando..."
+          );
+        });
+      }
+
+      async function revisarEstadoEvaluacion() {
+        if (redirigiendo) {
+          return;
+        }
+
+        try {
+          const response = await fetch(
+            `/sesion/${sesionId}/estado/`,
+            {
+              credentials: "same-origin",
+              cache: "no-store"
+            }
+          );
+
+          if (!response.ok) {
+            return;
+          }
+
+          const data = await response.json();
+          const segundos = segundosParaMostrar(data);
+
+          actualizarTimer(segundos);
+
+          if (
+            data.faseActual
+            !== "f5_evaluacion_pitch"
+          ) {
+            if (data.rutaAlumno) {
+              redirigiendo = true;
+
+              window.location.replace(
+                data.rutaAlumno
+              );
+            }
+
+            return;
+          }
+
+          const grupoActual = data.grupoActual;
+
+          if (
+            !grupoActual
+            || String(grupoActual.id)
+              !== String(grupoObjetivoInicial)
+          ) {
+            redirigiendo = true;
+            window.location.reload();
+          }
+        } catch (error) {
+          console.error(
+            "Error sincronizando evaluación:",
+            error
+          );
+        }
+      }
+
+      window.setInterval(
+        revisarEstadoEvaluacion,
+        1000
+      );
+
+      revisarEstadoEvaluacion();
+    });
+  </script>
+
+  {% with grupo=evaluator_team %}
+    {% include "includes/sincronizacion_fase.html" %}
+  {% endwith %}
 </body>
 </html>

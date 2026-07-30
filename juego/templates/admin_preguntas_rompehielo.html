@@ -63,6 +63,63 @@
       box-shadow: 0 0 0 3px rgba(0,242,109,.16);
     }
 
+
+    .admin-help {
+      margin: 0 0 16px;
+      padding: 12px 14px;
+      border: 1px solid rgba(0, 59, 255, .16);
+      border-radius: 12px;
+      background: rgba(0, 59, 255, .05);
+      color: #374151;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .admin-help strong {
+      color: #003BFF;
+    }
+
+    .pregunta-meta {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      flex-wrap: wrap;
+    }
+
+    .pregunta-tipo {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .02em;
+    }
+
+    .pregunta-tipo.base {
+      background: rgba(0, 59, 255, .12);
+      color: #003BFF;
+      border: 1px solid rgba(0, 59, 255, .18);
+    }
+
+    .pregunta-tipo.pool {
+      background: rgba(124, 58, 237, .11);
+      color: #6d28d9;
+      border: 1px solid rgba(124, 58, 237, .18);
+    }
+
+    .pregunta-item.es-base {
+      border-color: rgba(0, 59, 255, .22);
+      background:
+        linear-gradient(
+          135deg,
+          rgba(0, 59, 255, .045),
+          rgba(255,255,255,0)
+        ),
+        #f9fafb;
+    }
+
     .check-line {
       display: flex;
       align-items: center;
@@ -295,8 +352,8 @@
 
       <h1 class="title">Preguntas rompehielo</h1>
       <p class="subtitle">
-        Administra las preguntas que verán los equipos según el modo elegido:
-        personas conocidas o personas que no se conocen.
+        Administra la pregunta base y el conjunto de preguntas adicionales
+        para personas conocidas y personas que no se conocen.
       </p>
 
       <section class="preguntas-layout">
@@ -308,6 +365,12 @@
             <h3>Nueva pregunta</h3>
           {% endif %}
 
+          <p class="admin-help">
+            Usa <strong>Pregunta base</strong> para la instrucción que verá
+            siempre cada grupo. Usa <strong>Pool aleatorio</strong> para las
+            preguntas adicionales que se asignarán una vez por grupo.
+          </p>
+
           <form method="post" action="{% url 'admin_preguntas_rompehielo' %}">
             {% csrf_token %}
 
@@ -317,19 +380,74 @@
 
             <div class="form-group">
               <label for="tipo_equipo">Tipo de equipo</label>
-              <select class="form-control" id="tipo_equipo" name="tipo_equipo">
-                <option value="desconocidos" {% if pregunta_editando.tipo_equipo == "desconocidos" %}selected{% endif %}>
+
+              <select
+                class="form-control"
+                id="tipo_equipo"
+                name="tipo_equipo"
+                required
+              >
+                <option
+                  value="desconocidos"
+                  {% if pregunta_editando.tipo_equipo == "desconocidos" %}
+                    selected
+                  {% endif %}
+                >
                   Personas que no se conocen
                 </option>
-                <option value="conocidos" {% if pregunta_editando.tipo_equipo == "conocidos" %}selected{% endif %}>
+
+                <option
+                  value="conocidos"
+                  {% if pregunta_editando.tipo_equipo == "conocidos" %}
+                    selected
+                  {% endif %}
+                >
                   Personas conocidas
                 </option>
               </select>
             </div>
 
             <div class="form-group">
-              <label for="texto">Pregunta</label>
-              <textarea class="form-control" id="texto" name="texto" required>{% if pregunta_editando %}{{ pregunta_editando.texto }}{% endif %}</textarea>
+              <label for="tipo_pregunta">
+                Función de la pregunta
+              </label>
+
+              <select
+                class="form-control"
+                id="tipo_pregunta"
+                name="tipo_pregunta"
+                required
+              >
+                <option
+                  value="base"
+                  {% if pregunta_editando.tipo_pregunta == "base" %}
+                    selected
+                  {% endif %}
+                >
+                  Pregunta base
+                </option>
+
+                <option
+                  value="pool"
+                  {% if not pregunta_editando or pregunta_editando.tipo_pregunta == "pool" %}
+                    selected
+                  {% endif %}
+                >
+                  Pregunta adicional del pool
+                </option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="texto">Texto de la pregunta</label>
+
+              <textarea
+                class="form-control"
+                id="texto"
+                name="texto"
+                required
+                placeholder="Escribe aquí la pregunta..."
+              >{% if pregunta_editando %}{{ pregunta_editando.texto }}{% endif %}</textarea>
             </div>
 
             <div class="form-group">
@@ -363,13 +481,32 @@
 
             {% if preguntas_desconocidos %}
               {% for p in preguntas_desconocidos %}
-                <article class="pregunta-item">
+                <article class="pregunta-item {% if p.tipo_pregunta == 'base' %}es-base{% endif %}">
                   <div class="pregunta-top">
-                    <span class="pregunta-orden">Orden {{ p.orden }}</span>
+                    <div class="pregunta-meta">
+                      <span class="pregunta-orden">
+                        Orden {{ p.orden }}
+                      </span>
+
+                      {% if p.tipo_pregunta == "base" %}
+                        <span class="pregunta-tipo base">
+                          Base fija
+                        </span>
+                      {% else %}
+                        <span class="pregunta-tipo pool">
+                          Pool aleatorio
+                        </span>
+                      {% endif %}
+                    </div>
+
                     {% if p.activa %}
-                      <span class="pregunta-status activa">Activa</span>
+                      <span class="pregunta-status activa">
+                        Activa
+                      </span>
                     {% else %}
-                      <span class="pregunta-status inactiva">Inactiva</span>
+                      <span class="pregunta-status inactiva">
+                        Inactiva
+                      </span>
                     {% endif %}
                   </div>
 
@@ -395,7 +532,7 @@
                 </article>
               {% endfor %}
             {% else %}
-              <p class="empty-state">Aún no hay preguntas para este modo.</p>
+              <p class="empty-state">Aún no hay preguntas configuradas para este modo.</p>
             {% endif %}
           </div>
 
@@ -404,13 +541,32 @@
 
             {% if preguntas_conocidos %}
               {% for p in preguntas_conocidos %}
-                <article class="pregunta-item">
+                <article class="pregunta-item {% if p.tipo_pregunta == 'base' %}es-base{% endif %}">
                   <div class="pregunta-top">
-                    <span class="pregunta-orden">Orden {{ p.orden }}</span>
+                    <div class="pregunta-meta">
+                      <span class="pregunta-orden">
+                        Orden {{ p.orden }}
+                      </span>
+
+                      {% if p.tipo_pregunta == "base" %}
+                        <span class="pregunta-tipo base">
+                          Base fija
+                        </span>
+                      {% else %}
+                        <span class="pregunta-tipo pool">
+                          Pool aleatorio
+                        </span>
+                      {% endif %}
+                    </div>
+
                     {% if p.activa %}
-                      <span class="pregunta-status activa">Activa</span>
+                      <span class="pregunta-status activa">
+                        Activa
+                      </span>
                     {% else %}
-                      <span class="pregunta-status inactiva">Inactiva</span>
+                      <span class="pregunta-status inactiva">
+                        Inactiva
+                      </span>
                     {% endif %}
                   </div>
 
@@ -436,7 +592,7 @@
                 </article>
               {% endfor %}
             {% else %}
-              <p class="empty-state">Aún no hay preguntas para este modo.</p>
+              <p class="empty-state">Aún no hay preguntas configuradas para este modo.</p>
             {% endif %}
           </div>
 

@@ -994,3 +994,10 @@ html body.ranking-parcial main.ranking-scene section.ranking-parcial-wrap .btn-r
     0 0 30px rgba(0, 200, 255, .24) !important;
 }
 
+/* ============================================================
+   PODIO FINAL
+   El rediseño futurista del podio se encuentra en
+   estilo_ranking_animado.css y está limitado a body.ranking-final.
+   Este archivo se conserva sin cambios visuales para no afectar
+   los rankings parciales ni las tablas compartidas.
+   ============================================================ */

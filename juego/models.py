@@ -4,28 +4,77 @@ from .image_utils import convertir_imagen_a_webp
 
 class PreguntaRompehielo(models.Model):
     TIPO_EQUIPO = (
-        ("desconocidos", "Personas que no se conocen"),
-        ("conocidos", "Personas conocidas"),
+        (
+            "desconocidos",
+            "Personas que no se conocen",
+        ),
+        (
+            "conocidos",
+            "Personas conocidas",
+        ),
     )
 
-    idpregunta = models.AutoField(primary_key=True)
+    TIPO_PREGUNTA = (
+        (
+            "base",
+            "Pregunta base",
+        ),
+        (
+            "pool",
+            "Pregunta aleatoria",
+        ),
+    )
+
+    idpregunta = models.AutoField(
+        primary_key=True
+    )
+
     tipo_equipo = models.CharField(
         max_length=20,
         choices=TIPO_EQUIPO,
-        default="desconocidos"
+        default="desconocidos",
     )
+
+    tipo_pregunta = models.CharField(
+        max_length=10,
+        choices=TIPO_PREGUNTA,
+        default="pool",
+    )
+
     texto = models.TextField()
-    activa = models.BooleanField(default=True)
-    orden = models.PositiveIntegerField(default=0)
-    creada_en = models.DateTimeField(auto_now_add=True)
-    actualizada_en = models.DateTimeField(auto_now=True)
+
+    activa = models.BooleanField(
+        default=True
+    )
+
+    orden = models.PositiveIntegerField(
+        default=0
+    )
+
+    creada_en = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    actualizada_en = models.DateTimeField(
+        auto_now=True
+    )
 
     class Meta:
         db_table = "pregunta_rompehielo"
-        ordering = ["tipo_equipo", "orden", "idpregunta"]
+
+        ordering = [
+            "tipo_equipo",
+            "tipo_pregunta",
+            "orden",
+            "idpregunta",
+        ]
 
     def __str__(self):
-        return f"{self.get_tipo_equipo_display()} — {self.texto[:60]}"
+        return (
+            f"{self.get_tipo_equipo_display()} — "
+            f"{self.get_tipo_pregunta_display()} — "
+            f"{self.texto[:60]}"
+        )
         
 class Alumno(models.Model):
     idalumno = models.AutoField(db_column='idAlumno', primary_key=True)
@@ -143,71 +192,229 @@ class Encuesta(models.Model):
         db_table = 'encuesta'
 
 class Grupo(models.Model):
-    idgrupo = models.AutoField(db_column='idGrupo', primary_key=True)
-    sesion = models.ForeignKey('Sesion', models.CASCADE, db_column='sesion_idSesion', null=True)
-    nombregrupo = models.CharField(max_length=100, blank=True, null=True)
-    usuario_idusuario = models.ForeignKey(
-        'Usuario',
-        models.DO_NOTHING,
-        db_column='usuario_idUsuario',
-        null=True,
-        blank=True
+    MODO_CONOCIDOS = (
+        (
+            "desconocidos",
+            "Personas que no se conocen",
+        ),
+        (
+            "conocidos",
+            "Personas conocidas",
+        ),
     )
-    tokensgrupo = models.IntegerField(blank=True, null=True, default=10)
-    etapa = models.IntegerField(blank=True, null=True, default=1)
+
+    idgrupo = models.AutoField(
+        db_column="idGrupo",
+        primary_key=True,
+    )
+
+    sesion = models.ForeignKey(
+        "Sesion",
+        models.CASCADE,
+        db_column="sesion_idSesion",
+        null=True,
+    )
+
+    nombregrupo = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+    )
+
+    usuario_idusuario = models.ForeignKey(
+        "Usuario",
+        models.DO_NOTHING,
+        db_column="usuario_idUsuario",
+        null=True,
+        blank=True,
+    )
+
+    tokensgrupo = models.IntegerField(
+        blank=True,
+        null=True,
+        default=10,
+    )
+
+    etapa = models.IntegerField(
+        blank=True,
+        null=True,
+        default=1,
+    )
+
     codigoacceso = models.CharField(
-        db_column='codigoAcceso',
+        db_column="codigoAcceso",
         max_length=8,
         unique=True,
         blank=True,
-        null=True
+        null=True,
     )
 
-    sopa_ganada = models.BooleanField(default=False)
-    sopa_tiempo_segundos = models.PositiveIntegerField(null=True, blank=True)
-    sopa_completada_en = models.DateTimeField(null=True, blank=True)
-    orden_presentacion = models.PositiveIntegerField(null=True, blank=True)
-    recompensa_peer_otorgada = models.BooleanField(default=False)
+    # Configuración de la actividad de conocidos.
+    modo_conocidos = models.CharField(
+        max_length=20,
+        choices=MODO_CONOCIDOS,
+        blank=True,
+        null=True,
+    )
 
-    foto_lego = models.ImageField(upload_to="legos/", null=True, blank=True)
-    pitch_texto = models.TextField(null=True, blank=True)
-    listo_ranking = models.BooleanField(default=False)
+    pregunta_rompehielo_asignada = models.ForeignKey(
+        "PreguntaRompehielo",
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name="grupos_asignados",
+    )
 
-    # Sincro F2
-    tema_elegido = models.CharField(max_length=80, blank=True, null=True)
+    # Sopa de letras.
+    sopa_ganada = models.BooleanField(
+        default=False
+    )
+
+    sopa_tiempo_segundos = (
+        models.PositiveIntegerField(
+            null=True,
+            blank=True,
+        )
+    )
+
+    sopa_completada_en = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
+
+    orden_presentacion = (
+        models.PositiveIntegerField(
+            null=True,
+            blank=True,
+        )
+    )
+
+    recompensa_peer_otorgada = (
+        models.BooleanField(
+            default=False
+        )
+    )
+
+    # Archivos y pitch.
+    foto_lego = models.ImageField(
+        upload_to="legos/",
+        null=True,
+        blank=True,
+    )
+
+    pitch_texto = models.TextField(
+        null=True,
+        blank=True,
+    )
+
+    listo_ranking = models.BooleanField(
+        default=False
+    )
+
+    # Sincronización F2.
+    tema_elegido = models.CharField(
+        max_length=80,
+        blank=True,
+        null=True,
+    )
+
     desafio_elegido = models.ForeignKey(
-        'Desafio',
+        "Desafio",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='grupos_que_lo_eligieron'
+        related_name="grupos_que_lo_eligieron",
     )
-    desafio_id_externo = models.CharField(max_length=50, blank=True, null=True)
-    desafio_nombre = models.CharField(max_length=255, blank=True, null=True)
-    desafio_descripcion = models.TextField(blank=True, null=True)
 
-    listo_f2_tematicas = models.BooleanField(default=False)
-    listo_f2_tematica = models.BooleanField(default=False)
-    listo_f2_desafio = models.BooleanField(default=False)
-    listo_f3_lego = models.BooleanField(default=False)
-    lego_sin_foto = models.BooleanField(default=False)
-    listo_lobby = models.BooleanField(default=False)
-    listo_f1 = models.BooleanField(default=False)
-    listo_f3 = models.BooleanField(default=False)
-    listo_f4 = models.BooleanField(default=False)
-    listo_f5 = models.BooleanField(default=False)
-    listo_f6 = models.BooleanField(default=False)
-    listo_f4_orden = models.BooleanField(default=False)
-    listo_inicio_f3 = models.BooleanField(default=False)
-    listo_f2 = models.BooleanField(default=False)
-    listo_f2_empatia = models.BooleanField(default=False)
-    bubble_tokens_otorgados = models.BooleanField(default=False)
+    desafio_id_externo = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+    )
+
+    desafio_nombre = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+    )
+
+    desafio_descripcion = models.TextField(
+        blank=True,
+        null=True,
+    )
+
+    listo_f2_tematicas = models.BooleanField(
+        default=False
+    )
+
+    listo_f2_tematica = models.BooleanField(
+        default=False
+    )
+
+    listo_f2_desafio = models.BooleanField(
+        default=False
+    )
+
+    listo_f3_lego = models.BooleanField(
+        default=False
+    )
+
+    lego_sin_foto = models.BooleanField(
+        default=False
+    )
+
+    listo_lobby = models.BooleanField(
+        default=False
+    )
+
+    listo_f1 = models.BooleanField(
+        default=False
+    )
+
+    listo_f3 = models.BooleanField(
+        default=False
+    )
+
+    listo_f4 = models.BooleanField(
+        default=False
+    )
+
+    listo_f5 = models.BooleanField(
+        default=False
+    )
+
+    listo_f6 = models.BooleanField(
+        default=False
+    )
+
+    listo_f4_orden = models.BooleanField(
+        default=False
+    )
+
+    listo_inicio_f3 = models.BooleanField(
+        default=False
+    )
+
+    listo_f2 = models.BooleanField(
+        default=False
+    )
+
+    listo_f2_empatia = models.BooleanField(
+        default=False
+    )
+
+    bubble_tokens_otorgados = (
+        models.BooleanField(
+            default=False
+        )
+    )
 
     class Meta:
-        db_table = 'grupo'
+        db_table = "grupo"
 
     def ajustar_tokens(self, cantidad):
         """Suma o resta tokens del grupo."""
+
         if self.tokensgrupo is None:
             self.tokensgrupo = 0
 
@@ -222,24 +429,51 @@ class Grupo(models.Model):
         archivo_anterior = None
 
         if self.pk:
-            anterior = type(self).objects.filter(pk=self.pk).first()
-            if anterior and anterior.foto_lego:
-                archivo_anterior = anterior.foto_lego.name
+            anterior = (
+                type(self)
+                .objects
+                .filter(pk=self.pk)
+                .first()
+            )
 
-        if self.foto_lego and not self.foto_lego.name.lower().endswith(".webp"):
-            nombre_webp, contenido_webp = convertir_imagen_a_webp(
+            if anterior and anterior.foto_lego:
+                archivo_anterior = (
+                    anterior.foto_lego.name
+                )
+
+        if (
+            self.foto_lego
+            and not self.foto_lego.name
+            .lower()
+            .endswith(".webp")
+        ):
+            (
+                nombre_webp,
+                contenido_webp,
+            ) = convertir_imagen_a_webp(
                 self.foto_lego,
                 max_size=(1000, 1000),
                 quality=70,
             )
 
-            self.foto_lego.save(nombre_webp, contenido_webp, save=False)
+            self.foto_lego.save(
+                nombre_webp,
+                contenido_webp,
+                save=False,
+            )
 
         super().save(*args, **kwargs)
 
-        if archivo_anterior and self.foto_lego and archivo_anterior != self.foto_lego.name:
+        if (
+            archivo_anterior
+            and self.foto_lego
+            and archivo_anterior
+            != self.foto_lego.name
+        ):
             try:
-                self.foto_lego.storage.delete(archivo_anterior)
+                self.foto_lego.storage.delete(
+                    archivo_anterior
+                )
             except Exception:
                 pass
 

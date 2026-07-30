@@ -8,6 +8,87 @@
   <title>Misión Emprende UDD — Formación de equipos</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/estilo_conocidos.css' %}" />
+
+  <style>
+    .preguntas-grupo {
+      width: 100%;
+      margin-top: 18px;
+    }
+
+    .preguntas-grupo-lista {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      width: 100%;
+    }
+
+    .pregunta-grupo-item {
+      width: 100%;
+      min-width: 0;
+      min-height: 74px;
+      padding: 15px 18px;
+
+      display: flex;
+      align-items: center;
+      gap: 14px;
+
+      border: 1px solid rgba(0, 200, 255, .44);
+      border-radius: 18px;
+
+      background:
+        linear-gradient(
+          135deg,
+          rgba(0, 200, 255, .10),
+          rgba(0, 255, 152, .05)
+        ),
+        rgba(2, 16, 36, .90);
+
+      box-shadow:
+        inset 0 0 18px rgba(0, 200, 255, .04),
+        0 10px 24px rgba(0, 0, 0, .16);
+    }
+
+    .pregunta-grupo-bullet {
+      flex: 0 0 auto;
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+
+      background: #00fc98;
+
+      box-shadow:
+        0 0 10px rgba(0, 252, 152, .48),
+        0 0 19px rgba(0, 200, 255, .20);
+    }
+
+    .pregunta-grupo-texto {
+      min-width: 0;
+      margin: 0 !important;
+
+      color: #f4fbff;
+      font-size: clamp(16px, 1.5vw, 20px);
+      font-weight: 800;
+      line-height: 1.4;
+
+      white-space: normal;
+      word-break: normal;
+      overflow-wrap: break-word;
+      text-align: left;
+    }
+
+    @media (max-width: 760px) {
+      .pregunta-grupo-item {
+        min-height: 66px;
+        padding: 13px 15px;
+        gap: 12px;
+      }
+
+      .pregunta-grupo-texto {
+        font-size: 16px;
+      }
+    }
+  </style>
+
 </head>
 
 <body class="conocidos-page">
@@ -27,18 +108,39 @@
       <div class="juego-contenido">
         <div id="speechBubbleConocidos" class="speech-bubble blur-target-bloqueado">
           <p class="body">
-            {% if modo_rapido %}
-              Respondan una pregunta para reconocer cómo pueden usar su experiencia previa como ventaja.
-            {% else %}
-              Respondan una pregunta para conocerse mejor y descubrir qué puede aportar cada integrante.
-            {% endif %}
+            Cada integrante debe responder las siguientes preguntas
+            para conocerse mejor:
           </p>
 
-          <p class="body pregunta-random" id="preguntaTexto">👉 Cargando pregunta...</p>
+          <div
+            class="preguntas-grupo"
+            aria-label="Preguntas que debe responder cada integrante"
+          >
+            <div class="preguntas-grupo-lista">
+              <article class="pregunta-grupo-item">
+                <span
+                  class="pregunta-grupo-bullet"
+                  aria-hidden="true"
+                ></span>
 
-          <button class="btn-random" id="btnPregunta" type="button">
-            Nueva pregunta
-          </button>
+                <p class="body pregunta-grupo-texto">
+                  {{ pregunta_base }}
+                </p>
+              </article>
+
+              <article class="pregunta-grupo-item">
+                <span
+                  class="pregunta-grupo-bullet"
+                  aria-hidden="true"
+                ></span>
+
+                <p class="body pregunta-grupo-texto">
+                  {{ pregunta_extra }}
+                </p>
+              </article>
+            </div>
+          </div>
+          </div>
         </div>
       </div>
 
@@ -110,28 +212,9 @@
 
     
 
-    <script id="preguntas-rompehielo-json" type="application/json">
-      {% if preguntas_rompehielo_json %}
-        {{ preguntas_rompehielo_json|safe }}
-      {% else %}
-        []
-      {% endif %}
-    </script>
-
     <script>
     const routesConfig = document.getElementById("routes");
     const MODO_RAPIDO = routesConfig?.dataset?.modoRapido === "true";
-
-    const PREGUNTAS_ROMPEHIELO = (() => {
-      try {
-        const tag = document.getElementById("preguntas-rompehielo-json");
-        const raw = (tag?.textContent || "[]").trim();
-        return JSON.parse(raw || "[]");
-      } catch (e) {
-        console.error("No se pudieron cargar las preguntas rompehielo:", e);
-        return [];
-      }
-    })();
 
     (function () {
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -431,8 +514,6 @@
       const csrfToken      = "{{ csrf_token }}";
       const timerElement   = document.getElementById("timer");
       const alarmAudio     = document.getElementById("alarm-audio");
-      const btnPregunta    = document.getElementById("btnPregunta");
-      const preguntaTexto  = document.getElementById("preguntaTexto");
       const overlay        = null;
       const textoEspera    = document.getElementById("texto-espera-fase");
       const contadorListos = document.getElementById("contador-listos-fase");
@@ -455,27 +536,6 @@
         document.getElementById("timer"),
       ];
 
-      let preguntas = Array.isArray(PREGUNTAS_ROMPEHIELO)
-        ? PREGUNTAS_ROMPEHIELO.filter(p => String(p || "").trim().length > 0)
-        : [];
-
-      if (!preguntas.length) {
-        preguntas = MODO_RAPIDO
-          ? [
-              "¿Qué fortaleza de este equipo ya conocen?",
-              "¿Qué rol suele tomar cada integrante cuando trabajan juntos?",
-              "¿Qué pueden hacer distinto esta vez para mejorar como equipo?",
-              "¿Qué confianza previa puede ayudarles en esta misión?",
-            ]
-          : [
-              "¿Qué habilidad crees que puedes aportar al equipo?",
-              "¿Qué dato tuyo ayudaría al equipo a conocerte mejor?",
-              "¿Prefieres liderar, crear ideas, investigar o comunicar?",
-              "¿Qué valoras en un buen compañero de equipo?",
-            ];
-      }
-
-      let ultimoIndice = -1;
       let timeLeft = Number(routesEl?.dataset?.tiempo || 10);
       let timerInterval = null;
       let timerIniciado = false;
@@ -488,21 +548,6 @@
       let timerRealSolicitado = false;
       let timerLiberadoTrasCountdown = false;
       let tiempoFinalizado = false;
-
-      function cambiarPregunta() {
-        if (!preguntaTexto || !preguntas.length) return;
-
-        let random = Math.floor(Math.random() * preguntas.length);
-
-        if (preguntas.length > 1) {
-          while (random === ultimoIndice) {
-            random = Math.floor(Math.random() * preguntas.length);
-          }
-        }
-
-        ultimoIndice = random;
-        preguntaTexto.textContent = "👉 " + preguntas[random];
-      }
 
       function pintarTiempo() {
         const minutes = Math.floor(Math.max(0, timeLeft) / 60);
@@ -556,10 +601,6 @@
             if (!tiempoFinalizado) {
               tiempoFinalizado = true;
               reproducirAlarma();
-            }
-
-            if (btnPregunta) {
-              btnPregunta.disabled = true;
             }
 
           }
@@ -702,10 +743,6 @@
             reproducirAlarma();
           }
 
-          if (btnPregunta) {
-            btnPregunta.disabled = true;
-          }
-
           return;
         }
 
@@ -789,11 +826,6 @@
         astroCerrado = true;
       }
 
-      if (btnPregunta) {
-        btnPregunta.addEventListener("click", cambiarPregunta);
-        cambiarPregunta();
-      }
-
       if (astroTrigger) {
         astroTrigger.addEventListener("click", abrirAstro);
       }
@@ -857,10 +889,6 @@
       };
 
       window.addEventListener("idiomaJuegoCambiado", () => {
-        if (ultimoIndice >= 0 && preguntaTexto) {
-          preguntaTexto.textContent = "👉 " + preguntas[ultimoIndice];
-        }
-
         if (contadorListos) {
           const p = contadorListos.textContent.match(/(\d+)\/(\d+)/);
 

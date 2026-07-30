@@ -41,20 +41,11 @@ Panel lateral de misión.
 
   <div
     class="metro-punto"
-    data-fases="comunicacion,transicioncomunicacion,pitch,orden_presentacion,presentar_pitch"
+    data-fases="comunicacion,transicioncomunicacion,pitch,orden_presentacion,presentar_pitch,apoyo,transicionapoyo,peer-review,peer_review,peerreview,peer-review-form,peer_review_form,evaluacion,evaluacion-pitch,evaluacion_pitch,mision_cumplida,ranking,reflexion"
     data-index="3"
   >
     <span class="metro-circulo">4</span>
     <small data-i18n="mapa_comunicacion">Comunicación</small>
-  </div>
-
-  <div
-    class="metro-punto"
-    data-fases="apoyo,transicionapoyo,peer_review,evaluacion,reflexion"
-    data-index="4"
-  >
-    <span class="metro-circulo">5</span>
-    <small data-i18n="mapa_apoyo">Apoyo</small>
   </div>
 </div>
 
@@ -84,7 +75,7 @@ Panel lateral de misión.
     left: 22px;
     transform: translateY(-50%);
     width: 122px;
-    min-height: 560px;
+    min-height: 480px;
     padding: 18px 10px 22px;
     border-radius: 30px;
     background:
@@ -413,7 +404,7 @@ Panel lateral de misión.
     .metro-progreso-habilidades {
       left: 10px;
       width: 86px;
-      min-height: 460px;
+      min-height: 390px;
       padding: 14px 8px 18px;
     }
 
@@ -606,6 +597,16 @@ Panel lateral de misión.
       transition: none !important;
     }
   }
+
+  /*
+ * Evita que el punto luminoso de la línea
+ * sobresalga por debajo del círculo activo.
+ */
+.metro-linea-activa::after,
+.metro-progreso-habilidades.animando
+.metro-linea-activa::after {
+  display: none !important;
+}
 </style>
 
 <script>
@@ -622,21 +623,74 @@ Panel lateral de misión.
     }
 
     const pathname = window.location.pathname.toLowerCase();
-    const puntos = Array.from(barra.querySelectorAll(".metro-punto"));
-    const lineaActiva = document.getElementById("metroLineaActiva");
+    const puntos = Array.from(
+      barra.querySelectorAll(".metro-punto")
+    );
 
-    let activo = -1;
+    const lineaBase = barra.querySelector(
+      ".metro-linea-base"
+    );
 
-    puntos.forEach((punto, index) => {
-      const fases = (punto.dataset.fases || "")
-        .split(",")
-        .map(fase => fase.trim().toLowerCase())
-        .filter(Boolean);
+    const lineaActiva = document.getElementById(
+      "metroLineaActiva"
+    );
 
-      if (fases.some(fase => pathname.includes(fase))) {
-        activo = index;
-      }
-    });
+    /*
+     * Algunas pantallas pueden indicar directamente qué habilidad
+     * debe mostrarse activa mediante:
+     *
+     * <body data-metro-habilidad="comunicacion">
+     *
+     * La pantalla de Evaluación también se reconoce mediante su
+     * clase peer-review-page, aunque la URL cambie.
+     */
+    const habilidadDeclarada = (
+      document.body?.dataset?.metroHabilidad || ""
+    )
+      .trim()
+      .toLowerCase();
+
+    const habilidadForzada = habilidadDeclarada || (
+      document.body?.classList.contains("peer-review-page")
+        ? "comunicacion"
+        : ""
+    );
+
+    const indicesHabilidades = {
+      "trabajo-equipo": 0,
+      "trabajo_equipo": 0,
+      "empatia": 1,
+      "creatividad": 2,
+      "comunicacion": 3,
+    };
+
+    let activo = Object.prototype.hasOwnProperty.call(
+      indicesHabilidades,
+      habilidadForzada
+    )
+      ? indicesHabilidades[habilidadForzada]
+      : -1;
+
+    /*
+     * Si la pantalla no forzó una habilidad, se identifica
+     * utilizando el nombre de la ruta actual.
+     */
+    if (activo === -1) {
+      puntos.forEach((punto, index) => {
+        const fases = (punto.dataset.fases || "")
+          .split(",")
+          .map(fase => fase.trim().toLowerCase())
+          .filter(Boolean);
+
+        if (
+          fases.some(fase =>
+            pathname.includes(fase)
+          )
+        ) {
+          activo = index;
+        }
+      });
+    }
 
     if (activo === -1) {
       barra.style.display = "none";
@@ -659,8 +713,7 @@ Panel lateral de misión.
       "transiciondesafio",
       "transicionempatia",
       "transicioncreatividad",
-      "transicioncomunicacion",
-      "transicionapoyo"
+      "transicioncomunicacion"
     ].some(nombre => pathname.includes(nombre));
 
     const debeAnimar =
@@ -680,26 +733,211 @@ Panel lateral de misión.
       }
     });
 
-    function aplicarProgreso(porcentaje, animar) {
-      if (!lineaActiva) return;
+function aplicarProgreso(porcentaje, animar) {
+  if (!lineaActiva || !lineaBase || !puntos.length) {
+    return;
+  }
 
-      if (!animar) {
-        lineaActiva.style.transition = "none";
-      }
+  const circulos = puntos
+    .map((punto) =>
+      punto.querySelector(".metro-circulo")
+    )
+    .filter(Boolean);
 
-      if (window.innerWidth <= 700) {
-        lineaActiva.style.width = porcentaje + "%";
-        lineaActiva.style.height = window.innerWidth <= 420 ? "5px" : "6px";
-      } else {
-        lineaActiva.style.height = porcentaje + "%";
-        lineaActiva.style.width = "8px";
-      }
+  if (!circulos.length) {
+    return;
+  }
 
-      if (!animar) {
-        lineaActiva.offsetHeight;
-        lineaActiva.style.transition = "";
+  const totalTramos = Math.max(
+    circulos.length - 1,
+    1
+  );
+
+  const porcentajeSeguro = Math.max(
+    0,
+    Math.min(
+      100,
+      Number(porcentaje) || 0
+    )
+  );
+
+  const indiceObjetivo = Math.max(
+    0,
+    Math.min(
+      circulos.length - 1,
+      Math.round(
+        (
+          porcentajeSeguro /
+          100
+        ) * totalTramos
+      )
+    )
+  );
+
+  const primerPunto = puntos[0];
+  const ultimoPunto =
+    puntos[puntos.length - 1];
+
+  const puntoObjetivo =
+    puntos[indiceObjetivo];
+
+  const primerCirculo = circulos[0];
+  const ultimoCirculo =
+    circulos[circulos.length - 1];
+
+  const circuloObjetivo =
+    circulos[indiceObjetivo];
+
+  if (!animar) {
+    lineaActiva.style.transition = "none";
+  }
+
+  /*
+   * En pantallas pequeñas el mapa es horizontal.
+   */
+  if (window.innerWidth <= 700) {
+    const inicioX =
+      primerPunto.offsetLeft +
+      primerCirculo.offsetLeft +
+      primerCirculo.offsetWidth -
+      2;
+
+    const finalX =
+      ultimoPunto.offsetLeft +
+      ultimoCirculo.offsetLeft +
+      2;
+
+    const objetivoX =
+      indiceObjetivo === 0
+        ? inicioX
+        : (
+            puntoObjetivo.offsetLeft +
+            circuloObjetivo.offsetLeft +
+            2
+          );
+
+    const centroY =
+      primerPunto.offsetTop +
+      primerCirculo.offsetTop +
+      primerCirculo.offsetHeight / 2;
+
+    const grosor =
+      window.innerWidth <= 420
+        ? 5
+        : 6;
+
+    Object.assign(
+      lineaBase.style,
+      {
+        top: `${centroY}px`,
+        bottom: "auto",
+        left: `${inicioX}px`,
+        right: "auto",
+        width: `${
+          Math.max(
+            0,
+            finalX - inicioX
+          )
+        }px`,
+        height: `${grosor}px`,
+        transform: "translateY(-50%)",
       }
-    }
+    );
+
+    Object.assign(
+      lineaActiva.style,
+      {
+        top: `${centroY}px`,
+        bottom: "auto",
+        left: `${inicioX}px`,
+        right: "auto",
+        width: `${
+          Math.max(
+            0,
+            objetivoX - inicioX
+          )
+        }px`,
+        height: `${grosor}px`,
+        transform: "translateY(-50%)",
+      }
+    );
+  } else {
+    /*
+     * En escritorio el mapa es vertical.
+     *
+     * La línea empieza dentro del borde inferior
+     * del primer círculo.
+     */
+    const inicioY =
+      primerPunto.offsetTop +
+      primerCirculo.offsetTop +
+      primerCirculo.offsetHeight -
+      2;
+
+    /*
+     * La línea base termina dentro del borde
+     * superior del último círculo.
+     */
+    const finalY =
+      ultimoPunto.offsetTop +
+      ultimoCirculo.offsetTop +
+      2;
+
+    /*
+     * La línea activa termina dentro del borde
+     * superior del círculo activo.
+     */
+    const objetivoY =
+      indiceObjetivo === 0
+        ? inicioY
+        : (
+            puntoObjetivo.offsetTop +
+            circuloObjetivo.offsetTop +
+            2
+          );
+
+    Object.assign(
+      lineaBase.style,
+      {
+        top: `${inicioY}px`,
+        bottom: "auto",
+        left: "50%",
+        right: "auto",
+        width: "8px",
+        height: `${
+          Math.max(
+            0,
+            finalY - inicioY
+          )
+        }px`,
+        transform: "translateX(-50%)",
+      }
+    );
+
+    Object.assign(
+      lineaActiva.style,
+      {
+        top: `${inicioY}px`,
+        bottom: "auto",
+        left: "50%",
+        right: "auto",
+        width: "8px",
+        height: `${
+          Math.max(
+            0,
+            objetivoY - inicioY
+          )
+        }px`,
+        transform: "translateX(-50%)",
+      }
+    );
+  }
+
+  if (!animar) {
+    void lineaActiva.offsetHeight;
+    lineaActiva.style.transition = "";
+  }
+}
 
     if (debeAnimar) {
       barra.classList.add("animando");

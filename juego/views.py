@@ -3396,13 +3396,233 @@ def promptconocidos(request):
         return redirect("pantalla_espera")
     return render(request, "promptconocidos.html", {"grupo": grupo})
 
+PREGUNTAS_BASE_FALLBACK = {
+    "desconocidos": (
+        "Cada integrante debe decir su nombre "
+        "y la carrera que estudia."
+    ),
+    "conocidos": (
+        "Cada integrante debe contar qué rol "
+        "suele asumir cuando trabajan juntos."
+    ),
+}
+
+
+PREGUNTAS_EXTRA_FALLBACK = {
+    "desconocidos": (
+        "¿Cuál es tu comida favorita?"
+    ),
+    "conocidos": (
+        "¿Qué experiencia anterior puede ayudar "
+        "al equipo durante esta misión?"
+    ),
+}
+
+
+def obtener_preguntas_rompehielo_grupo(
+    grupo,
+    tipo_equipo,
+):
+    """
+    Devuelve una pregunta base y una pregunta extra.
+
+    La pregunta extra queda guardada en el grupo para que:
+    - no cambie al recargar;
+    - todos sus integrantes vean la misma;
+    - cada grupo pueda recibir una diferente.
+    """
+
+    if tipo_equipo not in {
+        "conocidos",
+        "desconocidos",
+    }:
+        tipo_equipo = "desconocidos"
+
+    with transaction.atomic():
+        grupo_bloqueado = (
+            Grupo.objects
+            .select_for_update()
+            .select_related(
+                "pregunta_rompehielo_asignada"
+            )
+            .get(pk=grupo.pk)
+        )
+
+        campos_actualizados = []
+
+        if (
+            grupo_bloqueado.modo_conocidos
+            != tipo_equipo
+        ):
+            grupo_bloqueado.modo_conocidos = (
+                tipo_equipo
+            )
+
+            grupo_bloqueado.pregunta_rompehielo_asignada = (
+                None
+            )
+
+            campos_actualizados.extend([
+                "modo_conocidos",
+                "pregunta_rompehielo_asignada",
+            ])
+
+        pregunta_base_obj = (
+            PreguntaRompehielo.objects
+            .filter(
+                tipo_equipo=tipo_equipo,
+                tipo_pregunta="base",
+                activa=True,
+            )
+            .order_by(
+                "orden",
+                "idpregunta",
+            )
+            .first()
+        )
+
+        pregunta_extra_obj = (
+            grupo_bloqueado
+            .pregunta_rompehielo_asignada
+        )
+
+        asignacion_valida = (
+            pregunta_extra_obj is not None
+            and pregunta_extra_obj.tipo_equipo
+            == tipo_equipo
+            and pregunta_extra_obj.tipo_pregunta
+            == "pool"
+        )
+
+        if not asignacion_valida:
+            preguntas_disponibles = list(
+                PreguntaRompehielo.objects
+                .filter(
+                    tipo_equipo=tipo_equipo,
+                    tipo_pregunta="pool",
+                    activa=True,
+                )
+                .order_by(
+                    "orden",
+                    "idpregunta",
+                )
+            )
+
+            pregunta_extra_obj = (
+                random.choice(
+                    preguntas_disponibles
+                )
+                if preguntas_disponibles
+                else None
+            )
+
+            grupo_bloqueado.pregunta_rompehielo_asignada = (
+                pregunta_extra_obj
+            )
+
+            if (
+                "pregunta_rompehielo_asignada"
+                not in campos_actualizados
+            ):
+                campos_actualizados.append(
+                    "pregunta_rompehielo_asignada"
+                )
+
+        if campos_actualizados:
+            grupo_bloqueado.save(
+                update_fields=campos_actualizados
+            )
+
+    pregunta_base = (
+        pregunta_base_obj.texto
+        if pregunta_base_obj
+        else PREGUNTAS_BASE_FALLBACK[
+            tipo_equipo
+        ]
+    )
+
+    pregunta_extra = (
+        pregunta_extra_obj.texto
+        if pregunta_extra_obj
+        else PREGUNTAS_EXTRA_FALLBACK[
+            tipo_equipo
+        ]
+    )
+
+    return pregunta_base, pregunta_extra
+
 def conocidos(request):
+    """
+    Actividad para integrantes que no se conocen.
+    Todos los integrantes del grupo reciben la misma
+    pregunta base y la misma pregunta adicional.
+    """
+
     grupo = obtener_grupo_desde_session(request)
+
     if not grupo:
         return redirect("registro")
-    if not acceso_permitido(grupo, "conocidos"):
+
+    if not acceso_permitido(
+        grupo,
+        "conocidos",
+    ):
         return redirect("pantalla_espera")
-    return render(request, "conocidos.html", {"grupo": grupo})
+
+    pregunta_base, pregunta_extra = (
+        obtener_preguntas_rompehielo_grupo(
+            grupo,
+            "desconocidos",
+        )
+    )
+
+    return render(
+        request,
+        "conocidos.html",
+        {
+            "grupo": grupo,
+            "modo_rapido": False,
+            "pregunta_base": pregunta_base,
+            "pregunta_extra": pregunta_extra,
+        },
+    )
+
+
+def conocidos_rapido(request):
+    """
+    Actividad para integrantes que ya se conocen.
+    Todos los integrantes del grupo reciben la misma
+    pregunta base y la misma pregunta adicional.
+    """
+
+    grupo = obtener_grupo_desde_session(request)
+
+    if not grupo:
+        return redirect("registro")
+
+    if not acceso_permitido(
+        grupo,
+        "conocidos_rapido",
+    ):
+        return redirect("pantalla_espera")
+
+    pregunta_base, pregunta_extra = (
+        obtener_preguntas_rompehielo_grupo(
+            grupo,
+            "conocidos",
+        )
+    )
+
+    return render(
+        request,
+        "conocidos.html",
+        {
+            "grupo": grupo,
+            "modo_rapido": True,
+            "pregunta_base": pregunta_base,
+            "pregunta_extra": pregunta_extra,
+        },
+    )
 
 def minijuego1(request):
     grupo = obtener_grupo_desde_session(
@@ -3457,56 +3677,199 @@ def minijuego1(request):
 def admin_preguntas_rompehielo(request):
     if request.method == "POST":
         idpregunta = request.POST.get("idpregunta")
-        tipo_equipo = request.POST.get("tipo_equipo", "desconocidos")
-        texto = request.POST.get("texto", "").strip()
+
+        tipo_equipo = request.POST.get(
+            "tipo_equipo",
+            "desconocidos",
+        )
+
+        tipo_pregunta = request.POST.get(
+            "tipo_pregunta",
+            "pool",
+        )
+
+        texto = request.POST.get(
+            "texto",
+            "",
+        ).strip()
+
         orden = request.POST.get("orden") or 0
         activa = request.POST.get("activa") == "on"
 
-        if tipo_equipo not in ["desconocidos", "conocidos"]:
-            messages.error(request, "Tipo de equipo inválido.")
-            return redirect("admin_preguntas_rompehielo")
+        if tipo_equipo not in {
+            "desconocidos",
+            "conocidos",
+        }:
+            messages.error(
+                request,
+                "Tipo de equipo inválido.",
+            )
+            return redirect(
+                "admin_preguntas_rompehielo"
+            )
+
+        if tipo_pregunta not in {
+            "base",
+            "pool",
+        }:
+            messages.error(
+                request,
+                "Función de pregunta inválida.",
+            )
+            return redirect(
+                "admin_preguntas_rompehielo"
+            )
 
         if not texto:
-            messages.error(request, "La pregunta no puede estar vacía.")
-            return redirect("admin_preguntas_rompehielo")
+            messages.error(
+                request,
+                "La pregunta no puede estar vacía.",
+            )
+            return redirect(
+                "admin_preguntas_rompehielo"
+            )
 
         try:
-            orden = int(orden)
-        except ValueError:
+            orden = max(int(orden), 0)
+        except (TypeError, ValueError):
             orden = 0
 
-        if idpregunta:
-            pregunta = get_object_or_404(PreguntaRompehielo, idpregunta=idpregunta)
-            pregunta.tipo_equipo = tipo_equipo
-            pregunta.texto = texto
-            pregunta.orden = orden
-            pregunta.activa = activa
-            pregunta.save()
-            messages.success(request, "Pregunta actualizada correctamente.")
-        else:
-            PreguntaRompehielo.objects.create(
-                tipo_equipo=tipo_equipo,
-                texto=texto,
-                orden=orden,
-                activa=activa
-            )
-            messages.success(request, "Pregunta creada correctamente.")
+        with transaction.atomic():
+            pregunta = None
+            tipo_equipo_anterior = None
+            tipo_pregunta_anterior = None
 
-        return redirect("admin_preguntas_rompehielo")
+            if idpregunta:
+                pregunta = get_object_or_404(
+                    PreguntaRompehielo,
+                    idpregunta=idpregunta,
+                )
 
-    preguntas_desconocidos = PreguntaRompehielo.objects.filter(
-        tipo_equipo="desconocidos"
-    ).order_by("orden", "idpregunta")
+                tipo_equipo_anterior = (
+                    pregunta.tipo_equipo
+                )
+                tipo_pregunta_anterior = (
+                    pregunta.tipo_pregunta
+                )
 
-    preguntas_conocidos = PreguntaRompehielo.objects.filter(
-        tipo_equipo="conocidos"
-    ).order_by("orden", "idpregunta")
+            # Solo puede existir una pregunta base
+            # activa por cada modalidad.
+            if (
+                tipo_pregunta == "base"
+                and activa
+            ):
+                otras_preguntas_base = (
+                    PreguntaRompehielo.objects
+                    .filter(
+                        tipo_equipo=tipo_equipo,
+                        tipo_pregunta="base",
+                        activa=True,
+                    )
+                )
 
-    return render(request, "admin_preguntas_rompehielo.html", {
-        "preguntas_desconocidos": preguntas_desconocidos,
-        "preguntas_conocidos": preguntas_conocidos,
-        "pregunta_editando": None,
-    })
+                if pregunta:
+                    otras_preguntas_base = (
+                        otras_preguntas_base.exclude(
+                            pk=pregunta.pk
+                        )
+                    )
+
+                otras_preguntas_base.update(
+                    activa=False
+                )
+
+            if pregunta:
+                pregunta.tipo_equipo = tipo_equipo
+                pregunta.tipo_pregunta = (
+                    tipo_pregunta
+                )
+                pregunta.texto = texto
+                pregunta.orden = orden
+                pregunta.activa = activa
+
+                pregunta.save()
+
+                cambio_modalidad = (
+                    tipo_equipo_anterior
+                    != tipo_equipo
+                )
+                cambio_funcion = (
+                    tipo_pregunta_anterior
+                    != tipo_pregunta
+                )
+
+                # Limpia las asignaciones si la pregunta
+                # ya no puede usarse como pregunta del pool.
+                if (
+                    not activa
+                    or tipo_pregunta != "pool"
+                    or cambio_modalidad
+                    or cambio_funcion
+                ):
+                    pregunta.grupos_asignados.update(
+                        pregunta_rompehielo_asignada=None
+                    )
+
+                messages.success(
+                    request,
+                    "Pregunta actualizada correctamente.",
+                )
+
+            else:
+                PreguntaRompehielo.objects.create(
+                    tipo_equipo=tipo_equipo,
+                    tipo_pregunta=tipo_pregunta,
+                    texto=texto,
+                    orden=orden,
+                    activa=activa,
+                )
+
+                messages.success(
+                    request,
+                    "Pregunta creada correctamente.",
+                )
+
+        return redirect(
+            "admin_preguntas_rompehielo"
+        )
+
+    preguntas_desconocidos = (
+        PreguntaRompehielo.objects
+        .filter(
+            tipo_equipo="desconocidos"
+        )
+        .order_by(
+            "tipo_pregunta",
+            "orden",
+            "idpregunta",
+        )
+    )
+
+    preguntas_conocidos = (
+        PreguntaRompehielo.objects
+        .filter(
+            tipo_equipo="conocidos"
+        )
+        .order_by(
+            "tipo_pregunta",
+            "orden",
+            "idpregunta",
+        )
+    )
+
+    return render(
+        request,
+        "admin_preguntas_rompehielo.html",
+        {
+            "preguntas_desconocidos": (
+                preguntas_desconocidos
+            ),
+            "preguntas_conocidos": (
+                preguntas_conocidos
+            ),
+            "pregunta_editando": None,
+        },
+    )
 
 
 def admin_preguntas_rompehielo_editar(request, idpregunta):
@@ -4163,34 +4526,49 @@ def cambiar_tematica(request):
     return redirect("tematicas")
 
 def elegir_modo_conocidos(request, modo):
-    grupo = obtener_grupo_desde_session(request)
+    grupo = obtener_grupo_desde_session(
+        request
+    )
+
     if not grupo:
         return redirect("registro")
 
-    if not acceso_permitido(grupo, "promptconocidos"):
+    if not acceso_permitido(
+        grupo,
+        "promptconocidos",
+    ):
         return redirect("pantalla_espera")
+
+    if modo not in {
+        "normal",
+        "rapido",
+    }:
+        return redirect("promptconocidos")
+
+    tipo_equipo = (
+        "conocidos"
+        if modo == "rapido"
+        else "desconocidos"
+    )
 
     request.session["modo_conocidos"] = modo
     request.session.modified = True
+
+    if grupo.modo_conocidos != tipo_equipo:
+        grupo.modo_conocidos = tipo_equipo
+        grupo.pregunta_rompehielo_asignada = None
+
+        grupo.save(
+            update_fields=[
+                "modo_conocidos",
+                "pregunta_rompehielo_asignada",
+            ]
+        )
 
     if modo == "rapido":
         return redirect("conocidos_rapido")
 
     return redirect("conocidos")
-
-
-def conocidos_rapido(request):
-    grupo = obtener_grupo_desde_session(request)
-    if not grupo:
-        return redirect("registro")
-
-    if not acceso_permitido(grupo, "conocidos_rapido"):
-        return redirect("pantalla_espera")
-
-    return render(request, "conocidos.html", {
-        "grupo": grupo,
-        "modo_rapido": True,
-    })
 
 @require_http_methods(["POST"])
 def agregar_alumno_manual(request):
