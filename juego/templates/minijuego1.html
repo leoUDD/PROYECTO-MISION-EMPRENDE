@@ -344,7 +344,7 @@
           No alcanzaron a completar la sopa, pero cada palabra encontrada fue recompensada.
         </p>
         <p id="timeModalReward"><strong>0 palabras encontradas · 0 tokens obtenidos</strong></p>
-        <button id="btnRetry" type="button">Aceptar y tomar foto</button>
+        <button id="btnRetry" type="button" data-i18n="sopa_boton_aceptar_foto">Aceptar y tomar foto</button>
       </div>
     </div>
 
@@ -357,7 +357,7 @@
         <p id="winText" data-i18n="sopa_win_texto">
           Encontraron todas las palabras y recibieron su recompensa.
         </p>
-        <button id="btnWinFoto" type="button">Aceptar y tomar foto</button>
+        <button id="btnWinFoto" type="button" data-i18n="sopa_boton_aceptar_foto">Aceptar y tomar foto</button>
         <p id="winEspera" class="win-espera" hidden>
           Esperando a los demás escuadrones...
         </p>
@@ -493,6 +493,7 @@
           type="button"
           id="foto-equipo-activar"
           class="foto-equipo-boton foto-equipo-boton-principal"
+          data-i18n="sopa_boton_activar_camara"
         >
           Activar cámara
         </button>
@@ -502,6 +503,7 @@
           id="foto-equipo-capturar"
           class="foto-equipo-boton foto-equipo-boton-principal"
           hidden
+          data-i18n="sopa_boton_tomar_foto"
         >
           Tomar foto
         </button>
@@ -511,6 +513,7 @@
           id="foto-equipo-repetir"
           class="foto-equipo-boton foto-equipo-boton-secundario"
           hidden
+          data-i18n="sopa_boton_repetir"
         >
           Repetir
         </button>
@@ -520,6 +523,7 @@
           id="foto-equipo-guardar"
           class="foto-equipo-boton foto-equipo-boton-principal"
           hidden
+          data-i18n="sopa_boton_guardar_foto"
         >
           Guardar foto y quedar listo
         </button>
@@ -1156,6 +1160,68 @@
     window.addEventListener("beforeunload", () => audio.pause());
   })();
 
+  /* ── Sonidos de diálogo (tecleo / botón) — igual que en las demás vistas con EdEmy ── */
+  (function () {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+
+    let ctx = null;
+
+    function getCtx() {
+      if (!ctx) ctx = new AudioCtx();
+      if (ctx.state === "suspended") ctx.resume();
+      return ctx;
+    }
+
+    window.sonarTecla = function () {
+      try {
+        const c = getCtx();
+        const o = c.createOscillator();
+        const g = c.createGain();
+
+        o.connect(g);
+        g.connect(c.destination);
+
+        o.type = "square";
+        o.frequency.setValueAtTime(520, c.currentTime);
+        o.frequency.exponentialRampToValueAtTime(380, c.currentTime + 0.04);
+
+        g.gain.setValueAtTime(0.05, c.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.05);
+
+        o.start(c.currentTime);
+        o.stop(c.currentTime + 0.06);
+      } catch(_) {}
+    };
+
+    window.sonarBoton = function () {
+      try {
+        const c = getCtx();
+
+        [
+          [440, 600, 0, 0.08, 0.18, 0.14],
+          [660, 880, 0.06, 0.18, 0.12, 0.22]
+        ].forEach(([f1, f2, delay, ramp, vol, stop]) => {
+          const o = c.createOscillator();
+          const g = c.createGain();
+
+          o.connect(g);
+          g.connect(c.destination);
+
+          o.type = "sine";
+          o.frequency.setValueAtTime(f1, c.currentTime + delay);
+          o.frequency.exponentialRampToValueAtTime(f2, c.currentTime + delay + ramp);
+
+          g.gain.setValueAtTime(vol, c.currentTime + delay);
+          g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + delay + stop);
+
+          o.start(c.currentTime + delay);
+          o.stop(c.currentTime + delay + stop + 0.02);
+        });
+      } catch(_) {}
+    };
+  })();
+
   /* ── Lógica de inicio de fase con diálogo de EdEmy ── */
   document.addEventListener("DOMContentLoaded", () => {
     function tJuego(clave, fallback = "") {
@@ -1198,10 +1264,10 @@
     (function instalarDialogoEdemy() {
 
       const GUION = [
-        { texto: "Con el paso de los años, incluso los conceptos del emprendimiento comenzaron a olvidarse…" },
-        { texto: "El sistema los ha ocultado para poner a prueba su capacidad de reconocerlos." },
-        { texto: "¡Tienen poco tiempo para encontrarlos, trabajen en equipo!" },
-        { texto: "Recuperemos ese conocimiento." }
+        { key: "sopa_dialogo_1", texto: "Con el paso de los años, incluso los conceptos del emprendimiento comenzaron a olvidarse…" },
+        { key: "sopa_dialogo_2", texto: "El sistema los ha ocultado para poner a prueba su capacidad de reconocerlos." },
+        { key: "sopa_dialogo_3", texto: "¡Tienen poco tiempo para encontrarlos, trabajen en equipo!" },
+        { key: "sopa_dialogo_4", texto: "Recuperemos ese conocimiento." }
       ];
 
       let paso = 0;
@@ -1293,8 +1359,8 @@
 
         if (btnDialogo) btnDialogo.disabled = false;
 
-        cambiarTextoBoton(n === GUION.length - 1 ? textoListo() : "Siguiente");
-        escribirTexto(GUION[n].texto);
+        cambiarTextoBoton(n === GUION.length - 1 ? textoListo() : tJuego("dialogo_boton_siguiente", "Siguiente"));
+        escribirTexto(tJuego(GUION[n].key, GUION[n].texto));
       }
 
       window.dialogoSiguiente = async function () {

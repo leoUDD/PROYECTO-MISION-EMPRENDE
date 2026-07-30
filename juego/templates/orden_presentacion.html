@@ -116,192 +116,130 @@
       min-height:0;
     }
 
-.vaso-wrap{
+.reel-wrap{
   position: relative;
-  width: min(420px, 78vw);
-  height: min(260px, 34vw);
-  min-height: 210px;
+  width: min(480px, 90vw);
+  height: min(320px, 40vw);
+  min-height: 260px;
   display:flex;
-  align-items:flex-end;
+  align-items:center;
   justify-content:center;
   margin: 8px auto 0;
-  overflow: visible;
   flex: 0 0 auto;
 }
 
-.varitas{
-  position:absolute;
-  bottom:34px;
-  left:50%;
-  transform:translateX(-50%);
-  width:min(260px, 54vw);
-  height:min(170px, 30vw);
-  min-width:190px;
-  min-height:130px;
-  pointer-events:none;
-  z-index:2;
-}
-
-.varita{
-  position:absolute;
-  bottom:0;
-  width:10px;
-  height:105px;
-  border-radius:999px;
-  transform-origin: bottom center;
-  box-shadow: 0 0 10px rgba(255,255,255,.18);
-  transition:
-    transform .35s ease,
-    height .35s ease,
-    filter .35s ease,
-    bottom .35s ease;
-}
-
-    .varita::after{
-      content:"";
-      position:absolute;
-      left:2px;
-      right:2px;
-      top:6px;
-      height:16px;
-      border-radius:999px;
-      background:rgba(255,255,255,.32);
-    }
-
-    .varita-1{ background:linear-gradient(180deg,#f7d37a,#c6922d); }
-    .varita-2{ background:linear-gradient(180deg,#7fc4ff,#2b79c2); }
-    .varita-3{ background:linear-gradient(180deg,#ffa36d,#d96a28); }
-    .varita-4{ background:linear-gradient(180deg,#d49cff,#8857d8); }
-    .varita-5{ background:linear-gradient(180deg,#a0e67a,#4c9b35); }
-    .varita-6{ background:linear-gradient(180deg,#ffd96a,#dfab22); }
-
-.varita[data-slot="0"]{
-  display:none;
-}
-
-.varita[data-slot="1"]{
-  left:70px;
-  transform:rotate(-14deg);
-}
-
-.varita[data-slot="2"]{
-  left:105px;
-  transform:rotate(-2deg);
-}
-
-.varita[data-slot="3"]{
-  left:140px;
-  transform:rotate(8deg);
-}
-
-.varita[data-slot="4"]{
-  left:170px;
-  transform:rotate(18deg);
-}
-
-.varita[data-slot="5"]{
-  display:none;
-}
-
-    .varitas.sorteando .varita-1{ animation: tambaleo1 .55s ease-in-out infinite alternate; }
-    .varitas.sorteando .varita-2{ animation: tambaleo2 .45s ease-in-out infinite alternate; }
-    .varitas.sorteando .varita-3{ animation: tambaleo3 .5s ease-in-out infinite alternate; }
-    .varitas.sorteando .varita-4{ animation: tambaleo4 .4s ease-in-out infinite alternate; }
-    .varitas.sorteando .varita-5{ animation: tambaleo5 .52s ease-in-out infinite alternate; }
-    .varitas.sorteando .varita-6{ animation: tambaleo6 .48s ease-in-out infinite alternate; }
-
-    @keyframes tambaleo1 { from { transform:rotate(-38deg); } to { transform:rotate(-20deg); } }
-    @keyframes tambaleo2 { from { transform:rotate(-20deg); } to { transform:rotate(-8deg); } }
-    @keyframes tambaleo3 { from { transform:rotate(-8deg); } to { transform:rotate(2deg); } }
-    @keyframes tambaleo4 { from { transform:rotate(2deg); } to { transform:rotate(12deg); } }
-    @keyframes tambaleo5 { from { transform:rotate(12deg); } to { transform:rotate(24deg); } }
-    @keyframes tambaleo6 { from { transform:rotate(26deg); } to { transform:rotate(38deg); } }
-
-.varita.ganadora{
-  z-index:5;
-  height:158px;
-  filter: drop-shadow(0 0 18px rgba(255, 190, 70, .65));
-  animation: subirGanadora 1.05s ease forwards;
-}
-@keyframes subirGanadora{
-  0%{
-    bottom:0;
-  }
-  100%{
-    bottom:34px;
-  }
-}
-
-.vaso{
-  position:relative;
-  width: min(168px, 34vw);
-  height: min(116px, 22vw);
-  min-width: 128px;
-  min-height: 92px;
-  border-radius: 20px 20px 30px 30px;
+.reel-marco{
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 26px;
+  border: 1.8px solid rgba(0,200,255,.50);
   background:
-    linear-gradient(180deg, rgba(255,255,255,.26), rgba(255,255,255,.08));
-  border:2px solid rgba(215,235,255,.74);
+    radial-gradient(circle at 50% 50%, rgba(0,252,152,.06), transparent 60%),
+    rgba(3,14,32,.62);
   box-shadow:
-    inset 0 0 0 2px rgba(255,255,255,.08),
-    0 10px 30px rgba(0,0,0,.2);
-  overflow:hidden;
-  backdrop-filter: blur(2px);
-  z-index:3;
+    inset 0 0 34px rgba(0,200,255,.14),
+    0 0 30px rgba(0,200,255,.18),
+    0 18px 40px rgba(0,0,0,.34);
+  overflow: hidden;
+  backdrop-filter: blur(5px);
+  animation: reelMarcoPulso 2.6s ease-in-out infinite;
 }
 
-    .vaso::before{
-      content:"";
-      position:absolute;
-      inset:10px auto 10px 10px;
-      width:14px;
-      background:rgba(255,255,255,.14);
-      border-radius:999px;
-      transform:skewX(-12deg);
-    }
+@keyframes reelMarcoPulso{
+  0%, 100%{
+    box-shadow:
+      inset 0 0 34px rgba(0,200,255,.14),
+      0 0 30px rgba(0,200,255,.18),
+      0 18px 40px rgba(0,0,0,.34);
+  }
+  50%{
+    box-shadow:
+      inset 0 0 40px rgba(0,200,255,.22),
+      0 0 42px rgba(0,200,255,.28),
+      0 18px 40px rgba(0,0,0,.34);
+  }
+}
 
-    .vaso::after{
-      content:"";
-      position:absolute;
-      left:10px;
-      right:10px;
-      top:10px;
-      height:10px;
-      border-radius:999px;
-      background:rgba(255,255,255,.18);
-    }
+.reel-marco::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:5;
+  pointer-events:none;
+  background:
+    linear-gradient(180deg, rgba(3,14,32,.98) 0%, rgba(3,14,32,0) 26%, rgba(3,14,32,0) 74%, rgba(3,14,32,.98) 100%);
+}
 
-    .chispas{
-      position:absolute;
-      inset:0;
-      pointer-events:none;
-      opacity:0;
-      transition:opacity .25s ease;
-      z-index:7;
-    }
+.reel-linea{
+  position: absolute;
+  left: 5%;
+  right: 5%;
+  top: 50%;
+  height: 68px;
+  transform: translateY(-50%);
+  border-top: 2px solid rgba(0,252,152,.85);
+  border-bottom: 2px solid rgba(0,252,152,.85);
+  background: rgba(0,252,152,.10);
+  box-shadow:
+    0 0 16px rgba(0,252,152,.45),
+    inset 0 0 20px rgba(0,252,152,.12);
+  pointer-events: none;
+  z-index: 3;
+}
 
-    .chispas.visible{
-      opacity:1;
-    }
+.reel-linea::before,
+.reel-linea::after{
+  content:"▸";
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  color: rgba(0,252,152,.85);
+  font-size: 20px;
+  text-shadow: 0 0 10px rgba(0,252,152,.6);
+}
 
-    .chispa{
-      position:absolute;
-      width:6px;
-      height:6px;
-      border-radius:50%;
-      background:#ffca6b;
-      box-shadow:0 0 10px rgba(255, 202, 107, .85);
-      animation: flotar .9s ease-out forwards;
-    }
+.reel-linea::before{ left:-4px; }
+.reel-linea::after{ right:-4px; transform:translateY(-50%) scaleX(-1); }
 
-    .chispa.c2{ background:#8ed8ff; box-shadow:0 0 10px rgba(142,216,255,.85); }
-    .chispa.c3{ background:#d8a1ff; box-shadow:0 0 10px rgba(216,161,255,.85); }
+.reel-lista{
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  will-change: transform;
+}
 
-    @keyframes flotar{
-      from { transform:translateY(0) scale(.8); opacity:0; }
-      25% { opacity:1; }
-      to { transform:translateY(-34px) scale(1.15); opacity:0; }
-    }
+.reel-item{
+  height: 68px;
+  min-height: 68px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size: clamp(19px, 2.3vw, 26px);
+  font-weight: 800;
+  color: rgba(230,238,248,.42);
+  text-align:center;
+  padding: 0 22px;
+  transition: color .2s ease, transform .2s ease, text-shadow .2s ease;
+}
+
+.reel-item.destacado{
+  color: #fff;
+  text-shadow: 0 0 16px rgba(0,252,152,.6);
+  transform: scale(1.08);
+}
+
+.reel-item.ganador{
+  color: var(--green-soft, #00fc98);
+  text-shadow:
+    0 0 10px rgba(0,252,152,.85),
+    0 0 24px rgba(0,252,152,.55);
+  transform: scale(1.1);
+}
 
     .estado-sorteo{
       min-height: 34px;
@@ -404,21 +342,19 @@
     min-height: 430px;
   }
 
-  .vaso-wrap{
-    width: min(320px, 86vw);
-    height: 220px;
-    min-height: 180px;
+  .reel-wrap{
+    width: min(360px, 90vw);
+    height: 260px;
+    min-height: 220px;
   }
 
-  .vaso{
-    width: min(140px, 42vw);
-    height: min(98px, 24vw);
+  .reel-item{
+    height: 56px;
+    min-height: 56px;
   }
 
-  .varitas{
-    width: min(220px, 64vw);
-    height: 140px;
-    bottom: 28px;
+  .reel-linea{
+    height: 56px;
   }
 }
 
@@ -439,23 +375,10 @@
 
         <div class="panel-sorteo">
           <div id="sorteoStage" class="sorteo-stage">
-            <div class="vaso-wrap">
-              <div class="varitas" id="varitas">
-                <div class="varita varita-1" data-slot="0"></div>
-                <div class="varita varita-2" data-slot="1"></div>
-                <div class="varita varita-3" data-slot="2"></div>
-                <div class="varita varita-4" data-slot="3"></div>
-                <div class="varita varita-5" data-slot="4"></div>
-                <div class="varita varita-6" data-slot="5"></div>
-              </div>
-
-              <div class="vaso"></div>
-
-              <div class="chispas" id="chispas">
-                <span class="chispa" style="left:34%; bottom:120px;"></span>
-                <span class="chispa c2" style="left:44%; bottom:138px;"></span>
-                <span class="chispa c3" style="left:57%; bottom:130px;"></span>
-                <span class="chispa" style="left:64%; bottom:114px;"></span>
+            <div class="reel-wrap">
+              <div class="reel-marco">
+                <div class="reel-linea" aria-hidden="true"></div>
+                <div id="reelLista" class="reel-lista"></div>
               </div>
             </div>
 
@@ -486,7 +409,7 @@
   </main>
 
   <audio id="audioSorteoAgitar" preload="auto">
-    <source src="{% static 'sounds/sorteo_varitas.mp3' %}" type="audio/mpeg">
+    <source src="{% static 'sounds/ruleta.mp3' %}" type="audio/mpeg">
   </audio>
   <audio id="audioSorteoReveal" preload="auto">
     <source src="{% static 'sounds/sorteo_reveal.mp3' %}" type="audio/mpeg">
@@ -498,8 +421,7 @@
     const btnOrdenListo = document.getElementById("btnOrdenListo");
     const ordenListoEstado = document.getElementById("ordenListoEstado");
     const accionesListoOrden = document.getElementById("accionesListoOrden");
-    const varitasEl = document.getElementById("varitas");
-    const chispasEl = document.getElementById("chispas");
+    const reelListaEl = document.getElementById("reelLista");
     const estadoAnimacionSorteo = document.getElementById("estadoAnimacionSorteo");
     const dotsSorteo = document.getElementById("dotsSorteo");
     const listaOrdenBonita = document.getElementById("listaOrdenBonita");
@@ -564,11 +486,11 @@ let ordenSorteadoPrevio = false;
     }
 
     function resetVisualSorteo() {
-      if (varitasEl) {
-        varitasEl.classList.remove("sorteando");
-        varitasEl.querySelectorAll(".varita").forEach(v => v.classList.remove("ganadora"));
+      if (reelListaEl) {
+        reelListaEl.style.transition = "none";
+        reelListaEl.style.transform = "translateY(0px)";
+        reelListaEl.innerHTML = "";
       }
-      if (chispasEl) chispasEl.classList.remove("visible");
       if (flashSorteo) flashSorteo.classList.remove("visible");
       if (listaOrdenBonita) {
         listaOrdenBonita.innerHTML = "";
@@ -606,9 +528,22 @@ let ordenSorteadoPrevio = false;
       ultimoOrdenRenderizado = firma;
     }
 
-    function elegirVaritaGanadora() {
-  return 2;
-}
+    function construirCarrete(ordenPitch) {
+      const nombres = (ordenPitch || []).map(item => item.nombre);
+      if (!nombres.length) return { lista: [], indiceFinal: 0 };
+
+      const primero = (ordenPitch || []).find(item => Number(item.orden) === 1);
+      const indiceObjetivo = primero ? Math.max(0, nombres.indexOf(primero.nombre)) : 0;
+
+      const VUELTAS = 6;
+      const lista = [];
+      for (let v = 0; v < VUELTAS; v++) {
+        lista.push(...nombres);
+      }
+      const indiceFinal = (VUELTAS - 1) * nombres.length + indiceObjetivo;
+
+      return { lista, indiceFinal };
+    }
 
     function mostrarAnimacionSorteo(ordenPitch, grupoActual) {
       if (animacionActiva) return;
@@ -623,41 +558,53 @@ let ordenSorteadoPrevio = false;
       if (estadoAnimacionSorteo) estadoAnimacionSorteo.textContent = tOrden("orden_presentacion_sorteando", "Sorteando...");
       setDots(1);
 
-      if (varitasEl) {
-        varitasEl.classList.add("sorteando");
-        varitasEl.querySelectorAll(".varita").forEach(v => v.classList.remove("ganadora"));
+      const { lista, indiceFinal } = construirCarrete(ordenPitch);
+
+      if (reelListaEl) {
+        reelListaEl.innerHTML = lista.map(nombre => `<div class="reel-item">${nombre}</div>`).join("");
+      }
+
+      const primerItem = reelListaEl ? reelListaEl.querySelector(".reel-item") : null;
+      const ALTURA_ITEM = primerItem ? primerItem.getBoundingClientRect().height : 68;
+
+      if (reelListaEl) {
+        reelListaEl.style.transition = "none";
+        reelListaEl.style.transform = `translateY(-${ALTURA_ITEM / 2}px)`;
       }
 
       reproducirAudio(audioSorteoAgitar);
 
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (reelListaEl) {
+            const destino = (indiceFinal * ALTURA_ITEM) + (ALTURA_ITEM / 2);
+            reelListaEl.style.transition = "transform 3.6s cubic-bezier(.12,.72,.18,1)";
+            reelListaEl.style.transform = `translateY(-${destino}px)`;
+          }
+        });
+      });
+
       setTimeout(() => {
         if (estadoAnimacionSorteo) estadoAnimacionSorteo.textContent = tOrden("orden_presentacion_primero", "Y el primero es...");
-        if (chispasEl) chispasEl.classList.add("visible");
-
-        const indiceGanador = elegirVaritaGanadora(ordenPitch);
-        const varitas = varitasEl ? varitasEl.querySelectorAll(".varita") : [];
-        if (varitas[indiceGanador]) {
-          varitas[indiceGanador].classList.add("ganadora");
-        }
-
         setDots(2);
-      }, 1500);
+      }, 2600);
 
       setTimeout(() => {
-  if (flashSorteo) flashSorteo.classList.add("visible");
-  reproducirAudio(audioSorteoReveal);
-}, 2400);
+        if (audioSorteoAgitar) { try { audioSorteoAgitar.pause(); } catch(_) {} }
+        if (flashSorteo) flashSorteo.classList.add("visible");
+        reproducirAudio(audioSorteoReveal);
+        if (reelListaEl) {
+          const items = reelListaEl.querySelectorAll(".reel-item");
+          if (items[indiceFinal]) items[indiceFinal].classList.add("ganador");
+        }
+      }, 3700);
 
-setTimeout(() => {
-  if (varitasEl) varitasEl.classList.remove("sorteando");
-}, 3000);
-
-setTimeout(() => {
-  if (flashSorteo) flashSorteo.classList.remove("visible");
-  renderOrdenBonito(ordenPitch, grupoActual);
-  mostrarSoloResultado();
-  animacionActiva = false;
-}, 3550);
+      setTimeout(() => {
+        if (flashSorteo) flashSorteo.classList.remove("visible");
+        renderOrdenBonito(ordenPitch, grupoActual);
+        mostrarSoloResultado();
+        animacionActiva = false;
+      }, 4350);
     }
 
     function renderEstadoFase(data) {

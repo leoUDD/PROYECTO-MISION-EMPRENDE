@@ -58,34 +58,34 @@
       id="astroLegoTrigger"
       class="astro-lego-trigger"
       type="button"
-      aria-label="Encontrar astronauta"
+      aria-label="Ver pregunta de Edemy"
       data-i18n="lego_astro_aria"
       data-i18n-attr="aria-label"
     >
-      <img src="{% static 'images/Cayendo.webp' %}" class="astro-lego-icon" alt="">
+      <img src="{% static 'images/EdemSerio.png' %}" class="astro-lego-icon" alt="">
     </button>
 
     <div id="astroLegoOverlay" class="astro-lego-overlay" aria-hidden="true">
       <div class="astro-lego-card">
         <div class="astro-lego-flex">
-          <img src="{% static 'images/EdemFeliz.webp' %}" class="astro-lego-standing" alt="">
+          <img src="{% static 'images/EdemSerio.png' %}" class="astro-lego-standing" alt="">
           <div class="astro-lego-text">
             <h3 data-i18n="lego_astro_titulo">Pregunta de Edemy</h3>
             <p data-i18n-html="true" data-i18n="lego_astro_intro">
               Si han seguido la misión con atención, podrán responder esta pregunta y ganar <strong>2 tokens</strong>.
             </p>
-            <p data-i18n="lego_astro_pregunta">¿Qué habilidades han trabajado hasta ahora y en qué orden?</p>
+            <p id="astroLegoPregunta">¿Qué habilidades han trabajado hasta ahora y en qué orden?</p>
             <div class="astro-lego-opciones" id="astroLegoOpciones">
-              <button type="button" class="astro-lego-opcion" data-correcta="false" data-i18n="lego_astro_opcion_a">
+              <button type="button" class="astro-lego-opcion" id="astroLegoOpcionA" data-correcta="false">
                 A) Creatividad → Trabajo en equipo → Empatía
               </button>
-              <button type="button" class="astro-lego-opcion" data-correcta="true" data-i18n="lego_astro_opcion_b">
+              <button type="button" class="astro-lego-opcion" id="astroLegoOpcionB" data-correcta="true">
                 B) Trabajo en equipo → Empatía → Creatividad
               </button>
-              <button type="button" class="astro-lego-opcion" data-correcta="false" data-i18n="lego_astro_opcion_c">
+              <button type="button" class="astro-lego-opcion" id="astroLegoOpcionC" data-correcta="false">
                 C) Empatía → Comunicación → Creatividad
               </button>
-              <button type="button" class="astro-lego-opcion" data-correcta="false" data-i18n="lego_astro_opcion_d">
+              <button type="button" class="astro-lego-opcion" id="astroLegoOpcionD" data-correcta="false">
                 D) Comunicación → Creatividad → Trabajo en equipo
               </button>
             </div>
@@ -466,14 +466,70 @@
       const astroOverlay  = document.getElementById("astroLegoOverlay");
       const astroClose    = document.getElementById("astroLegoClose");
       const astroFeedback = document.getElementById("astroLegoFeedback");
+      const astroPregunta = document.getElementById("astroLegoPregunta");
       const astroOpciones = document.querySelectorAll(".astro-lego-opcion");
       const STORAGE_ASTRO_LEGO = `astro_lego_pregunta_usada_${sesionId}_${grupoId}`;
+      const STORAGE_ASTRO_LEGO_INDICE = `astro_lego_pregunta_indice_${sesionId}_${grupoId}`;
       let respondido = localStorage.getItem(STORAGE_ASTRO_LEGO)==="1";
 
       function tAstro(clave,fallback="") {
         const idioma = window.i18nJuego?.obtenerIdioma?.() || "es";
         return window.i18nJuego?.traducciones?.[idioma]?.[clave] || fallback;
       }
+
+      const PREGUNTAS = [
+        {
+          preguntaKey: "lego_astro_pregunta",
+          preguntaFallback: "¿Qué habilidades han trabajado hasta ahora y en qué orden?",
+          opciones: [
+            { key: "lego_astro_opcion_a", fallback: "A) Creatividad → Trabajo en equipo → Empatía", correcta: false },
+            { key: "lego_astro_opcion_b", fallback: "B) Trabajo en equipo → Empatía → Creatividad", correcta: true },
+            { key: "lego_astro_opcion_c", fallback: "C) Empatía → Comunicación → Creatividad", correcta: false },
+            { key: "lego_astro_opcion_d", fallback: "D) Comunicación → Creatividad → Trabajo en equipo", correcta: false }
+          ],
+          feedbackOkKey: "lego_astro_feedback_ok",
+          feedbackOkFallback: "¡Correcto! La respuesta era Trabajo en equipo → Empatía → Creatividad. Tomen sus 2 tokens.",
+          feedbackErrorKey: "lego_astro_feedback_error",
+          feedbackErrorFallback: "Fallaste. La respuesta correcta era: Trabajo en equipo → Empatía → Creatividad."
+        },
+        {
+          preguntaKey: "lego_astro_pregunta_2",
+          preguntaFallback: "¿Qué deben considerar antes de construir su solución?",
+          opciones: [
+            { key: "lego_astro_opcion2_a", fallback: "A) El tiempo disponible, las piezas y que la construcción se entienda.", correcta: false },
+            { key: "lego_astro_opcion2_b", fallback: "B) La persona objetivo, el desafío y las ideas del Bubble Map.", correcta: true },
+            { key: "lego_astro_opcion2_c", fallback: "C) La temática elegida, una idea rápida y una buena presentación.", correcta: false },
+            { key: "lego_astro_opcion2_d", fallback: "D) Los tokens, la ruleta y cómo repartir las tareas.", correcta: false }
+          ],
+          feedbackOkKey: "lego_astro_feedback_ok_2",
+          feedbackOkFallback: "¡Correcto! Antes de construir deben considerar a la persona objetivo, el desafío y las ideas del Bubble Map. Tomen sus 2 tokens.",
+          feedbackErrorKey: "lego_astro_feedback_error_2",
+          feedbackErrorFallback: "Fallaste. La respuesta correcta era: la persona objetivo, el desafío y las ideas del Bubble Map."
+        }
+      ];
+
+      let indicePregunta = parseInt(localStorage.getItem(STORAGE_ASTRO_LEGO_INDICE), 10);
+      if (indicePregunta !== 0 && indicePregunta !== 1) {
+        indicePregunta = Math.random() < 0.5 ? 0 : 1;
+        localStorage.setItem(STORAGE_ASTRO_LEGO_INDICE, String(indicePregunta));
+      }
+      const preguntaActual = PREGUNTAS[indicePregunta];
+
+      function renderPregunta() {
+        if (astroPregunta) {
+          astroPregunta.setAttribute("data-i18n", preguntaActual.preguntaKey);
+          astroPregunta.textContent = tAstro(preguntaActual.preguntaKey, preguntaActual.preguntaFallback);
+        }
+        astroOpciones.forEach((btn, i) => {
+          const opcion = preguntaActual.opciones[i];
+          if (!opcion) return;
+          btn.setAttribute("data-i18n", opcion.key);
+          btn.setAttribute("data-correcta", opcion.correcta ? "true" : "false");
+          btn.textContent = tAstro(opcion.key, opcion.fallback);
+        });
+      }
+
+      renderPregunta();
 
       if (respondido&&astroTrigger) astroTrigger.classList.add("oculto");
 
@@ -490,13 +546,13 @@
           astroOpciones.forEach(op=>{ op.disabled=true; if(op.dataset.correcta==="true") op.classList.add("correcta"); });
           if (correcta) {
             btn.classList.add("correcta");
-            if (astroFeedback) { astroFeedback.className="astro-lego-feedback visible ok"; astroFeedback.textContent=tAstro("lego_astro_feedback_ok","¡Correcto! La respuesta era Trabajo en equipo → Empatía → Creatividad. Tomen sus 2 tokens."); }
+            if (astroFeedback) { astroFeedback.className="astro-lego-feedback visible ok"; astroFeedback.textContent=tAstro(preguntaActual.feedbackOkKey, preguntaActual.feedbackOkFallback); }
             try {
               await fetch("{% url 'aplicar_resultado_ruleta_lego' %}",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json","X-CSRFToken":csrfToken},body:JSON.stringify({tokens:2,resultado:"pregunta_astronauta_lego"})});
             } catch(e){}
           } else {
             btn.classList.add("incorrecta");
-            if (astroFeedback) { astroFeedback.className="astro-lego-feedback visible error"; astroFeedback.textContent=tAstro("lego_astro_feedback_error","Fallaste. La respuesta correcta era: Trabajo en equipo → Empatía → Creatividad."); }
+            if (astroFeedback) { astroFeedback.className="astro-lego-feedback visible error"; astroFeedback.textContent=tAstro(preguntaActual.feedbackErrorKey, preguntaActual.feedbackErrorFallback); }
           }
           if (astroClose) astroClose.classList.add("visible");
         });
@@ -512,8 +568,8 @@
         if (!astroFeedback||!respondido) return;
         const fueCorrecta = astroFeedback.classList.contains("ok");
         astroFeedback.textContent = fueCorrecta
-          ? tAstro("lego_astro_feedback_ok","¡Correcto! La respuesta era Trabajo en equipo → Empatía → Creatividad. Tomen sus 2 tokens.")
-          : tAstro("lego_astro_feedback_error","Fallaste. La respuesta correcta era: Trabajo en equipo → Empatía → Creatividad.");
+          ? tAstro(preguntaActual.feedbackOkKey, preguntaActual.feedbackOkFallback)
+          : tAstro(preguntaActual.feedbackErrorKey, preguntaActual.feedbackErrorFallback);
       });
     });
   </script>

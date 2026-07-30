@@ -14,11 +14,11 @@
 
   <!-- Música de fondo -->
   <audio id="musicaBubble" src="{% static 'sounds/musica_bubble.mp3' %}" loop preload="auto"></audio>
-  <button id="btnMuteBubble" title="Silenciar música">🔊</button>
+  <button id="btnMuteBubble" class="music-btn" title="Silenciar música" aria-label="Silenciar música">🔊</button>
 
   <main class="bubblemap-container">
 
-    <h1 id="tituloBubble">
+    <h1 id="tituloBubble" data-i18n="bubble_titulo">
       Empatía
     </h1>
 
@@ -40,17 +40,17 @@
     </section>
 
     <button id="objetoCelularTrigger" class="objeto-celular-trigger" type="button" aria-label="Encontrar tablet perdida" data-i18n="bubble_objeto_aria" data-i18n-attr="aria-label">
-      <img src="{% static 'images/Tablet.webp' %}" class="objeto-celular-icon" alt="" aria-hidden="true">
+      <img src="{% static 'images/EdemFeliz.png' %}" class="objeto-celular-icon" alt="" aria-hidden="true">
     </button>
 
     <div id="objetoCelularOverlay" class="astro-object-overlay" aria-hidden="true">
       <div class="astro-object-card">
         <div class="astro-flex">
-          <img src="{% static 'images/Parado.webp' %}" class="astro-img" alt="" aria-hidden="true">
+          <img src="{% static 'images/EdemFeliz.png' %}" class="astro-img" alt="" aria-hidden="true">
           <div class="astro-text">
             <h3 data-i18n="bubble_objeto_titulo">Registro de misión actualizado.</h3>
             <p data-i18n="bubble_objeto_p1">Nuevos datos adquiridos: las personas tienen necesidades, emociones y motivaciones.</p>
-            <p data-i18n-html="true" data-i18n="bubble_objeto_p2">Lamentablemente, sus estas no aparecen como notificaciones. He solicitado esa actualización.</p>
+            <p data-i18n-html="true" data-i18n="bubble_objeto_p2">Lamentablemente, estas no aparecen como notificaciones. He solicitado esa actualización.</p>
             <button id="objetoCelularClose" class="astro-object-close" type="button" data-i18n="bubble_objeto_boton">Entendido</button>
           </div>
         </div>

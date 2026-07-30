@@ -18,23 +18,23 @@
       <section class="team-section">
 
         <div class="title-wrapper">
-          <h1 class="title">Empatía</h1>
+          <h1 class="title" data-i18n="empatia_intro_titulo">Empatía</h1>
         </div>
 
         <div class="mission-panel">
-          <p class="mission-lead">
+          <p class="mission-lead" data-i18n="empatia_intro_lead">
             PERSONA OBJETIVO IDENTIFICADA
           </p>
 
-          <p>
+          <p data-i18n="empatia_intro_texto">
             Una solución solo genera impacto cuando responde a las necesidades reales de las personas.
           </p>
 
           <p class="mission-urgent">
-            <strong>Analicen sus necesidades, pensamientos y emociones.</strong>
+            <strong data-i18n="empatia_intro_urgente">Analicen sus necesidades, pensamientos y emociones.</strong>
           </p>
 
-          <div class="tablet-reminder">
+          <div class="tablet-reminder" data-i18n="empatia_intro_tablet">
             📱 Protocolo: Entrega la Tablet a un compañero antes de continuar.
           </div>
 
@@ -139,18 +139,89 @@
   </script>
 
   <script>
+    /* ── Sonidos de diálogo (tecleo / botón) — igual que en las demás vistas con EdEmy ── */
     (function () {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+
+      let ctx = null;
+
+      function getCtx() {
+        if (!ctx) ctx = new AudioCtx();
+        if (ctx.state === "suspended") ctx.resume();
+        return ctx;
+      }
+
+      window.sonarTecla = function () {
+        try {
+          const c = getCtx();
+          const o = c.createOscillator();
+          const g = c.createGain();
+
+          o.connect(g);
+          g.connect(c.destination);
+
+          o.type = "square";
+          o.frequency.setValueAtTime(520, c.currentTime);
+          o.frequency.exponentialRampToValueAtTime(380, c.currentTime + 0.04);
+
+          g.gain.setValueAtTime(0.05, c.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.05);
+
+          o.start(c.currentTime);
+          o.stop(c.currentTime + 0.06);
+        } catch(_) {}
+      };
+
+      window.sonarBoton = function () {
+        try {
+          const c = getCtx();
+
+          [
+            [440, 600, 0, 0.08, 0.18, 0.14],
+            [660, 880, 0.06, 0.18, 0.12, 0.22]
+          ].forEach(([f1, f2, delay, ramp, vol, stop]) => {
+            const o = c.createOscillator();
+            const g = c.createGain();
+
+            o.connect(g);
+            g.connect(c.destination);
+
+            o.type = "sine";
+            o.frequency.setValueAtTime(f1, c.currentTime + delay);
+            o.frequency.exponentialRampToValueAtTime(f2, c.currentTime + delay + ramp);
+
+            g.gain.setValueAtTime(vol, c.currentTime + delay);
+            g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + delay + stop);
+
+            o.start(c.currentTime + delay);
+            o.stop(c.currentTime + delay + stop + 0.02);
+          });
+        } catch(_) {}
+      };
+    })();
+
+    (function () {
+      function tJuego(clave, fallback = "") {
+        const idioma = window.i18nJuego?.obtenerIdioma?.() || "es";
+        return window.i18nJuego?.traducciones?.[idioma]?.[clave] || fallback;
+      }
+
       const GUION = [
         {
+          key: "empatia_dialogo_1",
           texto: "En el 2060 muchos diseñaban soluciones sin conocer a las personas que las necesitaban."
         },
         {
+          key: "empatia_dialogo_2",
           texto: "Ese fue uno de nuestros mayores errores…"
         },
         {
+          key: "empatia_dialogo_3",
           texto: "Escuchen antes de proponer."
         },
         {
+          key: "empatia_dialogo_4",
           texto: "Solo así podrán construir algo con verdadero impacto."
         }
       ];
@@ -230,8 +301,8 @@
       function mostrarPaso(n) {
         paso = n;
         actualizarDots();
-        cambiarTextoBoton(n === GUION.length - 1 ? "Ver tarjeta de misión" : "Continuar");
-        escribirTexto(GUION[n].texto);
+        cambiarTextoBoton(n === GUION.length - 1 ? tJuego("empatia_dialogo_ver_tarjeta", "Ver tarjeta de misión") : tJuego("empatia_dialogo_continuar", "Continuar"));
+        escribirTexto(tJuego(GUION[n].key, GUION[n].texto));
       }
 
       function cerrarDialogo() {

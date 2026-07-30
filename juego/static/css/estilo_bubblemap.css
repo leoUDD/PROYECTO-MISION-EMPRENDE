@@ -312,44 +312,71 @@ body{
 
 /* ── Objeto celular ── */
 .objeto-celular-trigger{
-  position: fixed;
-  right: clamp(18px, 4vw, 54px);
-  bottom: clamp(92px, 15vh, 150px);
-  width: 68px;
-  height: 68px;
+  --edemy-size: clamp(64px, 6.5vw, 92px);
+  position: absolute;
+  top: clamp(10px, 2vh, 24px);
+  left: calc(100% - var(--edemy-size) - clamp(10px, 2vw, 24px));
+  right: auto;
+  bottom: auto;
+  width: var(--edemy-size);
+  height: var(--edemy-size);
   border: none;
-  border-radius: 20px;
-  background: rgba(7, 21, 43, 0.86);
-  border: 1px solid rgba(0, 200, 255, 0.32);
-  box-shadow: 0 12px 26px rgba(0,0,0,.30), 0 0 18px rgba(0,200,255,.18);
+  border-radius: 999px;
+  background: transparent;
+  box-shadow: none;
   cursor: pointer;
   z-index: 60;
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: celularFloat 4.2s ease-in-out infinite alternate;
+  animation: celularFloat 19s ease-in-out infinite;
+  will-change: top, left, transform;
 }
 
 .objeto-celular-trigger:hover{
   transform: scale(1.06);
-  box-shadow: 0 14px 30px rgba(0,0,0,.34), 0 0 24px rgba(0,200,255,.30);
 }
 
 .objeto-celular-icon{
-  width: 72px;
+  width: 100%;
   height: auto;
   object-fit: contain;
-  animation: celularBounce 1.4s ease-in-out infinite alternate;
+  filter:
+    drop-shadow(0 0 16px rgba(0,200,255,.34))
+    drop-shadow(0 0 26px rgba(0,252,152,.18));
 }
 
 @keyframes celularFloat{
-  from { translate: 0 0; }
-  to   { translate: -24px -18px; }
-}
-
-@keyframes celularBounce{
-  from { transform: translateY(0) rotate(-4deg); }
-  to   { transform: translateY(-6px) rotate(4deg); }
+  0%, 100%{
+    top: clamp(10px, 2vh, 24px);
+    left: calc(100% - var(--edemy-size) - clamp(10px, 2vw, 24px));
+    transform: rotate(-4deg) scale(1);
+  }
+  14%{
+    top: 8%;
+    left: 68%;
+    transform: rotate(6deg) scale(1.04);
+  }
+  30%{
+    top: 42%;
+    left: calc(100% - var(--edemy-size) - 18px);
+    transform: rotate(-3deg) scale(.98);
+  }
+  48%{
+    top: 66%;
+    left: 55%;
+    transform: rotate(7deg) scale(1.03);
+  }
+  66%{
+    top: 40%;
+    left: 6%;
+    transform: rotate(-6deg) scale(1.02);
+  }
+  82%{
+    top: 10%;
+    left: 30%;
+    transform: rotate(4deg) scale(.99);
+  }
 }
 
 .objeto-celular-trigger.oculto{ display: none; }
@@ -562,7 +589,7 @@ body{
   .astro-text{ text-align: center; }
   .astro-img{ width: 100px; }
 
-  .objeto-celular-trigger{ width: 58px; height: 58px; border-radius: 18px; bottom: 76px; }
+  .objeto-celular-trigger{ --edemy-size: 58px; }
 }
 
 @keyframes neonPulse{
@@ -878,7 +905,32 @@ body::before{
 }
 
 /* Objetos y modales */
-.objeto-celular-trigger,
+.music-btn{
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 500;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(0,200,255,.60);
+  background: rgba(0,20,40,.85);
+  color: #FFFFFF;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 14px rgba(0,200,255,.25);
+  transition: border-color .2s ease, box-shadow .2s ease, transform .15s ease;
+}
+
+.music-btn:hover{
+  border-color: rgba(0,252,152,.78);
+  box-shadow: 0 0 22px rgba(0,252,152,.34);
+  transform: scale(1.08);
+}
+
 #btnMuteBubble{
   background:rgba(3,18,42,.76) !important;
   border-color:rgba(0,200,255,.42) !important;
@@ -1242,10 +1294,7 @@ body::before{
   }
 
   .objeto-celular-trigger{
-    width:64px !important;
-    height:64px !important;
-    border-radius:20px !important;
-    bottom:82px !important;
+    --edemy-size: 64px;
   }
 }
 

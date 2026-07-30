@@ -41,6 +41,68 @@
   </div>
 
   <script>
+    /* ── Sonidos de diálogo (tecleo / botón) — igual que en las demás vistas con EdEmy ── */
+    (function () {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+
+      let ctx = null;
+
+      function getCtx() {
+        if (!ctx) ctx = new AudioCtx();
+        if (ctx.state === "suspended") ctx.resume();
+        return ctx;
+      }
+
+      window.sonarTecla = function () {
+        try {
+          const c = getCtx();
+          const o = c.createOscillator();
+          const g = c.createGain();
+
+          o.connect(g);
+          g.connect(c.destination);
+
+          o.type = "square";
+          o.frequency.setValueAtTime(520, c.currentTime);
+          o.frequency.exponentialRampToValueAtTime(380, c.currentTime + 0.04);
+
+          g.gain.setValueAtTime(0.05, c.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.05);
+
+          o.start(c.currentTime);
+          o.stop(c.currentTime + 0.06);
+        } catch(_) {}
+      };
+
+      window.sonarBoton = function () {
+        try {
+          const c = getCtx();
+
+          [
+            [440, 600, 0, 0.08, 0.18, 0.14],
+            [660, 880, 0.06, 0.18, 0.12, 0.22]
+          ].forEach(([f1, f2, delay, ramp, vol, stop]) => {
+            const o = c.createOscillator();
+            const g = c.createGain();
+
+            o.connect(g);
+            g.connect(c.destination);
+
+            o.type = "sine";
+            o.frequency.setValueAtTime(f1, c.currentTime + delay);
+            o.frequency.exponentialRampToValueAtTime(f2, c.currentTime + delay + ramp);
+
+            g.gain.setValueAtTime(vol, c.currentTime + delay);
+            g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + delay + stop);
+
+            o.start(c.currentTime + delay);
+            o.stop(c.currentTime + delay + stop + 0.02);
+          });
+        } catch(_) {}
+      };
+    })();
+
     document.addEventListener("DOMContentLoaded", () => {
       const overlay = document.getElementById("inicio-fase-overlay");
       const texto = document.getElementById("dialogo-texto-rpg");
@@ -98,9 +160,16 @@
         texto.appendChild(cursor);
 
         let i = 0;
+        let teclaCounter = 0;
         timerEscritura = setInterval(() => {
           if (i < txt.length) {
             textoNodo.data = txt.slice(0, i + 1);
+
+            teclaCounter++;
+            if (teclaCounter % 2 === 0 && txt[i] !== " " && typeof window.sonarTecla === "function") {
+              window.sonarTecla();
+            }
+
             i += 1;
           } else {
             clearInterval(timerEscritura);
@@ -128,6 +197,8 @@
       }
 
       btnSiguiente.addEventListener("click", () => {
+        if (typeof window.sonarBoton === "function") window.sonarBoton();
+
         if (escribiendo) {
           clearInterval(timerEscritura);
           escribiendo = false;

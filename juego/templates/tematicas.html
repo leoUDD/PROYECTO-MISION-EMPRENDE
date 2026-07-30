@@ -22,19 +22,20 @@
         <h1 id="page-title" data-i18n="tematicas_titulo">Elige la temática del desafío</h1>
         <p class="subtitle" data-i18n="tematicas_subtitulo">Selecciona una categoría para continuar. Cada bloque explica de qué trata.</p>
         <div class="timer-box">
-          <span data-i18n="tematicas_timer_label">⏱️ Tiempo para elegir temática y desafío:</span>
-          <strong id="timerTematica">--</strong><br>
+          <div class="timer-grande">
+            <strong id="timerTematica">--</strong>
+          </div>
           <span class="timer-hint" data-i18n="tematicas_timer_hint">Si no eligen a tiempo, el sistema asignará una temática y desafío al azar.</span>
         </div>
       </header>
 
-      <button id="objetoCamaraTrigger" class="objeto-camara-trigger" type="button" aria-label="Encontrar cámara perdida" data-i18n="tematicas_camara_aria" data-i18n-attr="aria-label">
-        <img src="{% static 'images/Camara.webp' %}" class="objeto-camara-img" alt="" aria-hidden="true">
+      <button id="objetoCamaraTrigger" class="objeto-camara-trigger" type="button" aria-label="Ver mensaje de EdEmy" data-i18n="tematicas_camara_aria" data-i18n-attr="aria-label">
+        <img src="{% static 'images/EdemSerio.png' %}" class="objeto-camara-img" alt="" aria-hidden="true">
       </button>
 
       <div id="objetoCamaraOverlay" class="astro-object-overlay" aria-hidden="true">
         <div class="astro-flex">
-          <img src="{% static 'images/Parado.webp' %}" class="astro-img" alt="" aria-hidden="true">
+          <img src="{% static 'images/Consejo1.png' %}" class="astro-img" alt="" aria-hidden="true">
           <div class="astro-text">
             <h3 data-i18n="tematicas_camara_titulo">Registro de misión actualizado.</h3>
             <p data-i18n="tematicas_camara_p1">Recuerden: los desafíos están diseñados para poner a prueba sus habilidades.</p>
@@ -62,7 +63,7 @@
                 <p class="desc">{{ tema.hero }}</p>
               </div>
               <div class="actions">
-                <button class="btn select" type="button" onclick="guardarTema('{{ tema.slug }}', this)">Elegir</button>
+                <button class="btn select" type="button" onclick="guardarTema('{{ tema.slug }}', this)" data-i18n="tematicas_elegir">Elegir</button>
               </div>
             </article>
           {% empty %}

@@ -48,6 +48,68 @@
   </div>
 
   <script>
+    /* ── Sonidos de diálogo (tecleo / botón) — igual que en las demás vistas con EdEmy ── */
+    (function () {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+
+      let ctx = null;
+
+      function getCtx() {
+        if (!ctx) ctx = new AudioCtx();
+        if (ctx.state === "suspended") ctx.resume();
+        return ctx;
+      }
+
+      window.sonarTecla = function () {
+        try {
+          const c = getCtx();
+          const o = c.createOscillator();
+          const g = c.createGain();
+
+          o.connect(g);
+          g.connect(c.destination);
+
+          o.type = "square";
+          o.frequency.setValueAtTime(520, c.currentTime);
+          o.frequency.exponentialRampToValueAtTime(380, c.currentTime + 0.04);
+
+          g.gain.setValueAtTime(0.05, c.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.05);
+
+          o.start(c.currentTime);
+          o.stop(c.currentTime + 0.06);
+        } catch(_) {}
+      };
+
+      window.sonarBoton = function () {
+        try {
+          const c = getCtx();
+
+          [
+            [440, 600, 0, 0.08, 0.18, 0.14],
+            [660, 880, 0.06, 0.18, 0.12, 0.22]
+          ].forEach(([f1, f2, delay, ramp, vol, stop]) => {
+            const o = c.createOscillator();
+            const g = c.createGain();
+
+            o.connect(g);
+            g.connect(c.destination);
+
+            o.type = "sine";
+            o.frequency.setValueAtTime(f1, c.currentTime + delay);
+            o.frequency.exponentialRampToValueAtTime(f2, c.currentTime + delay + ramp);
+
+            g.gain.setValueAtTime(vol, c.currentTime + delay);
+            g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + delay + stop);
+
+            o.start(c.currentTime + delay);
+            o.stop(c.currentTime + delay + stop + 0.02);
+          });
+        } catch(_) {}
+      };
+    })();
+
     document.addEventListener("DOMContentLoaded", () => {
       const texto = document.getElementById("dialogo-texto-rpg");
       const btnSiguiente = document.getElementById("dialogo-siguiente");
@@ -110,9 +172,16 @@
         texto.appendChild(cursor);
 
         let i = 0;
+        let teclaCounter = 0;
         timerEscritura = setInterval(() => {
           if (i < txt.length) {
             textoNodo.data = txt.slice(0, i + 1);
+
+            teclaCounter++;
+            if (teclaCounter % 2 === 0 && txt[i] !== " " && typeof window.sonarTecla === "function") {
+              window.sonarTecla();
+            }
+
             i += 1;
           } else {
             clearInterval(timerEscritura);
@@ -145,6 +214,8 @@
       }
 
       btnSiguiente.addEventListener("click", () => {
+        if (typeof window.sonarBoton === "function") window.sonarBoton();
+
         if (escribiendo) {
           clearInterval(timerEscritura);
           escribiendo = false;
@@ -241,14 +312,14 @@
       data-i18n-attr="aria-label"
     >
       <span class="astro-signal-pitch" aria-hidden="true"></span>
-      <img class="astro-img-falling-pitch" src="{% static 'images/Cayendo.webp' %}" alt="" aria-hidden="true">
+      <img class="astro-img-falling-pitch" src="{% static 'images/EdemRojo.png' %}" alt="" aria-hidden="true">
     </button>
 
   </main>
 
   <div id="astroPitchOverlay" class="astro-pitch-overlay" aria-hidden="true">
     <div class="astro-pitch-card">
-      <img src="{% static 'images/EdemFeliz.png' %}" alt="" aria-hidden="true" class="astro-pitch-img">
+      <img src="{% static 'images/EdemRojo.png' %}" alt="" aria-hidden="true" class="astro-pitch-img">
       <div class="astro-pitch-text">
         <h3 id="astroPitchTitulo" data-i18n="pitch_astro_titulo_inicio">Estructura recomendada</h3>
         <p id="astroPitchMensaje" data-i18n="pitch_astro_mensaje_inicio">
@@ -335,7 +406,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function abrirAstroPitch(titulo, mensaje) {
     if (!astroPitchOverlay) return;
     if (astroPitchTitulo) astroPitchTitulo.textContent = titulo;
-    if (astroPitchMensaje) astroPitchMensaje.textContent = mensaje;
+    if (astroPitchMensaje) astroPitchMensaje.innerHTML = mensaje;
     astroPitchOverlay.classList.add("visible");
     astroPitchOverlay.setAttribute("aria-hidden", "false");
   }
@@ -374,8 +445,8 @@ document.addEventListener("DOMContentLoaded", () => {
     ocultarAstroFlotando();
     if (astroModo === "inicio") {
       abrirAstroPitch(
-        tJuego("pitch_astro_titulo_inicio", "Registro de comunicación completado."),
-        tJuego("pitch_astro_mensaje_inicio", "Consejo de EdEmy: una buena presentación no necesita decirlo todo, solo lo importante. Mis sensores confirman que los humanos suelen intentar explicar 20 minutos de trabajo en 2 minutos. 🤖")
+        tJuego("pitch_astro_titulo_completado", "Registro de comunicación completado."),
+        tJuego("pitch_astro_mensaje_completado", "Consejo de EdEmy: una buena presentación no necesita decirlo todo, solo lo importante. Mis sensores confirman que los humanos suelen intentar explicar 20 minutos de trabajo en 2 minutos. 🤖")
       );
     } else {
       abrirAstroPitch(tJuego("pitch_astro_titulo_mitad", "Mitad del tiempo"), analizarPitchActual());

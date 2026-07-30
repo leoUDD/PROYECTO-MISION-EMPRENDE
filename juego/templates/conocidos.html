@@ -12,25 +12,28 @@
   <style>
     .preguntas-grupo {
       width: 100%;
-      margin-top: 18px;
+      margin-top: 24px;
+      display: block;
+      grid-template-columns: none;
     }
 
     .preguntas-grupo-lista {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 12px;
+      gap: 14px;
       width: 100%;
     }
 
     .pregunta-grupo-item {
       width: 100%;
       min-width: 0;
-      min-height: 74px;
-      padding: 15px 18px;
+      min-height: 92px;
+      padding: 22px 32px;
 
       display: flex;
       align-items: center;
-      gap: 14px;
+      justify-content: center;
+      gap: 18px;
 
       border: 1px solid rgba(0, 200, 255, .44);
       border-radius: 18px;
@@ -66,9 +69,9 @@
       margin: 0 !important;
 
       color: #f4fbff;
-      font-size: clamp(16px, 1.5vw, 20px);
+      font-size: clamp(17px, 1.65vw, 22px);
       font-weight: 800;
-      line-height: 1.4;
+      line-height: 1.42;
 
       white-space: normal;
       word-break: normal;
@@ -78,13 +81,13 @@
 
     @media (max-width: 760px) {
       .pregunta-grupo-item {
-        min-height: 66px;
-        padding: 13px 15px;
+        min-height: 70px;
+        padding: 15px 17px;
         gap: 12px;
       }
 
       .pregunta-grupo-texto {
-        font-size: 16px;
+        font-size: 17px;
       }
     }
   </style>
@@ -140,7 +143,6 @@
               </article>
             </div>
           </div>
-          </div>
         </div>
       </div>
 
@@ -148,7 +150,7 @@
         <h2 id="timer" class="blur-target-bloqueado timer-esperando">00:10</h2>
       </div>
 
-      <button id="astro-trigger" class="astro-trigger" type="button" aria-label="Abrir transmisión secundaria">
+      <button id="astro-trigger" class="astro-trigger" type="button" aria-label="Abrir transmisión secundaria" data-i18n="conocidos_astro_aria" data-i18n-attr="aria-label">
         <span class="astro-signal" aria-hidden="true"></span>
         <img class="astro-img-falling" src="{% static 'images/Consejo1.png' %}" alt="" aria-hidden="true">
       </button>
@@ -156,10 +158,10 @@
       <div id="astro-overlay" class="astro-overlay" aria-hidden="true">
         <div id="astro-card" class="astro-card" role="dialog" aria-label="Transmisión secundaria">
           <img class="astro-img-standing" src="{% static 'images/EdemRojo.png' %}" alt="" aria-hidden="true">
-          <h3>Registro de agentes completado.</h3>
-          <p>Confirmado: el compañero que menos habla podría tener la mejor idea.</p>
-          <p>También podría estar pensando en comida. Mis sensores no distinguen la diferencia. 🤖</p>
-          <button id="astro-close" class="astro-close" type="button">Entendido</button>
+          <h3 data-i18n="conocidos_astro_titulo">Registro de agentes completado.</h3>
+          <p data-i18n="conocidos_astro_p1">Confirmado: el compañero que menos habla podría tener la mejor idea.</p>
+          <p data-i18n="conocidos_astro_p2">También podría estar pensando en comida. Mis sensores no distinguen la diferencia. 🤖</p>
+          <button id="astro-close" class="astro-close" type="button" data-i18n="conocidos_astro_boton">Entendido</button>
         </div>
       </div>
     </section>
@@ -277,18 +279,23 @@
     })();
 
     (function () {
+      function tJuego(clave, fallback = "") {
+        const idioma = window.i18nJuego?.obtenerIdioma?.() || "es";
+        return window.i18nJuego?.traducciones?.[idioma]?.[clave] || fallback;
+      }
+
       const GUION = MODO_RAPIDO
         ? [
-            { texto: "Los registros indican que ya se conocen." },
-            { texto: "En mi época, incluso los mejores equipos dejaron de colaborar porque las máquinas tomaban todas las decisiones." },
-            { texto: "Hoy deberán demostrar que trabajar juntos sigue siendo una ventaja." },
-            { texto: "Confirmen cuando estén listos." }
+            { key: "conocidos_dialogo_conocidos_1", texto: "Los registros indican que ya se conocen." },
+            { key: "conocidos_dialogo_conocidos_2", texto: "En mi época, incluso los mejores equipos dejaron de colaborar porque las máquinas tomaban todas las decisiones." },
+            { key: "conocidos_dialogo_conocidos_3", texto: "Hoy deberán demostrar que trabajar juntos sigue siendo una ventaja." },
+            { key: "conocidos_dialogo_conocidos_4", texto: "Confirmen cuando estén listos." }
           ]
         : [
-            { texto: "Veo que este equipo acaba de formarse." },
-            { texto: "Las mejores soluciones del pasado nacían cuando personas con experiencias distintas trabajan en equipo." },
-            { texto: "Conózcanse antes de comenzar." },
-            { texto: "Confirmen cuando estén listos." }
+            { key: "conocidos_dialogo_desconocidos_1", texto: "Veo que este equipo acaba de formarse." },
+            { key: "conocidos_dialogo_desconocidos_2", texto: "Las mejores soluciones del pasado nacían cuando personas con experiencias distintas trabajan en equipo." },
+            { key: "conocidos_dialogo_desconocidos_3", texto: "Conózcanse antes de comenzar." },
+            { key: "conocidos_dialogo_desconocidos_4", texto: "Confirmen cuando estén listos." }
           ];
 
       let paso = 0;
@@ -386,8 +393,8 @@
           btnDialogo.disabled = false;
         }
 
-        cambiarTextoBoton(n === GUION.length - 1 ? "⚡ Confirmar equipo listo" : "Siguiente");
-        escribirTexto(GUION[n].texto);
+        cambiarTextoBoton(n === GUION.length - 1 ? tJuego("dialogo_boton_confirmar_equipo", "⚡ Confirmar equipo listo") : tJuego("dialogo_boton_siguiente", "Siguiente"));
+        escribirTexto(tJuego(GUION[n].key, GUION[n].texto));
       }
 
       window.dialogoSiguiente = async function () {

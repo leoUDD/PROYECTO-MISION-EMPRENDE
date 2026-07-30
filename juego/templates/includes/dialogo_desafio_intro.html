@@ -374,21 +374,30 @@
   }
 
   /* ── GUIÓN EDEMY ── */
+  function tJuego(clave, fallback = "") {
+    const idioma = window.i18nJuego?.obtenerIdioma?.() || "es";
+    return window.i18nJuego?.traducciones?.[idioma]?.[clave] || fallback;
+  }
+
   const GUION = [
     {
       nombre: "EdEmy",
+      key: "desafios_dialogo_1",
       texto: "Activando protocolo de Empatía…"
     },
     {
       nombre: "EdEmy",
+      key: "desafios_dialogo_2",
       texto: "Agentes, un buen emprendimiento resuelve un problema relevante para la sociedad."
     },
     {
       nombre: "EdEmy",
+      key: "desafios_dialogo_3",
       texto: "A continuación, tendrán que elegir una temática y un desafío."
     },
     {
       nombre: "EdEmy",
+      key: "desafios_dialogo_4",
       texto: "Esa decisión definirá el resto de la misión."
     }
   ];
@@ -468,9 +477,9 @@
     habEl.textContent = linea.nombre;
     actualizarDots();
 
-    btnLabel.textContent = (n === GUION.length - 1) ? "¡Entendido!" : "Siguiente";
+    btnLabel.textContent = (n === GUION.length - 1) ? tJuego("dialogo_boton_entendido", "¡Entendido!") : tJuego("dialogo_boton_siguiente", "Siguiente");
 
-    escribirTexto(linea.texto);
+    escribirTexto(tJuego(linea.key, linea.texto));
   }
 
   window.ddSiguiente = function () {

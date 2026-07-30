@@ -161,12 +161,17 @@
       } catch (_) {}
     }
 
+    function tJuego(clave, fallback = "") {
+      const idioma = window.i18nJuego?.obtenerIdioma?.() || "es";
+      return window.i18nJuego?.traducciones?.[idioma]?.[clave] || fallback;
+    }
+
     const GUION = [
-      { texto: "¡Agentes soy Edemy, bienvenidos al año 2060! " },
-      { texto: "Los traje desde el pasado porque ustedes aún conservan aquello que aquí se perdió…" },
-      { texto: "La tecnología resolvió casi todos los problemas... pero la humanidad dejó de crear nuevas soluciones." },
-      { texto: "Cada actividad recuperará una habilidad necesaria para reconstruir el futuro." },
-      { texto: "¿Están listos? Comencemos la misión."}
+      { key: "bienvenida_dialogo_1", texto: "¡Agentes soy Edemy, bienvenidos al año 2060! " },
+      { key: "bienvenida_dialogo_2", texto: "Los traje desde el pasado porque ustedes aún conservan aquello que aquí se perdió…" },
+      { key: "bienvenida_dialogo_3", texto: "La tecnología resolvió casi todos los problemas... pero la humanidad dejó de crear nuevas soluciones." },
+      { key: "bienvenida_dialogo_4", texto: "Cada actividad recuperará una habilidad necesaria para reconstruir el futuro." },
+      { key: "bienvenida_dialogo_5", texto: "¿Están listos? Comencemos la misión."}
     ];
 
     let paso = 0;
@@ -241,8 +246,8 @@
       paso = n;
       actualizarDots();
       if (btnDialogo) btnDialogo.disabled = false;
-      cambiarTextoBoton(n === GUION.length - 1 ? "¡Entendido!" : "Siguiente");
-      escribirTexto(GUION[n].texto);
+      cambiarTextoBoton(n === GUION.length - 1 ? tJuego("dialogo_boton_entendido", "¡Entendido!") : tJuego("dialogo_boton_siguiente", "Siguiente"));
+      escribirTexto(tJuego(GUION[n].key, GUION[n].texto));
     }
 
     window.dialogoSiguiente = function () {

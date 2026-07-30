@@ -25,6 +25,69 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      position: relative;
+    }
+
+    .edemy-flotante-ranking {
+      --edemy-size: clamp(64px, 6.4vw, 92px);
+      position: absolute;
+      top: clamp(4px, 1vw, 14px);
+      left: calc(100% - var(--edemy-size) - clamp(4px, 1vw, 14px));
+      width: var(--edemy-size);
+      height: var(--edemy-size);
+      z-index: 5;
+      pointer-events: none;
+      opacity: .96;
+      will-change: top, left, transform;
+      animation: edemyFloatRanking 19s ease-in-out infinite;
+    }
+
+    .edemy-flotante-ranking img {
+      width: 100%;
+      height: auto;
+      object-fit: contain;
+      filter:
+        drop-shadow(0 0 16px rgba(0,252,152,.40))
+        drop-shadow(0 0 26px rgba(0,200,255,.20));
+    }
+
+    @keyframes edemyFloatRanking {
+      0%, 100% {
+        top: clamp(4px, 1vw, 14px);
+        left: calc(100% - var(--edemy-size) - clamp(4px, 1vw, 14px));
+        transform: rotate(-4deg) scale(1);
+      }
+      14% {
+        top: 6%;
+        left: 68%;
+        transform: rotate(6deg) scale(1.04);
+      }
+      30% {
+        top: 40%;
+        left: calc(100% - var(--edemy-size) - 20px);
+        transform: rotate(-3deg) scale(.98);
+      }
+      48% {
+        top: 58%;
+        left: 60%;
+        transform: rotate(7deg) scale(1.03);
+      }
+      66% {
+        top: 30%;
+        left: 12%;
+        transform: rotate(-6deg) scale(1.02);
+      }
+      82% {
+        top: 8%;
+        left: 34%;
+        transform: rotate(4deg) scale(.99);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .edemy-flotante-ranking {
+        display: none;
+      }
     }
 
     .ranking-parcial-card {
@@ -2884,28 +2947,31 @@ body.ranking-final .tfr-tok {
 
       <!-- RANKING PARCIAL — paleta verde/azul -->
       <section class="ranking-parcial-wrap">
+        <div class="edemy-flotante-ranking" aria-hidden="true">
+          <img src="{% static 'images/EdemFeliz.png' %}" alt="">
+        </div>
         <div class="ranking-parcial-card">
           {% if grupo.sesion.fase_actual == "f1_ranking" %}
-  <h1 class="titulo">Así van los equipos</h1>
-  <p class="subtitulo">
+  <h1 class="titulo" data-i18n="ranking_parcial_f1_titulo">Así van los equipos</h1>
+  <p class="subtitulo" data-i18n="ranking_parcial_f1_subtitulo">
     ¡Aún pueden quedar primeros! La misión recién comienza.
   </p>
 
 {% elif grupo.sesion.fase_actual == "f2_ranking" %}
-  <h1 class="titulo">La misión sigue abierta</h1>
-  <p class="subtitulo">
+  <h1 class="titulo" data-i18n="ranking_parcial_f2_titulo">La misión sigue abierta</h1>
+  <p class="subtitulo" data-i18n="ranking_parcial_f2_subtitulo">
     Cada decisión puede cambiar el tablero.
   </p>
 
 {% elif grupo.sesion.fase_actual == "f3_ranking" %}
-  <h1 class="titulo">Nada está definido todavía</h1>
-  <p class="subtitulo">
+  <h1 class="titulo" data-i18n="ranking_parcial_f3_titulo">Nada está definido todavía</h1>
+  <p class="subtitulo" data-i18n="ranking_parcial_f3_subtitulo">
     El próximo desafío puede llevarlos a la cima.
   </p>
 
 {% else %}
-  <h1 class="titulo">Así va la misión</h1>
-  <p class="subtitulo">
+  <h1 class="titulo" data-i18n="ranking_parcial_default_titulo">Así va la misión</h1>
+  <p class="subtitulo" data-i18n="ranking_parcial_default_subtitulo">
     Sigan avanzando: todavía pueden llegar arriba.
   </p>
 {% endif %}

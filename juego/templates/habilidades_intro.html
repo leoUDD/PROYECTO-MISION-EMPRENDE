@@ -488,133 +488,184 @@
       return habilidadesCompletadas.some(h => h === n || h.includes(n));
     }
 
+    function tJuego(clave, fallback = "") {
+      const idioma = window.i18nJuego?.obtenerIdioma?.() || "es";
+      return window.i18nJuego?.traducciones?.[idioma]?.[clave] || fallback;
+    }
+
     const guionInicioMapa = [
       {
+        key: "habilidades_intro_1",
         texto: "Han cruzado el umbral de la misión.",
         robot: ROBOTS.feliz,
-        estado: "TRANSMISIÓN INICIADA"
+        estado: "TRANSMISIÓN INICIADA",
+        estadoKey: "habilidades_intro_1_estado"
       },
       {
+        key: "habilidades_intro_2",
         texto: "Lo que ven frente a ustedes no es solo un mapa.",
         robot: ROBOTS.serio,
-        estado: "ANÁLISIS DEL MAPA"
+        estado: "ANÁLISIS DEL MAPA",
+        estadoKey: "habilidades_intro_2_estado"
       },
       {
+        key: "habilidades_intro_3",
         texto: "Es una ruta de recuperación.",
         robot: ROBOTS.serio,
-        estado: "RUTA DETECTADA"
+        estado: "RUTA DETECTADA",
+        estadoKey: "habilidades_intro_3_estado"
       },
       {
+        key: "habilidades_intro_4",
         texto: "Durante años, la humanidad delegó sus decisiones, sus ideas y sus soluciones.",
         robot: ROBOTS.triste,
-        estado: "REGISTRO HISTÓRICO"
+        estado: "REGISTRO HISTÓRICO",
+        estadoKey: "habilidades_intro_4_estado"
       },
       {
+        key: "habilidades_intro_5",
         texto: "Pero hay habilidades que ninguna máquina puede reemplazar por completo.",
         robot: ROBOTS.serio,
-        estado: "HABILIDADES HUMANAS"
+        estado: "HABILIDADES HUMANAS",
+        estadoKey: "habilidades_intro_5_estado"
       },
       {
+        key: "habilidades_intro_6",
         texto: "Primero deberán trabajar en equipo. Luego comprender el problema, crear una solución y comunicarla con claridad.",
         robot: ROBOTS.feliz,
-        estado: "RUTA DE MISIÓN"
+        estado: "RUTA DE MISIÓN",
+        estadoKey: "habilidades_intro_6_estado"
       },
       {
+        key: "habilidades_intro_7",
         texto: "Soy EdEmy. Estaré observando su progreso.",
         robot: ROBOTS.serio,
-        estado: "GUÍA ACTIVADO"
+        estado: "GUÍA ACTIVADO",
+        estadoKey: "habilidades_intro_7_estado"
       },
       {
+        key: "habilidades_intro_8",
         texto: "El futuro no espera. Avancen.",
         robot: ROBOTS.rojo,
-        estado: "ORDEN DE AVANCE"
+        estado: "ORDEN DE AVANCE",
+        estadoKey: "habilidades_intro_8_estado"
       }
     ];
 
     const guionPostTrabajoEquipo = [
       {
+        key: "habilidades_post_equipo_1",
         texto: "Trabajo en equipo completado.",
         robot: ROBOTS.feliz,
-        estado: "HABILIDAD RECUPERADA"
+        estado: "HABILIDAD RECUPERADA",
+        estadoKey: "habilidades_post_equipo_1_estado"
       },
       {
+        key: "habilidades_post_equipo_2",
         texto: "Ya demostraron que una misión no avanza solo con buenas ideas. También necesita coordinación.",
         robot: ROBOTS.serio,
-        estado: "ANÁLISIS DEL EQUIPO"
+        estado: "ANÁLISIS DEL EQUIPO",
+        estadoKey: "habilidades_post_equipo_2_estado"
       },
       {
+        key: "habilidades_post_equipo_3",
         texto: "Ahora viene Empatía.",
         robot: ROBOTS.feliz,
-        estado: "SIGUIENTE HABILIDAD"
+        estado: "SIGUIENTE HABILIDAD",
+        estadoKey: "habilidades_post_equipo_3_estado"
       },
       {
+        key: "habilidades_post_equipo_4",
         texto: "Observen el problema desde quienes lo viven. Escuchar será más importante que asumir.",
         robot: ROBOTS.serio,
-        estado: "MISIÓN ACTIVA"
+        estado: "MISIÓN ACTIVA",
+        estadoKey: "habilidades_post_equipo_4_estado"
       }
     ];
 
     const guionPostEmpatia = [
       {
+        key: "habilidades_post_empatia_1",
         texto: "Empatía completada.",
         robot: ROBOTS.feliz,
-        estado: "HABILIDAD RECUPERADA"
+        estado: "HABILIDAD RECUPERADA",
+        estadoKey: "habilidades_post_empatia_1_estado"
       },
       {
+        key: "habilidades_post_empatia_2",
         texto: "Ya entendieron algo clave: un emprendimiento no empieza con una idea.",
         robot: ROBOTS.serio,
-        estado: "LECTURA DEL PROBLEMA"
+        estado: "LECTURA DEL PROBLEMA",
+        estadoKey: "habilidades_post_empatia_2_estado"
       },
       {
+        key: "habilidades_post_empatia_3",
         texto: "Empieza con un problema real, vivido por personas reales.",
         robot: ROBOTS.serio,
-        estado: "PROBLEMA IDENTIFICADO"
+        estado: "PROBLEMA IDENTIFICADO",
+        estadoKey: "habilidades_post_empatia_3_estado"
       },
       {
+        key: "habilidades_post_empatia_4",
         texto: "Ahora viene Creatividad. Transformen lo aprendido en una solución con valor.",
         robot: ROBOTS.rojo,
-        estado: "SIGUIENTE HABILIDAD"
+        estado: "SIGUIENTE HABILIDAD",
+        estadoKey: "habilidades_post_empatia_4_estado"
       }
     ];
 
     const guionPostCreatividad = [
       {
+        key: "habilidades_post_creatividad_1",
         texto: "Creatividad completada.",
         robot: ROBOTS.feliz,
-        estado: "HABILIDAD RECUPERADA"
+        estado: "HABILIDAD RECUPERADA",
+        estadoKey: "habilidades_post_creatividad_1_estado"
       },
       {
+        key: "habilidades_post_creatividad_2",
         texto: "Ya tienen una solución. Pero una idea que no se comunica, no existe.",
         robot: ROBOTS.serio,
-        estado: "SOLUCIÓN DETECTADA"
+        estado: "SOLUCIÓN DETECTADA",
+        estadoKey: "habilidades_post_creatividad_2_estado"
       },
       {
+        key: "habilidades_post_creatividad_3",
         texto: "La etapa final pondrá a prueba Comunicación y Negociación.",
         robot: ROBOTS.rojo,
-        estado: "FASE FINAL"
+        estado: "FASE FINAL",
+        estadoKey: "habilidades_post_creatividad_3_estado"
       },
       {
+        key: "habilidades_post_creatividad_4",
         texto: "Presenten con claridad, escuchen la retroalimentación y prepárense para mejorar la propuesta.",
         robot: ROBOTS.serio,
-        estado: "MISIÓN ACTIVA"
+        estado: "MISIÓN ACTIVA",
+        estadoKey: "habilidades_post_creatividad_4_estado"
       }
     ];
 
     const guionPostMisionFinal = [
       {
+        key: "habilidades_post_final_1",
         texto: "Misión final completada.",
         robot: ROBOTS.feliz,
-        estado: "MISIÓN COMPLETADA"
+        estado: "MISIÓN COMPLETADA",
+        estadoKey: "habilidades_post_final_1_estado"
       },
       {
+        key: "habilidades_post_final_2",
         texto: "Comunicaron, negociaron y defendieron su propuesta.",
         robot: ROBOTS.serio,
-        estado: "RESULTADO REGISTRADO"
+        estado: "RESULTADO REGISTRADO",
+        estadoKey: "habilidades_post_final_2_estado"
       },
       {
+        key: "habilidades_post_final_3",
         texto: "El futuro ha sido ajustado. La humanidad aún tiene una oportunidad.",
         robot: ROBOTS.feliz,
-        estado: "SISTEMA ESTABLE"
+        estado: "SISTEMA ESTABLE",
+        estadoKey: "habilidades_post_final_3_estado"
       }
     ];
 
@@ -737,12 +788,12 @@
       cambiarRobot(item.robot);
 
       if (estadoEl) {
-        estadoEl.textContent = item.estado;
+        estadoEl.textContent = tJuego(item.estadoKey, item.estado);
       }
 
       btnNext.textContent = index === guionIntro.length - 1 ? "INICIAR MAPA" : "SIGUIENTE";
 
-      escribirTexto(item.texto);
+      escribirTexto(tJuego(item.key, item.texto));
     }
 
     function cerrarIntro() {

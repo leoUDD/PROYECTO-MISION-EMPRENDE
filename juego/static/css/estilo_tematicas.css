@@ -185,9 +185,34 @@ body:has(#inicio-fase-overlay:not(.overlay-hidden)) .selector-container{
 }
 
 #timerTematica{
-  color: var(--green-soft);
-  margin-left: 6px;
-  text-shadow: 0 0 10px rgba(0,252,152,.42);
+  color: #EAF8FF;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 10px rgba(0,200,255,.70);
+}
+
+.timer-grande{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: fit-content;
+  min-width: clamp(150px, 18vw, 220px);
+  height: clamp(64px, 7vw, 88px);
+  margin: 10px auto;
+  padding: 0 24px;
+  border-radius: 20px;
+  border: 1.8px solid rgba(0,200,255,.64);
+  background: rgba(2,12,28,.60);
+  font-size: clamp(38px, 4.4vw, 62px);
+  font-weight: 900;
+  box-shadow:
+    0 0 18px rgba(0,200,255,.25),
+    inset 0 0 20px rgba(0,200,255,.15);
+  animation: neonPulseTematicas 1.4s ease-in-out infinite;
+}
+
+@keyframes neonPulseTematicas{
+  0%, 100%{ box-shadow: 0 0 18px rgba(0,200,255,.25), inset 0 0 20px rgba(0,200,255,.15); }
+  50%{ box-shadow: 0 0 28px rgba(0,200,255,.42), inset 0 0 26px rgba(0,200,255,.24); }
 }
 
 .timer-hint{
@@ -683,37 +708,62 @@ body:has(#inicio-fase-overlay:not(.overlay-hidden)) .selector-container{
    OBJETO CÁMARA / MINI AYUDA
 ===================================================== */
 .objeto-camara-trigger{
+  --edemy-size: clamp(72px, 7.2vw, 100px);
   position: fixed;
-  right: clamp(18px, 4vw, 54px);
-  bottom: clamp(90px, 14vh, 150px);
+  top: clamp(14px, 2vh, 30px);
+  left: calc(50% - var(--edemy-size) / 2);
+  right: auto;
+  bottom: auto;
   z-index: 60;
-  width: 88px;
-  height: 88px;
-  border: 1.5px solid rgba(0,200,255,.36);
-  border-radius: 24px;
-  background: rgba(3,18,38,.78);
-  box-shadow:
-    0 12px 26px rgba(0,0,0,.34),
-    0 0 16px rgba(0,200,255,.18);
+  width: var(--edemy-size);
+  height: var(--edemy-size);
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  box-shadow: none;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: camaraFloat 4.2s ease-in-out infinite alternate;
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
+  animation: camaraFloat 17s ease-in-out infinite;
+  will-change: top, left, transform;
 }
 
 .objeto-camara-img{
-  width: 70px;
+  width: 100%;
   height: auto;
   pointer-events: none;
-  filter: drop-shadow(0 0 12px rgba(0,200,255,.25));
+  filter:
+    drop-shadow(0 0 16px rgba(0,200,255,.34))
+    drop-shadow(0 0 26px rgba(0,252,152,.18));
 }
 
 @keyframes camaraFloat{
-  from{ translate: 0 0; }
-  to{ translate: -34px -26px; }
+  0%, 100%{
+    top: clamp(14px, 2vh, 30px);
+    left: 8%;
+    transform: rotate(-4deg) scale(1);
+  }
+  20%{
+    top: clamp(10px, 1.6vh, 22px);
+    left: 30%;
+    transform: rotate(5deg) scale(1.04);
+  }
+  40%{
+    top: clamp(30px, 4vh, 52px);
+    left: 52%;
+    transform: rotate(-3deg) scale(.98);
+  }
+  60%{
+    top: clamp(8px, 1.2vh, 18px);
+    left: 70%;
+    transform: rotate(6deg) scale(1.03);
+  }
+  80%{
+    top: clamp(24px, 3vh, 40px);
+    left: 88%;
+    transform: rotate(-5deg) scale(1.02);
+  }
 }
 
 .objeto-camara-trigger.oculto{
@@ -993,14 +1043,11 @@ body:has(#inicio-fase-overlay:not(.overlay-hidden)) .selector-container{
   }
 
   .objeto-camara-trigger{
-    width: 64px;
-    height: 64px;
-    border-radius: 20px;
-    bottom: 82px;
+    --edemy-size: 60px;
   }
 
   .objeto-camara-img{
-    width: 52px;
+    width: 100%;
   }
 
   .astro-flex{

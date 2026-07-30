@@ -17,23 +17,23 @@
       <section class="team-section">
 
         <div class="title-wrapper">
-          <h1 class="title">Creatividad</h1>
+          <h1 class="title" data-i18n="creatividad_intro_titulo">Creatividad</h1>
         </div>
 
         <div class="mission-panel" aria-label="Tarjeta de misión creatividad">
-          <p class="mission-lead">
+          <p class="mission-lead" data-i18n="creatividad_intro_lead">
             LABORATORIO DE PROTOTIPADO
           </p>
 
-          <p>
+          <p data-i18n="creatividad_intro_texto">
             Toda gran innovación comienza con una primera versión.
           </p>
 
           <p class="mission-urgent">
-            <strong>Inicien la construcción de una solución que responda al desafío seleccionado y a las necesidades de su persona objetivo.</strong>
+            <strong data-i18n="creatividad_intro_urgente">Inicien la construcción de una solución que responda al desafío seleccionado y a las necesidades de su persona objetivo.</strong>
           </p>
 
-          <div class="tablet-reminder">
+          <div class="tablet-reminder" data-i18n="creatividad_intro_tablet">
             📱 Protocolo: Entrega la Tablet a un compañero antes de continuar.
           </div>
 
@@ -138,6 +138,68 @@
   </script>
 
   <script>
+    /* ── Sonidos de diálogo (tecleo / botón) — igual que en las demás vistas con EdEmy ── */
+    (function () {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+
+      let ctx = null;
+
+      function getCtx() {
+        if (!ctx) ctx = new AudioCtx();
+        if (ctx.state === "suspended") ctx.resume();
+        return ctx;
+      }
+
+      window.sonarTecla = function () {
+        try {
+          const c = getCtx();
+          const o = c.createOscillator();
+          const g = c.createGain();
+
+          o.connect(g);
+          g.connect(c.destination);
+
+          o.type = "square";
+          o.frequency.setValueAtTime(520, c.currentTime);
+          o.frequency.exponentialRampToValueAtTime(380, c.currentTime + 0.04);
+
+          g.gain.setValueAtTime(0.05, c.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.05);
+
+          o.start(c.currentTime);
+          o.stop(c.currentTime + 0.06);
+        } catch(_) {}
+      };
+
+      window.sonarBoton = function () {
+        try {
+          const c = getCtx();
+
+          [
+            [440, 600, 0, 0.08, 0.18, 0.14],
+            [660, 880, 0.06, 0.18, 0.12, 0.22]
+          ].forEach(([f1, f2, delay, ramp, vol, stop]) => {
+            const o = c.createOscillator();
+            const g = c.createGain();
+
+            o.connect(g);
+            g.connect(c.destination);
+
+            o.type = "sine";
+            o.frequency.setValueAtTime(f1, c.currentTime + delay);
+            o.frequency.exponentialRampToValueAtTime(f2, c.currentTime + delay + ramp);
+
+            g.gain.setValueAtTime(vol, c.currentTime + delay);
+            g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + delay + stop);
+
+            o.start(c.currentTime + delay);
+            o.stop(c.currentTime + delay + stop + 0.02);
+          });
+        } catch(_) {}
+      };
+    })();
+
     document.addEventListener("DOMContentLoaded", () => {
       const overlay = document.getElementById("dialogo-inicial-overlay");
       const textoEl = document.getElementById("dialogo-texto");
@@ -145,6 +207,19 @@
       const dots = document.getElementById("dialogo-dots");
 
       if (!overlay || !textoEl || !btn || !dots) return;
+
+      function tJuego(clave, fallback = "") {
+        const idioma = window.i18nJuego?.obtenerIdioma?.() || "es";
+        return window.i18nJuego?.traducciones?.[idioma]?.[clave] || fallback;
+      }
+
+      const mensajesKeys = [
+        "creatividad_dialogo_1",
+        "creatividad_dialogo_2",
+        "creatividad_dialogo_3",
+        "creatividad_dialogo_4",
+        "creatividad_dialogo_5"
+      ];
 
       const mensajes = [
         "Activando protocolo de Creatividad…",
@@ -158,6 +233,12 @@
       let escribiendo = false;
       let timer = null;
 
+      function textoBoton() {
+        return indice === mensajes.length - 1
+          ? tJuego("creatividad_dialogo_ver_tarjeta", "Ver tarjeta de misión")
+          : tJuego("creatividad_dialogo_continuar", "Continuar");
+      }
+
       function renderDots() {
         dots.innerHTML = mensajes.map((_, i) => {
           const clase = i === indice ? "activo" : (i < indice ? "hecho" : "");
@@ -170,31 +251,40 @@
         escribiendo = true;
         textoEl.textContent = "";
         let i = 0;
+        let teclaCounter = 0;
 
         timer = setInterval(() => {
           textoEl.textContent += texto.charAt(i);
+
+          teclaCounter++;
+          if (teclaCounter % 2 === 0 && texto[i] !== " " && typeof window.sonarTecla === "function") {
+            window.sonarTecla();
+          }
+
           i += 1;
 
           if (i >= texto.length) {
             clearInterval(timer);
             escribiendo = false;
-            btn.textContent = indice === mensajes.length - 1 ? "Ver tarjeta de misión" : "Continuar";
+            btn.textContent = textoBoton();
           }
         }, 18);
       }
 
       function mostrarMensaje() {
         renderDots();
-        btn.textContent = "Continuar";
-        escribir(mensajes[indice]);
+        btn.textContent = tJuego("creatividad_dialogo_continuar", "Continuar");
+        escribir(tJuego(mensajesKeys[indice], mensajes[indice]));
       }
 
       btn.addEventListener("click", () => {
+        if (typeof window.sonarBoton === "function") window.sonarBoton();
+
         if (escribiendo) {
           clearInterval(timer);
-          textoEl.textContent = mensajes[indice];
+          textoEl.textContent = tJuego(mensajesKeys[indice], mensajes[indice]);
           escribiendo = false;
-          btn.textContent = indice === mensajes.length - 1 ? "Ver tarjeta de misión" : "Continuar";
+          btn.textContent = textoBoton();
           return;
         }
 

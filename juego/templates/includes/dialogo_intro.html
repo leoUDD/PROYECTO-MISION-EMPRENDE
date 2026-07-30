@@ -448,21 +448,30 @@ body:has(#dialogo-overlay.visible) .metro-progreso-habilidades {
   }
 
   /* ── GUIÓN EdEmy ── */
+  function tJuego(clave, fallback = "") {
+    const idioma = window.i18nJuego?.obtenerIdioma?.() || "es";
+    return window.i18nJuego?.traducciones?.[idioma]?.[clave] || fallback;
+  }
+
   const GUION = [
     {
       nombre: "EdEmy",
+      key: "trabajo_equipo_dialogo_1",
       texto: "El futuro perdió la capacidad de colaborar. Cada persona dependía únicamente de la tecnología."
     },
     {
       nombre: "EdEmy",
+      key: "trabajo_equipo_dialogo_2",
       texto: "Hoy recuperaremos esa habilidad."
     },
     {
       nombre: "EdEmy",
+      key: "trabajo_equipo_dialogo_3",
       texto: "Organicen sus fortalezas y trabajen como un solo equipo."
     },
     {
       nombre: "EdEmy",
+      key: "trabajo_equipo_dialogo_4",
       texto: "Activando la primera prueba..."
     }
   ];
@@ -536,9 +545,9 @@ body:has(#dialogo-overlay.visible) .metro-progreso-habilidades {
     habEl.textContent = linea.nombre;
     actualizarDots();
 
-    btnLabel.textContent = (n === GUION.length - 1) ? "¡Entendido!" : "Siguiente";
+    btnLabel.textContent = (n === GUION.length - 1) ? tJuego("dialogo_boton_entendido", "¡Entendido!") : tJuego("dialogo_boton_siguiente", "Siguiente");
 
-    escribirTexto(linea.texto);
+    escribirTexto(tJuego(linea.key, linea.texto));
   }
 
   window.dialogoSiguiente = function () {
