@@ -45,6 +45,7 @@ import random
 from math import ceil
 from django.utils import timezone
 from django.db.models import F
+from django.db.models.functions import Coalesce
 
 import logging
 
@@ -59,6 +60,8 @@ from .drive_service import (
     nombre_seguro,
     subir_o_reemplazar_archivo,
 )
+
+from .auth import requiere_staff, requiere_admin, profesor_autenticado, es_admin
 
 logger = logging.getLogger(__name__)
 
@@ -114,7 +117,8 @@ RUTA_POR_FASE = {
     "f4_orden_pitch": "orden_presentacion_alumno",
     "f4_presentacion_pitch": "presentar_pitch",
 
-    "f5_transicion_apoyo": "transicionapoyo",
+    # f5_transicion_apoyo fue eliminada del flujo: la vista y la URL se
+    # conservan solo porque sincronizacion_fase.html referencia la URL.
     "f5_evaluacion_pitch": "peer_review",
     "f6_ranking": "ranking",
     "reflexion": "reflexion",
@@ -143,7 +147,6 @@ ETIQUETA_FASE = {
     "f4_orden_pitch": "F4 · Sorteo orden pitch",
     "f4_presentacion_pitch": "F4 · Presentación pitch",
 
-    "f5_transicion_apoyo": "F5 · Transición Apoyo",
     "f5_evaluacion_pitch": "F5 · Evaluación pitch",
 
     "f6_ranking": "Ranking final",
@@ -248,7 +251,7 @@ def obtener_grupo_desde_session(request):
     grupo_id = request.session.get("grupo_id")
     sesion_id = request.session.get("sesion_id")
 
-    print("obtener_grupo_desde_session -> grupo_id:", grupo_id, "| sesion_id:", sesion_id)
+    logger.debug("obtener_grupo_desde_session -> grupo_id=%s sesion_id=%s", grupo_id, sesion_id)
 
     if not grupo_id or not sesion_id:
         return None
@@ -259,11 +262,11 @@ def obtener_grupo_desde_session(request):
             sesion_id=sesion_id,
         )
     except Grupo.DoesNotExist:
-        print("obtener_grupo_desde_session -> grupo no existe, flush session")
+        logger.debug("obtener_grupo_desde_session -> grupo no existe, flush session")
         request.session.flush()
         return None
 
-    print("obtener_grupo_desde_session -> grupo real:", grupo.idgrupo, "| nombre:", grupo.nombregrupo)
+    logger.debug("obtener_grupo_desde_session -> grupo=%s nombre=%s", grupo.idgrupo, grupo.nombregrupo)
     return grupo
 
 def salir_grupo(request):
@@ -292,6 +295,7 @@ def fase_anterior_automatica(fase_actual):
     return fase_actual
 
 @require_POST
+@requiere_staff
 def profesor_fase_anterior(request, sesion_id):
     sesion = get_object_or_404(Sesion, pk=sesion_id)
 
@@ -561,7 +565,9 @@ def calcular_segundos_restantes(sesion):
 
             for e in evaluaciones:
                 total = (e.claridad or 0) + (e.creatividad or 0) + (e.viabilidad or 0) + (e.equipo or 0) + (e.presentacion or 0)
-                gid = e.grupo_evaluado.id
+                # La PK de Grupo es idgrupo: usar .id lanzaba AttributeError
+                # (error 500 en el polling de estado_sesion al expirar la evaluación).
+                gid = e.grupo_evaluado_id
                 puntaje_recibido[gid] = puntaje_recibido.get(gid, 0) + total
 
             if puntaje_recibido:
@@ -843,7 +849,6 @@ def acceso_permitido(grupo, nombre_vista):
         "orden_presentacion_alumno": ["f4_orden_pitch"],
         "presentar_pitch": ["f4_presentacion_pitch"],
 
-        "transicionapoyo": ["f5_transicion_apoyo"],
         "peer_review": ["f5_evaluacion_pitch"],
         "mision_cumplida": ["f5_evaluacion_pitch"],
 
@@ -963,6 +968,7 @@ def estado_presentacion_pitch(request, sesion_id):
     return JsonResponse(data)
 
 @require_POST
+@requiere_staff
 def iniciar_presentacion_pitch(request, sesion_id):
     sesion = get_object_or_404(Sesion, pk=sesion_id)
 
@@ -1018,6 +1024,7 @@ def iniciar_presentacion_pitch(request, sesion_id):
 
 
 @require_POST
+@requiere_staff
 def siguiente_grupo_pitch(request, sesion_id):
     sesion = get_object_or_404(Sesion, pk=sesion_id)
 
@@ -1784,6 +1791,7 @@ def desbloquear_desafio(request):
     return JsonResponse({"ok": True})
 
 @require_POST
+@requiere_staff
 def profesor_actualizar_estado(request, sesion_id):
     sesion = get_object_or_404(Sesion, pk=sesion_id)
     payload = json.loads(request.body or "{}")
@@ -1916,6 +1924,7 @@ def profesor_actualizar_estado(request, sesion_id):
     })
 
 @require_POST
+@requiere_staff
 def dev_timer_10_segundos(request, sesion_id):
     if not settings.DEBUG:
         return JsonResponse({
@@ -1946,6 +1955,7 @@ def dev_timer_10_segundos(request, sesion_id):
     })
 
 @require_POST
+@requiere_staff
 def profesor_siguiente_fase(request, sesion_id):
     sesion = get_object_or_404(Sesion, pk=sesion_id)
 
@@ -2029,7 +2039,13 @@ def profesor_siguiente_fase(request, sesion_id):
 
 @require_POST
 def marcar_listo_ranking(request, grupo_id):
-    grupo = get_object_or_404(Grupo, pk=grupo_id)
+    grupo = obtener_grupo_desde_session(request)
+
+    if not grupo:
+        return JsonResponse({"ok": False, "error": "No se pudo identificar tu grupo."}, status=403)
+
+    if grupo.idgrupo != grupo_id:
+        return JsonResponse({"ok": False, "error": "No puedes marcar listo a otro grupo."}, status=403)
 
     grupo.listo_ranking = True
     grupo.save(update_fields=["listo_ranking"])
@@ -2050,7 +2066,14 @@ def marcar_listo_ranking(request, grupo_id):
 
 @require_POST
 def marcar_grupo_listo(request, grupo_id):
-    grupo = get_object_or_404(Grupo, pk=grupo_id)
+    grupo = obtener_grupo_desde_session(request)
+
+    if not grupo:
+        return JsonResponse({"ok": False, "error": "No se pudo identificar tu grupo."}, status=403)
+
+    if grupo.idgrupo != grupo_id:
+        return JsonResponse({"ok": False, "error": "No puedes marcar listo a otro grupo."}, status=403)
+
     sesion = grupo.sesion
     fase_actual = sesion.fase_actual
 
@@ -3389,9 +3412,9 @@ def registro(request):
         request.session["ranking_flags_reseteados"] = False
         request.session.modified = True
 
-        print(
-            f"registro -> codigo={codigo} | grupo={grupo.idgrupo} "
-            f"| nombre={grupo.nombregrupo} | sesion={grupo.sesion.idsesion if grupo.sesion else 'SIN SESION'}"
+        logger.debug(
+            "registro -> codigo=%s grupo=%s nombre=%s sesion=%s",
+            codigo, grupo.idgrupo, grupo.nombregrupo, grupo.sesion_id,
         )
 
         return redirect("bienvenida")
@@ -3693,6 +3716,7 @@ def minijuego1(request):
         },
     )
 
+@requiere_admin
 def admin_preguntas_rompehielo(request):
     if request.method == "POST":
         idpregunta = request.POST.get("idpregunta")
@@ -3891,6 +3915,7 @@ def admin_preguntas_rompehielo(request):
     )
 
 
+@requiere_admin
 def admin_preguntas_rompehielo_editar(request, idpregunta):
     pregunta_editando = get_object_or_404(PreguntaRompehielo, idpregunta=idpregunta)
 
@@ -3909,6 +3934,7 @@ def admin_preguntas_rompehielo_editar(request, idpregunta):
     })
 
 
+@requiere_admin
 def admin_preguntas_rompehielo_toggle(request, idpregunta):
     pregunta = get_object_or_404(PreguntaRompehielo, idpregunta=idpregunta)
 
@@ -3920,6 +3946,7 @@ def admin_preguntas_rompehielo_toggle(request, idpregunta):
     return redirect("admin_preguntas_rompehielo")
 
 
+@requiere_admin
 def admin_preguntas_rompehielo_eliminar(request, idpregunta):
     pregunta = get_object_or_404(PreguntaRompehielo, idpregunta=idpregunta)
 
@@ -4133,22 +4160,30 @@ def registrar_palabra_sopa(request):
         )
 
         if creada:
-            Grupo.objects.filter(pk=grupo.pk).update(tokensgrupo=F("tokensgrupo") + 1)
+            # Coalesce evita que un tokensgrupo NULL deje la suma en NULL.
+            Grupo.objects.filter(pk=grupo.pk).update(
+                tokensgrupo=Coalesce(F("tokensgrupo"), 0) + 1
+            )
 
     return JsonResponse({
         "ok": True,
         "nueva": creada,
     })
 
+@requiere_staff
 def dashboardprofesor(request):
-    profesor = Profesor.objects.first()
+    profesor = profesor_autenticado(request)
     sesion = None
 
     if profesor:
         sesion = Sesion.objects.filter(profesor=profesor).order_by("-fecha_creacion").first()
+    elif es_admin(request):
+        # El administrador puede supervisar la sesión más reciente.
+        sesion = Sesion.objects.order_by("-fecha_creacion").first()
 
-    return render(request, "dashboardprofesor.html", {"sesion": sesion})
+    return render(request, "dashboardprofesor.html", {"sesion": sesion, "profesor": profesor})
 
+@requiere_staff
 def control_sesion(request, sesion_id):
     sesion = get_object_or_404(Sesion, pk=sesion_id)
     grupos = Grupo.objects.filter(sesion=sesion).order_by("idgrupo")
@@ -4167,6 +4202,7 @@ def porcentaje(parte, total):
     return round((parte / total) * 100)
 
 
+@requiere_admin
 def dashboardadmin(request):
     total_grupos = Grupo.objects.count()
 
@@ -4253,6 +4289,7 @@ def dashboardadmin(request):
     })
 
 
+@requiere_admin
 def agregardesafio(request):
 
     admin = Idadministrador.objects.first()
@@ -4278,6 +4315,7 @@ def agregardesafio(request):
     
     return render(request, 'agregardesafio.html')
 
+@requiere_admin
 def lista_desafios(request):
     desafios = Desafio.objects.all().order_by('iddesafio')
     return render(request, 'listadesafios.html', {
@@ -4397,6 +4435,7 @@ def asignar_alumnos_a_grupos(sesion: Sesion):
     return index_alumno
 
 
+@requiere_staff
 def registrargrupos(request):
     profesor = Profesor.objects.first()
 
@@ -4452,6 +4491,7 @@ def generar_codigo_acceso(longitud=6):
         if not Grupo.objects.filter(codigoacceso=codigo).exists():
             return codigo
 
+@requiere_staff
 def cargar_alumnos(request):
     profesor = Profesor.objects.first()
 
@@ -4590,6 +4630,7 @@ def elegir_modo_conocidos(request, modo):
     return redirect("conocidos")
 
 @require_http_methods(["POST"])
+@requiere_staff
 def agregar_alumno_manual(request):
     """
     Agrega un alumno manualmente a la SESIÓN ACTIVA del profesor.
@@ -4926,6 +4967,7 @@ def guardar_pitch(request):
 
 
 @require_POST
+@requiere_staff
 def profesor_sortear_orden_pitch(request, sesion_id):
     sesion = get_object_or_404(Sesion, pk=sesion_id)
 
@@ -4984,6 +5026,7 @@ def presentar_pitch(request):
     })
 
 
+@requiere_staff
 def registraralumnos(request):
     return cargar_alumnos(request)
 
@@ -5026,7 +5069,13 @@ def issue_challenge_view(request, challenge_id):
         messages.error(request, "Selecciona un equipo objetivo.")
         return redirect("market")
 
-    grupo_receptor = get_object_or_404(Grupo, pk=target_team_id)
+    grupo_receptor = get_object_or_404(
+        Grupo, pk=target_team_id, sesion=grupo_emisor.sesion
+    )
+
+    if grupo_receptor.pk == grupo_emisor.pk:
+        messages.error(request, "No puedes retarte a ti mismo.")
+        return redirect("market")
 
     cost = int(reto.costoreto or 0)
 
@@ -5160,22 +5209,33 @@ def peer_review_view(request):
 
 
 
+@requiere_admin
 def registrarprofesor(request):
     if request.method == "POST":
-        email = request.POST.get("email")
-        facultad = request.POST.get("facultad")
+        email = (request.POST.get("email") or "").strip()
+        facultad = (request.POST.get("facultad") or "").strip()
+        clave = request.POST.get("clave") or ""
 
-        if email and facultad:
-            usuario = Usuario.objects.create(password="temp")
+        if email and facultad and clave:
+            if Profesor.objects.filter(emailprofesor__iexact=email).exists():
+                messages.error(request, "Ya existe un profesor con ese email.")
+                return redirect("registrarprofesor")
 
-            Profesor.objects.create(
+            usuario = Usuario.objects.create(password="")
+
+            profesor = Profesor.objects.create(
                 usuario_idusuario=usuario,
                 emailprofesor=email,
                 facultad=facultad
             )
 
+            from .auth import asignar_clave_profesor
+            asignar_clave_profesor(profesor, clave)
+
             messages.success(request, "Profesor registrado correctamente.")
             return redirect("registrarprofesor")
+
+        messages.error(request, "Debes completar email, facultad y clave.")
 
     profesores = Profesor.objects.all().order_by("emailprofesor")
 
@@ -5184,6 +5244,7 @@ def registrarprofesor(request):
     })
 
 
+@requiere_admin
 def listar_profesores(request):
     profesores = Profesor.objects.all().order_by('-idprofesor')
     return render(request, 'listar_profesores.html', {'profesores': profesores})
@@ -5191,6 +5252,7 @@ def listar_profesores(request):
 
 
 @require_http_methods(["POST"])
+@requiere_staff
 def eliminar_alumno(request, idalumno):
     alumno = get_object_or_404(Alumno, idalumno=idalumno)
     try:
@@ -5312,6 +5374,7 @@ def crear_grupos_para_alumnos(sesion, alumnos, max_por_grupo=8, cantidad_grupos_
 
     return len(grupos)
 
+@requiere_staff
 def crear_sesion(request):
     profesor = Profesor.objects.first()
 
@@ -5426,6 +5489,7 @@ def crear_sesion(request):
 
     return render(request, "crear_sesion.html")
 
+@requiere_staff
 def listar_sesiones(request):
     profesor = Profesor.objects.first()
 
@@ -5548,6 +5612,7 @@ def mision_cumplida_view(request):
         "grupo": grupo,
     })
 
+@requiere_staff
 def preview_pantalla_profesor(request, sesion_id):
     sesion = get_object_or_404(Sesion, pk=sesion_id)
 
@@ -5572,7 +5637,6 @@ def preview_pantalla_profesor(request, sesion_id):
         "f4_orden_pitch": "orden_presentacion.html",
         "f4_presentacion_pitch": "presentar_pitch.html",
 
-        "f5_transicion_apoyo": "transicionapoyo.html",
         "f5_evaluacion_pitch": "peer_review.html",
 
         "f6_ranking": "ranking.html",
@@ -5597,6 +5661,7 @@ def preview_pantalla_profesor(request, sesion_id):
 
     return render(request, template_name, context)
 
+@requiere_admin
 def admin_desafios(request):
     if request.method == "POST":
         accion = request.POST.get("accion")
@@ -5689,6 +5754,7 @@ def admin_desafios(request):
 
 
 @require_POST
+@requiere_admin
 def eliminar_profesor(request, profesor_id):
     profesor = get_object_or_404(Profesor, idprofesor=profesor_id)
 
@@ -5717,6 +5783,7 @@ def eliminar_profesor(request, profesor_id):
 
 
 @require_POST
+@requiere_admin
 def eliminar_profesor_forzado(request, profesor_id):
     profesor = get_object_or_404(Profesor, idprofesor=profesor_id)
 
@@ -5744,6 +5811,7 @@ def guardar_imagen_tematica(request_file):
     return settings.MEDIA_URL + ruta
 
 
+@requiere_admin
 def admin_tematicas(request):
     if request.method == "POST":
         accion = request.POST.get("accion")
@@ -5865,6 +5933,7 @@ def admin_tematicas(request):
         "tematicas": tematicas,
     })
 
+@requiere_admin
 def admin_desafio_info(request, desafio_id):
     desafio = get_object_or_404(Desafio, iddesafio=desafio_id)
 
@@ -5928,6 +5997,7 @@ def borrar_fotos_lego_sesion(sesion):
     for grupo in grupos:
         borrar_foto_lego_grupo(grupo)
 
+@requiere_admin
 def admin_ruleta(request):
     if request.method == "POST":
         accion = request.POST.get("accion")
@@ -6022,6 +6092,7 @@ def admin_ruleta(request):
         "total_activas": total_activas,
     })
 
+@requiere_admin
 def admin_tiempos(request):
     if request.method == "POST":
         ids = request.POST.getlist("tiempo_id")
@@ -6041,6 +6112,7 @@ def admin_tiempos(request):
         "tiempos": tiempos,
     })
 
+@requiere_staff
 def ver_como_grupo(request, grupo_id):
     grupo = get_object_or_404(Grupo, idgrupo=grupo_id)
 

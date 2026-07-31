@@ -557,7 +557,8 @@ class Tokens(models.Model):
 
 class Usuario(models.Model):
     idusuario = models.AutoField(db_column='idUsuario', primary_key=True)
-    password = models.CharField(max_length=45, blank=True, null=True)
+    # 128 caracteres para almacenar hashes de Django (pbkdf2_sha256).
+    password = models.CharField(max_length=128, blank=True, null=True)
 
     class Meta:
         db_table = 'usuario'

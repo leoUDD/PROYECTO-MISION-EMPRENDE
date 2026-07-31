@@ -1,11 +1,14 @@
 # juego/urls.py
 from django.urls import path
 from . import views
+from . import auth as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
     path("favicon.ico", views.favicon_view, name="favicon"),
+    path("acceso/", auth_views.login_acceso, name="login_acceso"),
+    path("acceso/salir/", auth_views.logout_acceso, name="logout_acceso"),
     #NUEVO
     path(
         "sesion/<int:sesion_id>/dev/timer-10/",

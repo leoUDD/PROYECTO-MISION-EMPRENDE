@@ -1,0 +1,216 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Acceso restringido · Misión Emprende</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link rel="icon" href="{% url 'favicon' %}">
+  <style>
+    :root {
+      --udd-green: #00F26D;
+      --udd-green-2: #00FC98;
+      --udd-cyan: #00C8FF;
+      --udd-dark: #00104A;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: "Poppins", sans-serif;
+      background:
+        radial-gradient(1200px 600px at 20% 0%, rgba(0, 200, 255, .18), transparent 60%),
+        radial-gradient(900px 500px at 85% 100%, rgba(0, 242, 109, .14), transparent 60%),
+        var(--udd-dark);
+      color: #eafcf3;
+      padding: 24px;
+    }
+
+    .panel {
+      width: min(420px, 100%);
+      background: rgba(255, 255, 255, .06);
+      border: 1px solid rgba(0, 242, 109, .35);
+      border-radius: 18px;
+      backdrop-filter: blur(10px);
+      padding: 34px 30px;
+      box-shadow: 0 0 40px rgba(0, 242, 109, .12);
+    }
+
+    h1 {
+      font-size: 1.35rem;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 4px;
+      color: var(--udd-green);
+      text-shadow: 0 0 18px rgba(0, 242, 109, .45);
+    }
+
+    .sub {
+      text-align: center;
+      font-size: .85rem;
+      opacity: .75;
+      margin-bottom: 22px;
+    }
+
+    .roles {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .roles label {
+      flex: 1;
+      text-align: center;
+      padding: 10px 0;
+      border-radius: 10px;
+      border: 1px solid rgba(0, 200, 255, .4);
+      cursor: pointer;
+      font-size: .9rem;
+      transition: all .2s ease;
+      user-select: none;
+    }
+
+    .roles input { display: none; }
+
+    .roles input:checked + span,
+    .roles label:has(input:checked) {
+      background: rgba(0, 242, 109, .16);
+      border-color: var(--udd-green);
+      color: var(--udd-green-2);
+      box-shadow: 0 0 14px rgba(0, 242, 109, .3);
+    }
+
+    .campo { margin-bottom: 16px; }
+
+    .campo label {
+      display: block;
+      font-size: .8rem;
+      margin-bottom: 6px;
+      opacity: .85;
+    }
+
+    .campo input {
+      width: 100%;
+      padding: 11px 14px;
+      border-radius: 10px;
+      border: 1px solid rgba(0, 200, 255, .45);
+      background: rgba(0, 16, 74, .55);
+      color: #eafcf3;
+      font-family: inherit;
+      font-size: .95rem;
+      outline: none;
+    }
+
+    .campo input:focus {
+      border-color: var(--udd-green);
+      box-shadow: 0 0 12px rgba(0, 242, 109, .35);
+    }
+
+    button {
+      width: 100%;
+      margin-top: 6px;
+      padding: 12px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(90deg, var(--udd-green), var(--udd-cyan));
+      color: #00212f;
+      font-family: inherit;
+      font-weight: 800;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: transform .15s ease, box-shadow .15s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 0 22px rgba(0, 242, 109, .5);
+    }
+
+    .error {
+      background: rgba(255, 70, 90, .14);
+      border: 1px solid rgba(255, 70, 90, .5);
+      color: #ffb4bd;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: .85rem;
+      margin-bottom: 16px;
+    }
+
+    .volver {
+      display: block;
+      text-align: center;
+      margin-top: 18px;
+      font-size: .82rem;
+      color: var(--udd-cyan);
+      text-decoration: none;
+      opacity: .85;
+    }
+
+    .volver:hover { opacity: 1; }
+
+    #campo-email[hidden] { display: none; }
+  </style>
+</head>
+<body>
+  <main class="panel">
+    <h1>Acceso restringido</h1>
+    <p class="sub">Panel de profesor y administración</p>
+
+    {% if messages %}
+      {% for message in messages %}
+        <div class="error">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+
+    <form method="POST" action="{% url 'login_acceso' %}">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ next }}">
+
+      <div class="roles">
+        <label>
+          <input type="radio" name="rol" value="profesor" {% if rol_inicial != "admin" %}checked{% endif %}>
+          <span>Profesor</span>
+        </label>
+        <label>
+          <input type="radio" name="rol" value="admin" {% if rol_inicial == "admin" %}checked{% endif %}>
+          <span>Administrador</span>
+        </label>
+      </div>
+
+      <div class="campo" id="campo-email" {% if rol_inicial == "admin" %}hidden{% endif %}>
+        <label for="email">Email de profesor</label>
+        <input type="email" id="email" name="email" placeholder="profesor@udd.cl" autocomplete="username">
+      </div>
+
+      <div class="campo">
+        <label for="clave">Clave</label>
+        <input type="password" id="clave" name="clave" required autocomplete="current-password">
+      </div>
+
+      <button type="submit">Ingresar</button>
+    </form>
+
+    <a class="volver" href="{% url 'perfiles' %}">← Volver a perfiles</a>
+  </main>
+
+  <script>
+    const campoEmail = document.getElementById("campo-email");
+    const inputEmail = document.getElementById("email");
+
+    document.querySelectorAll('input[name="rol"]').forEach((radio) => {
+      radio.addEventListener("change", () => {
+        const esProfesor = radio.value === "profesor" && radio.checked;
+        campoEmail.hidden = !esProfesor;
+        inputEmail.required = esProfesor;
+      });
+    });
+
+    inputEmail.required = !campoEmail.hidden;
+  </script>
+</body>
+</html>

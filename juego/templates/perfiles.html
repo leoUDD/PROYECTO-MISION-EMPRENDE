@@ -326,7 +326,7 @@
         </div>
 
         <div class="perfil perfil--profesor">
-          <a href="{% url 'dashboardprofesor' %}" data-rol="profesor" aria-label="Ingresar como Profesor" class="restringido">
+          <a href="{% url 'login_acceso' %}?rol=profesor" data-rol="profesor" aria-label="Ingresar como Profesor">
             <img src="{% static 'images/Perfil2.png' %}" alt="Profesor">
             <div class="acceso-restringido">
               <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="lock-icon">
@@ -340,7 +340,7 @@
         </div>
 
         <div class="perfil perfil--admin">
-          <a href="{% url 'dashboardadmin' %}" data-rol="admin" aria-label="Ingresar como Administrador" class="restringido">
+          <a href="{% url 'login_acceso' %}?rol=admin" data-rol="admin" aria-label="Ingresar como Administrador">
             <img src="{% static 'images/Perfil3.png' %}" alt="Administrador">
             <div class="acceso-restringido">
               <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="lock-icon">
@@ -444,10 +444,8 @@
     }
 
     // ── Modal de contraseña para perfiles restringidos ──
-    const PASSWORDS = {
-      'profesor': 'profe123',
-      'admin':    'admin123',
-    };
+    // La validación de acceso ahora es server-side (vista login_acceso).
+    const PASSWORDS = {};
 
     const modalOverlay = document.getElementById('modalOverlay');
     const modalInput   = document.getElementById('modalInput');
