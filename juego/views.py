@@ -5380,6 +5380,11 @@ def crear_sesion(request):
     # crear sesiones para un profesor indicando su email en el formulario.
     profesor = profesor_autenticado(request)
 
+    contexto_base = {
+        "profesor_actual": profesor,
+        "es_admin_actual": es_admin(request) and profesor is None,
+    }
+
     if request.method == "POST":
         nombre = (request.POST.get("nombre") or "").strip()
         email_profesor = (request.POST.get("email_profesor") or "").strip()
@@ -5389,7 +5394,7 @@ def crear_sesion(request):
             # Admin sin identidad de profesor: resolver por email.
             if not email_profesor:
                 messages.error(request, "Debes ingresar el correo del profesor dueño de la sesión.")
-                return render(request, "crear_sesion.html")
+                return render(request, "crear_sesion.html", contexto_base)
 
             profesor = Profesor.objects.filter(
                 emailprofesor__iexact=email_profesor
@@ -5397,7 +5402,7 @@ def crear_sesion(request):
 
             if not profesor:
                 messages.error(request, "No existe un profesor con ese correo. Regístralo primero.")
-                return render(request, "crear_sesion.html")
+                return render(request, "crear_sesion.html", contexto_base)
 
         modo_creacion = request.POST.get("modo_creacion", "recomendado")
         archivo = request.FILES.get("archivo_excel")
@@ -5407,18 +5412,18 @@ def crear_sesion(request):
 
         if not nombre:
             messages.error(request, "Debes darle un nombre a la sesión.")
-            return render(request, "crear_sesion.html")
+            return render(request, "crear_sesion.html", contexto_base)
 
         if not archivo:
             messages.error(request, "Debes subir el archivo de estudiantes.")
-            return render(request, "crear_sesion.html")
+            return render(request, "crear_sesion.html", contexto_base)
 
         try:
             df = leer_alumnos_desde_archivo(archivo)
 
             if not df:
                 messages.error(request, "El archivo no tiene estudiantes.")
-                return render(request, "crear_sesion.html")
+                return render(request, "crear_sesion.html", contexto_base)
 
             sesiones_creadas = []
 
@@ -5480,14 +5485,15 @@ def crear_sesion(request):
                 messages.success(request, "Sesión creada correctamente.")
 
             return render(request, "crear_sesion.html", {
+                **contexto_base,
                 "sesiones_creadas": sesiones_creadas,
             })
 
         except Exception as e:
             messages.error(request, f"No se pudo procesar la sesión: {e}")
-            return render(request, "crear_sesion.html")
+            return render(request, "crear_sesion.html", contexto_base)
 
-    return render(request, "crear_sesion.html")
+    return render(request, "crear_sesion.html", contexto_base)
 
 @requiere_staff
 def listar_sesiones(request):

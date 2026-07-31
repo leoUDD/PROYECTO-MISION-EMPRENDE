@@ -298,30 +298,22 @@ body {
   <input type="text" name="nombre" required>
 </div>
 
+{% if es_admin_actual %}
 <div class="field">
-  <label>Correo del profesor *</label>
-  <input type="email" name="email_profesor" required>
+  <label>Correo del profesor dueño de la sesión *</label>
+  <input type="email" name="email_profesor" placeholder="profesor@udd.cl" required>
+  <div class="hint">La sesión quedará asignada a este profesor (debe estar registrado).</div>
 </div>
-
+{% else %}
 <div class="field">
-  <label>Facultad *</label>
-  <select name="facultad" required>
-  <option value="">Seleccione una facultad</option>
-  <option value="Arquitectura y Arte">Arquitectura y Arte</option>
-  <option value="Ciencias de la Salud">Ciencias de la Salud</option>
-  <option value="Comunicaciones">Comunicaciones</option>
-  <option value="Derecho">Derecho</option>
-  <option value="Diseño">Diseño</option>
-  <option value="Economía y Negocios">Economía y Negocios</option>
-  <option value="Educación">Educación</option>
-  <option value="Gobierno">Gobierno</option>
-  <option value="Ingeniería">Ingeniería</option>
-  <option value="Medicina Clínica Alemana Universidad del Desarrollo">
-    Medicina Clínica Alemana Universidad del Desarrollo
-  </option>
-  <option value="Psicología">Psicología</option>
-</select>
+  <label>Profesor</label>
+  <div class="hint">
+    La sesión quedará asignada a tu cuenta:
+    <strong>{{ profesor_actual.emailprofesor }}</strong>
+    {% if profesor_actual.facultad %} · {{ profesor_actual.facultad }}{% endif %}
+  </div>
 </div>
+{% endif %}
 
       <div class="field">
         <label>Archivo Excel *</label>

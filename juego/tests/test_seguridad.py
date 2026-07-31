@@ -359,3 +359,16 @@ class SesionesPorProfesorTests(BaseJuegoTestCase):
             "archivo_excel": self._csv_alumnos(),
         })
         self.assertFalse(Sesion.objects.filter(nombre="Sin dueño").exists())
+
+
+    def test_formulario_profesor_no_pide_email(self):
+        """El profesor logueado no debe ver el campo email_profesor obligatorio."""
+        self.login_profesor(self.profesor)
+        respuesta = self.client.get(reverse("crear_sesion"))
+        self.assertNotContains(respuesta, 'name="email_profesor"')
+        self.assertContains(respuesta, "profe@udd.cl")
+
+    def test_formulario_admin_si_pide_email(self):
+        self.login_admin()
+        respuesta = self.client.get(reverse("crear_sesion"))
+        self.assertContains(respuesta, 'name="email_profesor"')
