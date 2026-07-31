@@ -5793,14 +5793,39 @@ def eliminar_profesor(request, profesor_id):
 @require_POST
 @requiere_admin
 def eliminar_profesor_forzado(request, profesor_id):
+    from .models import Desafiolego, Encuesta, Retogrupo, Tokens
+
     profesor = get_object_or_404(Profesor, idprofesor=profesor_id)
 
-    Alumno.objects.filter(profesor_idprofesor=profesor).delete()
-    Sesion.objects.filter(profesor=profesor).delete()
+    try:
+        with transaction.atomic():
+            grupos = Grupo.objects.filter(sesion__profesor=profesor)
 
-    profesor.delete()
+            # Estas tablas apuntan a Grupo con on_delete=DO_NOTHING: hay que
+            # borrarlas explícitamente o la FK de la base impide el cascade
+            # de Sesion -> Grupo (IntegrityError).
+            Retogrupo.objects.filter(
+                Q(grupo_emisor__in=grupos) | Q(grupo_receptor__in=grupos)
+            ).delete()
+            Tokens.objects.filter(grupo_idgrupo__in=grupos).delete()
+            Encuesta.objects.filter(grupo_idgrupo__in=grupos).delete()
+            Desafiolego.objects.filter(grupo_idgrupo__in=grupos).delete()
 
-    messages.success(request, "Profesor y datos asociados eliminados correctamente.")
+            Alumno.objects.filter(profesor_idprofesor=profesor).delete()
+            Sesion.objects.filter(profesor=profesor).delete()
+
+            usuario = profesor.usuario_idusuario
+            profesor.delete()
+
+            # No dejar el Usuario huérfano (Profesor -> Usuario es DO_NOTHING).
+            if usuario and not Profesor.objects.filter(usuario_idusuario=usuario).exists():
+                usuario.delete()
+
+        messages.success(request, "Profesor y datos asociados eliminados correctamente.")
+    except Exception as e:
+        logger.exception("Error en eliminación forzada del profesor %s", profesor_id)
+        messages.error(request, f"No se pudo completar la eliminación: {e}")
+
     return redirect("registrarprofesor")
 
 def guardar_imagen_tematica(request_file):

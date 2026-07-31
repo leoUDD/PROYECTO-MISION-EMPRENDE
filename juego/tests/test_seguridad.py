@@ -372,3 +372,98 @@ class SesionesPorProfesorTests(BaseJuegoTestCase):
         self.login_admin()
         respuesta = self.client.get(reverse("crear_sesion"))
         self.assertContains(respuesta, 'name="email_profesor"')
+
+
+class EliminarProfesorTests(BaseJuegoTestCase):
+    """Eliminación normal (protegida) y forzada (limpieza completa)."""
+
+    def _poblar_datos_de_juego(self):
+        """Simula una sesión jugada: retos de market y encuestas."""
+        from juego.models import Encuesta, Reto, Retogrupo
+
+        reto = Reto.objects.create(nombrereto="Reto", costoreto=2)
+        Retogrupo.objects.create(
+            reto=reto,
+            grupo_emisor=self.grupos[0],
+            grupo_receptor=self.grupos[1],
+        )
+        Encuesta.objects.create(grupo_idgrupo=self.grupos[0])
+
+    def test_eliminacion_normal_se_niega_si_tiene_sesiones(self):
+        from juego.models import Profesor
+
+        self.login_admin()
+        respuesta = self.client.post(
+            reverse("eliminar_profesor", args=[self.profesor.idprofesor])
+        )
+
+        self.assertRedirects(respuesta, reverse("registrarprofesor"), fetch_redirect_response=False)
+        self.assertTrue(
+            Profesor.objects.filter(pk=self.profesor.idprofesor).exists()
+        )
+
+    def test_eliminacion_normal_borra_profesor_limpio(self):
+        from juego.models import Profesor, Usuario
+
+        limpio = crear_profesor("limpio@udd.cl")
+        usuario_id = limpio.usuario_idusuario_id
+
+        self.login_admin()
+        self.client.post(reverse("eliminar_profesor", args=[limpio.idprofesor]))
+
+        self.assertFalse(Profesor.objects.filter(pk=limpio.idprofesor).exists())
+        self.assertFalse(Usuario.objects.filter(pk=usuario_id).exists())
+
+    def test_forzada_elimina_sesion_jugada_sin_integrity_error(self):
+        """Regresión: las FKs DO_NOTHING (Retogrupo, Encuesta...) rompían el cascade."""
+        from juego.models import (
+            Encuesta, Grupo, Profesor, Retogrupo, Sesion, Usuario,
+        )
+
+        self._poblar_datos_de_juego()
+        usuario_id = self.profesor.usuario_idusuario_id
+
+        self.login_admin()
+        respuesta = self.client.post(
+            reverse("eliminar_profesor_forzado", args=[self.profesor.idprofesor])
+        )
+
+        self.assertRedirects(respuesta, reverse("registrarprofesor"), fetch_redirect_response=False)
+        self.assertFalse(Profesor.objects.filter(pk=self.profesor.idprofesor).exists())
+        self.assertEqual(Sesion.objects.filter(profesor_id=self.profesor.idprofesor).count(), 0)
+        self.assertEqual(Grupo.objects.count(), 0)
+        self.assertEqual(Retogrupo.objects.count(), 0)
+        self.assertEqual(Encuesta.objects.count(), 0)
+        # El Usuario no queda huérfano.
+        self.assertFalse(Usuario.objects.filter(pk=usuario_id).exists())
+
+    def test_forzada_no_toca_datos_de_otros_profesores(self):
+        from juego.models import Grupo, Sesion
+
+        otro = crear_profesor("otro@udd.cl")
+        sesion_ajena = crear_sesion(otro, nombre="Ajena")
+        crear_grupos(sesion_ajena, 2)
+
+        self._poblar_datos_de_juego()
+
+        self.login_admin()
+        self.client.post(
+            reverse("eliminar_profesor_forzado", args=[self.profesor.idprofesor])
+        )
+
+        self.assertTrue(Sesion.objects.filter(pk=sesion_ajena.idsesion).exists())
+        self.assertEqual(Grupo.objects.filter(sesion=sesion_ajena).count(), 2)
+
+    def test_sesion_fantasma_no_pasa_el_decorador(self):
+        """Si el admin elimina a un profesor logueado, su sesión deja de servir."""
+        victima = crear_profesor("victima@udd.cl")
+
+        # La víctima está logueada en este navegador.
+        self.login_profesor(victima)
+
+        # El admin la elimina desde otro lado.
+        victima.delete()
+
+        respuesta = self.client.get(reverse("dashboardprofesor"))
+        self.assertEqual(respuesta.status_code, 302)
+        self.assertIn(reverse("login_acceso"), respuesta.url)

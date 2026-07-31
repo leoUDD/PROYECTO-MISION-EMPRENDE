@@ -56,7 +56,15 @@ def es_admin(request):
 
 
 def es_staff(request):
-    return es_admin(request) or bool(request.session.get("profesor_id"))
+    """Admin, o un profesor que EXISTE en la base.
+
+    Verificar la existencia evita sesiones fantasma: si el admin elimina a un
+    profesor logueado, su profesor_id en sesión deja de ser válido.
+    """
+    if es_admin(request):
+        return True
+
+    return profesor_autenticado(request) is not None
 
 
 def _es_peticion_json(request):
