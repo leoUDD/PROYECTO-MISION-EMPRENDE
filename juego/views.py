@@ -18,7 +18,8 @@ from django.views.decorators.cache import never_cache
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.views.decorators.http import require_POST
-from django.http import JsonResponse
+from django.http import JsonResponse, FileResponse, Http404
+from django.contrib.staticfiles import finders
 from django.db.models import Count, Q
 from .models import Tematica, Desafio, Grupo, RuletaLegoOpcion
 from django.db import IntegrityError
@@ -509,7 +510,18 @@ def calcular_segundos_restantes(sesion):
 
         # ===================== F4 PRESENTACION PITCH =====================
         if fase_vencida == "f4_presentacion_pitch":
+            ahora = timezone.now()
+            segundos_evaluacion = tiempo_por_fase(sesion, "f5_evaluacion_pitch")
+
             sesion.fase_actual = "f5_evaluacion_pitch"
+            sesion.segundos_restantes = segundos_evaluacion
+            sesion.timer_corriendo = segundos_evaluacion > 0
+            sesion.timer_inicio_at = ahora if sesion.timer_corriendo else None
+            sesion.timer_fin_at = (
+                ahora + timedelta(seconds=segundos_evaluacion)
+                if sesion.timer_corriendo else None
+            )
+
             sesion.save(update_fields=[
                 "fase_actual",
                 "timer_corriendo",
@@ -517,7 +529,7 @@ def calcular_segundos_restantes(sesion):
                 "timer_inicio_at",
                 "timer_fin_at",
             ])
-            return 0
+            return segundos_evaluacion
 
         # ===================== F2 TEMATICAS =====================
         fases_con_autoavance = {
@@ -3314,6 +3326,13 @@ def lego(request):
 
 
 #NUEVO CIERRRE
+def favicon_view(request):
+    ruta = finders.find("images/favicon.ico")
+    if not ruta:
+        raise Http404("favicon no encontrado")
+    return FileResponse(open(ruta, "rb"), content_type="image/x-icon")
+
+
 def perfiles(request):
     return render(request, 'perfiles.html')
 

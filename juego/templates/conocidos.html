@@ -8,7 +8,7 @@
   <title>Misión Emprende UDD — Formación de equipos</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/estilo_conocidos.css' %}" />
-
+  <link rel="icon" href="{% url 'favicon' %}">
   <style>
     .preguntas-grupo {
       width: 100%;
@@ -102,15 +102,15 @@
 
       <h1 id="tituloConocidos" class="title blur-target-bloqueado">
         {% if modo_rapido %}
-          La confianza también es una herramienta
+          <span data-i18n="conocidos_titulo_rapido">La confianza también es una herramienta</span>
         {% else %}
-          Las diferencias pueden abrir nuevas rutas
+          <span data-i18n="conocidos_titulo_normal">Las diferencias pueden abrir nuevas rutas</span>
         {% endif %}
       </h1>
 
       <div class="juego-contenido">
         <div id="speechBubbleConocidos" class="speech-bubble blur-target-bloqueado">
-          <p class="body">
+          <p class="body" data-i18n="conocidos_intro_texto">
             Cada integrante debe responder las siguientes preguntas
             para conocerse mejor:
           </p>

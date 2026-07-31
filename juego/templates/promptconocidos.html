@@ -7,6 +7,7 @@
   <title>Misión Emprende UDD — Formación de equipos</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&family=Orbitron:wght@700;900&family=Exo+2:wght@700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/estilo_promptconocidos.css' %}" />
+  <link rel="icon" href="{% url 'favicon' %}">
 </head>
 <body>
   {% include "atajos.html" %}
@@ -37,10 +38,10 @@
   </div>
 
   <main class="mode-container" role="region" aria-label="Elegir modo de equipo">
-    <div class="phase-title">Trabajo en Equipo</div>
+    <div class="phase-title" data-i18n="promptconocidos_titulo_fase">Trabajo en Equipo</div>
 
     <header class="mode-header">
-      <p class="mode-subtitle">
+      <p class="mode-subtitle" data-i18n="promptconocidos_subtitulo">
         Elijan con quién comenzar la misión: personas conocidas o nuevas. Cada opción abre un camino distinto.
       </p>
     </header>
@@ -48,21 +49,21 @@
       <a href="{% url 'elegir_modo_conocidos' 'normal' %}" class="mode-card mode-intro" aria-label="Elegir equipo con personas que no se conocen">
         <div class="overlay"></div>
         <div class="mode-content">
-          <h2 class="mode-name">Personas que no se conocen</h2>
-          <p class="mode-desc">
+          <h2 class="mode-name" data-i18n="promptconocidos_normal_titulo">Personas que no se conocen</h2>
+          <p class="mode-desc" data-i18n="promptconocidos_normal_desc">
             Rompan el hielo, preséntense y descubran qué puede aportar cada integrante a la misión.
           </p>
-          <span class="mode-cta">Aceptar desafío</span>
+          <span class="mode-cta" data-i18n="promptconocidos_normal_cta">Aceptar desafío</span>
         </div>
       </a>
       <a href="{% url 'elegir_modo_conocidos' 'rapido' %}" class="mode-card mode-known" aria-label="Elegir equipo con personas conocidas">
         <div class="overlay"></div>
         <div class="mode-content">
-          <h2 class="mode-name">Personas conocidas</h2>
-          <p class="mode-desc">
+          <h2 class="mode-name" data-i18n="promptconocidos_rapido_titulo">Personas conocidas</h2>
+          <p class="mode-desc" data-i18n="promptconocidos_rapido_desc">
             Usen la confianza previa para organizarse rápido y avanzar sincronizados.
           </p>
-          <span class="mode-cta">Usar ventaja</span>
+          <span class="mode-cta" data-i18n="promptconocidos_rapido_cta">Usar ventaja</span>
         </div>
       </a>
     </section>

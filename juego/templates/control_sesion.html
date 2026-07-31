@@ -1,315 +1,38 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Panel de seguimiento</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Misión Emprende UDD — Panel de seguimiento</title>
 
-  <style>
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f3f4f6;
-      color: #111827;
-    }
-
-    .layout {
-      display: grid;
-      grid-template-columns: 360px 1fr;
-      min-height: 100vh;
-    }
-
-    .sidebar {
-      background: #ffffff;
-      padding: 24px;
-      border-right: 1px solid #d1d5db;
-      overflow-y: auto;
-    }
-
-    .contenido {
-      padding: 24px;
-      overflow-y: auto;
-    }
-
-    h1 {
-      margin: 0 0 18px;
-      font-size: 28px;
-      color: #111827;
-    }
-
-    h2 {
-      margin: 0 0 12px;
-      color: #111827;
-    }
-
-    .card {
-      background: white;
-      border: 1px solid #d1d5db;
-      border-radius: 16px;
-      padding: 18px;
-      margin-bottom: 16px;
-      box-shadow: 0 8px 20px rgba(0,0,0,.04);
-    }
-
-    .mini-label {
-      font-size: 13px;
-      color: #6b7280;
-      margin-bottom: 4px;
-    }
-
-    .big {
-      font-size: 30px;
-      font-weight: 800;
-      color: #111827;
-      line-height: 1.1;
-    }
-
-    .timer {
-      font-size: 56px;
-      font-weight: 900;
-      color: #111827;
-      letter-spacing: .04em;
-    }
-
-    .pill {
-      display: inline-flex;
-      padding: 7px 12px;
-      border-radius: 999px;
-      background: #e0f2fe;
-      color: #075985;
-      font-weight: 800;
-      font-size: 13px;
-    }
-
-    .accion-profesor {
-      padding: 14px;
-      border-radius: 14px;
-      background: #eff6ff;
-      border: 1px solid #bfdbfe;
-      color: #1e3a8a;
-      font-weight: 700;
-      line-height: 1.45;
-    }
-
-    .progreso {
-      display: grid;
-      gap: 10px;
-    }
-
-    .paso {
-      padding: 12px;
-      border-radius: 12px;
-      background: #f3f4f6;
-      font-weight: 800;
-      color: #4b5563;
-    }
-
-    .paso.activo {
-      background: #dbeafe;
-      color: #1d4ed8;
-      outline: 2px solid #93c5fd;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 14px;
-    }
-
-    th, td {
-      padding: 10px 8px;
-      border-bottom: 1px solid #e5e7eb;
-      text-align: left;
-      vertical-align: middle;
-    }
-
-    th {
-      background: #f9fafb;
-      color: #374151;
-      font-weight: 800;
-      position: sticky;
-      top: 0;
-    }
-
-    .codigo {
-      font-weight: 900;
-      letter-spacing: .08em;
-      color: #1d4ed8;
-    }
-
-    .btn-ver {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 9px 13px;
-      border-radius: 999px;
-      background: #2563eb;
-      color: white;
-      font-weight: 800;
-      text-decoration: none;
-      font-size: 13px;
-      white-space: nowrap;
-    }
-
-    .estado-ok { color: #16a34a; font-weight: 900; }
-    .estado-no { color: #dc2626; font-weight: 900; }
-
-    .nota {
-      font-size: 13px;
-      color: #6b7280;
-      line-height: 1.45;
-    }
-
-    .orden-lista {
-      margin: 0;
-      padding-left: 20px;
-    }
-
-    .orden-lista li {
-      margin-bottom: 6px;
-    }
-
-    @media(max-width: 1000px) {
-      .layout {
-        grid-template-columns: 1fr;
-      }
-
-      .sidebar {
-        border-right: none;
-        border-bottom: 1px solid #d1d5db;
-      }
-
-      .grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-
-    .btn-volver {
-  display: block;
-  text-align: center;
-  padding: 12px;
-  border-radius: 12px;
-  background: #1f2937;
-  color: white;
-  text-decoration: none;
-  font-weight: 800;
-  margin-top: 10px;
-  transition: 0.2s;
-}
-
-.btn-volver:hover {
-  background: #374151;
-}
-
-.dev-card {
-  border: 2px dashed #f59e0b;
-  background: #fffbeb;
-}
-
-.btn-dev {
-  width: 100%;
-  border: none;
-  padding: 12px;
-  border-radius: 12px;
-  background: #f59e0b;
-  color: #111827;
-  font-weight: 900;
-  cursor: pointer;
-}
-
-.btn-dev:hover {
-  background: #d97706;
-}
-
-.btn-back {
-  background: #6366f1;
-  color: white;
-  margin-top: 10px;
-}
-
-.btn-back:hover {
-  background: #4f46e5;
-}
-
-.btn-stop {
-  background: #ef4444;
-  color: white;
-  margin-top: 10px;
-}
-
-.btn-stop:hover {
-  background: #dc2626;
-}
-
-.btn-reset {
-  background: #3b82f6;
-  color: white;
-  margin-top: 10px;
-}
-
-.btn-reset:hover {
-  background: #2563eb;
-}
-
-.btn-start {
-  background: #22c55e;
-  color: white;
-  margin-top: 10px;
-}
-
-.btn-start:hover {
-  background: #16a34a;
-}
-
-.btn-timer-10 {
-  background: #f97316;
-  color: white;
-  margin-top: 10px;
-}
-
-.btn-timer-10:hover {
-  background: #ea580c;
-}
-  </style>
+  <link rel="icon" href="{% url 'favicon' %}">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/estilo_control_sesion.css' %}">
 </head>
 
 <body>
-<div class="layout">
+<div class="control-layout" id="controlLayout">
 <form style="display:none;">
   {% csrf_token %}
 </form>
-  <aside class="sidebar">
-    <h1>Panel de seguimiento</h1>
-    <div style="margin-top: 20px;">
-  <a href="{% url 'dashboardprofesor' %}" class="btn-ver">
-  ⟵ Dashboard
-</a>
 
-<a href="{% url 'listar_sesiones' %}" class="btn-ver">
-  📋 Ver sesiones
-</a>
-</div>
-    <div class="card">
-      <div class="mini-label">Sesión</div>
-      <div class="big">{{ sesion.nombre }}</div>
+  <aside class="control-sidebar">
+    <div class="control-sidebar-top">
+      <p class="eyebrow">Panel de seguimiento</p>
+      <h1 class="control-title">{{ sesion.nombre }}</h1>
+      <div class="control-nav-links">
+        <a href="{% url 'dashboardprofesor' %}" class="btn-ghost">⟵ Dashboard</a>
+        <a href="{% url 'listar_sesiones' %}" class="btn-ghost">📋 Ver sesiones</a>
+      </div>
+    </div>
 
-      <br>
-
+    <div class="readout-card">
       <div class="mini-label">Actividad actual</div>
       <div class="pill" id="faseEtiqueta">{{ sesion.fase_actual }}</div>
 
-      <br><br>
-
-      <div class="mini-label">Tiempo restante</div>
-      <div class="timer" id="timerGrande">00:00</div>
+      <div class="mini-label readout-timer-label">Tiempo restante</div>
+      <div class="readout-timer" id="timerGrande">00:00</div>
 
       <p class="nota">
         Esta vista es solo de seguimiento. El avance, timers y acciones principales las realizan los estudiantes.
@@ -317,43 +40,48 @@
     </div>
 
     <div class="card">
-      <h2>Qué debe hacer el profesor</h2>
+      <h2>🎯 Qué debe hacer el profesor</h2>
       <div id="accionProfesor" class="accion-profesor">
         Esperar el avance de los grupos.
       </div>
     </div>
 
-<div class="card dev-card">
-  <h2>Herramientas DEV</h2>
-  <p class="nota">Botones temporales para pruebas.</p>
+    <div class="card dev-card">
+      <div class="dev-card-head">
+        <h2>Herramientas DEV</h2>
+        <span class="dev-badge">Solo pruebas</span>
+      </div>
+      <p class="nota">Botones temporales para pruebas.</p>
 
-  <button type="button" class="btn-dev" onclick="avanzarFaseDev()">
-    Avanzar fase
-  </button>
+      <div class="dev-grid">
+        <button type="button" class="btn-dev" onclick="avanzarFaseDev()">
+          Avanzar fase
+        </button>
 
-  <button type="button" class="btn-dev btn-back" onclick="retrocederFaseDev()">
-    Retroceder fase
-  </button>
+        <button type="button" class="btn-dev btn-dev-back" onclick="retrocederFaseDev()">
+          Retroceder fase
+        </button>
 
-  <button type="button" class="btn-dev btn-start" onclick="iniciarTimerDev()">
-    Iniciar timer
-  </button>
+        <button type="button" class="btn-dev btn-dev-start" onclick="iniciarTimerDev()">
+          Iniciar timer
+        </button>
 
-  <button type="button" class="btn-dev btn-stop" onclick="detenerTimerDev()">
-    Detener timer
-  </button>
+        <button type="button" class="btn-dev btn-dev-stop" onclick="detenerTimerDev()">
+          Detener timer
+        </button>
 
-  <button type="button" class="btn-dev btn-reset" onclick="reiniciarTimerDev()">
-    Reiniciar tiempo de fase
-  </button>
+        <button type="button" class="btn-dev btn-dev-reset" onclick="reiniciarTimerDev()">
+          Reiniciar tiempo de fase
+        </button>
 
-  <button type="button" class="btn-dev btn-timer-10" onclick="timer10Dev()">
-  T imer a 10 segundos
-  </button>
+        <button type="button" class="btn-dev btn-dev-10" onclick="timer10Dev()">
+          Timer a 10 segundos
+        </button>
+      </div>
+    </div>
 
-</div>
     <div class="card">
-      <h2>Avance general</h2>
+      <h2>🗺️ Avance general</h2>
 
       <div class="progreso">
         <div class="paso" data-habilidad="f1">F1 · Trabajo en equipo</div>
@@ -366,9 +94,9 @@
     </div>
 
     <div class="card">
-      <h2>Códigos de acceso</h2>
+      <h2>🔑 Códigos de acceso</h2>
 
-      <table>
+      <table class="mini-table">
         <thead>
           <tr>
             <th>Grupo</th>
@@ -379,7 +107,7 @@
           {% for grupo in grupos %}
           <tr>
             <td>{{ grupo.nombregrupo }}</td>
-            <td class="codigo">{{ grupo.codigoacceso }}</td>
+            <td><span class="codigo">{{ grupo.codigoacceso }}</span></td>
           </tr>
           {% endfor %}
         </tbody>
@@ -387,27 +115,27 @@
     </div>
   </aside>
 
-  <main class="contenido">
+  <main class="control-main">
 
-    <div class="grid">
-      <div class="card">
-        <div class="mini-label">Grupos en sesión</div>
+    <div class="stats-grid">
+      <div class="stat-card stat-card-grupos">
+        <div class="mini-label">👥 Grupos en sesión</div>
         <div class="big" id="totalGrupos">{{ grupos|length }}</div>
       </div>
 
-      <div class="card">
-        <div class="mini-label">Grupos listos etapa actual</div>
+      <div class="stat-card stat-card-listos" id="statListos">
+        <div class="mini-label">✅ Grupos listos etapa actual</div>
         <div class="big"><span id="listosInicio">0</span>/<span id="totalInicio">0</span></div>
       </div>
 
-      <div class="card">
-        <div class="mini-label">Estado timer</div>
+      <div class="stat-card stat-card-timer">
+        <div class="mini-label">⏱ Estado timer</div>
         <div class="big" id="timerEstado">Detenido</div>
       </div>
     </div>
 
     <div class="card">
-      <h2>Ver pantalla de un grupo</h2>
+      <h2>👁 Ver pantalla de un grupo</h2>
       <p class="nota">
         Abre la vista del estudiante en otra pestaña. Úsalo como modo observación.
       </p>
@@ -423,9 +151,9 @@
         </thead>
         <tbody>
           {% for grupo in grupos %}
-          <tr>
-            <td>{{ grupo.nombregrupo }}</td>
-            <td class="codigo">{{ grupo.codigoacceso }}</td>
+          <tr class="team-row">
+            <td><span class="team-dot"></span>{{ grupo.nombregrupo }}</td>
+            <td><span class="codigo">{{ grupo.codigoacceso }}</span></td>
             <td>{{ grupo.tokensgrupo|default:0 }}</td>
             <td>
               <a href="{% url 'ver_como_grupo' grupo.idgrupo %}" target="_blank" class="btn-ver">
@@ -439,7 +167,7 @@
     </div>
 
     <div class="card">
-      <h2>Estado de grupos</h2>
+      <h2>📊 Estado de grupos</h2>
 
       <table>
         <thead>
@@ -455,14 +183,14 @@
         </thead>
         <tbody id="tablaGrupos">
           {% for grupo in grupos %}
-          <tr>
-            <td>{{ grupo.nombregrupo }}</td>
+          <tr class="team-row">
+            <td><span class="team-dot"></span>{{ grupo.nombregrupo }}</td>
             <td>{{ grupo.tokensgrupo|default:0 }}</td>
             <td>—</td>
             <td>{{ grupo.tema_elegido|default:"—" }}</td>
             <td>{{ grupo.desafio_nombre|default:"—" }}</td>
-            <td>{% if grupo.foto_lego or grupo.lego_sin_foto %}✅{% else %}❌{% endif %}</td>
-            <td>{% if grupo.pitch_texto %}✅{% else %}❌{% endif %}</td>
+            <td>{% if grupo.foto_lego or grupo.lego_sin_foto %}<span class="estado-ok">✅</span>{% else %}<span class="estado-no">❌</span>{% endif %}</td>
+            <td>{% if grupo.pitch_texto %}<span class="estado-ok">✅</span>{% else %}—{% endif %}</td>
           </tr>
           {% endfor %}
         </tbody>
@@ -470,17 +198,19 @@
     </div>
 
     <div class="card">
-      <h2>Presentación de pitch</h2>
+      <h2>🎤 Presentación de pitch</h2>
 
-      <div class="mini-label">Grupo presentando</div>
-      <div id="grupoActualNombre" class="big">Aún no sorteado</div>
-      <div id="grupoActualOrden" class="nota">—</div>
+      <div class="pitch-actual">
+        <div>
+          <div class="mini-label">Grupo presentando</div>
+          <div id="grupoActualNombre" class="big">Aún no sorteado</div>
+        </div>
+        <div id="grupoActualOrden" class="nota">—</div>
+      </div>
 
-      <br>
-
-      <div style="text-align:center;">
+      <div class="pitch-timer-wrap">
         <div class="mini-label">Tiempo de presentación</div>
-        <div id="timerPitchProfesor" class="timer">00:00</div>
+        <div id="timerPitchProfesor" class="readout-timer readout-timer-sm">00:00</div>
       </div>
 
       <h3>Orden del pitch</h3>
@@ -494,6 +224,7 @@
 
 <script>
 const sesionId = "{{ sesion.idsesion }}";
+const controlLayout = document.getElementById("controlLayout");
 
 function formatearTiempo(totalSegundos) {
   const segundos = Math.max(0, Number(totalSegundos || 0));
@@ -577,8 +308,8 @@ function actualizarTablaGrupos(data) {
   if (!tabla || !Array.isArray(data.grupos)) return;
 
   tabla.innerHTML = data.grupos.map(g => `
-    <tr>
-      <td>${g.nombre}</td>
+    <tr class="team-row">
+      <td><span class="team-dot"></span>${g.nombre}</td>
       <td>${g.tokens ?? 0}</td>
       <td>${listoActual(g, data.faseActual) ? '<span class="estado-ok">✅</span>' : '<span class="estado-no">❌</span>'}</td>
       <td>${g.temaElegido || g.tema_elegido || "—"}</td>
@@ -600,7 +331,7 @@ function renderOrdenPitch(ordenPitch, grupoActual) {
 
   lista.innerHTML = ordenPitch.map(item => {
     const esActual = grupoActual && grupoActual.id === item.id;
-    return `<li ${esActual ? 'style="font-weight:900;color:#1d4ed8;"' : ""}>
+    return `<li class="${esActual ? "orden-actual" : ""}">
       ${item.orden}. ${item.nombre}${esActual ? " ← presentando" : ""}
     </li>`;
   }).join("");
@@ -612,9 +343,22 @@ function actualizarUI(data) {
   document.getElementById("timerPitchProfesor").textContent = formatearTiempo(data.segundosRestantes);
   document.getElementById("timerEstado").textContent = data.timerCorriendo ? "Corriendo" : "Detenido";
 
+  if (controlLayout) {
+    controlLayout.dataset.timerCorriendo = data.timerCorriendo ? "true" : "false";
+  }
+
   document.getElementById("totalGrupos").textContent = data.totalGrupos || 0;
   document.getElementById("listosInicio").textContent = data.listosInicio || 0;
   document.getElementById("totalInicio").textContent = data.totalListosInicio || data.totalGrupos || 0;
+
+  const totalListosEtapa = data.totalListosInicio || data.totalGrupos || 0;
+  const statListos = document.getElementById("statListos");
+  if (statListos) {
+    statListos.classList.toggle(
+      "completo",
+      totalListosEtapa > 0 && (data.listosInicio || 0) >= totalListosEtapa
+    );
+  }
 
   document.getElementById("accionProfesor").textContent = textoAccionProfesor(data.faseActual);
 

@@ -7,6 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Misión Emprende UDD — Sopa de Letras</title>
   <link rel="stylesheet" href="{% static 'css/estilo_sopadeletras.css' %}">
+  <link rel="icon" href="{% url 'favicon' %}">
 
   <style>
     body.foto-equipo-abierta {
@@ -339,8 +340,8 @@
 
     <div id="timeModal" class="modal" aria-hidden="true" role="dialog" aria-labelledby="timeModalTitle">
       <div class="modal-content">
-        <h2 id="timeModalTitle">⏰ ¡Tiempo terminado!</h2>
-        <p id="timeModalText">
+        <h2 id="timeModalTitle" data-i18n="sopa_time_titulo">⏰ ¡Tiempo terminado!</h2>
+        <p id="timeModalText" data-i18n="sopa_time_texto">
           No alcanzaron a completar la sopa, pero cada palabra encontrada fue recompensada.
         </p>
         <p id="timeModalReward"><strong>0 palabras encontradas · 0 tokens obtenidos</strong></p>
@@ -358,7 +359,7 @@
           Encontraron todas las palabras y recibieron su recompensa.
         </p>
         <button id="btnWinFoto" type="button" data-i18n="sopa_boton_aceptar_foto">Aceptar y tomar foto</button>
-        <p id="winEspera" class="win-espera" hidden>
+        <p id="winEspera" class="win-espera" hidden data-i18n="sopa_win_espera">
           Esperando a los demás escuadrones...
         </p>
       </div>
@@ -439,8 +440,8 @@
     <section class="foto-equipo-panel">
       <div class="foto-equipo-encabezado">
         <span class="foto-equipo-etiqueta">REGISTRO DE MISIÓN</span>
-        <h2 id="foto-equipo-titulo">¡Foto del equipo!</h2>
-        <p>
+        <h2 id="foto-equipo-titulo" data-i18n="foto_equipo_titulo">¡Foto del equipo!</h2>
+        <p data-i18n="foto_equipo_intro">
           Reúnanse frente a la cámara. Al guardar la fotografía quedarán listos
           y esperarán hasta que todos los equipos terminen.
         </p>
@@ -463,10 +464,10 @@
 
         <div id="foto-equipo-placeholder" class="foto-equipo-placeholder">
           <span class="foto-equipo-camara" aria-hidden="true">📷</span>
-          <strong id="foto-equipo-placeholder-titulo">
+          <strong id="foto-equipo-placeholder-titulo" data-i18n="foto_equipo_placeholder_titulo">
             Registren a todo el equipo
           </strong>
-          <span id="foto-equipo-placeholder-texto">
+          <span id="foto-equipo-placeholder-texto" data-i18n="foto_equipo_placeholder_texto">
             Presionen “Activar cámara” para comenzar.
           </span>
         </div>
@@ -477,8 +478,8 @@
           hidden
         >
           <span class="foto-equipo-check" aria-hidden="true">✓</span>
-          <strong>Fotografía guardada</strong>
-          <span>El registro ya está seguro en Google Drive.</span>
+          <strong data-i18n="foto_equipo_guardada_titulo">Fotografía guardada</strong>
+          <span data-i18n="foto_equipo_guardada_texto">El registro ya está seguro en Google Drive.</span>
         </div>
       </div>
 
@@ -530,10 +531,10 @@
       </div>
 
       <div id="foto-equipo-alternativa" class="foto-equipo-alternativa">
-        <span>¿No se pudo abrir la cámara?</span>
+        <span data-i18n="foto_equipo_alt_pregunta">¿No se pudo abrir la cámara?</span>
 
         <label class="foto-equipo-boton foto-equipo-boton-archivo">
-          Tomar o seleccionar foto
+          <span data-i18n="foto_equipo_boton_archivo">Tomar o seleccionar foto</span>
           <input
             type="file"
             id="foto-equipo-archivo"
@@ -546,7 +547,7 @@
 
       <div id="foto-equipo-espera" class="foto-equipo-espera" hidden>
         <div class="foto-equipo-espera-texto">
-          <strong>Esperando a los demás equipos…</strong>
+          <strong data-i18n="foto_equipo_espera_titulo">Esperando a los demás equipos…</strong>
           <span id="foto-equipo-contador">0/0 equipos con foto</span>
         </div>
 
@@ -571,6 +572,11 @@
   <script>
   /* Resultado de la sopa: primero se acepta la recompensa y después se toma la foto. */
   (function () {
+    function tJuego(clave, fallback = "") {
+      const idioma = window.i18nJuego?.obtenerIdioma?.() || "es";
+      return window.i18nJuego?.traducciones?.[idioma]?.[clave] || fallback;
+    }
+
     const timeModal = document.getElementById("timeModal");
     const winModal = document.getElementById("winModal");
     const timeText = document.getElementById("timeModalText");
@@ -605,18 +611,19 @@
       resultadoMostrado = true;
 
       const cantidad = Math.max(0, Number(palabrasEncontradas) || 0);
-      const palabraTexto = cantidad === 1 ? "palabra" : "palabras";
-      const tokenTexto = cantidad === 1 ? "token" : "tokens";
+      const plantilla = cantidad === 1
+        ? tJuego("sopa_time_recompensa_singular", "{n} palabra encontrada · {n} token obtenido")
+        : tJuego("sopa_time_recompensa_plural", "{n} palabras encontradas · {n} tokens obtenidos");
 
       if (timeText) {
-        timeText.textContent =
-          "No alcanzaron a completar la sopa de letras, pero cada palabra encontrada fue recompensada.";
+        timeText.textContent = tJuego(
+          "sopa_time_texto",
+          "No alcanzaron a completar la sopa de letras, pero cada palabra encontrada fue recompensada."
+        );
       }
 
       if (timeReward) {
-        timeReward.innerHTML =
-          `<strong>${cantidad} ${palabraTexto} encontrada${cantidad === 1 ? "" : "s"} · ` +
-          `${cantidad} ${tokenTexto} obtenido${cantidad === 1 ? "" : "s"}</strong>`;
+        timeReward.innerHTML = `<strong>${plantilla.replaceAll("{n}", cantidad)}</strong>`;
       }
 
       mostrarModal(timeModal);
@@ -631,11 +638,12 @@
 
       if (
         winText &&
-        !/token|bono|recompensa/i.test(winText.textContent || "")
+        !/token|bono|recompensa|reward|bonus/i.test(winText.textContent || "")
       ) {
-        winText.textContent =
-          `Encontraron las ${cantidad || 8} palabras. ` +
-          "Los tokens por palabra y el bono final ya fueron agregados al equipo.";
+        winText.textContent = tJuego(
+          "sopa_win_texto_detalle",
+          "Encontraron las {n} palabras. Los tokens por palabra y el bono final ya fueron agregados al equipo."
+        ).replaceAll("{n}", cantidad || 8);
       }
 
       mostrarModal(winModal);
@@ -665,6 +673,11 @@
   (function () {
     const modal = document.getElementById("foto-equipo-modal");
     if (!modal) return;
+
+    function tJuego(clave, fallback = "") {
+      const idioma = window.i18nJuego?.obtenerIdioma?.() || "es";
+      return window.i18nJuego?.traducciones?.[idioma]?.[clave] || fallback;
+    }
 
     const video = document.getElementById("foto-equipo-video");
     const preview = document.getElementById("foto-equipo-preview");
@@ -733,12 +746,12 @@
       if (placeholder) placeholder.hidden = false;
 
       if (placeholderTitulo) {
-        placeholderTitulo.textContent = "Registren a todo el equipo";
+        placeholderTitulo.textContent = tJuego("foto_equipo_placeholder_titulo", "Registren a todo el equipo");
       }
 
       if (placeholderTexto) {
         placeholderTexto.textContent =
-          "Presionen “Activar cámara” para comenzar.";
+          tJuego("foto_equipo_placeholder_texto", "Presionen “Activar cámara” para comenzar.");
       }
 
       if (acciones) acciones.hidden = false;
@@ -785,7 +798,7 @@
       }
 
       mostrarMensaje(
-        "Revisen que aparezca todo el equipo antes de guardar."
+        tJuego("foto_equipo_msg_revisar_preview", "Revisen que aparezca todo el equipo antes de guardar.")
       );
     }
 
@@ -812,7 +825,7 @@
       }
 
       mostrarMensaje(
-        "Fotografía guardada correctamente.",
+        tJuego("foto_equipo_msg_guardada", "Fotografía guardada correctamente."),
         "exito"
       );
     }
@@ -826,7 +839,7 @@
 
       if (contador) {
         contador.textContent =
-          `${listosNumero}/${totalNumero} equipos con foto`;
+          `${listosNumero}/${totalNumero} ${tJuego("foto_equipo_contador_sufijo", "equipos con foto")}`;
       }
 
       if (progreso) {
@@ -873,16 +886,16 @@
       if (!navigator.mediaDevices?.getUserMedia) {
         if (placeholderTitulo) {
           placeholderTitulo.textContent =
-            "La cámara directa no está disponible";
+            tJuego("foto_equipo_sin_camara_titulo", "La cámara directa no está disponible");
         }
 
         if (placeholderTexto) {
           placeholderTexto.textContent =
-            "Usen el botón “Tomar o seleccionar foto”.";
+            tJuego("foto_equipo_usar_alt_boton", "Usen el botón “Tomar o seleccionar foto”.");
         }
 
         mostrarMensaje(
-          "El navegador no permitió abrir la cámara directamente.",
+          tJuego("foto_equipo_msg_sin_soporte", "El navegador no permitió abrir la cámara directamente."),
           "error"
         );
         return;
@@ -912,7 +925,7 @@
         if (btnCapturar) btnCapturar.hidden = false;
 
         mostrarMensaje(
-          "Cuando estén listos, presionen “Tomar foto”."
+          tJuego("foto_equipo_msg_listos_tomar", "Cuando estén listos, presionen “Tomar foto”.")
         );
       } catch (error) {
         console.error("No se pudo abrir la cámara:", error);
@@ -920,16 +933,16 @@
         if (placeholder) placeholder.hidden = false;
 
         if (placeholderTitulo) {
-          placeholderTitulo.textContent = "No se pudo abrir la cámara";
+          placeholderTitulo.textContent = tJuego("foto_equipo_error_camara_titulo", "No se pudo abrir la cámara");
         }
 
         if (placeholderTexto) {
           placeholderTexto.textContent =
-            "Usen el botón “Tomar o seleccionar foto”.";
+            tJuego("foto_equipo_usar_alt_boton", "Usen el botón “Tomar o seleccionar foto”.");
         }
 
         mostrarMensaje(
-          "Revisen el permiso de cámara o utilicen la opción alternativa.",
+          tJuego("foto_equipo_msg_error_permiso", "Revisen el permiso de cámara o utilicen la opción alternativa."),
           "error"
         );
       } finally {
@@ -945,7 +958,7 @@
         !canvas
       ) {
         mostrarMensaje(
-          "La cámara todavía no está lista.",
+          tJuego("foto_equipo_msg_camara_no_lista", "La cámara todavía no está lista."),
           "error"
         );
         return;
@@ -968,7 +981,7 @@
         blob => {
           if (!blob) {
             mostrarMensaje(
-              "No fue posible generar la fotografía.",
+              tJuego("foto_equipo_msg_error_generar", "No fue posible generar la fotografía."),
               "error"
             );
             return;
@@ -1001,7 +1014,7 @@
         if (btnGuardar) btnGuardar.hidden = true;
 
         mostrarMensaje(
-          "Cuando estén listos, tomen una nueva foto."
+          tJuego("foto_equipo_msg_nueva_foto", "Cuando estén listos, tomen una nueva foto.")
         );
       } else {
         prepararEstadoInicial();
@@ -1012,7 +1025,7 @@
       if (!fotoBlob || guardando || guardada) {
         if (!fotoBlob) {
           mostrarMensaje(
-            "Primero deben tomar o seleccionar una fotografía.",
+            tJuego("foto_equipo_msg_falta_foto", "Primero deben tomar o seleccionar una fotografía."),
             "error"
           );
         }
@@ -1026,7 +1039,7 @@
       if (inputArchivo) inputArchivo.disabled = true;
 
       mostrarMensaje(
-        "Guardando la fotografía y el registro del equipo…"
+        tJuego("foto_equipo_msg_guardando", "Guardando la fotografía y el registro del equipo…")
       );
 
       const formulario = new FormData();
@@ -1061,7 +1074,7 @@
         if (!respuesta.ok || !datos.ok) {
           throw new Error(
             datos.error ||
-            "No fue posible guardar la fotografía."
+            tJuego("foto_equipo_msg_error_guardar", "No fue posible guardar la fotografía.")
           );
         }
 
@@ -1090,7 +1103,7 @@
 
         mostrarMensaje(
           error.message ||
-          "No fue posible guardar la fotografía.",
+          tJuego("foto_equipo_msg_error_guardar", "No fue posible guardar la fotografía."),
           "error"
         );
       }
@@ -1109,7 +1122,7 @@
       if (!archivo.type.startsWith("image/")) {
         inputArchivo.value = "";
         mostrarMensaje(
-          "El archivo seleccionado no es una imagen.",
+          tJuego("foto_equipo_msg_archivo_invalido", "El archivo seleccionado no es una imagen."),
           "error"
         );
         return;
@@ -1121,6 +1134,26 @@
     window.addEventListener("beforeunload", () => {
       detenerCamara();
       limpiarPreviewUrl();
+    });
+
+    window.addEventListener("idiomaJuegoCambiado", () => {
+      if (contador) {
+        const p = contador.textContent.match(/(\d+)\/(\d+)/);
+        if (p) {
+          contador.textContent =
+            `${p[1]}/${p[2]} ${tJuego("foto_equipo_contador_sufijo", "equipos con foto")}`;
+        }
+      }
+
+      if (placeholder && !placeholder.hidden) {
+        if (placeholderTitulo) {
+          placeholderTitulo.textContent = tJuego("foto_equipo_placeholder_titulo", "Registren a todo el equipo");
+        }
+        if (placeholderTexto) {
+          placeholderTexto.textContent =
+            tJuego("foto_equipo_placeholder_texto", "Presionen “Activar cámara” para comenzar.");
+        }
+      }
     });
   })();
   </script>

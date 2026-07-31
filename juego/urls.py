@@ -3,7 +3,9 @@ from django.urls import path
 from . import views
 from django.conf import settings
 from django.conf.urls.static import static
+
 urlpatterns = [
+    path("favicon.ico", views.favicon_view, name="favicon"),
     #NUEVO
     path(
         "sesion/<int:sesion_id>/dev/timer-10/",
@@ -132,4 +134,3 @@ path(
     path("mision-cumplida/", views.mision_cumplida_view, name="mision_cumplida"),
 
 ]
-

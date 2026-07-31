@@ -10,6 +10,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <title>Misión Emprende UDD — Evaluación de Proyectos</title>
+  <link rel="icon" href="{% url 'favicon' %}">
 
   <link
     href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
@@ -48,7 +49,7 @@
             Evaluación de Proyectos
           </h1>
 
-          <p class="peer-subtitle">
+          <p class="peer-subtitle" data-i18n="peer_subtitulo">
   Asignen una puntuación por criterio y envíen su evaluación
   antes de que termine la ronda.
 </p>
@@ -56,7 +57,7 @@
 <div class="peer-penalty-note">
   <span class="peer-penalty-icon" aria-hidden="true">⚠</span>
 
-  <p>
+  <p data-i18n="peer_nota_penalizacion" data-i18n-html="true">
     Si un equipo no termina a tiempo, las áreas faltantes se
     completarán con nota máxima y ese equipo perderá
     <strong>2 tokens</strong>.
@@ -85,7 +86,7 @@
             01:30
           </strong>
 
-          <span class="peer-timer-caption">
+          <span class="peer-timer-caption" data-i18n="peer_timer_caption">
             para enviar la evaluación
           </span>
         </div>
@@ -120,15 +121,15 @@
         </div>
 
         {% if mi_equipo_presenta %}
-          <span class="peer-status-chip es-presentando">
+          <span class="peer-status-chip es-presentando" data-i18n="peer_estado_presentando">
             Presentando
           </span>
         {% elif ya_evaluo %}
-          <span class="peer-status-chip es-completado">
+          <span class="peer-status-chip es-completado" data-i18n="peer_estado_enviada">
             Evaluación enviada
           </span>
         {% else %}
-          <span class="peer-status-chip es-evaluando">
+          <span class="peer-status-chip es-evaluando" data-i18n="peer_estado_evaluando">
             Evaluando
           </span>
         {% endif %}
@@ -141,7 +142,7 @@
           </div>
 
           <div>
-            <h2>Su equipo está presentando</h2>
+            <h2 data-i18n="peer_mi_equipo_presenta_titulo">Su equipo está presentando</h2>
 
             <p data-i18n="peer_mi_equipo_presenta_help">
               Esperen mientras los demás equipos terminan
@@ -157,7 +158,7 @@
           </div>
 
           <div>
-            <h2>Evaluación registrada</h2>
+            <h2 data-i18n="peer_evaluacion_registrada_titulo">Evaluación registrada</h2>
 
             <p data-i18n="peer_alert_ya_evaluo">
               Su equipo ya envió la evaluación. Esperen a que
@@ -178,7 +179,7 @@
           <section class="criteria-panel" aria-labelledby="criteriosTitulo">
             <div class="criteria-heading">
               <div>
-                <span class="criteria-kicker">
+                <span class="criteria-kicker" data-i18n="peer_matriz_kicker">
                   MATRIZ DE EVALUACIÓN
                 </span>
 
@@ -190,7 +191,7 @@
                 </h2>
               </div>
 
-              <p>
+              <p data-i18n="peer_desliza_ayuda">
                 Deslicen cada criterio desde 1 hasta 5.
               </p>
             </div>
@@ -261,7 +262,7 @@
           <section class="comment-panel">
             <div class="comment-heading">
               <div>
-                <span class="comment-kicker">
+                <span class="comment-kicker" data-i18n="peer_mensaje_kicker">
                   MENSAJE AL EQUIPO
                 </span>
 
@@ -295,7 +296,7 @@
           </section>
 
           <div class="peer-actions">
-            <p class="peer-actions-note">
+            <p class="peer-actions-note" data-i18n="peer_actions_nota">
               La ronda avanzará cuando todos los equipos hayan enviado.
             </p>
 

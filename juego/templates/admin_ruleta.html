@@ -6,6 +6,7 @@
   <title>Ruleta — Dashboard Admin</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/estilo_dashboardadmin.css' %}">
+  <link rel="icon" href="{% url 'favicon' %}">
 
   <style>
     .top-actions{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;gap:16px}
@@ -64,6 +65,7 @@
         <li><a href="{% url 'admin_desafios' %}">Desafíos</a></li>
         <li><a href="{% url 'admin_ruleta' %}" class="active">Ruleta</a></li>
         <li><a href="{% url 'admin_tiempos' %}">Tiempos</a></li>
+        <li><a href="{% url 'admin_preguntas_rompehielo' %}">Preguntas rompehielo</a></li>
         <li class="sidebar-separator"></li>
         <li><a href="{% url 'perfiles' %}" class="back-link">⟵ Cambiar de perfil</a></li>
       </ul>
