@@ -261,3 +261,101 @@ class MarketSeguroTests(BaseJuegoTestCase):
         self.grupo.refresh_from_db()
         self.assertEqual(self.grupo.tokensgrupo, 6)
         self.assertEqual(Retogrupo.objects.count(), 1)
+
+
+class SesionesPorProfesorTests(BaseJuegoTestCase):
+    """Cada profesor ve y crea solo sus sesiones; el admin las ve todas."""
+
+    def _csv_alumnos(self, cantidad=4):
+        import io as _io
+
+        lineas = ["Nombre,Apellido Paterno,Apellido Materno,RUT,Correo,Carrera"]
+        for i in range(cantidad):
+            lineas.append(f"Alumno{i},Pérez,Soto,1{i}.111.111-{i},a{i}@udd.cl,Ingeniería")
+
+        archivo = _io.BytesIO("\n".join(lineas).encode("utf-8"))
+        archivo.name = "alumnos.csv"
+        return archivo
+
+    def test_listar_sesiones_solo_muestra_las_propias(self):
+        otro = crear_profesor("otro@udd.cl")
+        ajena = crear_sesion(otro, nombre="Sesión ajena")
+
+        self.login_profesor(self.profesor)
+        respuesta = self.client.get(reverse("listar_sesiones"))
+
+        ids = [i["sesion"].idsesion for i in respuesta.context["sesiones_info"]]
+        self.assertIn(self.sesion.idsesion, ids)
+        self.assertNotIn(ajena.idsesion, ids)
+
+    def test_admin_ve_todas_las_sesiones(self):
+        otro = crear_profesor("otro@udd.cl")
+        ajena = crear_sesion(otro, nombre="Sesión ajena")
+
+        self.login_admin()
+        respuesta = self.client.get(reverse("listar_sesiones"))
+
+        ids = [i["sesion"].idsesion for i in respuesta.context["sesiones_info"]]
+        self.assertIn(self.sesion.idsesion, ids)
+        self.assertIn(ajena.idsesion, ids)
+
+    def test_crear_sesion_la_asigna_al_profesor_logueado(self):
+        from juego.models import Sesion
+
+        nuevo = crear_profesor("nuevo@udd.cl")
+        self.login_profesor(nuevo)
+
+        respuesta = self.client.post(reverse("crear_sesion"), {
+            "nombre": "Mi sesión",
+            "modo_creacion": "recomendado",
+            "archivo_excel": self._csv_alumnos(),
+        })
+
+        self.assertEqual(respuesta.status_code, 200)
+        creada = Sesion.objects.filter(nombre="Mi sesión").first()
+        self.assertIsNotNone(creada)
+        self.assertEqual(creada.profesor_id, nuevo.idprofesor)
+
+    def test_crear_sesion_no_corrompe_a_otro_profesor(self):
+        """Regresión: el flujo antiguo sobrescribía email/facultad del primer profesor."""
+        nuevo = crear_profesor("nuevo@udd.cl")
+        self.login_profesor(nuevo)
+
+        self.client.post(reverse("crear_sesion"), {
+            "nombre": "Mi sesión",
+            "email_profesor": "cualquiercosa@udd.cl",
+            "facultad": "Otra",
+            "modo_creacion": "recomendado",
+            "archivo_excel": self._csv_alumnos(),
+        })
+
+        self.profesor.refresh_from_db()
+        self.assertEqual(self.profesor.emailprofesor, "profe@udd.cl")
+        self.assertEqual(self.profesor.facultad, "Ingeniería")
+
+    def test_admin_crea_sesion_para_profesor_por_email(self):
+        from juego.models import Sesion
+
+        self.login_admin()
+        respuesta = self.client.post(reverse("crear_sesion"), {
+            "nombre": "Sesión admin",
+            "email_profesor": "PROFE@UDD.CL",
+            "modo_creacion": "recomendado",
+            "archivo_excel": self._csv_alumnos(),
+        })
+
+        self.assertEqual(respuesta.status_code, 200)
+        creada = Sesion.objects.filter(nombre="Sesión admin").first()
+        self.assertIsNotNone(creada)
+        self.assertEqual(creada.profesor_id, self.profesor.idprofesor)
+
+    def test_admin_sin_email_recibe_error(self):
+        from juego.models import Sesion
+
+        self.login_admin()
+        self.client.post(reverse("crear_sesion"), {
+            "nombre": "Sin dueño",
+            "modo_creacion": "recomendado",
+            "archivo_excel": self._csv_alumnos(),
+        })
+        self.assertFalse(Sesion.objects.filter(nombre="Sin dueño").exists())

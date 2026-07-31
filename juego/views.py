@@ -5376,16 +5376,28 @@ def crear_grupos_para_alumnos(sesion, alumnos, max_por_grupo=8, cantidad_grupos_
 
 @requiere_staff
 def crear_sesion(request):
-    profesor = Profesor.objects.first()
-
-    if not profesor:
-        messages.warning(request, "Primero debes registrar un profesor.")
-        return redirect("registrarprofesor")
+    # La sesión pertenece al profesor autenticado. El administrador puede
+    # crear sesiones para un profesor indicando su email en el formulario.
+    profesor = profesor_autenticado(request)
 
     if request.method == "POST":
         nombre = (request.POST.get("nombre") or "").strip()
         email_profesor = (request.POST.get("email_profesor") or "").strip()
         facultad = (request.POST.get("facultad") or "").strip()
+
+        if profesor is None:
+            # Admin sin identidad de profesor: resolver por email.
+            if not email_profesor:
+                messages.error(request, "Debes ingresar el correo del profesor dueño de la sesión.")
+                return render(request, "crear_sesion.html")
+
+            profesor = Profesor.objects.filter(
+                emailprofesor__iexact=email_profesor
+            ).first()
+
+            if not profesor:
+                messages.error(request, "No existe un profesor con ese correo. Regístralo primero.")
+                return render(request, "crear_sesion.html")
 
         modo_creacion = request.POST.get("modo_creacion", "recomendado")
         archivo = request.FILES.get("archivo_excel")
@@ -5395,14 +5407,6 @@ def crear_sesion(request):
 
         if not nombre:
             messages.error(request, "Debes darle un nombre a la sesión.")
-            return render(request, "crear_sesion.html")
-
-        if not email_profesor:
-            messages.error(request, "Debes ingresar el correo del profesor.")
-            return render(request, "crear_sesion.html")
-
-        if not facultad:
-            messages.error(request, "Debes seleccionar una facultad.")
             return render(request, "crear_sesion.html")
 
         if not archivo:
@@ -5419,10 +5423,6 @@ def crear_sesion(request):
             sesiones_creadas = []
 
             with transaction.atomic():
-
-                profesor.emailprofesor = email_profesor
-                profesor.facultad = facultad
-                profesor.save()
 
                 if modo_creacion == "dividir_dos":
                     cantidad_sesiones = 2
@@ -5491,13 +5491,15 @@ def crear_sesion(request):
 
 @requiere_staff
 def listar_sesiones(request):
-    profesor = Profesor.objects.first()
+    profesor = profesor_autenticado(request)
 
-    if not profesor:
-        messages.warning(request, "Aún no hay profesores registrados.")
-        return redirect("registrarprofesor")
-
-    sesiones = Sesion.objects.filter(profesor=profesor).order_by("-fecha_creacion")
+    if profesor:
+        sesiones = Sesion.objects.filter(profesor=profesor).order_by("-fecha_creacion")
+    elif es_admin(request):
+        # El administrador supervisa todas las sesiones.
+        sesiones = Sesion.objects.select_related("profesor").order_by("-fecha_creacion")
+    else:
+        sesiones = Sesion.objects.none()
 
     sesiones_info = []
 
