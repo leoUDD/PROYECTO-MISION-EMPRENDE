@@ -6,9 +6,9 @@ Uso:
     python manage.py crear_profesor correo@udd.cl claveSegura --facultad "Ingeniería"
 """
 
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 
-from juego.auth import asignar_clave_profesor
+from juego.auth import asignar_clave_profesor, errores_de_clave
 from juego.models import Profesor, Usuario
 
 
@@ -19,11 +19,24 @@ class Command(BaseCommand):
         parser.add_argument("email", type=str)
         parser.add_argument("clave", type=str)
         parser.add_argument("--facultad", type=str, default="")
+        parser.add_argument(
+            "--forzar",
+            action="store_true",
+            help="Omite la validación de robustez de la clave.",
+        )
 
     def handle(self, *args, **options):
         email = options["email"].strip()
         clave = options["clave"]
         facultad = options["facultad"].strip()
+
+        if not options["forzar"]:
+            errores = errores_de_clave(clave)
+            if errores:
+                raise CommandError(
+                    "Clave demasiado débil: " + " ".join(errores)
+                    + " (usa --forzar para omitir esta validación)"
+                )
 
         profesor = Profesor.objects.filter(emailprofesor__iexact=email).first()
 

@@ -131,7 +131,13 @@
 
           <div class="form-group">
             <label for="clave">Clave de acceso</label>
-            <input type="password" id="clave" name="clave" placeholder="Clave para el panel de profesor" required autocomplete="new-password">
+            <div style="display:flex; gap:8px; align-items:center;">
+              <input type="text" id="clave" name="clave" placeholder="Mínimo 8 caracteres, no solo números" required autocomplete="new-password" style="flex:1;">
+              <button type="button" id="btn-generar-clave" class="btn-primary" style="white-space:nowrap;">Generar</button>
+            </div>
+            <small style="display:block; margin-top:6px; opacity:.75;">
+              Usa "Generar" para una clave fácil de dictar (p. ej. condor-austral-742). Cópiala antes de registrar: no se vuelve a mostrar.
+            </small>
           </div>
 
           <button type="submit" class="btn-primary">Registrar profesor</button>
@@ -165,6 +171,13 @@
                         </form>
 
                         <form method="POST"
+                              action="{% url 'restablecer_clave_profesor' profesor.idprofesor %}"
+                              onsubmit="return confirm('Se generará una clave nueva para este profesor y la actual dejará de funcionar. ¿Continuar?');">
+                          {% csrf_token %}
+                          <button type="submit" class="btn-primary">Restablecer clave</button>
+                        </form>
+
+                        <form method="POST"
                               action="{% url 'eliminar_profesor_forzado' profesor.idprofesor %}"
                               onsubmit="return confirm('Esto eliminará también alumnos y sesiones asociadas a este profesor. ¿Seguro?');">
                           {% csrf_token %}
@@ -184,5 +197,30 @@
       </section>
     </main>
   </div>
+<script>
+  (function () {
+    const boton = document.getElementById("btn-generar-clave");
+    const campo = document.getElementById("clave");
+    if (!boton || !campo) return;
+
+    boton.addEventListener("click", async function () {
+      boton.disabled = true;
+      try {
+        const res = await fetch("{% url 'generar_clave_sugerida' %}", {
+          headers: { "Accept": "application/json" },
+        });
+        const data = await res.json();
+        if (data.clave) {
+          campo.value = data.clave;
+          campo.focus();
+        }
+      } catch (e) {
+        alert("No se pudo generar la clave. Intenta de nuevo.");
+      } finally {
+        boton.disabled = false;
+      }
+    });
+  })();
+</script>
 </body>
 </html>

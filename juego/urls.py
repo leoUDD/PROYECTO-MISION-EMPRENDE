@@ -9,6 +9,8 @@ urlpatterns = [
     path("favicon.ico", views.favicon_view, name="favicon"),
     path("acceso/", auth_views.login_acceso, name="login_acceso"),
     path("acceso/salir/", auth_views.logout_acceso, name="logout_acceso"),
+    path("profesor/<int:profesor_id>/restablecer-clave/", views.restablecer_clave_profesor, name="restablecer_clave_profesor"),
+    path("admin-panel/generar-clave/", views.generar_clave_sugerida, name="generar_clave_sugerida"),
     #NUEVO
     path(
         "sesion/<int:sesion_id>/dev/timer-10/",

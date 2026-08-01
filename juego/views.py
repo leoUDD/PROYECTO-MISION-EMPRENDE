@@ -5233,6 +5233,14 @@ def registrarprofesor(request):
                 messages.error(request, "Ya existe un profesor con ese email.")
                 return redirect("registrarprofesor")
 
+            from .auth import errores_de_clave
+            errores = errores_de_clave(clave)
+
+            if errores:
+                for error in errores:
+                    messages.error(request, error)
+                return redirect("registrarprofesor")
+
             usuario = Usuario.objects.create(password="")
 
             profesor = Profesor.objects.create(
@@ -5804,6 +5812,36 @@ def eliminar_profesor(request, profesor_id):
         messages.error(request, f"Error al eliminar: {e}")
 
     return redirect("registrarprofesor")
+
+
+@require_POST
+@requiere_admin
+def restablecer_clave_profesor(request, profesor_id):
+    """El admin genera una clave legible nueva para un profesor que la olvidó.
+
+    Se muestra una sola vez en pantalla; en la base solo queda el hash.
+    """
+    from .auth import asignar_clave_profesor, generar_clave_legible
+
+    profesor = get_object_or_404(Profesor, idprofesor=profesor_id)
+
+    clave_nueva = generar_clave_legible()
+    asignar_clave_profesor(profesor, clave_nueva)
+
+    messages.success(
+        request,
+        f"Nueva clave para {profesor.emailprofesor}: {clave_nueva} — "
+        "cópiala y entrégasela ahora; no se volverá a mostrar."
+    )
+    return redirect("registrarprofesor")
+
+
+@requiere_admin
+def generar_clave_sugerida(request):
+    """Devuelve una clave legible para prellenar el formulario de registro."""
+    from .auth import generar_clave_legible
+
+    return JsonResponse({"clave": generar_clave_legible()})
 
 
 @require_POST
