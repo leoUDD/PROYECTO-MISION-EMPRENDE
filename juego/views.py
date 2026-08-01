@@ -4258,7 +4258,7 @@ def dashboardadmin(request):
 
         sesiones_recientes.append({
             "nombre": f"Sesión {sesion.idsesion}",
-            "fase_actual": sesion.fase_actual,
+            "fase_actual": ETIQUETA_FASE.get(sesion.fase_actual, sesion.fase_actual),
             "total_grupos": total,
             "sopa": porcentaje(grupos.filter(sopa_ganada=True).count(), total),
             "pitch": porcentaje(
@@ -4271,11 +4271,23 @@ def dashboardadmin(request):
             ),
         })
 
+    # Un alumno "ha jugado" si quedó asignado a un grupo y su sesión avanzó
+    # más allá de la fase inicial (es decir, la partida efectivamente comenzó).
+    alumnos_registrados = Alumno.objects.count()
+    alumnos_jugado = (
+        Alumno.objects
+        .filter(grupo__isnull=False, sesion__isnull=False)
+        .exclude(sesion__fase_actual=FASES_ORDEN[0])
+        .count()
+    )
+
     kpis = {
         "profesores": Profesor.objects.count(),
         "grupos": total_grupos,
         "sesiones": Sesion.objects.count(),
         "desafios_activos": Desafio.objects.filter(activo=True).count(),
+        "alumnos_registrados": alumnos_registrados,
+        "alumnos_jugado": alumnos_jugado,
         "pct_sopa": porcentaje(grupos_sopa, total_grupos),
         "pct_pitch": porcentaje(grupos_pitch, total_grupos),
         "pct_lego": porcentaje(grupos_lego, total_grupos),

@@ -178,15 +178,9 @@
         </div>
 
         <div class="kpi-card">
-          <div class="kpi-title">Palabras sopa</div>
-          <div class="kpi-value">{{ kpis.palabras_sopa|default:0 }}</div>
-          <div class="kpi-desc">Encontradas por grupos</div>
-        </div>
-
-        <div class="kpi-card">
-          <div class="kpi-title">Burbujas</div>
-          <div class="kpi-value">{{ kpis.burbujas|default:0 }}</div>
-          <div class="kpi-desc">Registradas en bubble map</div>
+          <div class="kpi-title">Alumnos que han jugado</div>
+          <div class="kpi-value">{{ kpis.alumnos_jugado|default:0 }}</div>
+          <div class="kpi-desc">De {{ kpis.alumnos_registrados|default:0 }} registrados</div>
         </div>
       </section>
 
@@ -227,18 +221,18 @@
           <h3>Actividad real del juego</h3>
 
           <div class="stat-line">
-            <strong>Palabras sopa</strong>
-            <span>{{ kpis.palabras_sopa|default:0 }}</span>
-          </div>
-
-          <div class="stat-line">
-            <strong>Burbujas creadas</strong>
-            <span>{{ kpis.burbujas|default:0 }}</span>
-          </div>
-
-          <div class="stat-line">
             <strong>Grupos con sopa completa</strong>
             <span>{{ kpis.pct_sopa|default:0 }}%</span>
+          </div>
+
+          <div class="stat-line">
+            <strong>Grupos con pitch enviado</strong>
+            <span>{{ kpis.pct_pitch|default:0 }}%</span>
+          </div>
+
+          <div class="stat-line">
+            <strong>Grupos con foto Lego</strong>
+            <span>{{ kpis.pct_lego|default:0 }}%</span>
           </div>
         </div>
 
@@ -252,9 +246,9 @@
                   <th>Sesión</th>
                   <th>Fase actual</th>
                   <th>Grupos</th>
-                  <th>Palabras sopa</th>
-                  <th>Burbujas</th>
-                  <th>Sopa completada</th>
+                  <th>Sopa</th>
+                  <th>Pitch</th>
+                  <th>Lego</th>
                 </tr>
               </thead>
 
@@ -264,9 +258,9 @@
                     <td>{{ s.nombre }}</td>
                     <td>{{ s.fase_actual }}</td>
                     <td>{{ s.total_grupos }}</td>
-                    <td>{{ s.palabras_sopa }}</td>
-                    <td>{{ s.burbujas }}</td>
                     <td>{{ s.sopa }}%</td>
+                    <td>{{ s.pitch }}%</td>
+                    <td>{{ s.lego }}%</td>
                   </tr>
                 {% endfor %}
               </tbody>
