@@ -1,6 +1,87 @@
+<style>
+  /* Salida suave al cambiar de fase: evita el corte seco de pantalla. */
+  body.fase-saliendo {
+    opacity: 0;
+    transition: opacity .25s ease;
+    pointer-events: none;
+  }
+</style>
 <script>
   const sesionId = "{{ grupo.sesion.idsesion|default:'' }}";
   let redirigiendo = false;
+
+  /* ------------------------------------------------------------------
+   * Bloqueo de transición.
+   *
+   * Problema: al marcar "listo" el último grupo, la fase cambia en el
+   * servidor dentro de esa misma petición, y el polling (1 s) lo
+   * redirigía de inmediato, cortando su animación/sonido/mensaje.
+   *
+   * Solución: tras un POST a /listo/ o /listo-ranking/ se activa un
+   * bloqueo breve. El polling sigue corriendo y detecta el cambio de
+   * fase, pero la redirección queda pendiente y se ejecuta al expirar
+   * el bloqueo. Tope duro de 4 s: nadie queda desincronizado.
+   *
+   * Los timers de fase no se ven afectados: son server-side
+   * (timer_fin_at) y cada vista renderiza los segundos restantes que
+   * entrega el polling al llegar.
+   * ------------------------------------------------------------------ */
+  const BLOQUEO_DEFECTO_MS = 4000;
+  const BLOQUEO_MAXIMO_MS = 5000;
+
+  let bloqueoHasta = 0;
+  let redireccionPendiente = null;
+  let timeoutRedireccion = null;
+
+  window.bloquearTransicionFase = function (ms) {
+    const duracion = Math.min(ms || BLOQUEO_DEFECTO_MS, BLOQUEO_MAXIMO_MS);
+    bloqueoHasta = Math.max(bloqueoHasta, Date.now() + duracion);
+  };
+
+  function ejecutarRedireccion(url) {
+    if (redirigiendo || !url) return;
+    redirigiendo = true;
+    document.body.classList.add("fase-saliendo");
+    setTimeout(function () {
+      window.location.replace(url);
+    }, 250);
+  }
+
+  function programarRedireccion(url) {
+    redireccionPendiente = url; // siempre la más reciente
+
+    const restante = bloqueoHasta - Date.now();
+
+    if (restante <= 0) {
+      ejecutarRedireccion(redireccionPendiente);
+      return;
+    }
+
+    if (!timeoutRedireccion) {
+      timeoutRedireccion = setTimeout(function () {
+        timeoutRedireccion = null;
+        ejecutarRedireccion(redireccionPendiente);
+      }, restante);
+    }
+  }
+
+  /* Activación automática: cualquier POST a los endpoints de "listo"
+   * enciende el bloqueo, sin que cada vista tenga que hacerlo. */
+  const RUTAS_LISTO = /\/(listo|listo-ranking)\/?(\?|$)/;
+  const fetchOriginal = window.fetch;
+
+  window.fetch = function (recurso, opciones) {
+    try {
+      const url = typeof recurso === "string" ? recurso : (recurso && recurso.url) || "";
+      const metodo = ((opciones && opciones.method) || (recurso && recurso.method) || "GET").toUpperCase();
+
+      if (metodo === "POST" && RUTAS_LISTO.test(url)) {
+        window.bloquearTransicionFase();
+      }
+    } catch (e) { /* nunca interferir con la petición */ }
+
+    return fetchOriginal.apply(this, arguments);
+  };
 
   function normalizarRuta(ruta) {
     if (!ruta) return "";
@@ -123,8 +204,7 @@
       const estaEnRutaValida = rutasValidas.includes(rutaActual);
 
       if (!estaEnRutaValida && rutaDestino && rutaActual !== rutaDestino) {
-        redirigiendo = true;
-        window.location.replace(data.rutaAlumno);
+        programarRedireccion(data.rutaAlumno);
       }
     } catch (error) {
       console.error("Error consultando estado de sesión:", error);
