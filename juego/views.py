@@ -5277,6 +5277,7 @@ def eliminar_alumno(request, idalumno):
 
 def finalizar_mision(request):
     request.session.pop("grupo_id", None)
+    request.session.pop("sesion_id", None)
     return redirect("perfiles")
 
 def reflexion(request):
@@ -5284,11 +5285,14 @@ def reflexion(request):
     if not grupo:
         return redirect("registro")
 
-    if grupo and grupo.sesion:
-        borrar_fotos_lego_sesion(grupo.sesion)    
-
     if not acceso_permitido(grupo, "reflexion"):
         return redirect("pantalla_espera")
+
+    # Solo después de validar la fase: si esto corriera antes, cualquier
+    # alumno visitando /reflexion/ a mitad del juego borraría las fotos
+    # Lego de Drive de toda la sesión.
+    if grupo.sesion:
+        borrar_fotos_lego_sesion(grupo.sesion)
 
     return render(request, "reflexion.html", {"grupo": grupo})
 def leer_filas_archivo(archivo):
