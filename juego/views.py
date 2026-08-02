@@ -994,8 +994,13 @@ def estado_presentacion_pitch(request, sesion_id):
     return JsonResponse(data)
 
 @require_POST
-@requiere_staff
 def iniciar_presentacion_pitch(request, sesion_id):
+    """
+    La dispara el propio grupo que está presentando desde
+    presentar_pitch.html, así que NO lleva @requiere_staff: la
+    autorización se hace más abajo exigiendo que el grupo en sesión
+    sea exactamente sesion.grupo_presentando.
+    """
     sesion = get_object_or_404(Sesion, pk=sesion_id)
 
     grupo = obtener_grupo_desde_session(request)
