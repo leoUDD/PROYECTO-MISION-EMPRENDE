@@ -75,19 +75,19 @@
             <p data-i18n-html="true" data-i18n="lego_astro_intro">
               Si han seguido la misión con atención, podrán responder esta pregunta y ganar <strong>2 tokens</strong>.
             </p>
-            <p id="astroLegoPregunta">¿Qué habilidades han trabajado hasta ahora y en qué orden?</p>
+            <p id="astroLegoPregunta">¿Cuál era el objetivo principal del Bubble Map?</p>
             <div class="astro-lego-opciones" id="astroLegoOpciones">
               <button type="button" class="astro-lego-opcion" id="astroLegoOpcionA" data-correcta="false">
-                A) Creatividad → Trabajo en equipo → Empatía
+                A) Identificar las características técnicas de la solución.
               </button>
-              <button type="button" class="astro-lego-opcion" id="astroLegoOpcionB" data-correcta="true">
-                B) Trabajo en equipo → Empatía → Creatividad
+              <button type="button" class="astro-lego-opcion" id="astroLegoOpcionB" data-correcta="false">
+                B) Priorizar las ideas con mayor potencial de negocio.
               </button>
-              <button type="button" class="astro-lego-opcion" id="astroLegoOpcionC" data-correcta="false">
-                C) Empatía → Comunicación → Creatividad
+              <button type="button" class="astro-lego-opcion" id="astroLegoOpcionC" data-correcta="true">
+                C) Explorar las necesidades, emociones y motivaciones del usuario.
               </button>
               <button type="button" class="astro-lego-opcion" id="astroLegoOpcionD" data-correcta="false">
-                D) Comunicación → Creatividad → Trabajo en equipo
+                D) Definir las funcionalidades principales del prototipo.
               </button>
             </div>
             <div id="astroLegoFeedback" class="astro-lego-feedback"></div>
@@ -481,17 +481,17 @@
       const PREGUNTAS = [
         {
           preguntaKey: "lego_astro_pregunta",
-          preguntaFallback: "¿Qué habilidades han trabajado hasta ahora y en qué orden?",
+          preguntaFallback: "¿Cuál era el objetivo principal del Bubble Map?",
           opciones: [
-            { key: "lego_astro_opcion_a", fallback: "A) Creatividad → Trabajo en equipo → Empatía", correcta: false },
-            { key: "lego_astro_opcion_b", fallback: "B) Trabajo en equipo → Empatía → Creatividad", correcta: true },
-            { key: "lego_astro_opcion_c", fallback: "C) Empatía → Comunicación → Creatividad", correcta: false },
-            { key: "lego_astro_opcion_d", fallback: "D) Comunicación → Creatividad → Trabajo en equipo", correcta: false }
+            { key: "lego_astro_opcion_a", fallback: "A) Identificar las características técnicas de la solución.", correcta: false },
+            { key: "lego_astro_opcion_b", fallback: "B) Priorizar las ideas con mayor potencial de negocio.", correcta: false },
+            { key: "lego_astro_opcion_c", fallback: "C) Explorar las necesidades, emociones y motivaciones del usuario.", correcta: true },
+            { key: "lego_astro_opcion_d", fallback: "D) Definir las funcionalidades principales del prototipo.", correcta: false }
           ],
           feedbackOkKey: "lego_astro_feedback_ok",
-          feedbackOkFallback: "¡Correcto! La respuesta era Trabajo en equipo → Empatía → Creatividad. Tomen sus 2 tokens.",
+          feedbackOkFallback: "¡Correcto! El Bubble Map servía para explorar las necesidades, emociones y motivaciones del usuario. Tomen sus 2 tokens.",
           feedbackErrorKey: "lego_astro_feedback_error",
-          feedbackErrorFallback: "Fallaste. La respuesta correcta era: Trabajo en equipo → Empatía → Creatividad."
+          feedbackErrorFallback: "Fallaste. La respuesta correcta era: explorar las necesidades, emociones y motivaciones del usuario."
         },
         {
           preguntaKey: "lego_astro_pregunta_2",

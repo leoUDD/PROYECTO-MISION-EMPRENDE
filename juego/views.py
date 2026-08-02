@@ -5373,9 +5373,20 @@ def galeria_equipos(request):
         .order_by("grupo__idgrupo")
     )
 
+    # Mismo criterio que el KPI del panel admin: un alumno "ha jugado"
+    # si quedó asignado a un grupo y su sesión avanzó más allá de la
+    # fase inicial.
+    total_alumnos_jugado = (
+        Alumno.objects
+        .filter(grupo__isnull=False, sesion__isnull=False)
+        .exclude(sesion__fase_actual=FASES_ORDEN[0])
+        .count()
+    )
+
     return render(request, "galeria_equipos.html", {
         "grupo": grupo,
         "fotos_equipo": fotos_equipo,
+        "total_alumnos_jugado": total_alumnos_jugado,
     })
 
 

@@ -129,6 +129,35 @@ body::before {
   font-weight: 650;
 }
 
+/* Contador de agentes que han jugado en total */
+.galeria-metrica {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-top: clamp(14px, 2vw, 20px);
+  padding: 10px 22px;
+  border-radius: 999px;
+  background: rgba(0, 200, 255, .10);
+  border: 1px solid rgba(0, 200, 255, .38);
+  box-shadow: 0 0 18px rgba(0, 200, 255, .12);
+}
+
+.galeria-metrica-numero {
+  color: var(--udd-green-bright);
+  font-size: clamp(22px, 2.6vw, 32px);
+  font-weight: 900;
+  line-height: 1;
+  text-shadow: 0 0 12px rgba(0, 242, 109, .5);
+}
+
+.galeria-metrica-texto {
+  color: rgba(230, 238, 248, .88);
+  font-size: clamp(12px, 1.2vw, 15px);
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
 /* Grilla pensada para ~10 fotos en pantalla, sin scroll en un
    proyector/monitor típico. Se reordena sola con menos fotos. */
 .galeria-grid {
