@@ -4393,14 +4393,13 @@ def lista_desafios(request):
     })
 
 
+@require_POST
+@requiere_admin
 def eliminar_desafio(request, iddesafio):
     desafio = get_object_or_404(Desafio, pk=iddesafio)
 
-    if request.method == "POST":
-        desafio.delete()
-        messages.success(request, "Desafío eliminado correctamente 🗑️")
-        return redirect('lista_desafios')
-
+    desafio.delete()
+    messages.success(request, "Desafío eliminado correctamente 🗑️")
     return redirect('lista_desafios')
 
 def transicionempatia(request):
