@@ -252,6 +252,26 @@ def iniciar_timer_de_sesion(sesion):
     ])
 
 
+CLAVES_SESSION_GRUPO = [
+    "grupo_id",
+    "sesion_id",
+    "ranking_flags_reseteados",
+    "modo_profesor",
+    "modo_conocidos",
+]
+
+
+def limpiar_session_grupo(request):
+    """
+    Elimina de la sesión solo las claves del grupo/alumno, preservando
+    el login de profesor/admin (profesor_id, es_admin). Un flush total
+    aquí cerraba la sesión de staff en todas las pestañas y rompía,
+    por ejemplo, las herramientas DEV del panel de control.
+    """
+    for clave in CLAVES_SESSION_GRUPO:
+        request.session.pop(clave, None)
+
+
 def obtener_grupo_desde_session(request):
     grupo_id = request.session.get("grupo_id")
     sesion_id = request.session.get("sesion_id")
@@ -267,15 +287,15 @@ def obtener_grupo_desde_session(request):
             sesion_id=sesion_id,
         )
     except Grupo.DoesNotExist:
-        logger.debug("obtener_grupo_desde_session -> grupo no existe, flush session")
-        request.session.flush()
+        logger.debug("obtener_grupo_desde_session -> grupo no existe, limpiando claves de grupo")
+        limpiar_session_grupo(request)
         return None
 
     logger.debug("obtener_grupo_desde_session -> grupo=%s nombre=%s", grupo.idgrupo, grupo.nombregrupo)
     return grupo
 
 def salir_grupo(request):
-    request.session.flush()
+    limpiar_session_grupo(request)
     messages.success(request, "Sesión del grupo cerrada correctamente.")
     return redirect("registro")
 
@@ -3425,8 +3445,21 @@ def registro(request):
         grupo.nombregrupo = nombre_grupo[:100]
         grupo.save(update_fields=["nombregrupo"])
 
+        # El flush + cycle_key protege contra fijación de sesión, pero
+        # borraba también el login de profesor/admin si el registro se
+        # hacía en el mismo navegador (caso típico en pruebas). Se
+        # preservan esas claves explícitamente.
+        profesor_id_previo = request.session.get("profesor_id")
+        es_admin_previo = request.session.get("es_admin")
+
         request.session.flush()
         request.session.cycle_key()
+
+        if profesor_id_previo:
+            request.session["profesor_id"] = profesor_id_previo
+        if es_admin_previo:
+            request.session["es_admin"] = es_admin_previo
+
         request.session["grupo_id"] = grupo.idgrupo
         request.session["sesion_id"] = grupo.sesion_id
         request.session["ranking_flags_reseteados"] = False
@@ -5921,31 +5954,36 @@ def eliminar_profesor(request, profesor_id):
 @require_POST
 @requiere_admin
 def restablecer_clave_profesor(request, profesor_id):
-    """El admin genera una clave legible nueva para un profesor que la olvidó.
+    """El admin restablece la clave de un profesor ingresando una nueva.
 
-    Se muestra una sola vez en pantalla; en la base solo queda el hash.
+    La clave debe cumplir los mismos requisitos que en el registro:
+    mínimo 8 caracteres, con letras, números y símbolos. No se generan
+    claves aleatorias; en la base solo queda el hash.
     """
-    from .auth import asignar_clave_profesor, generar_clave_legible
+    from .auth import asignar_clave_profesor, errores_de_clave
 
     profesor = get_object_or_404(Profesor, idprofesor=profesor_id)
 
-    clave_nueva = generar_clave_legible()
+    clave_nueva = request.POST.get("clave_nueva") or ""
+
+    if not clave_nueva:
+        messages.error(request, "Debes ingresar la clave nueva.")
+        return redirect("registrarprofesor")
+
+    errores = errores_de_clave(clave_nueva)
+    if errores:
+        for error in errores:
+            messages.error(request, error)
+        return redirect("registrarprofesor")
+
     asignar_clave_profesor(profesor, clave_nueva)
 
     messages.success(
         request,
-        f"Nueva clave para {profesor.emailprofesor}: {clave_nueva} — "
-        "cópiala y entrégasela ahora; no se volverá a mostrar."
+        f"Clave actualizada para {profesor.emailprofesor}. "
+        "La clave anterior dejó de funcionar."
     )
     return redirect("registrarprofesor")
-
-
-@requiere_admin
-def generar_clave_sugerida(request):
-    """Devuelve una clave legible para prellenar el formulario de registro."""
-    from .auth import generar_clave_legible
-
-    return JsonResponse({"clave": generar_clave_legible()})
 
 
 @require_POST

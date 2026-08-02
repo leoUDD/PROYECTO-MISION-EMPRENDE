@@ -97,7 +97,7 @@ class RegistrarProfesorValidacionTests(BaseJuegoTestCase):
         self.client.post(reverse("registrarprofesor"), {
             "email": "flamante@udd.cl",
             "facultad": "Diseño",
-            "clave": "suClave99",
+            "clave": "suClave99!",
         })
 
         # Nuevo navegador limpio.
@@ -105,7 +105,7 @@ class RegistrarProfesorValidacionTests(BaseJuegoTestCase):
         self.client.post(reverse("login_acceso"), {
             "rol": "profesor",
             "email": "flamante@udd.cl",
-            "clave": "suClave99",
+            "clave": "suClave99!",
         })
         nuevo = Profesor.objects.get(emailprofesor="flamante@udd.cl")
         self.assertEqual(self.client.session.get("profesor_id"), nuevo.idprofesor)

@@ -22,7 +22,7 @@ Ambos decoradores responden JSON 403 a peticiones AJAX/JSON y redirigen
 al login en peticiones normales de navegador.
 """
 
-import secrets
+
 
 from functools import wraps
 from urllib.parse import urlencode
@@ -125,50 +125,35 @@ def requiere_admin(view_func):
 
 
 # ---------------------------------------------------------------------------
-# Generación y validación de claves
+# Validación de claves
 # ---------------------------------------------------------------------------
 
-_PALABRAS_A = [
-    "cohete", "brujula", "faro", "volcan", "glaciar", "bosque", "delfin",
-    "condor", "puma", "zorro", "cactus", "trueno", "granito", "cobre",
-    "salitre", "pehuen", "canelo", "chincol", "queltehue", "huemul",
-    "pudú", "loica", "avellano", "arrayan", "boldo", "maqui", "copihue",
-    "notro", "coigue", "raulí", "quillay", "peumo", "litre", "espino",
-]
-
-_PALABRAS_B = [
-    "austral", "andino", "costero", "lunar", "solar", "polar", "dorado",
-    "plateado", "esmeralda", "turquesa", "escarlata", "indigo", "ambar",
-    "veloz", "sereno", "bravo", "astuto", "sigiloso", "radiante", "errante",
-    "salvaje", "antiguo", "eterno", "fugaz", "brillante", "silvestre",
-    "nortino", "sureno", "isleno", "cordillerano", "pampino", "portuario",
-]
-
-
-def generar_clave_legible():
-    """Clave fácil de dictar y anotar, difícil de adivinar.
-
-    Formato: palabra-palabra-NNN (p. ej. "condor-austral-742").
-    Usa secrets para aleatoriedad criptográfica.
-    """
-    return "{}-{}-{}".format(
-        secrets.choice(_PALABRAS_A),
-        secrets.choice(_PALABRAS_B),
-        secrets.randbelow(900) + 100,
-    )
-
-
 def errores_de_clave(clave_plana):
-    """Valida la robustez con los AUTH_PASSWORD_VALIDATORS de settings.
+    """Valida la robustez de la clave.
+
+    Requisitos: mínimo 8 caracteres, con letras, números y símbolos.
+    Además aplica los AUTH_PASSWORD_VALIDATORS de settings (claves
+    comunes, similitud, etc.).
 
     Devuelve una lista de mensajes de error; vacía si la clave es aceptable.
     """
+    errores = []
+
     try:
         validate_password(clave_plana)
     except ValidationError as exc:
-        return list(exc.messages)
+        errores.extend(exc.messages)
 
-    return []
+    if not any(c.isalpha() for c in clave_plana):
+        errores.append("La clave debe incluir al menos una letra.")
+
+    if not any(c.isdigit() for c in clave_plana):
+        errores.append("La clave debe incluir al menos un número.")
+
+    if not any(not c.isalnum() for c in clave_plana):
+        errores.append("La clave debe incluir al menos un símbolo (p. ej. - _ . ! #).")
+
+    return errores
 
 
 # ---------------------------------------------------------------------------
