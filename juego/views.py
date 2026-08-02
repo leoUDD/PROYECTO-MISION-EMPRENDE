@@ -61,7 +61,9 @@ from .drive_service import (
     subir_o_reemplazar_archivo,
 )
 
-from .auth import requiere_staff, requiere_admin, profesor_autenticado, es_admin
+from .auth import requiere_staff, requiere_admin, profesor_autenticado, es_admin, es_staff
+from django.core.cache import cache
+from django.http import HttpResponse
 
 logger = logging.getLogger(__name__)
 
@@ -121,7 +123,10 @@ RUTA_POR_FASE = {
     # conservan solo porque sincronizacion_fase.html referencia la URL.
     "f5_evaluacion_pitch": "peer_review",
     "f6_ranking": "ranking",
-    "reflexion": "reflexion",
+    # La fase "reflexion" primero muestra la galería con las fotos de
+    # equipo elegidas por el admin; desde ahí el alumno continúa
+    # manualmente a "reflexion" (mismo gate de fase, sin fase nueva).
+    "reflexion": "galeria_equipos",
 }
 
 ETIQUETA_FASE = {
@@ -853,6 +858,7 @@ def acceso_permitido(grupo, nombre_vista):
         "mision_cumplida": ["f5_evaluacion_pitch"],
 
         "ranking": ["f1_ranking", "f2_ranking", "f3_ranking", "f6_ranking"],
+        "galeria_equipos": ["reflexion"],
         "reflexion": ["reflexion"],
     }
 
@@ -2986,13 +2992,10 @@ def guardar_foto_equipo(request):
     )
 
     if registro_existente:
-        foto_url = ""
-
-        if registro_existente.foto_temporal:
-            try:
-                foto_url = registro_existente.foto_temporal.url
-            except ValueError:
-                foto_url = ""
+        foto_url = reverse(
+            "foto_equipo_imagen",
+            args=[registro_existente.pk],
+        )
 
         estado_fotos = sincronizar_fotos_equipo_y_avanzar(
             sesion
@@ -3172,6 +3175,20 @@ def guardar_foto_equipo(request):
         registro.subida_drive = True
         registro.error_drive = ""
 
+        # Las fotos solo pueden vivir en Drive: borrada la subida con
+        # éxito, se elimina la copia temporal del servidor. La galería
+        # y el panel admin las sirven vía proxy (foto_equipo_imagen).
+        try:
+            registro.foto_temporal.delete(save=False)
+        except Exception:
+            logger.exception(
+                "No se pudo eliminar la copia temporal "
+                "de la foto del grupo %s tras subirla "
+                "a Drive.",
+                grupo.idgrupo,
+            )
+        registro.foto_temporal = None
+
         registro.save(
             update_fields=[
                 "sesion",
@@ -3223,7 +3240,10 @@ def guardar_foto_equipo(request):
         {
             "ok": True,
             "yaExistia": False,
-            "fotoUrl": registro.foto_temporal.url,
+            "fotoUrl": reverse(
+                "foto_equipo_imagen",
+                args=[registro.pk],
+            ),
             "nombreArchivo": nombre_foto,
             "integrantes": integrantes,
             "gruposFotosEquipo": (
@@ -5288,6 +5308,90 @@ def finalizar_mision(request):
     request.session.pop("sesion_id", None)
     return redirect("perfiles")
 
+@never_cache
+def galeria_equipos(request):
+    """
+    Pantalla previa a la reflexión final: muestra las fotos de equipo
+    que el admin eligió mostrar (selección global, vale para todas las
+    sesiones hasta que se cambie). No es una fase nueva del juego: usa
+    el mismo gate que "reflexion" (sesion.fase_actual == "reflexion").
+    """
+
+    grupo = obtener_grupo_desde_session(request)
+    if not grupo:
+        return redirect("registro")
+
+    if not acceso_permitido(grupo, "galeria_equipos"):
+        return redirect("pantalla_espera")
+
+    fotos_equipo = (
+        FotoEquipo.objects
+        .filter(
+            subida_drive=True,
+            seleccionada_galeria=True,
+        )
+        .exclude(drive_foto_id__exact="")
+        .select_related("grupo")
+        .order_by("grupo__idgrupo")
+    )
+
+    return render(request, "galeria_equipos.html", {
+        "grupo": grupo,
+        "fotos_equipo": fotos_equipo,
+    })
+
+
+def foto_equipo_imagen(request, foto_id):
+    """
+    Proxy de imágenes: descarga la foto de equipo desde Google Drive
+    (por su drive_foto_id) y la sirve como JPEG.
+
+    Las fotos NO se almacenan en el servidor: viven solo en Drive y se
+    cachean en memoria un rato para no golpear la API en cada carga.
+
+    Acceso: staff/admin, o un alumno con grupo activo en sesión.
+    """
+
+    if not es_staff(request) and not obtener_grupo_desde_session(request):
+        raise Http404()
+
+    foto = (
+        FotoEquipo.objects
+        .filter(pk=foto_id, subida_drive=True)
+        .exclude(drive_foto_id__exact="")
+        .first()
+    )
+
+    if not foto:
+        raise Http404()
+
+    clave_cache = f"foto_equipo_drive_{foto.pk}_{foto.drive_foto_id}"
+    contenido = cache.get(clave_cache)
+
+    if contenido is None:
+        try:
+            servicio = construir_servicio_drive()
+            contenido = (
+                servicio.files()
+                .get_media(fileId=foto.drive_foto_id)
+                .execute()
+            )
+        except Exception:
+            logger.exception(
+                "No se pudo descargar de Drive la foto "
+                "del grupo %s (archivo %s).",
+                foto.grupo_id,
+                foto.drive_foto_id,
+            )
+            raise Http404()
+
+        cache.set(clave_cache, contenido, 3600)
+
+    respuesta = HttpResponse(contenido, content_type="image/jpeg")
+    respuesta["Cache-Control"] = "private, max-age=3600"
+    return respuesta
+
+
 def reflexion(request):
     grupo = obtener_grupo_desde_session(request)
     if not grupo:
@@ -5672,7 +5776,7 @@ def preview_pantalla_profesor(request, sesion_id):
         "f5_evaluacion_pitch": "peer_review.html",
 
         "f6_ranking": "ranking.html",
-        "reflexion": "reflexion.html",
+        "reflexion": "galeria_equipos.html",
     }
 
     template_name = plantilla_por_fase.get(sesion.fase_actual, "pantalla_espera_preview.html")
@@ -6197,6 +6301,48 @@ def admin_tiempos(request):
 
     return render(request, "admin_tiempos.html", {
         "tiempos": tiempos,
+    })
+
+@requiere_admin
+def admin_galeria_fotos(request):
+    """
+    Panel donde el admin elige qué fotos de equipo (ya subidas a Drive)
+    se muestran en la galería previa a la reflexión final.
+
+    La selección es global: no se filtra por sesión, aplica a todas las
+    sesiones por igual hasta que el admin la vuelva a cambiar.
+    """
+
+    if request.method == "POST":
+        ids_visibles = set(request.POST.getlist("foto_id"))
+        ids_seleccionados = set(request.POST.getlist("seleccionada"))
+
+        for foto_id in ids_visibles:
+            foto = FotoEquipo.objects.filter(pk=foto_id).first()
+            if not foto:
+                continue
+
+            nueva_seleccion = foto_id in ids_seleccionados
+            if foto.seleccionada_galeria != nueva_seleccion:
+                foto.seleccionada_galeria = nueva_seleccion
+                foto.save(update_fields=["seleccionada_galeria"])
+
+        messages.success(request, "Selección de la galería actualizada.")
+        return redirect("admin_galeria_fotos")
+
+    fotos_equipo = (
+        FotoEquipo.objects
+        .filter(subida_drive=True)
+        .exclude(drive_foto_id__exact="")
+        .select_related("grupo", "sesion")
+        .order_by("-actualizada_en")
+    )
+
+    total_seleccionadas = fotos_equipo.filter(seleccionada_galeria=True).count()
+
+    return render(request, "admin_galeria_fotos.html", {
+        "fotos_equipo": fotos_equipo,
+        "total_seleccionadas": total_seleccionadas,
     })
 
 @requiere_staff

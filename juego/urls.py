@@ -40,6 +40,7 @@ urlpatterns = [
     path("sesion/<int:sesion_id>/fase-anterior/", views.profesor_fase_anterior, name="profesor_fase_anterior"),
     path("dashboardadmin/tiempos/", views.admin_tiempos, name="admin_tiempos"),
     path("dashboardadmin/ruleta/", views.admin_ruleta, name="admin_ruleta"),
+    path("dashboardadmin/galeria-fotos/", views.admin_galeria_fotos, name="admin_galeria_fotos"),
     path("ver-grupo/<int:grupo_id>/", views.ver_como_grupo, name="ver_como_grupo"),
     path("dashboardadmin/desafios/<int:desafio_id>/info/", views.admin_desafio_info, name="admin_desafio_info"),
     path("profesores/", views.registrarprofesor, name="listar_profesores"),
@@ -135,6 +136,8 @@ path(
     path('market/issue/<int:challenge_id>/', views.issue_challenge_view, name='issue_challenge'),
     path('peer-review/', views.peer_review_view, name='peer_review'),
     path("ranking/", views.ranking_view, name="ranking"),
+    path('galeria-equipos/', views.galeria_equipos, name='galeria_equipos'),
+    path('foto-equipo/<int:foto_id>/imagen/', views.foto_equipo_imagen, name='foto_equipo_imagen'),
     path('reflexion/', views.reflexion, name='reflexion'),
     path("mision-cumplida/", views.mision_cumplida_view, name="mision_cumplida"),
 

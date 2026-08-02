@@ -1,0 +1,227 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Galería de fotos — Dashboard Admin</title>
+  <link rel="icon" href="{% url 'favicon' %}">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/estilo_dashboardadmin.css' %}">
+
+  <style>
+    .top-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .btn-main {
+      border: 0;
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-weight: 800;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      background: #2563eb;
+      color: white;
+    }
+
+    .contador-seleccion {
+      font-size: 13px;
+      font-weight: 700;
+      color: #475569;
+    }
+
+    .contador-seleccion.aviso {
+      color: #b45309;
+    }
+
+    .fotos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 18px;
+    }
+
+    .foto-card {
+      background: white;
+      border-radius: 16px;
+      padding: 14px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.06);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .foto-card.seleccionada {
+      outline: 2px solid #2563eb;
+    }
+
+    .foto-card-img {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #e5e7eb;
+    }
+
+    .foto-card-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .foto-card h2 {
+      font-size: 15px;
+      margin: 0;
+    }
+
+    .foto-card p {
+      margin: 0;
+      font-size: 12px;
+      color: #64748b;
+      line-height: 1.35;
+    }
+
+    .foto-card label.check-mostrar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      margin-top: 4px;
+      cursor: pointer;
+    }
+
+    .barra-guardar {
+      position: sticky;
+      bottom: 0;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 0 4px;
+      margin-top: 18px;
+      background: linear-gradient(180deg, transparent, #f8fafc 40%);
+    }
+
+    @media(max-width:700px){
+      .fotos-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+  </style>
+</head>
+
+<body>
+<div class="dashboard">
+
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <h2 class="sidebar-title">Dashboard Admin</h2>
+    </div>
+
+    <nav class="sidebar-nav">
+      <ul>
+        <li><a href="{% url 'dashboardadmin' %}">Inicio</a></li>
+        <li><a href="{% url 'registrarprofesor' %}">Profesores</a></li>
+        <li><a href="{% url 'admin_tematicas' %}">Temáticas</a></li>
+        <li><a href="{% url 'admin_desafios' %}">Desafíos</a></li>
+        <li><a href="{% url 'admin_ruleta' %}">Ruleta</a></li>
+        <li><a href="{% url 'admin_tiempos' %}">Tiempos</a></li>
+        <li><a href="{% url 'admin_preguntas_rompehielo' %}">Preguntas rompehielo</a></li>
+        <li><a href="{% url 'admin_galeria_fotos' %}" class="active">Galería de fotos</a></li>
+        <li class="sidebar-separator"></li>
+        <li><a href="{% url 'perfiles' %}" class="back-link">⟵ Cambiar de perfil</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <main class="main-content">
+    {% if messages %}
+      <div class="messages">
+        {% for m in messages %}
+          <div class="msg {{ m.tags }}">{{ m }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <div class="top-actions">
+      <div>
+        <h1 class="title">Galería de fotos</h1>
+        <p class="subtitle">
+          Elige qué fotos de equipo (ya subidas a Drive) se muestran en la
+          galería previa a la reflexión final. La selección es global: vale
+          para todas las sesiones hasta que la cambies.
+        </p>
+      </div>
+    </div>
+
+    <form method="POST" id="formGaleriaFotos">
+      {% csrf_token %}
+
+      <div class="barra-guardar">
+        <span class="contador-seleccion" id="contadorSeleccion"></span>
+        <button class="btn-main" type="submit">Guardar selección</button>
+      </div>
+
+      <section class="fotos-grid">
+        {% for f in fotos_equipo %}
+          <article class="foto-card {% if f.seleccionada_galeria %}seleccionada{% endif %}">
+            <div class="foto-card-img">
+              <img src="{% url 'foto_equipo_imagen' f.pk %}" alt="{{ f.grupo.nombregrupo|default:'Equipo' }}" loading="lazy">
+            </div>
+
+            <h2>{{ f.grupo.nombregrupo|default:"Equipo" }}</h2>
+            <p>Sesión {{ f.sesion_id }} · {{ f.actualizada_en|date:"d/m/Y H:i" }}</p>
+
+            <input type="hidden" name="foto_id" value="{{ f.id }}">
+            <label class="check-mostrar">
+              <input
+                type="checkbox"
+                name="seleccionada"
+                value="{{ f.id }}"
+                {% if f.seleccionada_galeria %}checked{% endif %}
+                onchange="actualizarContadorSeleccion()">
+              Mostrar en galería
+            </label>
+          </article>
+        {% empty %}
+          <p>Todavía no hay fotos de equipo subidas a Drive.</p>
+        {% endfor %}
+      </section>
+
+      <div class="barra-guardar">
+        <span class="contador-seleccion" id="contadorSeleccionAbajo"></span>
+        <button class="btn-main" type="submit">Guardar selección</button>
+      </div>
+    </form>
+  </main>
+</div>
+
+<script>
+  function actualizarContadorSeleccion() {
+    const form = document.getElementById("formGaleriaFotos");
+    const total = form.querySelectorAll('input[name="seleccionada"]:checked').length;
+    const texto = total === 1 ? "1 foto seleccionada" : `${total} fotos seleccionadas`;
+    const aviso = total > 10;
+
+    [
+      document.getElementById("contadorSeleccion"),
+      document.getElementById("contadorSeleccionAbajo")
+    ].forEach((el) => {
+      if (!el) return;
+      el.textContent = aviso ? `${texto} (recomendado: hasta 10)` : texto;
+      el.classList.toggle("aviso", aviso);
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", actualizarContadorSeleccion);
+</script>
+
+</body>
+</html>

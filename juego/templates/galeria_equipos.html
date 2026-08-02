@@ -1,0 +1,61 @@
+{% load static %}
+{% include "atajos.html" with ocultar_mapa_habilidades=True ocultar_hud_ranking=True %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Misión Emprende UDD — Galería de Equipos</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/estilo_galeria_equipos.css' %}">
+  <link rel="icon" href="{% url 'favicon' %}">
+</head>
+
+<body>
+
+  <main class="galeria-wrap" role="main" aria-labelledby="page-title">
+
+    <section class="galeria-hero">
+      <div class="hero-badge" data-i18n="galeria_equipos_badge">MISIÓN COMPLETADA</div>
+
+      <header class="page-header">
+        <div class="head-text">
+          <h1 id="page-title" data-i18n="galeria_equipos_titulo">Galería de equipos</h1>
+          <p class="subtitle" data-i18n="galeria_equipos_subtitulo">
+            Así se vieron los agentes que cumplieron la misión.
+          </p>
+        </div>
+      </header>
+    </section>
+
+    {% if fotos_equipo %}
+      <section class="galeria-grid" aria-label="Fotos de los equipos">
+        {% for foto in fotos_equipo %}
+          <article class="galeria-card">
+            <div class="galeria-card-img">
+              <img src="{% url 'foto_equipo_imagen' foto.pk %}" alt="{{ foto.grupo.nombregrupo|default:'Equipo' }}" loading="lazy">
+            </div>
+            <p class="galeria-card-nombre">{{ foto.grupo.nombregrupo|default:"Equipo" }}</p>
+          </article>
+        {% endfor %}
+      </section>
+    {% else %}
+      <section class="galeria-vacia" aria-label="Sin fotos seleccionadas">
+        <p data-i18n="galeria_equipos_vacia">
+          Todavía no hay fotos seleccionadas para la galería.
+        </p>
+      </section>
+    {% endif %}
+
+    <section class="final-cta">
+      <a href="{% url 'reflexion' %}" class="btn-primary" data-i18n="galeria_equipos_continuar">
+        Continuar
+      </a>
+    </section>
+
+  </main>
+
+  {% include "includes/sincronizacion_fase.html" %}
+
+</body>
+</html>

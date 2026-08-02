@@ -774,6 +774,17 @@ class FotoEquipo(models.Model):
         blank=True,
     )
 
+    seleccionada_galeria = models.BooleanField(
+        default=False,
+        help_text=(
+            "Marca si el admin eligió esta foto para "
+            "mostrarla en la galería de equipos previa "
+            "a la reflexión final. La selección es global "
+            "y aplica a todas las sesiones hasta que se "
+            "cambie."
+        ),
+    )
+
     fecha_captura = models.DateTimeField(
         auto_now_add=True,
     )
