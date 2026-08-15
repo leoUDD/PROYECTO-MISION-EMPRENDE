@@ -253,3 +253,11 @@ CELERY_BROKER_URL = os.getenv(
 ).strip()
 
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+
+DEV_TOOLS_ENABLED = (
+    os.getenv(
+        "DEV_TOOLS_ENABLED",
+        "False",
+    ).strip().lower()
+    in {"1", "true", "yes", "on"}
+)

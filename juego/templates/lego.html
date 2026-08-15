@@ -147,24 +147,129 @@
         <p data-i18n="lego_modal_texto">
           El tiempo de construcción terminó. Ahora suban la foto de su prototipo o indiquen que no pudieron cargarla.
         </p>
-        <form method="POST" enctype="multipart/form-data">
-          {% csrf_token %}
-          <input type="file" name="foto_lego" id="foto_lego" class="foto-input" accept="image/*">
-          <div class="sin-foto-wrap">
-            <label class="sin-foto-label" for="sin_foto_lego">
-              <input type="checkbox" name="sin_foto_lego" id="sin_foto_lego">
-              <span data-i18n="lego_sin_foto">No pudimos subir foto</span>
-            </label>
-          </div>
-          <div id="errorFoto" class="error-foto" style="display:none;" data-i18n="lego_error_foto">
-            Debes subir una foto o marcar que no pudieron subirla.
-          </div>
-          <button type="submit" id="buttonGuardarFoto" class="btn-guardar-foto" disabled data-i18n="lego_guardar_continuar">
-            Guardar y continuar
-          </button>
-          <div id="estadoGruposLego" class="estado-grupos-lego">0/0 grupos listos</div>
-          <div id="detalleGruposLego" class="detalle-grupos-lego">0 con foto · 0 sin foto</div>
-        </form>
+        <form method="POST" enctype="multipart/form-data" id="formFotoLego">
+  {% csrf_token %}
+
+  <div class="lego-camara-visor">
+    <video
+      id="lego-video"
+      autoplay
+      playsinline
+      muted
+      hidden
+    ></video>
+
+    <img
+      id="lego-preview"
+      class="lego-preview-img"
+      alt="Vista previa de la foto LEGO"
+      hidden
+    >
+
+    <canvas id="lego-canvas" hidden></canvas>
+
+    <div id="lego-placeholder" class="lego-camara-placeholder">
+      <span class="lego-camara-icono">📷</span>
+      <strong>Fotografía del prototipo</strong>
+      <span>Activen la cámara o seleccionen una fotografía.</span>
+    </div>
+  </div>
+
+  <div id="lego-mensaje-camara" class="lego-mensaje-camara"></div>
+
+  <div class="lego-camara-acciones">
+    <button
+      type="button"
+      id="lego-activar-camara"
+      class="btn-guardar-foto"
+    >
+      Activar cámara
+    </button>
+
+    <button
+      type="button"
+      id="lego-cambiar-camara"
+      class="btn-lego-secundario"
+      hidden
+    >
+      🔄 Cambiar cámara
+    </button>
+
+    <button
+      type="button"
+      id="lego-tomar-foto"
+      class="btn-guardar-foto"
+      hidden
+    >
+      Tomar foto
+    </button>
+
+    <button
+      type="button"
+      id="lego-repetir-foto"
+      class="btn-lego-secundario"
+      hidden
+    >
+      Repetir
+    </button>
+  </div>
+
+  <div class="lego-selector-archivo">
+    <span>También pueden usar una foto existente:</span>
+
+    <label class="btn-lego-archivo">
+      Tomar o seleccionar foto
+
+      <input
+        type="file"
+        name="foto_lego"
+        id="foto_lego"
+        accept="image/*"
+        hidden
+      >
+    </label>
+  </div>
+
+  <div class="sin-foto-wrap">
+    <label class="sin-foto-label" for="sin_foto_lego">
+      <input
+        type="checkbox"
+        name="sin_foto_lego"
+        id="sin_foto_lego"
+      >
+      <span data-i18n="lego_sin_foto">
+        No pudimos subir foto
+      </span>
+    </label>
+  </div>
+
+  <div
+    id="errorFoto"
+    class="error-foto"
+    style="display:none;"
+    data-i18n="lego_error_foto"
+  >
+    Debes subir una foto o marcar que no pudieron subirla.
+  </div>
+
+  <button
+    type="submit"
+    id="buttonGuardarFoto"
+    class="btn-guardar-foto"
+    disabled
+    data-i18n="lego_guardar_continuar"
+  >
+    Guardar y continuar
+  </button>
+
+  <div id="estadoGruposLego" class="estado-grupos-lego">
+    0/0 grupos listos
+  </div>
+
+  <div id="detalleGruposLego" class="detalle-grupos-lego">
+    0 con foto · 0 sin foto
+  </div>
+</form>
       </div>
     </div>
 
@@ -388,75 +493,583 @@
   </script>
 
   <script>
-    const inputFoto         = document.getElementById("foto_lego");
-    const sinFoto           = document.getElementById("sin_foto_lego");
-    const previewWrapper    = document.getElementById("previewWrapper");
-    const previewImg        = document.getElementById("previewImg");
-    const buttonGuardarFoto = document.getElementById("buttonGuardarFoto");
-    const errorFoto         = document.getElementById("errorFoto");
-    const formFoto          = document.querySelector("#modal-fin form");
-    let yaEnviado = false;
+(function () {
+  const inputFoto = document.getElementById("foto_lego");
+  const sinFoto = document.getElementById("sin_foto_lego");
 
-    function tLegoFoto(clave,fallback="") {
-      const idioma = window.i18nJuego?.obtenerIdioma?.() || "es";
-      return window.i18nJuego?.traducciones?.[idioma]?.[clave] || fallback;
+  const video = document.getElementById("lego-video");
+  const preview = document.getElementById("lego-preview");
+  const canvas = document.getElementById("lego-canvas");
+  const placeholder = document.getElementById("lego-placeholder");
+
+  const btnActivar = document.getElementById("lego-activar-camara");
+  const btnCambiar = document.getElementById("lego-cambiar-camara");
+  const btnTomar = document.getElementById("lego-tomar-foto");
+  const btnRepetir = document.getElementById("lego-repetir-foto");
+
+  const buttonGuardarFoto = document.getElementById("buttonGuardarFoto");
+  const errorFoto = document.getElementById("errorFoto");
+  const mensajeCamara = document.getElementById("lego-mensaje-camara");
+
+  const formFoto = document.getElementById("formFotoLego");
+
+  let stream = null;
+  let fotoSeleccionada = null;
+  let previewUrl = null;
+  let yaEnviado = false;
+
+  // Para LEGO conviene comenzar con la cámara trasera,
+  // ya que normalmente se fotografía el prototipo.
+  let facingModeActual = "environment";
+
+  function tLegoFoto(clave, fallback = "") {
+    const idioma =
+      window.i18nJuego?.obtenerIdioma?.() || "es";
+
+    return (
+      window.i18nJuego?.traducciones?.[idioma]?.[clave]
+      || fallback
+    );
+  }
+
+  function mostrarMensaje(texto, error = false) {
+    if (!mensajeCamara) return;
+
+    mensajeCamara.textContent = texto || "";
+    mensajeCamara.classList.toggle(
+      "error",
+      Boolean(error)
+    );
+  }
+
+  function limpiarPreviewUrl() {
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+      previewUrl = null;
+    }
+  }
+
+  function detenerCamara() {
+    if (!stream) return;
+
+    stream.getTracks().forEach(track => {
+      track.stop();
+    });
+
+    stream = null;
+
+    if (video) {
+      video.srcObject = null;
+    }
+  }
+
+  function ocultarVisor() {
+    if (video) video.hidden = true;
+    if (preview) preview.hidden = true;
+    if (placeholder) placeholder.hidden = true;
+  }
+
+  function mostrarPlaceholder() {
+    ocultarVisor();
+
+    if (placeholder) {
+      placeholder.hidden = false;
+    }
+  }
+
+  function actualizarEstadoBoton() {
+    const hayFoto = Boolean(fotoSeleccionada);
+    const marcoSinFoto = Boolean(
+      sinFoto && sinFoto.checked
+    );
+
+    buttonGuardarFoto.disabled =
+      (!hayFoto && !marcoSinFoto)
+      || yaEnviado;
+
+    if (errorFoto) {
+      errorFoto.style.display = "none";
     }
 
-    function actualizarEstadoBoton() {
-      const hayArchivo  = inputFoto&&inputFoto.files&&inputFoto.files.length>0;
-      const marcoSinFoto= sinFoto&&sinFoto.checked;
-      buttonGuardarFoto.disabled = !(hayArchivo||marcoSinFoto)||yaEnviado;
-      if (errorFoto) errorFoto.style.display="none";
-      if (marcoSinFoto) { inputFoto.value=""; previewWrapper.classList.remove("visible"); previewImg.removeAttribute("src"); }
+    if (marcoSinFoto) {
+      fotoSeleccionada = null;
+
+      if (inputFoto) {
+        inputFoto.value = "";
+      }
+
+      limpiarPreviewUrl();
+      mostrarPlaceholder();
+
+      if (btnRepetir) btnRepetir.hidden = true;
+    }
+  }
+
+  function mostrarVistaPrevia(archivo) {
+    detenerCamara();
+    limpiarPreviewUrl();
+
+    fotoSeleccionada = archivo;
+
+    previewUrl = URL.createObjectURL(
+      archivo
+    );
+
+    ocultarVisor();
+
+    preview.src = previewUrl;
+    preview.hidden = false;
+
+    btnTomar.hidden = true;
+    btnCambiar.hidden = true;
+    btnActivar.hidden = true;
+    btnRepetir.hidden = false;
+
+    if (sinFoto) {
+      sinFoto.checked = false;
+    }
+
+    mostrarMensaje(
+      "Revisen la fotografía antes de guardar."
+    );
+
+    actualizarEstadoBoton();
+  }
+
+  async function abrirCamara() {
+    if (!navigator.mediaDevices?.getUserMedia) {
+      mostrarMensaje(
+        "Este navegador no permite abrir la cámara directamente. "
+        + "Usen “Tomar o seleccionar foto”.",
+        true
+      );
+
+      return;
+    }
+
+    detenerCamara();
+
+    btnActivar.disabled = true;
+    btnCambiar.disabled = true;
+
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        audio: false,
+
+        video: {
+          facingMode: {
+            ideal: facingModeActual
+          },
+
+          width: {
+            ideal: 1920
+          },
+
+          height: {
+            ideal: 1080
+          }
+        }
+      });
+
+      ocultarVisor();
+
+      video.srcObject = stream;
+      video.hidden = false;
+
+      await video.play();
+
+      btnActivar.hidden = true;
+      btnTomar.hidden = false;
+      btnRepetir.hidden = true;
+
+      // Comprobamos si hay más de una cámara.
+      try {
+        const dispositivos =
+          await navigator.mediaDevices.enumerateDevices();
+
+        const camaras = dispositivos.filter(
+          dispositivo =>
+            dispositivo.kind === "videoinput"
+        );
+
+        btnCambiar.hidden =
+          camaras.length < 2;
+
+      } catch (_) {
+        // Si el navegador no entrega la lista,
+        // dejamos disponible igualmente el botón.
+        btnCambiar.hidden = false;
+      }
+
+      mostrarMensaje(
+        facingModeActual === "environment"
+          ? "Cámara trasera activa."
+          : "Cámara frontal activa."
+      );
+
+    } catch (error) {
+      console.error(
+        "No se pudo abrir la cámara LEGO:",
+        error
+      );
+
+      mostrarPlaceholder();
+
+      btnActivar.hidden = false;
+      btnTomar.hidden = true;
+      btnCambiar.hidden = true;
+
+      mostrarMensaje(
+        "No se pudo abrir la cámara. "
+        + "Revisen los permisos o seleccionen una fotografía.",
+        true
+      );
+
+    } finally {
+      btnActivar.disabled = false;
+      btnCambiar.disabled = false;
+    }
+  }
+
+  async function cambiarCamara() {
+    if (yaEnviado) return;
+
+    facingModeActual =
+      facingModeActual === "environment"
+        ? "user"
+        : "environment";
+
+    await abrirCamara();
+  }
+
+  function tomarFoto() {
+    if (
+      !video
+      || !video.videoWidth
+      || !video.videoHeight
+    ) {
+      mostrarMensaje(
+        "La cámara todavía no está lista.",
+        true
+      );
+
+      return;
+    }
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    const contexto =
+      canvas.getContext("2d");
+
+    contexto.drawImage(
+      video,
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
+
+    canvas.toBlob(
+      blob => {
+        if (!blob) {
+          mostrarMensaje(
+            "No fue posible generar la fotografía.",
+            true
+          );
+
+          return;
+        }
+
+        // Convertimos la captura en un File.
+        // Para Django sigue siendo exactamente
+        // request.FILES["foto_lego"].
+        const archivo = new File(
+          [blob],
+          "foto_lego.jpg",
+          {
+            type: "image/jpeg",
+            lastModified: Date.now()
+          }
+        );
+
+        mostrarVistaPrevia(
+          archivo
+        );
+      },
+      "image/jpeg",
+      0.92
+    );
+  }
+
+  async function repetirFoto() {
+    if (yaEnviado) return;
+
+    fotoSeleccionada = null;
+    limpiarPreviewUrl();
+
+    if (preview) {
+      preview.removeAttribute("src");
+      preview.hidden = true;
     }
 
     if (inputFoto) {
-      inputFoto.addEventListener("change",(e)=>{
-        const file = e.target.files&&e.target.files[0];
-        if (sinFoto) sinFoto.checked=false;
-        if (!file) { previewWrapper.classList.remove("visible"); previewImg.removeAttribute("src"); actualizarEstadoBoton(); return; }
-        previewImg.src = URL.createObjectURL(file);
-        previewWrapper.classList.add("visible");
-        actualizarEstadoBoton();
-      });
+      inputFoto.value = "";
     }
 
-    if (sinFoto) sinFoto.addEventListener("change", actualizarEstadoBoton);
+    btnRepetir.hidden = true;
 
-    if (formFoto) {
-      formFoto.addEventListener("submit", async(e)=>{
-        e.preventDefault();
-        if (yaEnviado) return;
-        const hayArchivo  = inputFoto&&inputFoto.files&&inputFoto.files.length>0;
-        const marcoSinFoto= sinFoto&&sinFoto.checked;
-        if (!hayArchivo&&!marcoSinFoto) {
-          if (errorFoto) { errorFoto.style.display="block"; errorFoto.textContent=tLegoFoto("lego_error_foto","Debes subir una foto o marcar que no pudieron subirla."); }
-          return;
-        }
-        const formData = new FormData(formFoto);
-        try {
-          const res  = await fetch(window.location.href,{method:"POST",body:formData,headers:{"X-Requested-With":"XMLHttpRequest"}});
-          const data = await res.json();
-          if (!data.ok) throw new Error(data.error||tLegoFoto("lego_error_guardar_foto","Error guardando"));
-          yaEnviado=true;
-          inputFoto.disabled=true; sinFoto.disabled=true; buttonGuardarFoto.disabled=true;
-          buttonGuardarFoto.textContent=tLegoFoto("lego_listo","¡Listo!");
-          const estado  = document.getElementById("estadoGruposLego");
-          const detalle = document.getElementById("detalleGruposLego");
-          if (estado)  estado.textContent  = `${data.gruposListosF3Lego||0}/${data.totalGrupos||0} ${tLegoFoto("lego_grupos_listos","grupos listos")}`;
-          if (detalle) detalle.textContent = `${data.gruposConFotoLego||0} ${tLegoFoto("lego_con_foto","con foto")} · ${data.gruposSinFotoLego||0} ${tLegoFoto("lego_sin_foto_detalle","sin foto")}`;
-        } catch(err) {
-          console.error(err);
-          if (errorFoto) { errorFoto.style.display="block"; errorFoto.textContent=err.message; }
-        }
-      });
+    await abrirCamara();
+
+    actualizarEstadoBoton();
+  }
+
+  inputFoto?.addEventListener(
+    "change",
+    event => {
+      const archivo =
+        event.target.files?.[0];
+
+      if (!archivo) return;
+
+      if (!archivo.type.startsWith("image/")) {
+        inputFoto.value = "";
+
+        mostrarMensaje(
+          "El archivo seleccionado no es una imagen.",
+          true
+        );
+
+        return;
+      }
+
+      mostrarVistaPrevia(
+        archivo
+      );
     }
+  );
 
-    window.addEventListener("idiomaJuegoCambiado",()=>{
-      if (!yaEnviado&&buttonGuardarFoto) buttonGuardarFoto.textContent=tLegoFoto("lego_guardar_continuar","Guardar y continuar");
-      if (errorFoto&&errorFoto.style.display!=="none") errorFoto.textContent=tLegoFoto("lego_error_foto","Debes subir una foto o marcar que no pudieron subirla.");
-    });
-  </script>
+  sinFoto?.addEventListener(
+    "change",
+    () => {
+      if (sinFoto.checked) {
+        detenerCamara();
+
+        btnTomar.hidden = true;
+        btnCambiar.hidden = true;
+        btnRepetir.hidden = true;
+        btnActivar.hidden = false;
+      }
+
+      actualizarEstadoBoton();
+    }
+  );
+
+  btnActivar?.addEventListener(
+    "click",
+    abrirCamara
+  );
+
+  btnCambiar?.addEventListener(
+    "click",
+    cambiarCamara
+  );
+
+  btnTomar?.addEventListener(
+    "click",
+    tomarFoto
+  );
+
+  btnRepetir?.addEventListener(
+    "click",
+    repetirFoto
+  );
+
+  formFoto?.addEventListener(
+    "submit",
+    async event => {
+      event.preventDefault();
+
+      if (yaEnviado) return;
+
+      const marcoSinFoto =
+        Boolean(sinFoto?.checked);
+
+      if (
+        !fotoSeleccionada
+        && !marcoSinFoto
+      ) {
+        if (errorFoto) {
+          errorFoto.style.display =
+            "block";
+
+          errorFoto.textContent =
+            tLegoFoto(
+              "lego_error_foto",
+              "Debes subir una foto o marcar que no pudieron subirla."
+            );
+        }
+
+        return;
+      }
+
+      const formData =
+        new FormData(formFoto);
+
+      // Si la foto viene desde la cámara, no está
+      // físicamente dentro del input file.
+      // La agregamos con exactamente el mismo nombre
+      // que espera Django.
+      if (
+        fotoSeleccionada
+        && !marcoSinFoto
+      ) {
+        formData.set(
+          "foto_lego",
+          fotoSeleccionada,
+          fotoSeleccionada.name
+            || "foto_lego.jpg"
+        );
+      }
+
+      yaEnviado = true;
+
+      buttonGuardarFoto.disabled =
+        true;
+
+      btnActivar.disabled = true;
+      btnCambiar.disabled = true;
+      btnTomar.disabled = true;
+      btnRepetir.disabled = true;
+
+      try {
+        const respuesta = await fetch(
+          window.location.href,
+          {
+            method: "POST",
+
+            body: formData,
+
+            headers: {
+              "X-Requested-With":
+                "XMLHttpRequest"
+            }
+          }
+        );
+
+        const data =
+          await respuesta.json();
+
+        if (
+          !respuesta.ok
+          || !data.ok
+        ) {
+          throw new Error(
+            data.error
+            || "Error guardando la fotografía."
+          );
+        }
+
+        detenerCamara();
+
+        if (inputFoto) {
+          inputFoto.disabled = true;
+        }
+
+        if (sinFoto) {
+          sinFoto.disabled = true;
+        }
+
+        buttonGuardarFoto.textContent =
+          tLegoFoto(
+            "lego_listo",
+            "¡Listo!"
+          );
+
+        const estado =
+          document.getElementById(
+            "estadoGruposLego"
+          );
+
+        const detalle =
+          document.getElementById(
+            "detalleGruposLego"
+          );
+
+        if (estado) {
+          estado.textContent =
+            `${data.gruposListosF3Lego || 0}/`
+            + `${data.totalGrupos || 0} `
+            + tLegoFoto(
+              "lego_grupos_listos",
+              "grupos listos"
+            );
+        }
+
+        if (detalle) {
+          detalle.textContent =
+            `${data.gruposConFotoLego || 0} `
+            + tLegoFoto(
+              "lego_con_foto",
+              "con foto"
+            )
+            + " · "
+            + `${data.gruposSinFotoLego || 0} `
+            + tLegoFoto(
+              "lego_sin_foto_detalle",
+              "sin foto"
+            );
+        }
+
+      } catch (error) {
+        console.error(error);
+
+        yaEnviado = false;
+
+        buttonGuardarFoto.disabled =
+          false;
+
+        btnActivar.disabled = false;
+        btnCambiar.disabled = false;
+        btnTomar.disabled = false;
+        btnRepetir.disabled = false;
+
+        if (errorFoto) {
+          errorFoto.style.display =
+            "block";
+
+          errorFoto.textContent =
+            error.message;
+        }
+      }
+    }
+  );
+
+  window.addEventListener(
+    "beforeunload",
+    () => {
+      detenerCamara();
+      limpiarPreviewUrl();
+    }
+  );
+
+  window.addEventListener(
+    "idiomaJuegoCambiado",
+    () => {
+      if (
+        !yaEnviado
+        && buttonGuardarFoto
+      ) {
+        buttonGuardarFoto.textContent =
+          tLegoFoto(
+            "lego_guardar_continuar",
+            "Guardar y continuar"
+          );
+      }
+    }
+  );
+})();
+</script>
 
   <script>
     document.addEventListener("DOMContentLoaded",()=>{

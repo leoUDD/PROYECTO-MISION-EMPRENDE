@@ -198,19 +198,56 @@
     <a class="volver" href="{% url 'perfiles' %}">← Volver a perfiles</a>
   </main>
 
-  <script>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
     const campoEmail = document.getElementById("campo-email");
     const inputEmail = document.getElementById("email");
+    const formulario = document.querySelector(
+      'form[action="{% url "login_acceso" %}"]'
+    );
 
-    document.querySelectorAll('input[name="rol"]').forEach((radio) => {
-      radio.addEventListener("change", () => {
-        const esProfesor = radio.value === "profesor" && radio.checked;
-        campoEmail.hidden = !esProfesor;
-        inputEmail.required = esProfesor;
+    function actualizarFormulario() {
+      const rolSeleccionado = document.querySelector(
+        'input[name="rol"]:checked'
+      );
+
+      const esProfesor =
+        rolSeleccionado &&
+        rolSeleccionado.value === "profesor";
+
+      // Profesor:
+      // muestra email y lo hace obligatorio.
+      //
+      // Administrador:
+      // oculta email y lo excluye completamente
+      // de validación y envío.
+      campoEmail.hidden = !esProfesor;
+
+      inputEmail.required = esProfesor;
+      inputEmail.disabled = !esProfesor;
+
+      if (!esProfesor) {
+        inputEmail.value = "";
+      }
+    }
+
+    document
+      .querySelectorAll('input[name="rol"]')
+      .forEach((radio) => {
+        radio.addEventListener(
+          "change",
+          actualizarFormulario
+        );
       });
-    });
 
-    inputEmail.required = !campoEmail.hidden;
-  </script>
+    // Estado inicial según ?rol=admin / ?rol=profesor
+    actualizarFormulario();
+
+    // Seguridad adicional antes de enviar.
+    formulario.addEventListener("submit", () => {
+      actualizarFormulario();
+    });
+  });
+</script>
 </body>
 </html>

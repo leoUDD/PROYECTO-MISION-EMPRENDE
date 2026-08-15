@@ -401,7 +401,7 @@
   <script src="{% static 'js/presentar_pitch.js' %}"></script>
 
   <script>
-    const sesionId = "{{ grupo.sesion.idsesion }}";
+    const sesionPitchId = "{{ grupo.sesion.idsesion }}";
     const grupoId = "{{ grupo.idgrupo }}";
     let redirigiendoPitch = false;
     let pollingEstadoPresentacion = null;
@@ -567,7 +567,7 @@
       if (redirigiendoPitch) return;
 
       try {
-        const res = await fetch(`/sesion/${sesionId}/estado-presentacion/`, {
+        const res = await fetch(`/sesion/${sesionPitchId}/estado-presentacion/`, {
           credentials: "same-origin",
           cache: "no-store"
         });
@@ -600,7 +600,7 @@
       btn.textContent = tPitch("presentar_pitch_boton_iniciando", "Iniciando...");
 
       try {
-        const res = await fetch(`/sesion/${sesionId}/iniciar-presentacion/`, {
+        const res = await fetch(`/sesion/${sesionPitchId}/iniciar-presentacion/`, {
           method: "POST",
           credentials: "same-origin",
           headers: {

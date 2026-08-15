@@ -575,6 +575,12 @@ class Sesion(models.Model):
         null=True,
     )
 
+    onedrive_carpeta_id = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+    )   
+
     grupo_presentando = models.ForeignKey(
     'Grupo',
     on_delete=models.SET_NULL,
@@ -783,6 +789,29 @@ class FotoEquipo(models.Model):
             "y aplica a todas las sesiones hasta que se "
             "cambie."
         ),
+    )
+
+    onedrive_carpeta_id = models.CharField(
+        max_length=255,
+        blank=True,
+    )
+
+    onedrive_foto_id = models.CharField(
+        max_length=255,
+        blank=True,
+    )
+
+    onedrive_txt_id = models.CharField(
+        max_length=255,
+        blank=True,
+    )
+
+    subida_onedrive = models.BooleanField(
+        default=False,
+    )
+
+    error_onedrive = models.TextField(
+       blank=True,
     )
 
     fecha_captura = models.DateTimeField(

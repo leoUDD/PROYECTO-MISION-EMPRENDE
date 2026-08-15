@@ -1612,3 +1612,418 @@ body::before {
     transition: none !important;
   }
 }
+
+/* ==========================================================
+   CÁMARA FOTO LEGO
+   ========================================================== */
+
+.lego-camara-visor {
+  width: min(100%, 520px);
+  aspect-ratio: 4 / 3;
+  margin: 16px auto;
+  border-radius: 18px;
+  overflow: hidden;
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #020b18;
+
+  border: 2px solid rgba(0, 242, 109, .45);
+
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, .38),
+    0 0 22px rgba(0, 200, 255, .14);
+}
+
+#lego-video,
+.lego-preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.lego-camara-placeholder {
+  padding: 24px;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 10px;
+
+  color: #d9e6f2;
+
+  text-align: center;
+}
+
+.lego-camara-placeholder strong {
+  color: #fff;
+  font-size: 1.05rem;
+}
+
+.lego-camara-icono {
+  font-size: 44px;
+}
+
+.lego-camara-acciones {
+  display: flex;
+  flex-wrap: wrap;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 10px;
+
+  margin: 12px 0;
+}
+
+.btn-lego-secundario,
+.btn-lego-archivo {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  min-height: 48px;
+
+  padding: 12px 20px;
+
+  border-radius: 14px;
+
+  font-family:
+    "Poppins",
+    system-ui,
+    sans-serif;
+
+  font-size: .95rem;
+  font-weight: 900;
+
+  cursor: pointer;
+
+  color: #fff;
+
+  border:
+    1px solid rgba(0, 200, 255, .55);
+
+  background:
+    rgba(0, 35, 75, .72);
+
+  box-shadow:
+    0 6px 18px rgba(0, 0, 0, .22);
+}
+
+.btn-lego-secundario:hover,
+.btn-lego-archivo:hover {
+  border-color:
+    rgba(0, 242, 109, .8);
+}
+
+.lego-selector-archivo {
+  margin: 16px 0;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+
+  gap: 10px;
+
+  color: #d9e6f2;
+
+  font-size: .9rem;
+}
+
+.lego-mensaje-camara {
+  min-height: 22px;
+
+  margin: 6px auto 10px;
+
+  color: #d9e6f2;
+
+  font-size: .9rem;
+  font-weight: 700;
+
+  text-align: center;
+}
+
+.lego-mensaje-camara.error {
+  color: #ffb4b4;
+}
+
+@media (max-width: 700px) {
+  .lego-camara-visor {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+  }
+
+  .lego-camara-acciones {
+    width: 100%;
+  }
+
+  .lego-camara-acciones button,
+  .btn-lego-archivo {
+    flex: 1 1 46%;
+  }
+}
+
+/* ==========================================================
+   CORRECCIÓN VISIBILIDAD CÁMARA LEGO
+   ========================================================== */
+
+/* Respetar siempre el atributo hidden */
+#lego-video[hidden],
+#lego-preview[hidden],
+#lego-placeholder[hidden],
+#lego-cambiar-camara[hidden],
+#lego-tomar-foto[hidden],
+#lego-repetir-foto[hidden] {
+  display: none !important;
+}
+
+
+/* ==========================================================
+   VISOR
+   ========================================================== */
+
+.lego-camara-visor {
+  width: 100%;
+  max-width: 520px;
+  aspect-ratio: 4 / 3;
+
+  margin: 18px auto;
+
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+
+  border-radius: 18px;
+
+  background: #020b18;
+
+  border: 2px solid rgba(0, 242, 109, .55);
+
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, .35),
+    0 0 22px rgba(0, 242, 109, .10);
+}
+
+
+/* Video y foto ocupan todo el visor */
+
+#lego-video:not([hidden]),
+#lego-preview:not([hidden]) {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+}
+
+
+/* Placeholder */
+
+#lego-placeholder:not([hidden]) {
+  width: 100%;
+  height: 100%;
+
+  padding: 30px;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 10px;
+
+  text-align: center;
+
+  color: #d9e6f2;
+}
+
+.lego-camara-placeholder strong {
+  color: #ffffff;
+
+  font-size: 1.05rem;
+}
+
+.lego-camara-placeholder span:not(.lego-camara-icono) {
+  max-width: 320px;
+
+  font-size: .9rem;
+
+  line-height: 1.5;
+
+  opacity: .9;
+}
+
+.lego-camara-icono {
+  font-size: 46px;
+
+  margin-bottom: 4px;
+}
+
+
+/* ==========================================================
+   BOTONES CÁMARA
+   ========================================================== */
+
+.lego-camara-acciones {
+  width: 100%;
+  max-width: 520px;
+
+  margin: 12px auto 18px;
+
+  display: flex;
+
+  flex-wrap: wrap;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 10px;
+}
+
+.lego-camara-acciones button {
+  min-width: 150px;
+}
+
+
+/* Botones secundarios */
+
+.btn-lego-secundario {
+  min-height: 46px;
+
+  padding: 11px 18px;
+
+  border-radius: 13px;
+
+  border: 1px solid rgba(0, 200, 255, .6);
+
+  background: rgba(0, 35, 75, .85);
+
+  color: white;
+
+  font-family: "Poppins", sans-serif;
+
+  font-size: .9rem;
+  font-weight: 800;
+
+  cursor: pointer;
+}
+
+
+/* ==========================================================
+   SELECCIONAR ARCHIVO
+   ========================================================== */
+
+.lego-selector-archivo {
+  width: 100%;
+  max-width: 520px;
+
+  margin: 18px auto;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+
+  gap: 9px;
+
+  text-align: center;
+
+  color: #d9e6f2;
+
+  font-size: .85rem;
+}
+
+.btn-lego-archivo {
+  min-height: 46px;
+
+  padding: 11px 18px;
+
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 13px;
+
+  border: 1px solid rgba(0, 200, 255, .65);
+
+  background: rgba(0, 35, 75, .85);
+
+  color: white;
+
+  font-family: "Poppins", sans-serif;
+
+  font-size: .9rem;
+  font-weight: 800;
+
+  cursor: pointer;
+}
+
+
+/* ==========================================================
+   MENSAJE CÁMARA
+   ========================================================== */
+
+.lego-mensaje-camara {
+  width: 100%;
+  max-width: 520px;
+
+  min-height: 20px;
+
+  margin: -4px auto 10px;
+
+  text-align: center;
+
+  color: #d9e6f2;
+
+  font-size: .85rem;
+  font-weight: 600;
+}
+
+.lego-mensaje-camara.error {
+  color: #ff9c9c;
+}
+
+
+/* ==========================================================
+   TABLET / CELULAR
+   ========================================================== */
+
+@media (max-width: 700px) {
+
+  .lego-camara-visor {
+    max-width: 100%;
+    aspect-ratio: 4 / 3;
+  }
+
+  .lego-camara-acciones {
+    display: grid;
+
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .lego-camara-acciones button {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .btn-lego-archivo {
+    width: 100%;
+  }
+}

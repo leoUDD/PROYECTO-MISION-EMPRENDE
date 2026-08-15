@@ -1,4 +1,8 @@
 #NUEVO
+from .onedrive_service import (
+    nombre_seguro_onedrive,
+    descargar_archivo_onedrive,
+)
 from django.shortcuts import render, redirect
 from django.core.files.storage import default_storage
 from django.conf import settings
@@ -54,11 +58,12 @@ from PIL import Image, ImageOps, UnidentifiedImageError
 
 from .models import FotoEquipo
 
-from .drive_service import (
-    buscar_o_crear_carpeta,
-    construir_servicio_drive,
-    nombre_seguro,
-    subir_o_reemplazar_archivo,
+from .onedrive_service import (
+    nombre_seguro_onedrive,
+)
+
+from .tasks import (
+    subir_foto_equipo_onedrive,
 )
 
 from .auth import requiere_staff, requiere_admin, profesor_autenticado, es_admin, es_staff
@@ -1137,14 +1142,40 @@ def estado_sesion(request, sesion_id):
     }
 
     # Grupos que ya tienen su fotografía correctamente subida a Drive.
-    grupos_con_foto_equipo_ids = set(
-        Grupo.objects
+    grupos_con_foto_temporal_ids = set(
+        FotoEquipo.objects
         .filter(
             sesion=sesion,
-            foto_equipo__subida_drive=True,
+            foto_temporal__isnull=False,
         )
-        .values_list("idgrupo", flat=True)
-        .distinct()
+        .exclude(
+            foto_temporal=""
+        )
+        .values_list(
+            "grupo_id",
+            flat=True,
+        )
+    )
+
+    grupos_con_foto_onedrive_ids = set(
+        FotoEquipo.objects
+        .filter(
+            sesion=sesion,
+            subida_onedrive=True,
+        )
+        .exclude(
+            onedrive_foto_id=""
+        )
+        .values_list(
+            "grupo_id",
+            flat=True,
+        )
+    )
+
+    grupos_con_foto_equipo_ids = (
+        grupos_con_foto_temporal_ids
+        |
+        grupos_con_foto_onedrive_ids
     )
 
     grupos_fotos_equipo = len(
@@ -1957,13 +1988,30 @@ def profesor_actualizar_estado(request, sesion_id):
 @require_POST
 @requiere_staff
 def dev_timer_10_segundos(request, sesion_id):
-    if not settings.DEBUG:
-        return JsonResponse({
-            "ok": False,
-            "error": "Esta función solo está disponible en modo desarrollo."
-        }, status=403)
+    """
+    Herramienta de prueba para dejar el temporizador
+    de la fase actual en 10 segundos.
 
-    sesion = get_object_or_404(Sesion, pk=sesion_id)
+    Solo está disponible cuando DEV_TOOLS_ENABLED=True
+    y para usuarios autorizados como staff/profesor.
+    """
+
+    if not settings.DEV_TOOLS_ENABLED:
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": (
+                    "Las herramientas DEV "
+                    "están deshabilitadas."
+                ),
+            },
+            status=403,
+        )
+
+    sesion = get_object_or_404(
+        Sesion,
+        pk=sesion_id,
+    )
 
     segundos = 10
     ahora = timezone.now()
@@ -1971,19 +2019,27 @@ def dev_timer_10_segundos(request, sesion_id):
     sesion.segundos_restantes = segundos
     sesion.timer_corriendo = True
     sesion.timer_inicio_at = ahora
-    sesion.timer_fin_at = ahora + timedelta(seconds=segundos)
-    sesion.save(update_fields=[
-        "segundos_restantes",
-        "timer_corriendo",
-        "timer_inicio_at",
-        "timer_fin_at",
-    ])
+    sesion.timer_fin_at = (
+        ahora
+        + timedelta(seconds=segundos)
+    )
 
-    return JsonResponse({
-        "ok": True,
-        "segundosRestantes": segundos,
-        "faseActual": sesion.fase_actual,
-    })
+    sesion.save(
+        update_fields=[
+            "segundos_restantes",
+            "timer_corriendo",
+            "timer_inicio_at",
+            "timer_fin_at",
+        ]
+    )
+
+    return JsonResponse(
+        {
+            "ok": True,
+            "segundosRestantes": segundos,
+            "faseActual": sesion.fase_actual,
+        }
+    )
 
 @require_POST
 @requiere_staff
@@ -2798,67 +2854,15 @@ def crear_txt_integrantes(
     return "\n".join(lineas).encode("utf-8")
 
 
-def obtener_carpeta_drive_sesion(
-    servicio,
-    sesion,
-    fecha_captura,
-):
-    """
-    Obtiene la carpeta de Drive asignada a la sesión.
 
-    Si todavía no existe, crea una carpeta dentro de
-    la carpeta principal Misión Emprende.
-    """
-
-    if sesion.drive_carpeta_id:
-        return sesion.drive_carpeta_id
-
-    carpeta_principal_id = (
-        settings.GOOGLE_DRIVE_ROOT_FOLDER_ID or ""
-    ).strip()
-
-    if not carpeta_principal_id:
-        raise RuntimeError(
-            "No está configurado "
-            "GOOGLE_DRIVE_ROOT_FOLDER_ID."
-        )
-
-    with transaction.atomic():
-        sesion_bloqueada = (
-            Sesion.objects
-            .select_for_update()
-            .get(pk=sesion.pk)
-        )
-
-        if sesion_bloqueada.drive_carpeta_id:
-            return sesion_bloqueada.drive_carpeta_id
-
-        nombre_carpeta = (
-            f"{fecha_captura.strftime('%Y-%m-%d')} - "
-            f"{nombre_seguro(sesion_bloqueada.nombre)} - "
-            f"Sesion {sesion_bloqueada.idsesion}"
-        )
-
-        carpeta_id = buscar_o_crear_carpeta(
-            servicio,
-            nombre_carpeta,
-            carpeta_principal_id,
-        )
-
-        sesion_bloqueada.drive_carpeta_id = carpeta_id
-
-        sesion_bloqueada.save(
-            update_fields=["drive_carpeta_id"]
-        )
-
-        return carpeta_id
 
 def sincronizar_fotos_equipo_y_avanzar(sesion):
     """
-    Avanza desde la sopa de letras hacia el ranking
-    cuando todos los grupos tienen una fotografía
-    correctamente subida a Google Drive.
-    """
+Avanza desde la sopa de letras hacia el ranking
+cuando todos los grupos tienen una fotografía
+guardada temporalmente.
+La subida a OneDrive ocurre en segundo plano.
+"""
 
     with transaction.atomic():
         sesion_bloqueada = (
@@ -2874,11 +2878,15 @@ def sincronizar_fotos_equipo_y_avanzar(sesion):
         )
 
         grupos_con_foto = (
-            Grupo.objects
+            FotoEquipo.objects
             .filter(
                 sesion=sesion_bloqueada,
-                foto_equipo__subida_drive=True,
+                foto_temporal__isnull=False,
             )
+            .exclude(
+                foto_temporal=""
+            )
+            .values("grupo_id")
             .distinct()
             .count()
         )
@@ -2933,9 +2941,12 @@ def sincronizar_fotos_equipo_y_avanzar(sesion):
 @require_POST
 def guardar_foto_equipo(request):
     """
-    Recibe una foto del grupo activo después de la sopa de letras,
-    la guarda temporalmente, la sube a Drive y genera el TXT
-    de integrantes.
+    Recibe una foto del grupo activo después de la sopa de letras.
+
+    La fotografía:
+    - se guarda temporalmente en el servidor;
+    - se envía a OneDrive en segundo plano mediante Celery;
+    - NO obliga al alumno a esperar la subida a OneDrive.
 
     El grupo puede tomar la fotografía cuando:
     - completó la sopa de letras; o
@@ -3006,12 +3017,23 @@ def guardar_foto_equipo(request):
             status=409,
         )
 
+    # ---------------------------------------------------------
+    # FOTO YA REGISTRADA
+    #
+    # Ya NO esperamos subida_drive=True.
+    # Basta con que la fotografía haya quedado guardada
+    # temporalmente en el servidor.
+    # ---------------------------------------------------------
+
     registro_existente = (
         FotoEquipo.objects
         .filter(
             grupo=grupo,
             sesion=sesion,
-            subida_drive=True,
+            foto_temporal__isnull=False,
+        )
+        .exclude(
+            foto_temporal=""
         )
         .first()
     )
@@ -3022,8 +3044,10 @@ def guardar_foto_equipo(request):
             args=[registro_existente.pk],
         )
 
-        estado_fotos = sincronizar_fotos_equipo_y_avanzar(
-            sesion
+        estado_fotos = (
+            sincronizar_fotos_equipo_y_avanzar(
+                sesion
+            )
         )
 
         return JsonResponse(
@@ -3049,8 +3073,17 @@ def guardar_foto_equipo(request):
                 "rutaAlumno": (
                     estado_fotos["rutaAlumno"]
                 ),
+                "respaldoOneDrive": (
+                    "completado"
+                    if registro_existente.subida_onedrive
+                    else "pendiente"
+                ),
             }
         )
+
+    # ---------------------------------------------------------
+    # RECIBIR FOTO
+    # ---------------------------------------------------------
 
     archivo = request.FILES.get("foto_equipo")
 
@@ -3062,6 +3095,10 @@ def guardar_foto_equipo(request):
             },
             status=400,
         )
+
+    # ---------------------------------------------------------
+    # CONVERTIR A JPEG
+    # ---------------------------------------------------------
 
     try:
         foto_jpeg = convertir_foto_equipo_a_jpeg(
@@ -3076,6 +3113,10 @@ def guardar_foto_equipo(request):
             },
             status=400,
         )
+
+    # ---------------------------------------------------------
+    # OBTENER INTEGRANTES
+    # ---------------------------------------------------------
 
     alumnos = (
         Alumno.objects
@@ -3104,7 +3145,11 @@ def guardar_foto_equipo(request):
         timezone.now()
     )
 
-    nombre_grupo = nombre_seguro(
+    # ---------------------------------------------------------
+    # NOMBRE DE ARCHIVO
+    # ---------------------------------------------------------
+
+    nombre_grupo = nombre_seguro_onedrive(
         grupo.nombregrupo or "Equipo"
     )
 
@@ -3114,9 +3159,9 @@ def guardar_foto_equipo(request):
 
     nombre_foto = f"{nombre_base}.jpg"
 
-    nombre_txt = (
-        f"{nombre_base} - integrantes.txt"
-    )
+    # ---------------------------------------------------------
+    # CREAR / ACTUALIZAR REGISTRO
+    # ---------------------------------------------------------
 
     registro, _ = FotoEquipo.objects.get_or_create(
         grupo=grupo,
@@ -3128,20 +3173,34 @@ def guardar_foto_equipo(request):
     registro.sesion = sesion
     registro.integrantes_snapshot = integrantes
     registro.nombre_archivo = nombre_foto
-    registro.subida_drive = False
-    registro.error_drive = ""
+
+    # Estado de OneDrive.
+    registro.subida_onedrive = False
+    registro.error_onedrive = ""
+
+    # ---------------------------------------------------------
+    # BORRAR FOTO TEMPORAL ANTERIOR
+    # ---------------------------------------------------------
 
     if registro.foto_temporal:
         try:
             registro.foto_temporal.delete(
                 save=False
             )
+
         except Exception:
             logger.exception(
                 "No se pudo eliminar la foto "
                 "temporal anterior del grupo %s.",
                 grupo.idgrupo,
             )
+
+    # ---------------------------------------------------------
+    # GUARDAR FOTO TEMPORAL
+    #
+    # Esta parte es rápida y ocurre antes de responder
+    # al navegador.
+    # ---------------------------------------------------------
 
     registro.foto_temporal.save(
         f"grupo_{grupo.idgrupo}.jpg",
@@ -3151,115 +3210,40 @@ def guardar_foto_equipo(request):
 
     registro.save()
 
-    try:
-        servicio = construir_servicio_drive()
+    # ---------------------------------------------------------
+    # SUBIR A ONEDRIVE EN SEGUNDO PLANO
+    #
+    # IMPORTANTE:
+    # Django NO espera que OneDrive termine.
+    #
+    # transaction.on_commit evita que Celery intente leer
+    # FotoEquipo antes de que la transacción esté confirmada.
+    # ---------------------------------------------------------
 
-        carpeta_sesion_id = (
-            obtener_carpeta_drive_sesion(
-                servicio,
-                sesion,
-                fecha_captura,
+    transaction.on_commit(
+        lambda foto_id=registro.pk: (
+            subir_foto_equipo_onedrive.delay(
+                foto_id
             )
         )
-
-        archivo_foto_drive = (
-            subir_o_reemplazar_archivo(
-                servicio,
-                nombre=nombre_foto,
-                contenido=foto_jpeg,
-                mime_type="image/jpeg",
-                carpeta_id=carpeta_sesion_id,
-            )
-        )
-
-        contenido_txt = crear_txt_integrantes(
-            grupo,
-            integrantes,
-            fecha_captura,
-        )
-
-        archivo_txt_drive = (
-            subir_o_reemplazar_archivo(
-                servicio,
-                nombre=nombre_txt,
-                contenido=contenido_txt,
-                mime_type="text/plain",
-                carpeta_id=carpeta_sesion_id,
-            )
-        )
-
-        registro.drive_carpeta_id = (
-            carpeta_sesion_id
-        )
-        registro.drive_foto_id = (
-            archivo_foto_drive["id"]
-        )
-        registro.drive_txt_id = (
-            archivo_txt_drive["id"]
-        )
-        registro.subida_drive = True
-        registro.error_drive = ""
-
-        # Las fotos solo pueden vivir en Drive: borrada la subida con
-        # éxito, se elimina la copia temporal del servidor. La galería
-        # y el panel admin las sirven vía proxy (foto_equipo_imagen).
-        try:
-            registro.foto_temporal.delete(save=False)
-        except Exception:
-            logger.exception(
-                "No se pudo eliminar la copia temporal "
-                "de la foto del grupo %s tras subirla "
-                "a Drive.",
-                grupo.idgrupo,
-            )
-        registro.foto_temporal = None
-
-        registro.save(
-            update_fields=[
-                "sesion",
-                "foto_temporal",
-                "drive_carpeta_id",
-                "drive_foto_id",
-                "drive_txt_id",
-                "nombre_archivo",
-                "integrantes_snapshot",
-                "subida_drive",
-                "error_drive",
-                "actualizada_en",
-            ]
-        )
-
-    except Exception as exc:
-        logger.exception(
-            "Error subiendo la fotografía "
-            "del grupo %s",
-            grupo.idgrupo,
-        )
-
-        registro.error_drive = str(exc)[:2000]
-
-        registro.save(
-            update_fields=[
-                "error_drive",
-                "actualizada_en",
-            ]
-        )
-
-        return JsonResponse(
-            {
-                "ok": False,
-                "error": (
-                    "La fotografía quedó temporalmente "
-                    "guardada, pero no pudo subirse a "
-                    "Google Drive. Inténtalo nuevamente."
-                ),
-            },
-            status=502,
-        )
-
-    estado_fotos = sincronizar_fotos_equipo_y_avanzar(
-        sesion
     )
+
+    # ---------------------------------------------------------
+    # ACTUALIZAR AVANCE DEL JUEGO
+    #
+    # El avance ahora depende de que exista la foto temporal,
+    # NO de que OneDrive haya terminado.
+    # ---------------------------------------------------------
+
+    estado_fotos = (
+        sincronizar_fotos_equipo_y_avanzar(
+            sesion
+        )
+    )
+
+    # ---------------------------------------------------------
+    # RESPUESTA INMEDIATA
+    # ---------------------------------------------------------
 
     return JsonResponse(
         {
@@ -3286,6 +3270,9 @@ def guardar_foto_equipo(request):
             "rutaAlumno": (
                 estado_fotos["rutaAlumno"]
             ),
+
+            # OneDrive todavía puede estar trabajando.
+            "respaldoOneDrive": "pendiente",
         }
     )
 
@@ -3743,7 +3730,10 @@ def minijuego1(request):
         .filter(
             grupo=grupo,
             sesion=grupo.sesion,
-            subida_drive=True,
+            foto_temporal__isnull=False,
+        )
+        .exclude(
+            foto_temporal=""
         )
         .exists()
     )
@@ -4065,8 +4055,11 @@ def sopa_completada(request):
             FotoEquipo.objects
             .filter(
                 grupo=grupo,
-                sesion=sesion,
-                subida_drive=True,
+               sesion=sesion,
+                foto_temporal__isnull=False,
+            )
+            .exclude(
+                foto_temporal=""
             )
             .exists()
         )
@@ -5364,10 +5357,10 @@ def galeria_equipos(request):
     fotos_equipo = (
         FotoEquipo.objects
         .filter(
-            subida_drive=True,
+            subida_onedrive=True,
             seleccionada_galeria=True,
         )
-        .exclude(drive_foto_id__exact="")
+        .exclude(onedrive_foto_id__exact="")
         .select_related("grupo")
         .order_by("grupo__idgrupo")
     )
@@ -5391,70 +5384,233 @@ def galeria_equipos(request):
 
 def foto_equipo_imagen(request, foto_id):
     """
-    Proxy de imágenes: descarga la foto de equipo desde Google Drive
-    (por su drive_foto_id) y la sirve como JPEG.
+    Proxy de imágenes de las fotografías de equipo.
 
-    Las fotos NO se almacenan en el servidor: viven solo en Drive y se
-    cachean en memoria un rato para no golpear la API en cada carga.
+    Mientras existe la copia temporal:
+    - se sirve directamente desde el servidor.
 
-    Acceso: staff/admin, o un alumno con grupo activo en sesión.
+    Cuando la copia temporal ya fue eliminada:
+    - se descarga la copia permanente desde OneDrive;
+    - se mantiene un cache temporal para evitar llamadas
+      innecesarias a Microsoft Graph.
+
+    Acceso:
+    - staff/admin; o
+    - alumno con grupo activo.
     """
 
-    if not es_staff(request) and not obtener_grupo_desde_session(request):
+    if (
+        not es_staff(request)
+        and not obtener_grupo_desde_session(request)
+    ):
         raise Http404()
 
     foto = (
         FotoEquipo.objects
-        .filter(pk=foto_id, subida_drive=True)
-        .exclude(drive_foto_id__exact="")
+        .filter(pk=foto_id)
         .first()
     )
 
     if not foto:
         raise Http404()
 
-    clave_cache = f"foto_equipo_drive_{foto.pk}_{foto.drive_foto_id}"
-    contenido = cache.get(clave_cache)
+    # =========================================================
+    # 1. COPIA TEMPORAL
+    # =========================================================
+    #
+    # Mientras la sesión sigue activa preferimos leer
+    # directamente del servidor.
+    #
 
-    if contenido is None:
+    if foto.foto_temporal:
         try:
-            servicio = construir_servicio_drive()
+            foto.foto_temporal.open("rb")
+
             contenido = (
-                servicio.files()
-                .get_media(fileId=foto.drive_foto_id)
-                .execute()
+                foto.foto_temporal.read()
             )
+
+            foto.foto_temporal.close()
+
+            respuesta = HttpResponse(
+                contenido,
+                content_type="image/jpeg",
+            )
+
+            respuesta["Cache-Control"] = (
+                "private, max-age=300"
+            )
+
+            return respuesta
+
         except Exception:
             logger.exception(
-                "No se pudo descargar de Drive la foto "
-                "del grupo %s (archivo %s).",
+                "No se pudo leer la fotografía "
+                "temporal del grupo %s.",
                 foto.grupo_id,
-                foto.drive_foto_id,
             )
+
+            # Si falla la copia temporal,
+            # intentamos recuperar desde OneDrive.
+            try:
+                foto.foto_temporal.close()
+            except Exception:
+                pass
+
+    # =========================================================
+    # 2. COPIA PERMANENTE EN ONEDRIVE
+    # =========================================================
+
+    if (
+        not foto.subida_onedrive
+        or not foto.onedrive_foto_id
+    ):
+        raise Http404()
+
+    clave_cache = (
+        f"foto_equipo_onedrive_"
+        f"{foto.pk}_"
+        f"{foto.onedrive_foto_id}"
+    )
+
+    contenido = cache.get(
+        clave_cache
+    )
+
+    if contenido is None:
+
+        try:
+            contenido = descargar_archivo_onedrive(
+                foto.onedrive_foto_id
+            )
+
+        except Exception:
+            logger.exception(
+                "No se pudo descargar desde "
+                "OneDrive la foto del grupo %s "
+                "(archivo %s).",
+                foto.grupo_id,
+                foto.onedrive_foto_id,
+            )
+
             raise Http404()
 
-        cache.set(clave_cache, contenido, 3600)
+        # Cache durante una hora.
+        cache.set(
+            clave_cache,
+            contenido,
+            3600,
+        )
 
-    respuesta = HttpResponse(contenido, content_type="image/jpeg")
-    respuesta["Cache-Control"] = "private, max-age=3600"
+    respuesta = HttpResponse(
+        contenido,
+        content_type="image/jpeg",
+    )
+
+    respuesta["Cache-Control"] = (
+        "private, max-age=3600"
+    )
+
     return respuesta
 
 
+def borrar_fotos_equipo_temporales_sesion(sesion):
+    """
+    Elimina del servidor las copias temporales de las fotos
+    de equipo que ya tienen respaldo permanente confirmado
+    en OneDrive.
+
+    Nunca elimina archivos de OneDrive.
+    """
+
+    registros = (
+        FotoEquipo.objects
+        .filter(
+            sesion=sesion,
+            subida_onedrive=True,
+        )
+        .exclude(
+            onedrive_foto_id=""
+        )
+        .exclude(
+            foto_temporal=""
+        )
+    )
+
+    for registro in registros:
+
+        if not registro.foto_temporal:
+            continue
+
+        try:
+            registro.foto_temporal.delete(
+                save=False
+            )
+
+            registro.foto_temporal = None
+
+            registro.save(
+                update_fields=[
+                    "foto_temporal",
+                    "actualizada_en",
+                ]
+            )
+
+            logger.info(
+                "Foto temporal eliminada del grupo %s "
+                "después de respaldarse en OneDrive.",
+                registro.grupo_id,
+            )
+
+        except Exception:
+            logger.exception(
+                "No se pudo eliminar la foto temporal "
+                "del grupo %s.",
+                registro.grupo_id,
+            )
+
 def reflexion(request):
     grupo = obtener_grupo_desde_session(request)
+
     if not grupo:
         return redirect("registro")
 
-    if not acceso_permitido(grupo, "reflexion"):
-        return redirect("pantalla_espera")
+    if not acceso_permitido(
+        grupo,
+        "reflexion",
+    ):
+        return redirect(
+            "pantalla_espera"
+        )
 
-    # Solo después de validar la fase: si esto corriera antes, cualquier
-    # alumno visitando /reflexion/ a mitad del juego borraría las fotos
-    # Lego de Drive de toda la sesión.
+    # Solo hacemos la limpieza después de comprobar
+    # que realmente estamos en la fase de Reflexión.
+    #
+    # De esta manera alguien no puede entrar manualmente
+    # a /reflexion/ antes de tiempo y provocar la limpieza.
     if grupo.sesion:
-        borrar_fotos_lego_sesion(grupo.sesion)
 
-    return render(request, "reflexion.html", {"grupo": grupo})
+        # Limpieza existente de las fotos LEGO.
+        borrar_fotos_lego_sesion(
+            grupo.sesion
+        )
+
+        # Limpieza de fotos temporales de equipo.
+        #
+        # Solo se borran aquellas que ya tienen
+        # respaldo confirmado en OneDrive.
+        borrar_fotos_equipo_temporales_sesion(
+            grupo.sesion
+        )
+
+    return render(
+        request,
+        "reflexion.html",
+        {
+            "grupo": grupo,
+        },
+    )
+
 def leer_filas_archivo(archivo):
     """Lee un .xlsx (openpyxl) o .csv (csv nativo) y devuelve una lista de
     diccionarios {encabezado: valor}, usando '' para celdas vacias.
@@ -6359,44 +6515,109 @@ def admin_tiempos(request):
 @requiere_admin
 def admin_galeria_fotos(request):
     """
-    Panel donde el admin elige qué fotos de equipo (ya subidas a Drive)
-    se muestran en la galería previa a la reflexión final.
+    Panel donde el administrador elige qué fotos
+    de equipo, ya respaldadas en OneDrive, se
+    muestran en la galería previa a la reflexión.
 
-    La selección es global: no se filtra por sesión, aplica a todas las
-    sesiones por igual hasta que el admin la vuelva a cambiar.
+    La selección es global:
+    no se filtra por sesión y permanece hasta
+    que el administrador vuelva a modificarla.
     """
 
     if request.method == "POST":
-        ids_visibles = set(request.POST.getlist("foto_id"))
-        ids_seleccionados = set(request.POST.getlist("seleccionada"))
+
+        ids_visibles = set(
+            request.POST.getlist(
+                "foto_id"
+            )
+        )
+
+        ids_seleccionados = set(
+            request.POST.getlist(
+                "seleccionada"
+            )
+        )
 
         for foto_id in ids_visibles:
-            foto = FotoEquipo.objects.filter(pk=foto_id).first()
+
+            foto = (
+                FotoEquipo.objects
+                .filter(pk=foto_id)
+                .first()
+            )
+
             if not foto:
                 continue
 
-            nueva_seleccion = foto_id in ids_seleccionados
-            if foto.seleccionada_galeria != nueva_seleccion:
-                foto.seleccionada_galeria = nueva_seleccion
-                foto.save(update_fields=["seleccionada_galeria"])
+            nueva_seleccion = (
+                foto_id
+                in ids_seleccionados
+            )
 
-        messages.success(request, "Selección de la galería actualizada.")
-        return redirect("admin_galeria_fotos")
+            if (
+                foto.seleccionada_galeria
+                != nueva_seleccion
+            ):
+
+                foto.seleccionada_galeria = (
+                    nueva_seleccion
+                )
+
+                foto.save(
+                    update_fields=[
+                        "seleccionada_galeria"
+                    ]
+                )
+
+        messages.success(
+            request,
+            "Selección de la galería actualizada."
+        )
+
+        return redirect(
+            "admin_galeria_fotos"
+        )
+
+    # ---------------------------------------------------------
+    # Solamente mostramos fotografías cuyo respaldo
+    # permanente en OneDrive está confirmado.
+    # ---------------------------------------------------------
 
     fotos_equipo = (
         FotoEquipo.objects
-        .filter(subida_drive=True)
-        .exclude(drive_foto_id__exact="")
-        .select_related("grupo", "sesion")
-        .order_by("-actualizada_en")
+        .filter(
+            subida_onedrive=True
+        )
+        .exclude(
+            onedrive_foto_id__exact=""
+        )
+        .select_related(
+            "grupo",
+            "sesion",
+        )
+        .order_by(
+            "-actualizada_en"
+        )
     )
 
-    total_seleccionadas = fotos_equipo.filter(seleccionada_galeria=True).count()
+    total_seleccionadas = (
+        fotos_equipo
+        .filter(
+            seleccionada_galeria=True
+        )
+        .count()
+    )
 
-    return render(request, "admin_galeria_fotos.html", {
-        "fotos_equipo": fotos_equipo,
-        "total_seleccionadas": total_seleccionadas,
-    })
+    return render(
+        request,
+        "admin_galeria_fotos.html",
+        {
+            "fotos_equipo": fotos_equipo,
+            "total_seleccionadas": (
+                total_seleccionadas
+            ),
+        },
+    )
 
 @requiere_staff
 def ver_como_grupo(request, grupo_id):
