@@ -241,3 +241,15 @@ MS_TOKEN_ENCRYPTION_KEY = os.getenv(
     "MS_TOKEN_ENCRYPTION_KEY",
     "",
 ).strip()
+
+
+# =====================================================
+# Celery / Redis
+# =====================================================
+
+CELERY_BROKER_URL = os.getenv(
+    "CELERY_BROKER_URL",
+    "redis://127.0.0.1:6379/0",
+).strip()
+
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
