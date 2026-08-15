@@ -206,3 +206,33 @@ GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET", "").strip()
 GOOGLE_REFRESH_TOKEN = os.getenv("GOOGLE_REFRESH_TOKEN", "").strip()
 GOOGLE_DRIVE_ROOT_NAME = os.getenv("GOOGLE_DRIVE_ROOT_NAME", "Misión Emprende").strip()
 GOOGLE_DRIVE_ROOT_FOLDER_ID = os.getenv("GOOGLE_DRIVE_ROOT_FOLDER_ID", "").strip()
+
+
+# =====================================================
+# Microsoft OneDrive / Graph
+# =====================================================
+
+MS_CLIENT_ID = os.getenv(
+    "MS_CLIENT_ID",
+    "",
+).strip()
+
+MS_TENANT_ID = os.getenv(
+    "MS_TENANT_ID",
+    "",
+).strip()
+
+MS_CLIENT_SECRET = os.getenv(
+    "MS_CLIENT_SECRET",
+    "",
+).strip()
+
+MS_REDIRECT_URI = os.getenv(
+    "MS_REDIRECT_URI",
+    "",
+).strip()
+
+ONEDRIVE_ROOT_FOLDER = os.getenv(
+    "ONEDRIVE_ROOT_FOLDER",
+    "Mision Emprende",
+).strip()

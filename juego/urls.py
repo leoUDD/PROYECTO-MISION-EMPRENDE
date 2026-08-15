@@ -140,4 +140,16 @@ path(
     path('reflexion/', views.reflexion, name='reflexion'),
     path("mision-cumplida/", views.mision_cumplida_view, name="mision_cumplida"),
 
+        # Microsoft OneDrive
+    path(
+        "onedrive/conectar/",
+        views.onedrive_conectar,
+        name="onedrive_conectar",
+    ),
+    path(
+        "onedrive/callback/",
+        views.onedrive_callback,
+        name="onedrive_callback",
+    ),
+
 ]

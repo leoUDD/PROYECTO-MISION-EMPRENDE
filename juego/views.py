@@ -6408,3 +6408,165 @@ def ver_como_grupo(request, grupo_id):
     request.session["modo_profesor"] = True 
 
     return redirect("pantalla_espera")
+
+
+# ============================================================
+# PRUEBA CONEXION MICROSOFT ONEDRIVE
+# Se retirara/ajustara cuando la integracion definitiva funcione.
+# ============================================================
+
+def onedrive_conectar(request):
+    import msal
+
+    app = msal.ConfidentialClientApplication(
+        client_id=settings.MS_CLIENT_ID,
+        authority=f"https://login.microsoftonline.com/{settings.MS_TENANT_ID}",
+        client_credential=settings.MS_CLIENT_SECRET,
+    )
+
+    flow = app.initiate_auth_code_flow(
+        scopes=[
+            "Files.ReadWrite",
+            "User.Read",
+        ],
+        redirect_uri=settings.MS_REDIRECT_URI,
+        login_hint="emprendimiento@udd.cl",
+    )
+
+    request.session["onedrive_auth_flow"] = flow
+
+    return redirect(flow["auth_uri"])
+
+
+def onedrive_callback(request):
+    import msal
+    import requests
+    from urllib.parse import quote
+
+    flow = request.session.get("onedrive_auth_flow")
+
+    if not flow:
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": "No existe un flujo de autenticacion pendiente."
+            },
+            status=400,
+        )
+
+    app = msal.ConfidentialClientApplication(
+        client_id=settings.MS_CLIENT_ID,
+        authority=f"https://login.microsoftonline.com/{settings.MS_TENANT_ID}",
+        client_credential=settings.MS_CLIENT_SECRET,
+    )
+
+    try:
+        result = app.acquire_token_by_auth_code_flow(
+            flow,
+            request.GET.dict(),
+        )
+    except ValueError:
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": "La respuesta de Microsoft no pudo validarse."
+            },
+            status=400,
+        )
+
+    if "access_token" not in result:
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": result.get("error"),
+                "descripcion": result.get("error_description"),
+            },
+            status=400,
+        )
+
+    access_token = result["access_token"]
+
+    # --------------------------------------------------------
+    # 1. Comprobar que Microsoft Graph reconoce la cuenta
+    # --------------------------------------------------------
+
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+    }
+
+    respuesta_usuario = requests.get(
+        "https://graph.microsoft.com/v1.0/me",
+        headers=headers,
+        timeout=30,
+    )
+
+    if not respuesta_usuario.ok:
+        return JsonResponse(
+            {
+                "ok": False,
+                "paso": "consultar_usuario",
+                "status": respuesta_usuario.status_code,
+                "respuesta": respuesta_usuario.text,
+            },
+            status=400,
+        )
+
+    usuario = respuesta_usuario.json()
+
+    # --------------------------------------------------------
+    # 2. Subir archivo de prueba a:
+    #    OneDrive / Mision Emprende
+    # --------------------------------------------------------
+
+    carpeta = quote(
+        settings.ONEDRIVE_ROOT_FOLDER,
+        safe="",
+    )
+
+    nombre_archivo = "prueba_conexion_mision_emprende.txt"
+
+    url_subida = (
+        "https://graph.microsoft.com/v1.0/"
+        f"me/drive/root:/{carpeta}/{nombre_archivo}:/content"
+    )
+
+    contenido = (
+        "Conexion correcta entre Mision Emprende y OneDrive.\n"
+        "Este archivo puede eliminarse despues de la prueba.\n"
+    ).encode("utf-8")
+
+    respuesta_subida = requests.put(
+        url_subida,
+        headers={
+            "Authorization": f"Bearer {access_token}",
+            "Content-Type": "text/plain",
+        },
+        data=contenido,
+        timeout=30,
+    )
+
+    if not respuesta_subida.ok:
+        return JsonResponse(
+            {
+                "ok": False,
+                "paso": "subir_archivo",
+                "status": respuesta_subida.status_code,
+                "respuesta": respuesta_subida.text,
+            },
+            status=400,
+        )
+
+    archivo = respuesta_subida.json()
+
+    request.session.pop("onedrive_auth_flow", None)
+
+    return JsonResponse(
+        {
+            "ok": True,
+            "mensaje": "CONEXION CON ONEDRIVE EXITOSA",
+            "cuenta": usuario.get("userPrincipalName"),
+            "nombre": usuario.get("displayName"),
+            "archivo_creado": archivo.get("name"),
+            "carpeta": settings.ONEDRIVE_ROOT_FOLDER,
+        }
+    )
