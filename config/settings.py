@@ -236,3 +236,8 @@ ONEDRIVE_ROOT_FOLDER = os.getenv(
     "ONEDRIVE_ROOT_FOLDER",
     "Mision Emprende",
 ).strip()
+
+MS_TOKEN_ENCRYPTION_KEY = os.getenv(
+    "MS_TOKEN_ENCRYPTION_KEY",
+    "",
+).strip()

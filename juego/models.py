@@ -801,3 +801,19 @@ class FotoEquipo(models.Model):
             f"Foto del grupo {self.grupo_id} "
             f"- sesión {self.sesion_id}"
         )
+
+class OneDriveAuth(models.Model):
+    token_cache_encriptado = models.TextField(
+        blank=True,
+        default="",
+    )
+
+    actualizado_en = models.DateTimeField(
+        auto_now=True,
+    )
+
+    class Meta:
+        db_table = "onedrive_auth"
+
+    def __str__(self):
+        return "Autorización OneDrive"

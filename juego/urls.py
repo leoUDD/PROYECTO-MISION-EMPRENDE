@@ -152,4 +152,10 @@ path(
         name="onedrive_callback",
     ),
 
+    path(
+    "onedrive/probar/",
+    views.onedrive_probar,
+    name="onedrive_probar",
+),
+
 ]
