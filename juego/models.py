@@ -599,8 +599,8 @@ class Sesion(models.Model):
     orden_sorteado = models.BooleanField(default=False)
     #Timer
     t_rompehielo = models.IntegerField(default=120)
-    t_diferencias = models.IntegerField(default=300)
-    t_empatia = models.IntegerField(default=300)
+    t_diferencias = models.IntegerField(default=240)
+    t_empatia = models.IntegerField(default=360)
     t_creatividad = models.IntegerField(default=600)
     t_pitch_prep = models.IntegerField(default=300)
     t_pitch = models.IntegerField(default=90)

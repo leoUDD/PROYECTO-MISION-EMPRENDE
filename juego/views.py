@@ -498,13 +498,13 @@ def tiempo_por_fase(sesion, fase):
     tiempos = {
         "f1_conocidos": getattr(sesion, "t_rompehielo", 10),
         "f1_pre_sopa": 0,
-        "f1_sopa": getattr(sesion, "t_diferencias", 60),
+        "f1_sopa": getattr(sesion, "t_diferencias", 240),
         "f1_ranking": 0,
 
         "f2_transicion": 0,
         "f2_tematicas": getattr(sesion, "t_tematicas", 120),
         "f2_transicion_empatia": 0,
-        "f2_bubblemap": getattr(sesion, "t_empatia", 10),
+        "f2_bubblemap": getattr(sesion, "t_empatia", 360),
         "f2_ranking": 0,
 
         "f3_transicion_creatividad": 0,
