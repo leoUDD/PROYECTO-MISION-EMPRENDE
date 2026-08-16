@@ -7,7 +7,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Misión Emprende UDD — Formación de equipos</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/linea_progreso_habilidades.css' %}">
   <link rel="stylesheet" href="{% static 'css/estilo_conocidos.css' %}" />
+<link rel="stylesheet" href="{% static 'css/student_timer.css' %}">
   <link rel="icon" href="{% url 'favicon' %}">
   <style>
     .preguntas-grupo {
@@ -95,6 +97,17 @@
 </head>
 
 <body class="conocidos-page">
+  <div class="student-timer-host"
+       data-student-timer
+       data-compact-after="48"
+       role="timer"
+       aria-live="polite">
+    <div class="student-timer-card">
+      <span class="student-timer-label">Tiempo restante</span>
+      <h2 id="timer" class="student-timer-value blur-target-bloqueado timer-esperando">00:10</h2>
+    </div>
+  </div>
+
   <main class="phone" role="region" aria-label="Formación de equipos">
 
     <section class="zona-juego" aria-label="Zona de juego">
@@ -146,9 +159,6 @@
         </div>
       </div>
 
-      <div class="juego-footer">
-        <h2 id="timer" class="blur-target-bloqueado timer-esperando">00:10</h2>
-      </div>
 
       <button id="astro-trigger" class="astro-trigger" type="button" aria-label="Abrir transmisión secundaria" data-i18n="conocidos_astro_aria" data-i18n-attr="aria-label">
         <span class="astro-signal" aria-hidden="true"></span>
@@ -925,5 +935,6 @@
 
   {% include "includes/sincronizacion_fase.html" %}
   {% include "includes/countdown_inicio_fase.html" %}
+  <script src="{% static 'js/student_timer.js' %}"></script>
 </body>
 </html>

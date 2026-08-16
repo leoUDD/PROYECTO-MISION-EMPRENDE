@@ -7,15 +7,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Misión Emprende UDD — Bubble Map</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/linea_progreso_habilidades.css' %}">
   <link rel="stylesheet" href="{% static 'css/estilo_bubblemap.css' %}">
+<link rel="stylesheet" href="{% static 'css/student_timer.css' %}">
   <link rel="icon" href="{% url 'favicon' %}">
 </head>
 
-<body data-sesion-id="{{ grupo.sesion.idsesion }}">
+<body class="bubblemap-page" data-sesion-id="{{ grupo.sesion.idsesion }}">
 
   <!-- Música de fondo -->
   <audio id="musicaBubble" src="{% static 'sounds/musica_bubble.mp3' %}" loop preload="auto"></audio>
   <button id="btnMuteBubble" class="music-btn" title="Silenciar música" aria-label="Silenciar música">🔊</button>
+
+  <div class="student-timer-host"
+       data-student-timer
+       data-compact-after="48"
+       role="timer"
+       aria-live="polite">
+    <div class="student-timer-card">
+      <span class="student-timer-label">Tiempo restante</span>
+      <div class="timer-bubblemap student-timer-value" id="timer">06:00</div>
+    </div>
+  </div>
 
   <main class="bubblemap-container">
 
@@ -65,8 +78,7 @@
         <li data-i18n-html="true" data-i18n="bubble_regla_2">Las respuestas más <strong>claras y desarrolladas</strong> otorgan más tokens.</li>
         <li data-i18n-html="true" data-i18n="bubble_regla_3">La burbuja <strong>"Otros"</strong> permite agregar varias ideas extra.</li>
         <li data-i18n-html="true" data-i18n="bubble_regla_4">Agregar un <strong>relato breve</strong> ayuda a entender mejor a la persona.</li>
-        <li data-i18n-html="true" data-i18n="bubble_regla_5">Agregar un <strong>link o noticia</strong> le da más valor a su análisis.</li>
-      </ul>
+</ul>
     </details>
 
     <div id="bubblemap-desafio-data"
@@ -75,9 +87,6 @@
       data-foto="{{ desafio_foto_actual|default:'' }}"
       hidden></div>
 
-    <div class="timer-wrap" id="timerWrap">
-      <div class="timer-bubblemap" id="timer">03:00</div>
-    </div>
 
     <section id="bubblesSection" class="bubble-stage">
       <div class="bubble central" id="bubbleCentral">
@@ -88,8 +97,7 @@
     <div id="bubbleActions" class="bubble-actions">
       <button type="button" id="btnAgregarOtro" class="bubble-action-btn" data-i18n="bubble_boton_otro">➕ Agregar idea en Otros</button>
       <button type="button" id="btnAbrirRelato" class="bubble-action-btn" data-i18n="bubble_boton_relato">📖 Relato breve</button>
-      <button type="button" id="btnAbrirLink" class="bubble-action-btn" data-i18n="bubble_boton_link">🔗 Link o noticia</button>
-    </div>
+</div>
 
     <footer id="footerBubble" class="footer-actions"></footer>
 
@@ -133,7 +141,7 @@
 
     <div id="routes"
       data-sesion-id="{{ grupo.sesion.idsesion }}"
-      data-tiempo="{{ segundos_restantes|default:180 }}"
+      data-tiempo="{{ segundos_restantes|default:360 }}"
       data-otorgar-tokens-url="{% url 'otorgar_tokens_bubblemap' %}">
     </div>
   </main>
@@ -212,7 +220,7 @@
         });
       }
 
-      const timerWrap = document.getElementById("timerWrap");
+      const timerWrap = document.querySelector("[data-student-timer]");
       const routesEl = document.getElementById("routes");
       const timerElement = document.getElementById("timer");
       const bubblesSection = document.getElementById("bubblesSection");
@@ -255,7 +263,7 @@
       const otrosTabs = document.getElementById("otrosTabs");
       const btnAgregarOtro = document.getElementById("btnAgregarOtro");
       const btnAbrirRelato = document.getElementById("btnAbrirRelato");
-      const btnAbrirLink = document.getElementById("btnAbrirLink");
+      const btnAbrirLink = null; // Funcionalidad "Link o noticia" eliminada
       const resultadoModal = document.getElementById("resultadoModal");
       const resultadoNivel = document.getElementById("resultadoNivel");
       const resultadoResumen = document.getElementById("resultadoResumen");
@@ -282,7 +290,7 @@
       if (!estado.link) estado.link = "";
 
       let editorActual = null;
-      let timeLeft = Number(routesEl?.dataset?.tiempo || 180);
+      let timeLeft = Number(routesEl?.dataset?.tiempo || 360);
       let timerInterval = null;
       let timerIniciado = false;
       let redirigiendo = false;
@@ -437,7 +445,7 @@
         abrirEditorEspecial("relato", tJuego("bubble_relato_titulo", "Relato breve"), tJuego("bubble_relato_pregunta", "Describe un día en la vida de esta persona. ¿Qué hace, qué necesita y qué problema vive?"));
       });
 
-      btnAbrirLink.addEventListener("click", () => {
+      btnAbrirLink?.addEventListener("click", () => {
         abrirEditorEspecial("link", tJuego("bubble_link_titulo", "Link o noticia"), tJuego("bubble_link_pregunta", "Agrega una referencia, noticia o ejemplo real relacionado con el desafío."));
       });
 
@@ -599,5 +607,86 @@
   </script>
 
   {% include "includes/sincronizacion_fase.html" %}
+  <script src="{% static 'js/student_timer.js' %}"></script>
+
+<script>
+  /* ==========================================================
+     FEEDBACK 1 — BUBBLE MAP TIMER ALIGN
+     ========================================================== */
+  (function () {
+    const init = () => {
+      document.body.classList.add("bubblemap-page");
+      document.documentElement.classList.add("bubblemap-scroll-root");
+
+      const main = document.querySelector(".bubblemap-container");
+      const resultado = document.getElementById("resultadoModal");
+
+      if (!main) return;
+
+      function obtenerHost() {
+        return document.querySelector("body > .student-timer-host")
+          || document.querySelector(".student-timer-host");
+      }
+
+      function alinearTimerConMain() {
+        const host = obtenerHost();
+        if (!host) return;
+
+        const rect = main.getBoundingClientRect();
+        const centroX = rect.left + (rect.width / 2);
+
+        host.style.setProperty("left", `${centroX}px`, "important");
+        host.style.setProperty("right", "auto", "important");
+        host.style.setProperty("transform", "translateX(-50%)", "important");
+      }
+
+      function sincronizarVisibilidadTimer() {
+        const host = obtenerHost();
+        if (!host || !resultado) return;
+
+        const misionCumplida =
+          resultado.classList.contains("visible")
+          || resultado.getAttribute("aria-hidden") === "false";
+
+        host.classList.toggle("bubblemap-timer-hidden", misionCumplida);
+      }
+
+      function recalcular() {
+        requestAnimationFrame(() => {
+          alinearTimerConMain();
+          sincronizarVisibilidadTimer();
+        });
+      }
+
+      recalcular();
+      setTimeout(recalcular, 0);
+      setTimeout(recalcular, 120);
+      setTimeout(recalcular, 400);
+
+      window.addEventListener("resize", recalcular);
+      window.addEventListener("orientationchange", () => setTimeout(recalcular, 120));
+
+      if ("ResizeObserver" in window) {
+        const ro = new ResizeObserver(recalcular);
+        ro.observe(main);
+      }
+
+      if (resultado && "MutationObserver" in window) {
+        const mo = new MutationObserver(sincronizarVisibilidadTimer);
+        mo.observe(resultado, {
+          attributes: true,
+          attributeFilter: ["class", "aria-hidden"]
+        });
+      }
+    };
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", init, { once: true });
+    } else {
+      init();
+    }
+  })();
+</script>
+
 </body>
 </html>

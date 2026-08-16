@@ -1961,3 +1961,761 @@ body.modal-open {
     width: 100% !important;
   }
 }
+
+/* ============================================================
+   MIGRACIÓN DESDE student_activity_layout.css — BUBBLEMAP
+   Reglas específicas que antes vivían en el CSS global.
+   ============================================================ */
+
+.bubblemap-page .bubblemap-container {
+width: min(1100px, 100%);
+}
+
+@media (min-width: 701px) and (max-width: 1100px) {
+.bubblemap-page .bubblemap-container {
+max-width: calc(100vw - 150px) !important;
+    margin-left: 132px !important;
+    margin-right: 18px !important;
+}
+}
+
+@media (min-width: 701px) and (max-width: 1100px) and (orientation: portrait) {
+body.bubblemap-page {
+padding-left: clamp(16px, 2.4vw, 24px) !important;
+    padding-right: clamp(16px, 2.4vw, 24px) !important;
+}
+
+.bubblemap-page .bubblemap-container {
+width: min(100%, 920px) !important;
+    max-width: 920px !important;
+
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+}
+
+@media (min-width: 1101px) and (hover: hover) and (pointer: fine) {
+body.bubblemap-page {
+display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+
+    width: 100% !important;
+    min-height: 100dvh !important;
+
+
+    padding:
+      82px
+      24px
+      28px
+      155px !important;
+
+    gap: 10px !important;
+
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+}
+
+.bubblemap-page .student-timer-host {
+flex: 0 0 auto !important;
+
+    position: sticky !important;
+    top: 72px !important;
+
+    align-self: center !important;
+
+    width: min(100%, 1100px) !important;
+    max-width: 1100px !important;
+
+    display: flex !important;
+    justify-content: center !important;
+
+    margin:
+      0
+      auto
+      6px !important;
+
+    z-index: 7000 !important;
+}
+
+.bubblemap-page .student-timer-card {
+min-width: 190px !important;
+    min-height: 70px !important;
+
+    padding: 9px 24px !important;
+}
+
+.bubblemap-page .bubblemap-container {
+flex: 0 0 auto !important;
+
+    width: min(100%, 1100px) !important;
+    max-width: 1100px !important;
+    min-width: 0 !important;
+
+    margin:
+      0
+      auto
+      18px !important;
+}
+}
+
+@media (orientation: landscape)
+       and (min-width: 701px)
+       and (max-width: 1400px)
+       and (hover: none)
+       and (pointer: coarse) {
+body.bubblemap-page {
+display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+
+    width: 100% !important;
+    min-height: 100dvh !important;
+
+    padding:
+      max(72px, calc(env(safe-area-inset-top) + 62px))
+      clamp(18px, 2vw, 26px)
+      26px
+      clamp(128px, 11.5vw, 160px) !important;
+
+    gap: 8px !important;
+
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+}
+
+.bubblemap-page .student-timer-host {
+flex: 0 0 auto !important;
+
+    position: sticky !important;
+    top:
+      max(68px, calc(env(safe-area-inset-top) + 58px)) !important;
+
+    align-self: center !important;
+
+    width: min(100%, 1040px) !important;
+    max-width: 1040px !important;
+
+    display: flex !important;
+    justify-content: center !important;
+
+    margin:
+      0
+      auto
+      4px !important;
+
+    z-index: 7000 !important;
+}
+
+.bubblemap-page .student-timer-card {
+min-width: 185px !important;
+    min-height: 64px !important;
+
+    padding: 8px 22px !important;
+}
+
+.bubblemap-page .bubblemap-container {
+width: min(100%, 1040px) !important;
+    max-width: 1040px !important;
+    min-width: 0 !important;
+
+    margin:
+      0
+      auto
+      16px !important;
+}
+}
+
+@media (orientation: portrait)
+       and (min-width: 701px)
+       and (max-width: 1100px) {
+body.bubblemap-page {
+display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+
+    width: 100% !important;
+    min-height: 100dvh !important;
+
+    padding:
+      max(76px, calc(env(safe-area-inset-top) + 68px))
+      clamp(16px, 2.4vw, 24px)
+      28px !important;
+
+    gap: 10px !important;
+
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+}
+
+.bubblemap-page .student-timer-host {
+flex: 0 0 auto !important;
+
+    position: sticky !important;
+    top:
+      max(72px, calc(env(safe-area-inset-top) + 64px)) !important;
+
+    align-self: center !important;
+
+    width: fit-content !important;
+    max-width: calc(100vw - 32px) !important;
+
+    margin:
+      0
+      auto
+      8px !important;
+
+    z-index: 7000 !important;
+}
+
+.bubblemap-page .student-timer-card {
+min-width: 190px !important;
+    min-height: 68px !important;
+
+    padding: 9px 22px !important;
+}
+
+.bubblemap-page .bubblemap-container {
+width: min(100%, 920px) !important;
+    max-width: 920px !important;
+    min-width: 0 !important;
+
+    margin:
+      0
+      auto !important;
+}
+}
+
+@media (min-width: 701px)
+       and (max-width: 1400px)
+       and (hover: none)
+       and (pointer: coarse) {
+.bubblemap-page .student-timer-host.is-compact {
+top:
+      max(64px, calc(env(safe-area-inset-top) + 56px)) !important;
+
+    width: fit-content !important;
+    max-width: calc(100vw - 32px) !important;
+}
+
+.bubblemap-page .student-timer-host.is-compact
+  .student-timer-card {
+min-width: 150px !important;
+    min-height: 46px !important;
+
+    padding: 7px 16px !important;
+}
+
+.bubblemap-page .student-timer-host.is-compact
+  .student-timer-label {
+display: none !important;
+}
+
+.bubblemap-page .student-timer-host.is-compact
+  .student-timer-value {
+font-size: 25px !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+}
+}
+
+@media (orientation: landscape)
+       and (min-width: 701px)
+       and (max-width: 1400px) {
+body.bubblemap-page {
+height: auto !important;
+    min-height: 100dvh !important;
+    max-height: none !important;
+
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    touch-action: pan-y;
+}
+
+.bubblemap-page .bubblemap-container {
+height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+
+    overflow: visible !important;
+
+    flex: 0 0 auto !important;
+}
+
+.bubblemap-page .bubble-stage {
+flex-shrink: 0 !important;
+}
+
+.bubblemap-page .bubblemap-container {
+margin-bottom: 42px !important;
+}
+}
+
+@media (min-width: 701px)
+       and (max-width: 1400px)
+       and (hover: none)
+       and (pointer: coarse) {
+body.bubblemap-page {
+position: relative !important;
+
+    width: 100% !important;
+    height: auto !important;
+    min-height: 100dvh !important;
+    max-height: none !important;
+
+
+    overflow: visible !important;
+
+    overscroll-behavior: auto !important;
+    touch-action: pan-y !important;
+
+
+    background-attachment: scroll !important;
+}
+
+.bubblemap-page .bubblemap-container {
+position: relative !important;
+
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+
+    overflow: visible !important;
+
+    flex: 0 0 auto !important;
+
+
+    background-attachment: scroll !important;
+
+    touch-action: pan-y !important;
+
+    margin-bottom:
+      max(56px, env(safe-area-inset-bottom)) !important;
+}
+
+.bubblemap-page .bubble-stage,
+.bubblemap-page .bubble,
+.bubblemap-page .bubble-item,
+.bubblemap-page .bubble.central,
+.bubblemap-page .desafio-panel,
+.bubblemap-page .reglas-bubble,
+.bubblemap-page .bubble-actions {
+touch-action: pan-y !important;
+}
+
+.bubblemap-page button,
+.bubblemap-page summary {
+touch-action: manipulation !important;
+}
+
+.bubblemap-page .student-timer-host {
+overflow: visible !important;
+}
+
+.bubblemap-page .bubblemap-container,
+.bubblemap-page .desafio-panel,
+.bubblemap-page .reglas-bubble {
+-webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+}
+}
+
+@media (orientation: landscape)
+       and (min-width: 1000px)
+       and (max-width: 1400px)
+       and (min-height: 700px)
+       and (max-height: 1100px)
+       and (hover: none)
+       and (pointer: coarse) {
+body.bubblemap-page {
+height: auto !important;
+    min-height: 100dvh !important;
+
+    align-items: center !important;
+    justify-content: flex-start !important;
+}
+
+.bubblemap-page .bubblemap-container {
+height: auto !important;
+    max-height: none !important;
+
+    overflow: visible !important;
+
+    padding-bottom: 34px !important;
+    margin-bottom: 72px !important;
+}
+
+.bubblemap-page .bubble-stage {
+flex: 0 0 auto !important;
+    flex-shrink: 0 !important;
+}
+
+.bubblemap-page .bubble-actions,
+.bubblemap-page .footer-actions {
+flex-shrink: 0 !important;
+}
+}
+
+@media (orientation: landscape)
+       and (min-width: 701px)
+       and (max-width: 1400px)
+       and (hover: none)
+       and (pointer: coarse) {
+body.bubblemap-page {
+position: relative !important;
+
+    display: block !important;
+
+    width: 100% !important;
+
+    height: auto !important;
+    min-height: 100dvh !important;
+    max-height: none !important;
+
+    margin: 0 !important;
+
+
+    overflow: visible !important;
+
+    overscroll-behavior: auto !important;
+
+
+    touch-action: pan-y pinch-zoom !important;
+
+
+    background-attachment: scroll !important;
+}
+
+.bubblemap-page .student-timer-host,
+.bubblemap-page .student-timer-host.is-compact {
+position: fixed !important;
+
+    top:
+      max(64px, calc(env(safe-area-inset-top) + 56px)) !important;
+
+    left: 50% !important;
+    right: auto !important;
+    bottom: auto !important;
+
+    transform: translateX(-50%) !important;
+
+    width: fit-content !important;
+    max-width: calc(100vw - 340px) !important;
+
+    margin: 0 !important;
+
+    z-index: 8000 !important;
+
+    overflow: visible !important;
+
+
+    transition:
+      opacity .18s ease,
+      filter .18s ease !important;
+
+    will-change: auto !important;
+
+    pointer-events: none !important;
+}
+
+.bubblemap-page .student-timer-host .student-timer-card {
+pointer-events: none !important;
+}
+
+.bubblemap-page
+  .student-timer-host:not(.is-compact)
+  .student-timer-card {
+min-width: 190px !important;
+    min-height: 62px !important;
+
+    padding: 8px 20px !important;
+
+    border-radius: 18px !important;
+}
+
+.bubblemap-page
+  .student-timer-host.is-compact
+  .student-timer-card {
+min-width: 142px !important;
+    max-width: 190px !important;
+
+    min-height: 44px !important;
+
+    padding: 6px 14px !important;
+
+    border-radius: 14px !important;
+}
+
+.bubblemap-page
+  .student-timer-host.is-compact
+  .student-timer-label {
+display: none !important;
+}
+
+.bubblemap-page
+  .student-timer-host.is-compact
+  .student-timer-value,
+.bubblemap-page
+  .student-timer-host.is-compact
+  #timer.student-timer-value {
+font-size: 25px !important;
+    line-height: 1 !important;
+
+    white-space: nowrap !important;
+}
+
+.bubblemap-page .bubblemap-container {
+position: relative !important;
+
+    display: block !important;
+
+    width: min(calc(100vw - 180px), 1100px) !important;
+    max-width: 1100px !important;
+
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+
+
+    margin:
+      132px
+      auto
+      72px !important;
+
+    overflow: visible !important;
+
+    background-attachment: scroll !important;
+
+    touch-action: pan-y pinch-zoom !important;
+}
+
+.bubblemap-page .bubble-stage,
+.bubblemap-page .bubble,
+.bubblemap-page .bubble-item,
+.bubblemap-page .bubble.central {
+touch-action: pan-y pinch-zoom !important;
+}
+
+.bubblemap-page button,
+.bubblemap-page summary,
+.bubblemap-page textarea {
+touch-action: manipulation !important;
+}
+
+.bubblemap-page .bubble-stage,
+.bubblemap-page .bubble-actions,
+.bubblemap-page .footer-actions {
+flex-shrink: 0 !important;
+}
+}
+
+@media (orientation: landscape)
+       and (min-width: 1200px)
+       and (max-width: 1400px)
+       and (min-height: 900px)
+       and (max-height: 1100px)
+       and (hover: none)
+       and (pointer: coarse) {
+.bubblemap-page .student-timer-host,
+.bubblemap-page .student-timer-host.is-compact {
+top:
+      max(68px, calc(env(safe-area-inset-top) + 60px)) !important;
+}
+
+.bubblemap-page .bubblemap-container {
+margin-top: 138px !important;
+    margin-bottom: 84px !important;
+}
+}
+
+html.bubblemap-scroll-root {
+width: 100% !important;
+
+  height: auto !important;
+  min-height: 100% !important;
+
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+
+  scroll-behavior: auto !important;
+  overscroll-behavior-y: auto !important;
+
+  -webkit-overflow-scrolling: touch;
+}
+
+body.bubblemap-page {
+position: relative !important;
+
+  width: 100% !important;
+
+  height: auto !important;
+  min-height: 100dvh !important;
+  max-height: none !important;
+
+
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
+
+  overscroll-behavior: auto !important;
+
+  touch-action: pan-y pinch-zoom !important;
+
+
+  background-attachment: scroll !important;
+}
+
+.bubblemap-page .bubblemap-container {
+position: relative !important;
+
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+
+  overflow: visible !important;
+
+  background-attachment: scroll !important;
+
+  touch-action: pan-y pinch-zoom !important;
+
+
+  margin-bottom:
+    max(64px, env(safe-area-inset-bottom)) !important;
+}
+
+.bubblemap-page .bubble-stage,
+.bubblemap-page .bubble,
+.bubblemap-page .bubble-item,
+.bubblemap-page .bubble.central,
+.bubblemap-page .desafio-panel,
+.bubblemap-page .reglas-bubble,
+.bubblemap-page .bubble-actions {
+touch-action: pan-y pinch-zoom !important;
+}
+
+.bubblemap-page button,
+.bubblemap-page summary {
+touch-action: manipulation !important;
+}
+
+.bubblemap-page .bubble-stage,
+.bubblemap-page .bubble-actions,
+.bubblemap-page .footer-actions {
+flex-shrink: 0 !important;
+}
+
+.bubblemap-page .student-timer-host,
+.bubblemap-page .student-timer-host.is-compact {
+position: fixed !important;
+}
+
+/* ============================================================
+   FEEDBACK 1 — BUBBLE MAP / FONDO + TIMER + SCROLL FINAL
+
+   Objetivos:
+   - el fondo del escenario NO se desplaza con el contenido
+   - un único scroll nativo del documento
+   - timer centrado respecto a .bubblemap-container
+   - timer oculto cuando aparece MISIÓN CUMPLIDA
+   ============================================================ */
+
+body.bubblemap-page {
+  position: relative !important;
+  isolation: isolate !important;
+
+  width: 100% !important;
+  height: auto !important;
+  min-height: 100dvh !important;
+  max-height: none !important;
+
+  background: #000712 !important;
+
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
+
+  overscroll-behavior-y: auto !important;
+  touch-action: pan-y pinch-zoom !important;
+}
+
+body.bubblemap-page::before {
+  content: "" !important;
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: -1 !important;
+
+  background:
+    #000712
+    url('/static/images/FondoBubbleMap.png')
+    center center / cover
+    no-repeat !important;
+
+  pointer-events: none !important;
+  transform: translateZ(0);
+}
+
+html.bubblemap-scroll-root,
+html:has(body.bubblemap-page) {
+  width: 100% !important;
+  height: auto !important;
+  min-height: 100% !important;
+
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+
+  scroll-behavior: auto !important;
+  overscroll-behavior-y: auto !important;
+
+  -webkit-overflow-scrolling: touch;
+}
+
+body.bubblemap-page .bubblemap-container {
+  position: relative !important;
+
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+
+  overflow: visible !important;
+  background-attachment: scroll !important;
+  touch-action: pan-y pinch-zoom !important;
+}
+
+body.bubblemap-page .bubble-stage,
+body.bubblemap-page .bubble,
+body.bubblemap-page .bubble-item,
+body.bubblemap-page .bubble.central,
+body.bubblemap-page .desafio-panel,
+body.bubblemap-page .reglas-bubble,
+body.bubblemap-page .bubble-actions {
+  touch-action: pan-y pinch-zoom !important;
+}
+
+body.bubblemap-page button,
+body.bubblemap-page summary,
+body.bubblemap-page textarea {
+  touch-action: manipulation !important;
+}
+
+body.bubblemap-page > .student-timer-host,
+body.bubblemap-page > .student-timer-host.is-compact {
+  position: fixed !important;
+  right: auto !important;
+  bottom: auto !important;
+  transform: translateX(-50%) !important;
+  margin: 0 !important;
+  z-index: 9000 !important;
+  pointer-events: none !important;
+}
+
+body.bubblemap-page > .student-timer-host.bubblemap-timer-hidden {
+  display: none !important;
+}
+
+body.bubblemap-page .resultado-modal {
+  z-index: 12000 !important;
+}

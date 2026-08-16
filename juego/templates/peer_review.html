@@ -20,10 +20,12 @@
     href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800;900&display=swap"
     rel="stylesheet"
   >
+  <link rel="stylesheet" href="{% static 'css/linea_progreso_habilidades.css' %}">
   <link
     rel="stylesheet"
     href="{% static 'css/estilo_peer_review.css' %}"
   >
+<link rel="stylesheet" href="{% static 'css/student_timer.css' %}">
 </head>
 
 <body
@@ -32,6 +34,20 @@
 >
 
 
+
+  <div class="student-timer-host"
+       data-student-timer
+       data-compact-after="999999">
+    <div id="timerPanelEvaluacion"
+         class="peer-timer-panel student-timer-card"
+         role="timer"
+         aria-live="polite"
+         aria-label="Tiempo restante para evaluar">
+      <span class="peer-timer-label" data-i18n="peer_tiempo_restante">Tiempo restante</span>
+      <strong id="timerEvaluacion" class="peer-timer-value student-timer-value">01:30</strong>
+      <span class="peer-timer-caption" data-i18n="peer_timer_caption">para enviar la evaluación</span>
+    </div>
+  </div>
 
   <main class="peer-layout">
     <section class="peer-stage" aria-labelledby="peerTitulo">
@@ -65,31 +81,7 @@
 </div>
         </div>
 
-        <div
-          id="timerPanelEvaluacion"
-          class="peer-timer-panel"
-          role="timer"
-          aria-live="polite"
-          aria-label="Tiempo restante para evaluar"
-        >
-          <span
-            class="peer-timer-label"
-            data-i18n="peer_tiempo_restante"
-          >
-            Tiempo restante
-          </span>
 
-          <strong
-            id="timerEvaluacion"
-            class="peer-timer-value"
-          >
-            01:30
-          </strong>
-
-          <span class="peer-timer-caption" data-i18n="peer_timer_caption">
-            para enviar la evaluación
-          </span>
-        </div>
       </header>
 
       {% if messages %}
@@ -646,5 +638,78 @@
   {% with grupo=evaluator_team %}
     {% include "includes/sincronizacion_fase.html" %}
   {% endwith %}
+  <script src="{% static 'js/student_timer.js' %}"></script>
+
+<script>
+  /* ==========================================================
+     PEER REVIEW FINAL — DEVOLVER TIMER AL HEADER
+     ========================================================== */
+  (function () {
+    function colocarTimerEnPeerReview() {
+      const hero = document.querySelector(".peer-review-page .peer-hero");
+      const main = document.querySelector(".peer-review-page .peer-layout");
+
+      if (!hero) return false;
+
+      const host =
+        document.querySelector("body > .student-timer-host")
+        || document.querySelector(".student-timer-host");
+
+      if (!host) return false;
+
+      if (host.parentElement !== hero) {
+        hero.appendChild(host);
+      }
+
+      host.classList.add("peer-timer-inline-host");
+
+      if (main) {
+        main.style.setProperty("margin-top", "0px", "important");
+      }
+
+      host.style.setProperty("position", "static", "important");
+      host.style.setProperty("left", "auto", "important");
+      host.style.setProperty("right", "auto", "important");
+      host.style.setProperty("top", "auto", "important");
+      host.style.setProperty("bottom", "auto", "important");
+      host.style.setProperty("transform", "none", "important");
+
+      return true;
+    }
+
+    function iniciar() {
+      colocarTimerEnPeerReview();
+
+      [0, 60, 180, 400].forEach(ms => {
+        setTimeout(colocarTimerEnPeerReview, ms);
+      });
+
+      if ("MutationObserver" in window) {
+        const observer = new MutationObserver(() => {
+          colocarTimerEnPeerReview();
+        });
+
+        observer.observe(document.body, {
+          childList: true
+        });
+      }
+
+      window.addEventListener("resize", colocarTimerEnPeerReview);
+      window.addEventListener("orientationchange", () => {
+        setTimeout(colocarTimerEnPeerReview, 120);
+      });
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", iniciar, { once: true });
+    } else {
+      iniciar();
+    }
+  })();
+</script>
+
+
+
+
 </body>
 </html>

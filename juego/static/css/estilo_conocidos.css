@@ -1179,3 +1179,964 @@ body:has(#dialogo-inicial-overlay.visible) .zona-juego{
     scroll-behavior: auto !important;
   }
 }
+
+/* ============================================================
+   MIGRACIÓN DESDE student_activity_layout.css — CONOCIDOS
+   Reglas específicas que antes vivían en el CSS global.
+   ============================================================ */
+
+.conocidos-page .phone {
+width: min(980px, 100%);
+  min-height: 0;
+}
+
+.conocidos-page .zona-juego {
+min-height: clamp(500px, 68dvh, 700px);
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.conocidos-page .juego-contenido {
+min-height: 0;
+}
+
+.conocidos-page .juego-footer:empty {
+display: none;
+}
+
+@media (min-width: 768px) and (max-height: 860px) {
+.conocidos-page .zona-juego {
+min-height: 0;
+    padding-top: 24px;
+    padding-bottom: 24px;
+    gap: 10px;
+}
+
+.conocidos-page .speech-bubble {
+padding: clamp(20px, 2.2vw, 30px);
+}
+}
+
+@media (max-width: 767px) {
+.conocidos-page .zona-juego {
+border-radius: 20px;
+}
+
+.conocidos-page .zona-juego {
+padding-left: 16px;
+    padding-right: 16px;
+}
+}
+
+.conocidos-page {
+display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+
+  padding-top: clamp(18px, 3vh, 34px) !important;
+  padding-bottom: clamp(20px, 3vh, 36px) !important;
+}
+
+.conocidos-page .student-timer-host {
+flex: 0 0 auto;
+  margin-top: 0;
+  margin-bottom: clamp(10px, 1.5vh, 18px);
+}
+
+.conocidos-page .phone {
+flex: 0 0 auto;
+  margin-top: 0 !important;
+}
+
+@media (min-width: 701px) and (max-width: 1100px) {
+.conocidos-page .phone {
+max-width: calc(100vw - 150px) !important;
+    margin-left: 132px !important;
+    margin-right: 18px !important;
+}
+}
+
+@media (min-width: 701px) and (max-width: 1100px) and (orientation: portrait) {
+.conocidos-page .student-timer-host {
+margin-bottom: 10px !important;
+}
+
+.conocidos-page .zona-juego {
+padding-top: clamp(20px, 2.5vw, 28px);
+}
+}
+
+@media (min-width: 701px) and (max-width: 1100px) and (orientation: portrait) {
+body.conocidos-page {
+width: 100%;
+    height: 100dvh;
+    min-height: 100dvh;
+
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+
+    align-items: stretch;
+    justify-items: stretch;
+
+    gap: 10px;
+
+    padding:
+      max(10px, env(safe-area-inset-top))
+      14px
+      14px
+      132px !important;
+
+    overflow-x: hidden;
+    overflow-y: hidden;
+}
+
+.conocidos-page .student-timer-host {
+grid-row: 1;
+
+    position: sticky;
+    top: max(8px, env(safe-area-inset-top));
+
+    align-self: start;
+    justify-self: center;
+
+    width: fit-content;
+    max-width: 100%;
+
+    margin: 0 auto !important;
+}
+
+.conocidos-page .student-timer-card {
+min-width: 178px;
+    min-height: 66px;
+    padding: 8px 20px;
+}
+
+.conocidos-page .phone {
+grid-row: 2;
+
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+
+    height: 100% !important;
+    min-height: 0 !important;
+
+    margin: 0 !important;
+}
+
+.conocidos-page .zona-juego {
+width: 100%;
+    height: 100%;
+    min-height: 0 !important;
+
+    padding:
+      clamp(32px, 4vh, 54px)
+      clamp(32px, 4.5vw, 56px)
+      clamp(30px, 3.5vh, 48px);
+
+
+    grid-template-rows:
+      auto
+      minmax(0, 1fr) !important;
+
+    align-items: center;
+    gap: clamp(20px, 2.4vh, 34px);
+
+    border-radius: 28px;
+}
+
+.conocidos-page .title {
+width: min(100%, 880px);
+
+    font-size: clamp(42px, 5.1vw, 58px);
+    line-height: 1.04;
+
+    padding-inline: 12px;
+}
+
+.conocidos-page .juego-contenido {
+width: 100%;
+    height: 100%;
+    min-height: 0 !important;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.conocidos-page .speech-bubble {
+width: min(94%, 860px);
+    max-width: 860px;
+
+    padding:
+      clamp(34px, 4vw, 50px)
+      clamp(34px, 4.5vw, 54px);
+
+    border-radius: 24px;
+}
+
+.conocidos-page .body {
+font-size: clamp(20px, 2.15vw, 25px);
+    line-height: 1.55;
+    margin-bottom: 20px;
+}
+
+.conocidos-page .pregunta-random {
+margin-top: 22px;
+
+    font-size: clamp(24px, 2.7vw, 31px);
+    line-height: 1.38;
+}
+
+.conocidos-page .btn-random {
+min-height: 58px;
+    padding: 14px 28px;
+    font-size: clamp(16px, 1.8vw, 19px);
+}
+
+.conocidos-page .phone {
+margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+}
+
+@media (min-width: 701px) and (max-width: 1100px) and (orientation: landscape) {
+body.conocidos-page {
+display: flex !important;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+
+    padding:
+      max(10px, env(safe-area-inset-top))
+      14px
+      16px
+      132px !important;
+
+    gap: 10px;
+
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.conocidos-page .student-timer-host {
+margin: 0 auto !important;
+}
+
+.conocidos-page .phone {
+width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+
+    min-height: calc(100dvh - 100px) !important;
+
+    margin: 0 !important;
+}
+
+.conocidos-page .zona-juego {
+min-height: calc(100dvh - 100px) !important;
+
+    padding:
+      clamp(24px, 3vh, 34px)
+      clamp(30px, 4vw, 48px);
+
+    grid-template-rows: auto minmax(0, 1fr) !important;
+    gap: 14px;
+}
+
+.conocidos-page .speech-bubble {
+width: min(94%, 860px);
+    padding: clamp(24px, 3vw, 36px);
+}
+}
+
+@media (min-width: 701px) and (max-width: 1100px) and (orientation: portrait) {
+body.conocidos-page {
+width: 100%;
+    height: 100dvh;
+    min-height: 100dvh;
+
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+
+    align-items: stretch;
+    justify-items: stretch;
+
+
+    padding:
+      max(56px, calc(env(safe-area-inset-top) + 48px))
+      14px
+      14px
+      132px !important;
+
+    gap: 10px;
+
+    overflow-x: hidden;
+    overflow-y: hidden;
+}
+
+.conocidos-page .student-timer-host {
+grid-row: 1;
+
+    position: sticky;
+    top: max(56px, calc(env(safe-area-inset-top) + 48px));
+
+    align-self: start;
+    justify-self: center;
+
+    width: fit-content;
+    max-width: 100%;
+
+    margin: 0 auto !important;
+
+    z-index: 7000;
+}
+
+.conocidos-page .student-timer-card {
+min-width: 172px;
+    min-height: 62px;
+
+    padding: 7px 18px;
+
+    border-radius: 17px;
+}
+
+.conocidos-page .student-timer-label {
+font-size: 8.5px;
+    line-height: 1;
+}
+
+.conocidos-page .student-timer-host .student-timer-value,
+.conocidos-page .student-timer-host #timer.student-timer-value {
+font-size: clamp(27px, 3.5vw, 36px) !important;
+}
+
+.conocidos-page .phone {
+grid-row: 2;
+
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+
+    height: 100% !important;
+    min-height: 0 !important;
+
+    margin: 0 !important;
+}
+
+.conocidos-page .zona-juego {
+width: 100%;
+    height: 100%;
+    min-height: 0 !important;
+
+    display: grid !important;
+
+
+    grid-template-rows:
+      auto
+      minmax(0, 1fr) !important;
+
+    align-items: stretch !important;
+    align-content: stretch !important;
+
+    gap: clamp(18px, 2vh, 26px) !important;
+
+    padding:
+      clamp(26px, 2.8vh, 36px)
+      clamp(30px, 4vw, 46px)
+      clamp(28px, 3vh, 40px) !important;
+
+    border-radius: 28px;
+
+
+    background:
+      linear-gradient(
+        180deg,
+        rgba(3, 22, 48, .40),
+        rgba(3, 14, 32, .30)
+      ) !important;
+
+    backdrop-filter: blur(2px) saturate(112%) !important;
+    -webkit-backdrop-filter: blur(2px) saturate(112%) !important;
+}
+
+.conocidos-page .title {
+width: min(100%, 900px);
+
+    margin: 0 auto !important;
+    padding: 0 10px !important;
+
+    align-self: start;
+
+    font-size: clamp(42px, 5vw, 56px);
+    line-height: 1.04;
+}
+
+.conocidos-page .juego-contenido {
+width: 100%;
+    height: 100%;
+    min-height: 0 !important;
+
+    display: flex !important;
+    align-items: stretch !important;
+    justify-content: center !important;
+}
+
+.conocidos-page .speech-bubble {
+width: min(96%, 900px) !important;
+    max-width: 900px !important;
+
+    height: 100%;
+    min-height: 0 !important;
+
+    margin: 0 auto;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    padding:
+      clamp(38px, 4.5vw, 58px)
+      clamp(36px, 4.8vw, 60px) !important;
+
+    border-radius: 24px;
+
+    background: rgba(4, 24, 50, .42) !important;
+
+    backdrop-filter: blur(3px) saturate(116%) !important;
+    -webkit-backdrop-filter: blur(3px) saturate(116%) !important;
+}
+
+.conocidos-page .body {
+margin: 0 0 clamp(22px, 2.4vh, 30px);
+
+    font-size: clamp(21px, 2.25vw, 26px);
+    line-height: 1.55;
+}
+
+.conocidos-page .pregunta-random {
+margin-top: clamp(18px, 2vh, 24px);
+
+    font-size: clamp(25px, 2.7vw, 31px);
+    line-height: 1.4;
+}
+
+.conocidos-page .btn-random {
+min-height: 58px;
+    padding: 14px 28px;
+
+    font-size: clamp(16px, 1.8vw, 19px);
+}
+
+.conocidos-page .astro-trigger {
+--astro-size: clamp(62px, 7vw, 82px);
+}
+}
+
+@media (min-width: 701px) and (max-width: 1100px) and
+       (orientation: portrait) and (max-height: 900px) {
+body.conocidos-page {
+padding-top: 50px !important;
+    overflow-y: auto;
+}
+
+.conocidos-page .student-timer-host {
+top: 50px;
+}
+
+.conocidos-page .phone {
+min-height: 690px !important;
+}
+
+.conocidos-page .speech-bubble {
+min-height: 420px !important;
+}
+}
+
+@media (min-width: 701px) and (max-width: 1100px) and (orientation: portrait) {
+.conocidos-page .zona-juego {
+background:
+      linear-gradient(
+        180deg,
+        rgba(3, 22, 48, .56),
+        rgba(3, 14, 32, .42)
+      ) !important;
+
+    backdrop-filter: blur(4px) saturate(118%) !important;
+    -webkit-backdrop-filter: blur(4px) saturate(118%) !important;
+
+
+    grid-template-rows: auto auto !important;
+    align-content: start !important;
+    align-items: start !important;
+
+    gap: clamp(20px, 2.2vh, 30px) !important;
+
+    padding:
+      clamp(30px, 3vh, 42px)
+      clamp(30px, 4vw, 46px)
+      clamp(30px, 3vh, 42px) !important;
+}
+
+.conocidos-page .title {
+margin: 0 auto !important;
+    padding: 0 8px !important;
+
+    font-size: clamp(42px, 5vw, 56px);
+    line-height: 1.04;
+}
+
+.conocidos-page .juego-contenido {
+width: 100%;
+
+    height: auto !important;
+    min-height: 0 !important;
+
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.conocidos-page .speech-bubble {
+width: min(96%, 900px) !important;
+    max-width: 900px !important;
+
+    height: auto !important;
+    min-height: 0 !important;
+
+    margin: 0 auto !important;
+
+    display: block !important;
+
+    padding:
+      clamp(34px, 4vw, 48px)
+      clamp(36px, 4.5vw, 54px) !important;
+
+
+    background: rgba(4, 24, 50, .50) !important;
+
+    backdrop-filter: blur(5px) saturate(122%) !important;
+    -webkit-backdrop-filter: blur(5px) saturate(122%) !important;
+}
+
+.conocidos-page .body {
+margin: 0 0 18px !important;
+
+    font-size: clamp(20px, 2.15vw, 25px);
+    line-height: 1.5;
+}
+
+.conocidos-page .pregunta-random {
+margin-top: 18px !important;
+
+    font-size: clamp(24px, 2.6vw, 30px);
+    line-height: 1.38;
+}
+
+.conocidos-page .zona-juego {
+justify-content: start !important;
+}
+}
+
+@media (min-width: 701px) and (max-width: 1100px) and (orientation: portrait) {
+body.conocidos-page {
+height: auto !important;
+    min-height: 100dvh !important;
+
+
+    background-attachment: scroll !important;
+
+
+    display: flex !important;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+
+    gap: 10px;
+
+    padding:
+      max(56px, calc(env(safe-area-inset-top) + 48px))
+      14px
+      18px
+      132px !important;
+
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.conocidos-page .student-timer-host {
+position: sticky;
+    top: max(56px, calc(env(safe-area-inset-top) + 48px));
+
+    align-self: center;
+
+    margin:
+      0
+      auto
+      8px !important;
+
+    z-index: 7000;
+}
+
+.conocidos-page .phone {
+width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+
+    height: auto !important;
+    min-height: 0 !important;
+
+    flex: 0 0 auto;
+
+    margin: 0 !important;
+}
+
+.conocidos-page .zona-juego {
+width: 100% !important;
+
+    height: auto !important;
+    min-height: 0 !important;
+
+    display: grid !important;
+    grid-template-rows: auto auto !important;
+
+    align-items: start !important;
+    align-content: start !important;
+
+    gap: clamp(18px, 2vh, 26px) !important;
+
+    padding:
+      clamp(28px, 3vh, 38px)
+      clamp(30px, 4vw, 46px)
+      clamp(30px, 3vh, 40px) !important;
+
+
+    background:
+      linear-gradient(
+        180deg,
+        rgba(3, 22, 48, .68),
+        rgba(3, 14, 32, .62)
+      ) !important;
+
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+.conocidos-page .zona-juego-fondo {
+backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+.conocidos-page .title {
+margin: 0 auto !important;
+
+    padding:
+      0
+      8px !important;
+
+    font-size: clamp(42px, 5vw, 56px);
+    line-height: 1.04;
+}
+
+.conocidos-page .juego-contenido {
+width: 100% !important;
+
+    height: auto !important;
+    min-height: 0 !important;
+
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.conocidos-page .speech-bubble {
+width: min(96%, 900px) !important;
+    max-width: 900px !important;
+
+    height: auto !important;
+    min-height: 0 !important;
+
+    margin: 0 auto !important;
+
+    padding:
+      clamp(30px, 3.6vw, 42px)
+      clamp(34px, 4.4vw, 52px) !important;
+
+
+    background: rgba(4, 24, 50, .78) !important;
+
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+.conocidos-page .body {
+margin:
+      0
+      0
+      18px !important;
+
+    font-size: clamp(20px, 2.15vw, 25px);
+    line-height: 1.5;
+}
+
+.conocidos-page .pregunta-random {
+margin-top: 16px !important;
+
+    font-size: clamp(24px, 2.6vw, 30px);
+    line-height: 1.38;
+}
+
+.conocidos-page .astro-trigger {
+--astro-size: clamp(60px, 6.8vw, 78px);
+}
+}
+
+@media (min-width: 701px) and (max-width: 1100px) and (orientation: portrait) {
+body.conocidos-page {
+width: 100%;
+    min-height: 100dvh !important;
+    height: auto !important;
+
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+
+    gap: 10px;
+
+    padding:
+      max(56px, calc(env(safe-area-inset-top) + 48px))
+      clamp(16px, 2.4vw, 24px)
+      24px !important;
+
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.conocidos-page .student-timer-host {
+order: 1;
+
+    position: sticky;
+    top: max(56px, calc(env(safe-area-inset-top) + 48px));
+
+    align-self: center;
+
+    margin: 0 auto 8px !important;
+}
+
+.conocidos-page .phone {
+order: 2;
+
+    width: min(100%, 920px) !important;
+    max-width: 920px !important;
+    min-width: 0 !important;
+
+    height: auto !important;
+    min-height: 0 !important;
+
+    margin: 0 auto !important;
+}
+
+.conocidos-page .zona-juego {
+width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+
+    grid-template-rows: auto auto !important;
+    align-content: start !important;
+    align-items: start !important;
+
+    gap: clamp(18px, 2vh, 26px) !important;
+
+    padding:
+      clamp(28px, 3vh, 38px)
+      clamp(30px, 4vw, 46px)
+      clamp(30px, 3vh, 40px) !important;
+}
+
+.conocidos-page .juego-contenido {
+height: auto !important;
+    min-height: 0 !important;
+}
+
+.conocidos-page .speech-bubble {
+height: auto !important;
+    min-height: 0 !important;
+}
+
+.conocidos-page .metro-progreso-habilidades {
+order: 3;
+
+    position: relative !important;
+    inset: auto !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+
+    transform: none !important;
+
+    width: min(100%, 920px) !important;
+    max-width: 920px !important;
+
+    height: 112px !important;
+    min-height: 112px !important;
+
+    margin: 4px auto 0 !important;
+    padding: 34px 28px 12px !important;
+
+    border-radius: 24px !important;
+
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: flex-start !important;
+    justify-content: space-between !important;
+    gap: 0 !important;
+
+    overflow: visible;
+}
+
+.conocidos-page .metro-progreso-habilidades::before {
+inset: 6px !important;
+    border-radius: 18px !important;
+}
+
+.conocidos-page .metro-header {
+position: absolute !important;
+    top: 9px !important;
+    left: 50% !important;
+
+    transform: translateX(-50%) !important;
+
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+
+    width: max-content;
+
+    margin: 0 !important;
+
+    font-size: 9px !important;
+    line-height: 1 !important;
+}
+
+.conocidos-page .metro-header-icon {
+display: inline !important;
+    margin: 0 !important;
+    font-size: 11px !important;
+}
+
+.conocidos-page .metro-header span:last-child {
+display: inline !important;
+}
+
+.conocidos-page .metro-punto {
+position: relative;
+    z-index: 2;
+
+    flex: 1 1 25%;
+    width: 25% !important;
+    min-width: 0;
+
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+
+    text-align: center;
+}
+
+.conocidos-page .metro-circulo {
+width: 34px !important;
+    height: 34px !important;
+
+    margin: 0 auto 7px !important;
+
+    border-width: 2px !important;
+
+    font-size: 12px !important;
+}
+
+.conocidos-page .metro-punto small {
+display: block !important;
+
+    max-width: 120px;
+
+    margin: 0 auto;
+
+    font-size: clamp(9px, 1.2vw, 11px) !important;
+    line-height: 1.12 !important;
+
+    white-space: normal;
+}
+
+.conocidos-page .metro-linea-base,
+.conocidos-page .metro-linea-activa {
+bottom: auto;
+    right: auto;
+
+    height: 6px;
+
+    border-radius: 999px;
+}
+
+.conocidos-page .metro-linea-activa {
+background:
+      linear-gradient(
+        90deg,
+        var(--metro-blue),
+        var(--metro-green-soft),
+        var(--metro-green)
+      ) !important;
+
+    background-size: 220% 100% !important;
+
+    transition: width .75s cubic-bezier(.18, .9, .25, 1) !important;
+}
+
+.conocidos-page .metro-punto.activo .metro-circulo {
+transform: scale(1.10) !important;
+}
+}
+
+@media (min-width: 701px) and (max-width: 1100px) and (orientation: portrait) {
+body.conocidos-page {
+padding-top:
+      max(76px, calc(env(safe-area-inset-top) + 68px)) !important;
+}
+
+.conocidos-page .student-timer-host {
+top:
+      max(76px, calc(env(safe-area-inset-top) + 68px)) !important;
+
+    margin-bottom: 12px !important;
+}
+
+.conocidos-page .student-timer-card {
+min-width: 198px !important;
+    min-height: 72px !important;
+
+    padding: 9px 24px !important;
+
+    border-radius: 19px !important;
+}
+
+.conocidos-page .student-timer-label {
+font-size: 9px !important;
+    letter-spacing: .14em !important;
+}
+
+.conocidos-page .student-timer-host .student-timer-value,
+.conocidos-page .student-timer-host #timer.student-timer-value {
+font-size: clamp(32px, 4.2vw, 42px) !important;
+}
+}

@@ -442,6 +442,65 @@ textarea::placeholder {
   user-select: none;
 }
 
+
+
+/* ─────────────────────────────────────────────
+   INSTRUCCION DE ESCRITURA DEL PITCH
+───────────────────────────────────────────── */
+.pitch-writing-instruction {
+  width: 100%;
+  margin: 0 0 10px;
+  padding: 13px 16px;
+  border-radius: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 4px 6px;
+  text-align: center;
+  color: rgba(230, 238, 248, .88);
+  font-size: clamp(13px, 1.08vw, 16px);
+  line-height: 1.45;
+  font-weight: 600;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(0, 242, 109, .08),
+      rgba(0, 200, 255, .06)
+    ),
+    rgba(3, 18, 42, .54);
+  border: 1px solid rgba(0, 200, 255, .28);
+  box-shadow:
+    0 8px 22px rgba(0, 0, 0, .16),
+    inset 0 0 18px rgba(0, 242, 109, .025);
+  backdrop-filter: blur(5px) saturate(116%);
+  -webkit-backdrop-filter: blur(5px) saturate(116%);
+}
+
+.pitch-writing-instruction strong {
+  color: var(--udd-green);
+  font-weight: 900;
+  text-shadow: 0 0 9px rgba(0, 242, 109, .18);
+}
+
+@media (min-width: 701px) and (max-width: 1100px) {
+  .pitch-writing-instruction {
+    padding: 14px 18px;
+    font-size: clamp(15px, 1.8vw, 18px);
+    border-radius: 15px;
+  }
+}
+
+@media (max-width: 700px) {
+  .pitch-writing-instruction {
+    padding: 12px 14px;
+    font-size: 13px;
+    line-height: 1.4;
+    justify-content: flex-start;
+    text-align: left;
+  }
+}
+
 /* ─────────────────────────────────────────────
    BOTONES GENERALES
 ───────────────────────────────────────────── */
@@ -1224,4 +1283,66 @@ body:has(#inicio-fase-overlay:not(.overlay-hidden)) .metro-progreso-habilidades 
     height: 100%;
     min-height: 0 !important;
   }
+}
+
+/* ============================================================
+   MIGRACIÓN DESDE student_activity_layout.css — PITCH
+   Reglas específicas que antes vivían en el CSS global.
+   ============================================================ */
+
+.pitch-page .pitch-editor {
+width: min(1080px, 100%);
+  min-height: 0;
+}
+
+@media (min-width: 768px) and (max-height: 860px) {
+.pitch-page .pitch-editor {
+padding-top: 24px;
+    padding-bottom: 26px;
+    gap: 11px;
+}
+
+.pitch-page #pitch-text {
+min-height: clamp(160px, 25dvh, 240px);
+    max-height: 34dvh;
+}
+}
+
+@media (max-width: 767px) {
+.pitch-page .pitch-editor {
+border-radius: 20px;
+}
+
+.pitch-page .pitch-editor {
+padding-left: 16px;
+    padding-right: 16px;
+}
+
+.pitch-page #pitch-text {
+min-height: 180px;
+    max-height: none;
+}
+}
+
+@media (min-width: 701px) and (max-width: 1100px) {
+.pitch-page .pitch-editor {
+max-width: calc(100vw - 150px) !important;
+    margin-left: 132px !important;
+    margin-right: 18px !important;
+}
+}
+
+@media (min-width: 701px) and (max-width: 1100px) and (orientation: portrait) {
+body.pitch-page {
+padding-left: clamp(16px, 2.4vw, 24px) !important;
+    padding-right: clamp(16px, 2.4vw, 24px) !important;
+}
+
+.pitch-page .pitch-editor {
+width: min(100%, 920px) !important;
+    max-width: 920px !important;
+
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
 }

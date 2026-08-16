@@ -7,15 +7,29 @@
   <title>Misión Emprende UDD — Pitch</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/linea_progreso_habilidades.css' %}">
   <link rel="stylesheet" href="{% static 'css/estilo_pitch.css' %}">
+<link rel="stylesheet" href="{% static 'css/student_timer.css' %}">
   <link rel="icon" href="{% url 'favicon' %}">
 </head>
 
-<body
+<body class="pitch-page"
   data-sesion-id="{{ grupo.sesion.idsesion }}"
   data-tiempo-inicial="{{ tiempo_inicial_pitch|default:300 }}"
 >
   {% include "atajos.html" %}
+  <div id="timer-wrap-pitch"
+       class="student-timer-host blur-target-bloqueado timer-esperando"
+       data-student-timer
+       data-compact-after="48"
+       role="timer"
+       aria-live="polite">
+    <div class="student-timer-card">
+      <span class="student-timer-label" data-i18n="pitch_timer_label">Tiempo restante</span>
+      <div id="timer" class="timer-box-pitch student-timer-value">00:00</div>
+    </div>
+  </div>
+
 
   <div id="inicio-fase-overlay" class="inicio-fase-overlay" aria-modal="true" role="dialog" aria-label="Instrucciones de pitch">
     <div id="dialogo-box" class="dialogo-box">
@@ -249,10 +263,6 @@
       Ordenen sus ideas para presentar una propuesta clara, breve y convincente.
     </p>
 
-    <div id="timer-wrap-pitch" class="timer-wrap-pitch blur-target-bloqueado timer-esperando">
-      <div class="timer-label-pitch" data-i18n="pitch_timer_label">Tiempo restante</div>
-      <div id="timer" class="timer-box-pitch">00:00</div>
-    </div>
 
     <audio id="alarm-audio" src="{% static 'sounds/alarma.mp3' %}" preload="auto"></audio>
 
@@ -289,6 +299,17 @@
     </section>
 
     <form id="pitchFormWrap" class="pitch-form blur-target-bloqueado" onsubmit="return false;">
+
+      <div class="pitch-writing-instruction" role="note">
+        <span data-i18n="pitch_instruccion_inicio">
+          Usa este espacio para preparar tu pitch:
+        </span>
+        <strong data-i18n="pitch_instruccion_detalle">
+          estructura, ideas clave y puntos que no puedes olvidar.
+        </strong>
+      </div>
+
+
       <textarea
         id="pitch-text"
         name="pitch-text"
@@ -611,5 +632,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   {% include "includes/sincronizacion_fase.html" %}
   {% include "includes/countdown_inicio_fase.html" %}
+  <script src="{% static 'js/student_timer.js' %}"></script>
 </body>
 </html>

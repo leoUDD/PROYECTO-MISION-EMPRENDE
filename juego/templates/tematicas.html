@@ -6,12 +6,25 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Misión Emprende UDD — Elige la temática</title>
+  <link rel="stylesheet" href="{% static 'css/linea_progreso_habilidades.css' %}">
   <link rel="stylesheet" href="{% static 'css/estilo_tematicas.css' %}">
+<link rel="stylesheet" href="{% static 'css/student_timer.css' %}">
   <link rel="icon" href="{% url 'favicon' %}">
 </head>
 
 <body class="tematicas-page">
   {% include "atajos.html" %}
+  <div class="student-timer-host"
+       data-student-timer
+       data-compact-after="48"
+       role="timer"
+       aria-live="polite">
+    <div class="student-timer-card">
+      <span class="student-timer-label">Tiempo restante</span>
+      <strong id="timerTematica" class="student-timer-value">--</strong>
+    </div>
+  </div>
+
 
   <!-- Música de fondo -->
   <audio id="musica-desafios" src="{% static 'sounds/musica_desafios.mp3' %}" loop preload="auto"></audio>
@@ -22,12 +35,9 @@
       <header class="header">
         <h1 id="page-title" data-i18n="tematicas_titulo">Elige la temática del desafío</h1>
         <p class="subtitle" data-i18n="tematicas_subtitulo">Selecciona una categoría para continuar. Cada bloque explica de qué trata.</p>
-        <div class="timer-box">
-          <div class="timer-grande">
-            <strong id="timerTematica">--</strong>
-          </div>
-          <span class="timer-hint" data-i18n="tematicas_timer_hint">Si no eligen a tiempo, el sistema asignará una temática y desafío al azar.</span>
-        </div>
+        <p class="timer-hint" data-i18n="tematicas_timer_hint">
+          Si no eligen a tiempo, el sistema asignará una temática y desafío al azar.
+        </p>
       </header>
 
       <button id="objetoCamaraTrigger" class="objeto-camara-trigger" type="button" aria-label="Ver mensaje de EdEmy" data-i18n="tematicas_camara_aria" data-i18n-attr="aria-label">
@@ -147,5 +157,6 @@
   })();
   </script>
   {% include "includes/sincronizacion_fase.html" %}
+  <script src="{% static 'js/student_timer.js' %}"></script>
 </body>
 </html>

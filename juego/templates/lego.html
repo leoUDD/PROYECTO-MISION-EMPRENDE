@@ -6,11 +6,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Misión Emprende UDD — LEGO</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/linea_progreso_habilidades.css' %}">
   <link rel="stylesheet" href="{% static 'css/estilo_lego.css' %}">
+<link rel="stylesheet" href="{% static 'css/student_timer.css' %}">
   <link rel="icon" href="{% url 'favicon' %}">
 </head>
 
-<body
+<body class="lego-page"
   data-sesion-id="{{ grupo.sesion.idsesion }}"
   data-tiempo-inicial="{{ tiempo_inicial_lego|default:15 }}"
 >
@@ -28,6 +30,17 @@
           onclick="toggleMusicaLego()">
     &#128266;
   </button>
+
+  <div class="student-timer-host"
+       data-student-timer
+       data-compact-after="48"
+       role="timer"
+       aria-live="polite">
+    <div class="student-timer-card">
+      <span class="student-timer-label">Tiempo restante</span>
+      <div id="timer" class="timer student-timer-value">00:15</div>
+    </div>
+  </div>
 
   <main class="phone">
 
@@ -124,7 +137,6 @@
 
     <audio id="alarm-audio" src="{% static 'sounds/alarma.mp3' %}" preload="auto"></audio>
 
-    <div id="timer" class="timer">00:15</div>
 
     <div id="fotoPanel" class="foto-panel">
       <h3 data-i18n="lego_foto_titulo">Prepara la foto del prototipo</h3>
@@ -1313,5 +1325,6 @@
   </script>
 
   {% include "includes/sincronizacion_fase.html" %}
+  <script src="{% static 'js/student_timer.js' %}"></script>
 </body>
 </html>

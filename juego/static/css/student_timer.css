@@ -1,0 +1,586 @@
+/* ============================================================
+   MISION EMPRENDE — TIMER COMPARTIDO
+   Generado automáticamente al separar student_activity_layout.css.
+   ============================================================ */
+
+:root {
+--student-timer-top: max(10px, env(safe-area-inset-top));
+  --student-timer-z: 7000;
+
+  --student-timer-bg:
+    radial-gradient(circle at 50% 0%, rgba(0, 252, 152, .13), transparent 52%),
+    linear-gradient(155deg, rgba(3, 25, 52, .96), rgba(2, 10, 28, .97));
+
+  --student-timer-border: rgba(0, 200, 255, .64);
+  --student-timer-accent: #00fc98;
+  --student-timer-text: #f4fbff;
+}
+
+html {
+scroll-padding-top: 78px;
+}
+
+.student-timer-host {
+position: sticky;
+  top: var(--student-timer-top);
+  z-index: var(--student-timer-z);
+
+  width: fit-content;
+  max-width: min(92vw, 620px);
+  margin: 0 auto clamp(14px, 2vh, 22px);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  pointer-events: none;
+  isolation: isolate;
+}
+
+.student-timer-card {
+position: relative;
+  width: fit-content;
+  min-width: clamp(190px, 22vw, 280px);
+  min-height: clamp(76px, 9vh, 98px);
+  padding: 12px clamp(22px, 3vw, 34px);
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 3px;
+
+  border: 1.7px solid var(--student-timer-border);
+  border-radius: 22px;
+  background: var(--student-timer-bg);
+  box-shadow:
+    0 12px 32px rgba(0, 0, 0, .34),
+    0 0 23px rgba(0, 200, 255, .18),
+    inset 0 0 22px rgba(0, 200, 255, .07);
+
+  backdrop-filter: blur(10px) saturate(125%);
+  -webkit-backdrop-filter: blur(10px) saturate(125%);
+
+  transform: translateZ(0);
+  transform-origin: top center;
+
+  transition:
+    min-width .22s ease,
+    min-height .22s ease,
+    padding .22s ease,
+    border-radius .22s ease,
+    box-shadow .22s ease,
+    background .22s ease,
+    transform .22s ease;
+}
+
+.student-timer-card::before {
+content: "";
+  position: absolute;
+  inset: 6px;
+  border: 1px solid rgba(0, 252, 152, .12);
+  border-radius: 16px;
+  pointer-events: none;
+}
+
+.student-timer-label {
+position: relative;
+  z-index: 1;
+  color: rgba(230, 238, 248, .78);
+  font-family: "Poppins", system-ui, sans-serif;
+  font-size: clamp(10px, .85vw, 12px);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  white-space: nowrap;
+
+  transition:
+    opacity .18s ease,
+    max-height .18s ease,
+    margin .18s ease,
+    transform .18s ease;
+}
+
+.student-timer-host .student-timer-value,
+.student-timer-host #timer.student-timer-value,
+.student-timer-host #timerTematica.student-timer-value,
+.student-timer-host #timerEvaluacion.student-timer-value {
+position: relative !important;
+  inset: auto !important;
+  z-index: 1 !important;
+
+  display: block !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  animation: none !important;
+
+  color: var(--student-timer-text) !important;
+  font-family: "Poppins", system-ui, sans-serif !important;
+  font-size: clamp(32px, 4vw, 48px) !important;
+  font-weight: 900 !important;
+  font-variant-numeric: tabular-nums;
+  line-height: 1 !important;
+  letter-spacing: .045em !important;
+  text-align: center !important;
+  text-shadow:
+    0 0 10px rgba(0, 200, 255, .72),
+    0 0 22px rgba(0, 252, 152, .18) !important;
+
+  opacity: 1 !important;
+  transform: none !important;
+
+  transition:
+    font-size .22s ease,
+    color .2s ease,
+    text-shadow .2s ease !important;
+}
+
+.student-timer-host.is-compact .student-timer-card {
+min-width: 148px;
+  min-height: 48px;
+  padding: 8px 16px;
+  gap: 0;
+
+  border-radius: 15px;
+  background:
+    linear-gradient(155deg, rgba(3, 25, 52, .985), rgba(2, 10, 28, .99));
+
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, .38),
+    0 0 18px rgba(0, 200, 255, .20);
+}
+
+.student-timer-host.is-compact .student-timer-card::before {
+inset: 4px;
+  border-radius: 11px;
+}
+
+.student-timer-host.is-compact .student-timer-label {
+max-height: 0;
+  margin: 0;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+.student-timer-host.is-compact .student-timer-value,
+.student-timer-host.is-compact #timer.student-timer-value,
+.student-timer-host.is-compact #timerTematica.student-timer-value,
+.student-timer-host.is-compact #timerEvaluacion.student-timer-value {
+font-size: clamp(23px, 2.6vw, 30px) !important;
+}
+
+.student-timer-host.is-warning .student-timer-card {
+border-color: rgba(255, 194, 71, .82);
+  box-shadow:
+    0 8px 28px rgba(0, 0, 0, .38),
+    0 0 24px rgba(255, 194, 71, .24);
+}
+
+.student-timer-host.is-warning .student-timer-value {
+color: #ffe0a0 !important;
+  text-shadow: 0 0 13px rgba(255, 184, 54, .72) !important;
+}
+
+.student-timer-host.is-danger .student-timer-card {
+border-color: rgba(255, 95, 112, .90);
+  box-shadow:
+    0 8px 28px rgba(0, 0, 0, .40),
+    0 0 28px rgba(255, 95, 112, .30);
+  animation: studentTimerDangerPulse 1s ease-in-out infinite;
+}
+
+.student-timer-host.is-danger .student-timer-value {
+color: #ffd0d6 !important;
+  text-shadow: 0 0 14px rgba(255, 95, 112, .85) !important;
+}
+
+@keyframes studentTimerDangerPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.025); }
+}
+
+.student-timer-card--progress {
+width: min(92vw, 580px);
+  min-width: min(92vw, 420px);
+}
+
+.student-timer-card--progress #timer-container {
+width: 100% !important;
+  margin: 0 !important;
+}
+
+.student-timer-card--progress .timer-bar-track {
+min-width: 120px;
+}
+
+.student-timer-host.is-compact .student-timer-card--progress {
+width: auto;
+  min-width: 150px;
+}
+
+.student-timer-host.is-compact .student-timer-card--progress
+  #timer-container > span[data-i18n="sopa_tiempo_restante"],
+.student-timer-host.is-compact .student-timer-card--progress
+  .timer-bar-track {
+display: none !important;
+}
+
+.student-timer-host .peer-timer-panel.student-timer-card {
+width: auto;
+  min-width: clamp(200px, 24vw, 300px);
+  min-height: clamp(78px, 9vh, 100px);
+  padding: 12px 28px;
+}
+
+.student-timer-host .peer-timer-panel .peer-timer-label,
+.student-timer-host .peer-timer-panel .peer-timer-caption {
+font-size: 11px;
+}
+
+.student-timer-host .peer-timer-panel .peer-timer-value {
+margin: 2px 0 !important;
+}
+
+.student-timer-host.is-compact .peer-timer-panel .peer-timer-label,
+.student-timer-host.is-compact .peer-timer-panel .peer-timer-caption {
+display: none;
+}
+
+.student-timer-host .peer-timer-panel.es-urgente {
+border-color: rgba(255, 154, 60, .88);
+}
+
+.student-timer-host .peer-timer-panel.es-finalizado {
+border-color: rgba(255, 95, 112, .88);
+}
+
+@media (max-width: 767px) {
+:root {
+--student-timer-top: max(7px, env(safe-area-inset-top));
+}
+
+html {
+scroll-padding-top: 66px;
+}
+
+.student-timer-host {
+max-width: calc(100vw - 24px);
+    margin-bottom: 12px;
+}
+
+.student-timer-card {
+min-width: 170px;
+    min-height: 68px;
+    padding: 10px 18px;
+    border-radius: 18px;
+}
+
+.student-timer-host .student-timer-value,
+.student-timer-host #timer.student-timer-value,
+.student-timer-host #timerTematica.student-timer-value,
+.student-timer-host #timerEvaluacion.student-timer-value {
+font-size: clamp(28px, 8vw, 38px) !important;
+}
+
+.student-timer-host.is-compact .student-timer-card {
+min-height: 44px;
+    padding: 7px 14px;
+}
+
+.student-timer-host.is-compact .student-timer-value,
+.student-timer-host.is-compact #timer.student-timer-value,
+.student-timer-host.is-compact #timerTematica.student-timer-value,
+.student-timer-host.is-compact #timerEvaluacion.student-timer-value {
+font-size: clamp(22px, 6vw, 27px) !important;
+}
+
+.student-timer-card--progress {
+min-width: min(92vw, 320px);
+}
+}
+
+@media (prefers-reduced-motion: reduce) {
+.student-timer-card,
+.student-timer-label,
+.student-timer-value {
+transition: none !important;
+}
+
+.student-timer-host.is-danger .student-timer-card {
+animation: none !important;
+}
+}
+
+@media (min-width: 701px) and (max-width: 1100px) {
+.student-timer-host {
+margin-left: auto !important;
+    margin-right: auto !important;
+}
+}
+
+@media (min-width: 701px) and (max-width: 1100px) and (orientation: portrait) {
+.student-timer-card {
+min-width: 175px;
+    min-height: 66px;
+    padding: 9px 20px;
+    border-radius: 18px;
+}
+
+.student-timer-host .student-timer-value,
+.student-timer-host #timer.student-timer-value,
+.student-timer-host #timerTematica.student-timer-value,
+.student-timer-host #timerEvaluacion.student-timer-value {
+font-size: clamp(28px, 4vw, 38px) !important;
+}
+
+.student-timer-label {
+font-size: 9px;
+}
+}
+
+@media (min-width: 701px) and (max-width: 1100px) and (orientation: portrait) {
+body:has(.student-timer-host) .student-timer-host {
+margin-left: auto !important;
+    margin-right: auto !important;
+}
+}
+
+@media (min-width: 701px)
+       and (max-width: 1400px)
+       and (hover: none)
+       and (pointer: coarse) {
+.student-timer-host.is-compact {
+top:
+      max(64px, calc(env(safe-area-inset-top) + 56px)) !important;
+
+    z-index: 6500 !important;
+}
+
+.student-timer-host.is-compact .student-timer-card {
+margin-top: 0 !important;
+}
+}
+
+@media (min-width: 701px)
+       and (max-width: 1100px)
+       and (orientation: portrait)
+       and (hover: none)
+       and (pointer: coarse) {
+.student-timer-host.is-compact {
+top:
+      max(72px, calc(env(safe-area-inset-top) + 64px)) !important;
+}
+}
+
+@media (min-width: 701px)
+       and (max-width: 1400px)
+       and (orientation: landscape)
+       and (max-height: 900px)
+       and (hover: none)
+       and (pointer: coarse) {
+.student-timer-host.is-compact {
+top:
+      max(58px, calc(env(safe-area-inset-top) + 50px)) !important;
+}
+}
+
+@media (orientation: landscape)
+       and (min-width: 701px)
+       and (max-width: 1400px) {
+html {
+height: auto !important;
+    min-height: 100% !important;
+
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+}
+}
+
+@media (min-width: 701px)
+       and (max-width: 1400px)
+       and (hover: none)
+       and (pointer: coarse) {
+html {
+height: auto !important;
+    min-height: 100% !important;
+
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+
+    scroll-behavior: auto !important;
+    overscroll-behavior-y: auto !important;
+
+    -webkit-overflow-scrolling: touch;
+}
+}
+
+@media (orientation: landscape)
+       and (min-width: 701px)
+       and (max-width: 1400px)
+       and (hover: none)
+       and (pointer: coarse) {
+html {
+width: 100% !important;
+
+    height: auto !important;
+    min-height: 100% !important;
+
+    overflow-x: hidden !important;
+    overflow-y: scroll !important;
+
+    scroll-behavior: auto !important;
+    overscroll-behavior: auto !important;
+}
+}
+
+body.student-global-timer-layout > .student-timer-host,
+body.student-global-timer-layout > .student-timer-host.is-compact {
+position: fixed !important;
+
+  top: var(--student-timer-safe-top, 66px) !important;
+
+  left: var(--student-main-center-x, 50vw) !important;
+  right: auto !important;
+  bottom: auto !important;
+
+  transform: translateX(-50%) !important;
+
+  width: fit-content !important;
+  max-width:
+    min(
+      var(--student-main-width, calc(100vw - 32px)),
+      calc(100vw - 28px)
+    ) !important;
+
+  margin: 0 !important;
+
+  z-index: 9000 !important;
+
+  overflow: visible !important;
+
+
+  pointer-events: none !important;
+
+  will-change: auto !important;
+
+  transition:
+    opacity .18s ease,
+    filter .18s ease !important;
+}
+
+body.student-global-timer-layout
+> .student-timer-host
+.student-timer-card {
+pointer-events: none !important;
+}
+
+body.student-global-timer-layout
+> .student-timer-host:not(.is-compact)
+.student-timer-card {
+min-width: clamp(176px, 18vw, 220px) !important;
+  min-height: clamp(62px, 6.5vw, 76px) !important;
+
+  padding:
+    clamp(8px, .8vw, 11px)
+    clamp(18px, 2vw, 26px) !important;
+
+  border-radius: 18px !important;
+}
+
+body.student-global-timer-layout
+> .student-timer-host.is-compact
+.student-timer-card {
+width: auto !important;
+
+  min-width: 142px !important;
+  max-width: 210px !important;
+
+  min-height: 44px !important;
+
+  padding: 6px 14px !important;
+
+  border-radius: 14px !important;
+}
+
+body.student-global-timer-layout
+> .student-timer-host.is-compact
+.student-timer-label {
+display: none !important;
+}
+
+body.student-global-timer-layout
+> .student-timer-host.is-compact
+.student-timer-value,
+body.student-global-timer-layout
+> .student-timer-host.is-compact
+#timer.student-timer-value,
+body.student-global-timer-layout
+> .student-timer-host.is-compact
+#timerTematica.student-timer-value,
+body.student-global-timer-layout
+> .student-timer-host.is-compact
+#timerEvaluacion.student-timer-value {
+font-size: clamp(24px, 2.3vw, 30px) !important;
+  line-height: 1 !important;
+
+  white-space: nowrap !important;
+}
+
+@media (min-width: 1101px) {
+body.student-global-timer-layout {
+--student-timer-safe-top: 68px;
+    --student-timer-gap: 14px;
+}
+}
+
+@media (min-width: 701px)
+       and (max-width: 1400px)
+       and (orientation: landscape) {
+body.student-global-timer-layout {
+--student-timer-safe-top:
+      max(64px, calc(env(safe-area-inset-top) + 56px));
+
+    --student-timer-gap: 12px;
+}
+}
+
+@media (min-width: 701px)
+       and (max-width: 1100px)
+       and (orientation: portrait) {
+body.student-global-timer-layout {
+--student-timer-safe-top:
+      max(72px, calc(env(safe-area-inset-top) + 64px));
+
+    --student-timer-gap: 12px;
+}
+}
+
+@media (max-width: 700px) {
+body.student-global-timer-layout {
+--student-timer-safe-top:
+      max(58px, calc(env(safe-area-inset-top) + 50px));
+
+    --student-timer-gap: 10px;
+}
+
+body.student-global-timer-layout
+  > .student-timer-host:not(.is-compact)
+  .student-timer-card {
+min-width: 160px !important;
+    min-height: 58px !important;
+}
+}

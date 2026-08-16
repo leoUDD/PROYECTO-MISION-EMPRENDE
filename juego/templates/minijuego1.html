@@ -6,7 +6,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Misión Emprende UDD — Sopa de Letras</title>
+  <link rel="stylesheet" href="{% static 'css/linea_progreso_habilidades.css' %}">
   <link rel="stylesheet" href="{% static 'css/estilo_sopadeletras.css' %}">
+<link rel="stylesheet" href="{% static 'css/student_timer.css' %}">
   <link rel="icon" href="{% url 'favicon' %}">
 
   <style>
@@ -313,28 +315,35 @@
 
 </head>
 
-<body
+<body class="sopa-page"
   data-sesion-id="{{ grupo.sesion.idsesion }}"
-  data-tiempo-inicial="{{ grupo.sesion.segundos_restantes|default:grupo.sesion.t_diferencias|default:300 }}"
+  data-tiempo-inicial="{{ grupo.sesion.segundos_restantes|default:grupo.sesion.t_diferencias|default:240 }}"
   data-sopa-ganada="{{ sopa_ganada|yesno:'true,false' }}"
   data-foto-guardada="{{ foto_equipo_guardada|yesno:'true,false' }}"
   data-palabras-encontradas="{{ palabras_encontradas|default:0 }}"
 >
+  <div class="student-timer-host"
+       data-student-timer
+       data-compact-after="48"
+       role="timer"
+       aria-live="polite">
+    <div class="student-timer-card student-timer-card--progress">
+      <div id="timer-container" class="blur-target-bloqueado timer-esperando">
+        <span data-i18n="sopa_tiempo_restante">Tiempo restante:</span>
+        <div id="timer-bar-track" class="timer-bar-track">
+          <div id="timer-bar-fill" class="timer-bar-fill"></div>
+        </div>
+        <span id="timer" class="timer student-timer-value">00:00</span>
+      </div>
+    </div>
+  </div>
+
   <main class="game-container">
 
     <h1 id="tituloSopa" class="blur-target-bloqueado" data-i18n="sopa_titulo">Trabajo En Equipo</h1>
     <p id="subtituloSopa" class="blur-target-bloqueado" data-i18n="sopa_subtitulo">Encuentra las palabras ocultas relacionadas con el emprendimiento</p>
 
-    <!-- ===== TIEMPO: ahora como barra que se va vaciando + número (NUEVO) ===== -->
-    <div id="timer-container" class="blur-target-bloqueado timer-esperando">
-      <span data-i18n="sopa_tiempo_restante">Tiempo restante:</span>
-      <div id="timer-bar-track" class="timer-bar-track">
-        <div id="timer-bar-fill" class="timer-bar-fill"></div>
-      </div>
-      <span id="timer" class="timer">00:00</span>
-    </div>
-
-    <audio id="alarm-audio"   src="{% static 'sounds/alarma.mp3' %}"  preload="auto"></audio>
+<audio id="alarm-audio"   src="{% static 'sounds/alarma.mp3' %}"  preload="auto"></audio>
     <audio id="victory-sound" src="{% static 'sounds/victory.mp3' %}" preload="auto"></audio>
     <audio id="musica-fondo"  src="{% static 'sounds/musica_sopa.mp3' %}" loop preload="auto"></audio>
 
@@ -388,8 +397,8 @@
       data-registrar-palabra-url="{% url 'registrar_palabra_sopa' %}"
       data-sopa-completada-api-url="{% url 'sopa_completada' %}"
       data-sesion-id="{{ grupo.sesion.idsesion }}"
-      data-tiempo="{{ grupo.sesion.segundos_restantes|default:grupo.sesion.t_diferencias|default:300 }}"
-      data-tiempo-inicial="{{ grupo.sesion.segundos_restantes|default:grupo.sesion.t_diferencias|default:300 }}"
+      data-tiempo="{{ grupo.sesion.segundos_restantes|default:grupo.sesion.t_diferencias|default:240 }}"
+      data-tiempo-inicial="{{ grupo.sesion.segundos_restantes|default:grupo.sesion.t_diferencias|default:240 }}"
       data-sopa-ganada="{{ sopa_ganada|yesno:'true,false' }}"
     ></div>
   </main>
@@ -1683,5 +1692,6 @@
 
   {% include "includes/countdown_inicio_fase.html" %}
   {% include "includes/sincronizacion_fase.html" %}
+  <script src="{% static 'js/student_timer.js' %}"></script>
 </body>
 </html>

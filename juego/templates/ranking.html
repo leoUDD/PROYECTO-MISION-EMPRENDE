@@ -253,6 +253,26 @@
     }
 
     .ranking-estado { color: #cde9ff; font-weight: 700; opacity: .92; }
+
+    /* AUTOAVANCE PODIO FINAL */
+    .ranking-autoavance {
+      margin: 0;
+      color: rgba(220, 244, 255, .92);
+      font-size: .95rem;
+      font-weight: 700;
+      text-align: center;
+      letter-spacing: .02em;
+      text-shadow: 0 0 10px rgba(0, 200, 255, .18);
+    }
+
+    .ranking-autoavance strong {
+      color: #00FC98;
+      font-size: 1.08em;
+      font-weight: 900;
+      text-shadow:
+        0 0 10px rgba(0, 252, 152, .55),
+        0 0 18px rgba(0, 200, 255, .22);
+    }
     .hidden { display: none !important; }
 
     /* primer / último lugar (sin cambios) */
@@ -3005,6 +3025,12 @@ body.ranking-final .tfr-tok {
     {% endif %}
 
     <div class="ranking-actions">
+      {% if grupo.sesion.fase_actual == "f6_ranking" %}
+        <p id="rankingAutoAvance" class="ranking-autoavance hidden" aria-live="polite">
+          Continuando automáticamente en <strong id="rankingAutoAvanceSegundos">15</strong> s...
+        </p>
+      {% endif %}
+
       <button id="btnRankingListo" class="btn-ranking-listo" type="button" data-i18n="ranking_continuar">
         Continuar
       </button>
@@ -3243,8 +3269,10 @@ body.ranking-final .tfr-tok {
       const overlay         = document.getElementById("ganadorOverlay");
       const podio           = document.getElementById("podioWrap");
       const audio           = document.getElementById("audioCelebracion");
-      const btnRankingListo = document.getElementById("btnRankingListo");
-      const rankingEstado   = document.getElementById("rankingEstado");
+      const btnRankingListo        = document.getElementById("btnRankingListo");
+      const rankingEstado          = document.getElementById("rankingEstado");
+      const rankingAutoAvance      = document.getElementById("rankingAutoAvance");
+      const rankingAutoAvanceSeg   = document.getElementById("rankingAutoAvanceSegundos");
 
       /* barras dinámicas: ahora puede haber N equipos */
       const barras = Array.from(
@@ -3258,6 +3286,7 @@ body.ranking-final .tfr-tok {
       const START = 8, END = 92;
       let frame = 0, terminoCarrera = false, redirigiendo = false;
       let ultimoListos = 0, ultimoTotal = 0;
+      let autoAvanceInterval = null;
 
       function tJuego(clave, fallback = "") {
         const idioma = window.i18nJuego?.obtenerIdioma?.() || "es";
@@ -3273,6 +3302,48 @@ body.ranking-final .tfr-tok {
       function setTextoBotonEsperando() {
         if (!btnRankingListo) return;
         btnRankingListo.textContent = tJuego("ranking_esperando", "Esperando...");
+      }
+
+      function detenerAutoAvancePodio(ocultar = true) {
+        if (autoAvanceInterval) {
+          clearInterval(autoAvanceInterval);
+          autoAvanceInterval = null;
+        }
+        if (ocultar && rankingAutoAvance) {
+          rankingAutoAvance.classList.add("hidden");
+        }
+      }
+
+      function iniciarAutoAvancePodio() {
+        if (
+          !esRankingFinal ||
+          !rankingAutoAvance ||
+          !rankingAutoAvanceSeg ||
+          !btnRankingListo ||
+          btnRankingListo.disabled ||
+          redirigiendo
+        ) return;
+
+        detenerAutoAvancePodio(false);
+
+        let segundosRestantes = 15;
+        rankingAutoAvanceSeg.textContent = segundosRestantes;
+        rankingAutoAvance.classList.remove("hidden");
+
+        autoAvanceInterval = setInterval(() => {
+          if (redirigiendo || btnRankingListo.disabled) {
+            detenerAutoAvancePodio();
+            return;
+          }
+
+          segundosRestantes -= 1;
+          rankingAutoAvanceSeg.textContent = Math.max(segundosRestantes, 0);
+
+          if (segundosRestantes <= 0) {
+            detenerAutoAvancePodio();
+            btnRankingListo.click();
+          }
+        }, 1000);
       }
       function aplicarTraduccionRankingDinamica() {
         if (rankingEstado) rankingEstado.textContent = textoGruposListos(ultimoListos, ultimoTotal);
@@ -3334,6 +3405,7 @@ body.ranking-final .tfr-tok {
 
       if (btnRankingListo) {
         btnRankingListo.addEventListener("click", async () => {
+          detenerAutoAvancePodio();
           btnRankingListo.disabled = true;
           setTextoBotonEsperando();
           try {
@@ -3393,7 +3465,10 @@ body.ranking-final .tfr-tok {
             if (carrera) carrera.classList.add("hidden");
             if (overlay) overlay.classList.remove("visible");
             /* mostrar podio directamente (sin video cinemático) */
-            if (podio) podio.classList.add("visible");
+            if (podio) {
+              podio.classList.add("visible");
+              iniciarAutoAvancePodio();
+            }
             if (window.fwStart) window.fwStart(true, 6);
             try {
               if (audio) {

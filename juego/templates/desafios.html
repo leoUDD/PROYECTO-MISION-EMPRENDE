@@ -7,29 +7,36 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Misión Emprende UDD — Desafíos</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/linea_progreso_habilidades.css' %}">
   <link rel="stylesheet" href="{% static 'css/estilo_desafios.css' %}">
+<link rel="stylesheet" href="{% static 'css/student_timer.css' %}">
   <link rel="icon" href="{% url 'favicon' %}">
 </head>
 
-<body
+<body class="desafios-page"
   data-sesion-id="{{ grupo.sesion.idsesion }}"
   data-grupo-id="{{ grupo.idgrupo }}"
 >
+  <div class="student-timer-host"
+       data-student-timer
+       data-compact-after="48"
+       role="timer"
+       aria-live="polite">
+    <div class="student-timer-card">
+      <span class="student-timer-label" data-i18n="desafios_timer_label">Tiempo restante</span>
+      <strong id="timerTematica" class="student-timer-value">--</strong>
+    </div>
+  </div>
+
   <main class="selector-container" role="main" aria-labelledby="page-title">
     <header class="header">
       <div class="header-badge" data-i18n="desafios_badge">SELECCIÓN DE DESAFÍO</div>
       <h1 id="page-title">{{ tematica.title|default:slug|title }}</h1>
       <p class="subtitle">{{ tematica.hero }}</p>
 
-      <div class="timer-box">
-        <div class="timer-line">
-          <span data-i18n="desafios_timer_label">⏱️ Tiempo para elegir temática y desafío:</span>
-          <strong id="timerTematica">--</strong>
-        </div>
-        <span class="timer-hint" data-i18n="desafios_timer_hint">
-          Si no eligen a tiempo, el sistema asignará una temática y desafío al azar.
-        </span>
-      </div>
+      <p class="timer-hint" data-i18n="desafios_timer_hint">
+        Si no eligen a tiempo, el sistema asignará una temática y desafío al azar.
+      </p>
 
       <div class="header-actions">
         <a href="{% url 'cambiar_tematica' %}" class="btn-volver-tematica" data-i18n="desafios_volver_tematica">
@@ -461,5 +468,6 @@
   </script>
 
   {% include "includes/sincronizacion_fase.html" %}
+  <script src="{% static 'js/student_timer.js' %}"></script>
 </body>
 </html>
