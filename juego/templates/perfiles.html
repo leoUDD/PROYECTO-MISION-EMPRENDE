@@ -4,206 +4,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Misión Emprende UDD — Perfiles</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <title>Misión Emprende UDD — Inicio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/estilo_perfiles.css' %}" />
   <link rel="icon" href="{% url 'favicon' %}">
-
-  <style>
-    /* ============================================================
-       PALETA UDD — azul, verde y blanco
-    ============================================================ */
-    :root {
-      --udd-blue:   #003BFF;
-      --udd-blue-2: #001B8F;
-      --udd-dark:   #00104A;
-      --udd-green:  #00F26D;
-      --udd-white:  #FFFFFF;
-
-      --card:        rgba(0, 18, 76, 0.92);
-      --text:        #FFFFFF;
-      --primary:     #00F26D;
-      --accent:      #FFFFFF;
-      --glow-cyan:   0 0 22px rgba(0, 242, 109, .75);
-      --glow-orange: 0 0 22px rgba(255, 255, 255, .65);
-      --glow-purple: 0 0 22px rgba(0, 59, 255, .75);
-    }
-
-    body {
-  background:
-    linear-gradient(rgba(0, 0, 0, .12), rgba(0, 0, 0, .28)),
-    url('/static/images/FotoPresente.jpg') center / cover no-repeat fixed,
-    #000712 !important;
-}
-
-    .modal-overlay {
-      background: rgba(0, 16, 74, 0.88);
-    }
-
-    .modal-box {
-      background: linear-gradient(160deg, rgba(0, 20, 90, 0.98), rgba(0, 10, 55, 0.98));
-      border-color: rgba(0, 242, 109, 0.55);
-      box-shadow:
-        0 0 42px rgba(0, 242, 109, 0.16),
-        0 24px 48px rgba(0,0,0,0.62);
-    }
-
-    .modal-title {
-      color: var(--udd-green);
-      text-shadow: 0 0 14px rgba(0, 242, 109, 0.55);
-    }
-
-    .modal-input {
-      background: rgba(255,255,255,0.06);
-      border-color: rgba(0, 242, 109, 0.38);
-      color: var(--udd-white);
-    }
-
-    .modal-input:focus {
-      border-color: var(--udd-green);
-      box-shadow: 0 0 0 3px rgba(0, 242, 109, 0.12);
-    }
-
-    .modal-btn--confirm {
-      background: linear-gradient(135deg, var(--udd-green), #00B955);
-      border-color: var(--udd-green);
-      color: var(--udd-dark);
-      box-shadow: 0 0 16px rgba(0, 242, 109, 0.36);
-    }
-
-    .modal-btn--confirm:hover {
-      box-shadow: 0 0 24px rgba(0, 242, 109, 0.68);
-    }
-
-    .btn-sound {
-      border-color: rgba(0, 242, 109, 0.95);
-      background: rgba(0, 20, 90, 0.92);
-      color: var(--udd-green);
-      box-shadow:
-        0 0 16px rgba(0,242,109,0.45),
-        inset 0 0 10px rgba(0,242,109,0.10);
-    }
-
-    .btn-sound:hover,
-    .btn-sound.active {
-      color: var(--udd-green);
-      border-color: var(--udd-green);
-      box-shadow: 0 0 24px rgba(0,242,109,0.72);
-    }
-
-    .phone {
-      box-shadow:
-        var(--shadow),
-        0 0 0 1px rgba(0,242,109,0.18),
-        0 0 34px rgba(0,59,255,0.24);
-    }
-
-    .logo-top img {
-      filter:
-        drop-shadow(0 0 10px rgba(255,255,255,0.22))
-        drop-shadow(0 0 16px rgba(0,242,109,0.18));
-    }
-
-    .logo-divider {
-      background: linear-gradient(90deg,
-        transparent,
-        rgba(0,242,109,0.85) 25%,
-        rgba(255,255,255,0.86) 50%,
-        rgba(0,242,109,0.85) 75%,
-        transparent);
-    }
-
-    .logo-sub {
-      color: var(--udd-white);
-      text-shadow:
-        0 0 10px rgba(0,242,109,0.42),
-        0 2px 10px rgba(0,0,0,.9);
-    }
-
-    .perfil > a {
-      border-color: rgba(255,255,255,0.92);
-      background: rgba(0, 16, 74, 0.92);
-    }
-
-    .perfil--alumno > a:hover {
-      border-color: var(--udd-green);
-      box-shadow:
-        0 0 24px rgba(0, 242, 109, .78),
-        0 12px 28px rgba(0,0,0,.6);
-      transform: translateY(-8px) scale(1.05);
-    }
-
-    .perfil--profesor > a:hover {
-      border-color: var(--udd-white);
-      box-shadow:
-        0 0 24px rgba(255, 255, 255, .7),
-        0 12px 28px rgba(0,0,0,.6);
-      transform: translateY(-8px) scale(1.05);
-    }
-
-    .perfil--admin > a:hover {
-      border-color: var(--udd-green);
-      box-shadow:
-        0 0 24px rgba(0, 242, 109, .78),
-        0 0 34px rgba(0, 59, 255, .35),
-        0 12px 28px rgba(0,0,0,.6);
-      transform: translateY(-8px) scale(1.05);
-    }
-
-    .perfil--alumno:hover .perfil-texto,
-    .perfil--admin:hover .perfil-texto {
-      background: rgba(0,242,109,0.16);
-      border-color: rgba(0,242,109,0.52);
-    }
-
-    .perfil--profesor:hover .perfil-texto {
-      background: rgba(255,255,255,0.14);
-      border-color: rgba(255,255,255,0.52);
-    }
-
-    .perfil-texto {
-      color: var(--udd-white);
-      background: rgba(0, 16, 74, 0.58);
-      border-color: rgba(255,255,255,0.20);
-    }
-
-    .acceso-restringido {
-      background: rgba(0, 16, 74, 0.9);
-      border-color: rgba(255,255,255,0.62);
-    }
-
-    .acceso-texto {
-      color: var(--udd-white);
-    }
-  </style>
 </head>
 <body>
-
-  <!-- Modal de contraseña -->
-  <div class="modal-overlay" id="modalOverlay">
-    <div class="modal-box">
-      <div class="modal-header">
-        <span class="modal-icon">🔒</span>
-        <h2 class="modal-title">ACCESO RESTRINGIDO</h2>
-        <p class="modal-sub">Ingresa el código de acceso</p>
-      </div>
-      <div class="modal-input-wrap">
-        <input type="password" id="modalInput" class="modal-input"
-               placeholder="••••••••" autocomplete="off" maxlength="20">
-        <div class="modal-error" id="modalError">Código incorrecto</div>
-      </div>
-      <div class="modal-actions">
-        <button class="modal-btn modal-btn--cancel" id="modalCancel">CANCELAR</button>
-        <button class="modal-btn modal-btn--confirm" id="modalConfirm">ACCEDER ▶</button>
-      </div>
-    </div>
-  </div>
 
   <div class="screen-wrapper">
 
     <!-- Marco futurista SVG -->
     <svg class="screen-frame" viewBox="0 0 100 100" preserveAspectRatio="none"
-         xmlns="http://www.w3.org/2000/svg">
+         xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
       <defs>
         <linearGradient id="fg1" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%" stop-color="#00F26D" stop-opacity="0.95"/>
@@ -291,11 +105,11 @@
 
     </svg>
 
-    <main class="phone" role="region" aria-label="Pantalla de perfiles">
+    <main class="phone" role="region" aria-label="Pantalla de inicio">
 
-      <!-- Botón de sonido dentro del phone -->
-      <button class="btn-sound" id="btnSound" aria-label="Activar música">
-        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Botón de sonido -->
+      <button class="btn-sound" id="btnSound" type="button" aria-label="Activar música" aria-pressed="false">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <g id="iconMute">
             <path d="M11 5L6 9H2v6h4l5 4V5z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
             <line x1="23" y1="9" x2="17" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
@@ -315,56 +129,42 @@
         <div class="logo-divider"></div>
       </div>
 
-      <!-- Círculos de perfil -->
-      <section class="perfiles">
+      <!-- Pie: acción principal del alumno + accesos de personal -->
+      <div class="pie-inicio">
 
-        <div class="perfil perfil--alumno">
-          <a href="{% url 'registro' %}" aria-label="Ingresar como Alumno">
-            <img src="{% static 'images/Perfil1.png' %}" alt="Alumno">
+        <a class="btn-iniciar" id="btnIniciar" href="{% url 'registro' %}">
+          <span class="btn-iniciar-texto">Iniciar</span>
+        </a>
+
+        <nav class="acceso-staff" aria-label="Acceso para personal">
+          <a class="btn-staff" href="{% url 'login_acceso' %}?rol=profesor" data-rol="profesor">
+            <svg class="lock-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" stroke-width="2"/>
+              <path d="M8 11V7a4 4 0 0 1 8 0v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <span class="btn-staff-texto">Profesor</span>
           </a>
-          <p class="perfil-texto">Alumno</p>
-        </div>
-
-        <div class="perfil perfil--profesor">
-          <a href="{% url 'login_acceso' %}?rol=profesor" data-rol="profesor" aria-label="Ingresar como Profesor">
-            <img src="{% static 'images/Perfil2.png' %}" alt="Profesor">
-            <div class="acceso-restringido">
-              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="lock-icon">
-                <rect x="5" y="11" width="14" height="10" rx="2" stroke="#FFFFFF" stroke-width="1.8"/>
-                <path d="M8 11V7a4 4 0 0 1 8 0v4" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round"/>
-              </svg>
-              <span class="acceso-texto">Acceso restringido</span>
-            </div>
+          <a class="btn-staff" href="{% url 'login_acceso' %}?rol=admin" data-rol="admin">
+            <svg class="lock-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" stroke-width="2"/>
+              <path d="M8 11V7a4 4 0 0 1 8 0v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <span class="btn-staff-texto">Administrador</span>
           </a>
-          <p class="perfil-texto">Profesor</p>
-        </div>
+        </nav>
 
-        <div class="perfil perfil--admin">
-          <a href="{% url 'login_acceso' %}?rol=admin" data-rol="admin" aria-label="Ingresar como Administrador">
-            <img src="{% static 'images/Perfil3.png' %}" alt="Administrador">
-            <div class="acceso-restringido">
-              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="lock-icon">
-                <rect x="5" y="11" width="14" height="10" rx="2" stroke="#FFFFFF" stroke-width="1.8"/>
-                <path d="M8 11V7a4 4 0 0 1 8 0v4" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round"/>
-              </svg>
-              <span class="acceso-texto">Acceso restringido</span>
-            </div>
-          </a>
-          <p class="perfil-texto">Administrador</p>
-        </div>
-
-      </section>
+      </div>
 
     </main>
   </div>
 
   <script>
     // ── Botón de sonido ──
-    const btnSound   = document.getElementById('btnSound');
-    const iconMute   = document.getElementById('iconMute');
-    const iconSound  = document.getElementById('iconSound');
-    let audio        = null;
-    let playing      = false;
+    const btnSound  = document.getElementById('btnSound');
+    const iconMute  = document.getElementById('iconMute');
+    const iconSound = document.getElementById('iconSound');
+    let audio   = null;
+    let playing = false;
 
     btnSound.addEventListener('click', () => {
       if (!playing) {
@@ -377,12 +177,14 @@
         iconMute.style.display  = 'none';
         iconSound.style.display = 'block';
         btnSound.classList.add('active');
+        btnSound.setAttribute('aria-pressed', 'true');
         playing = true;
       } else {
         audio.pause();
         iconMute.style.display  = 'block';
         iconSound.style.display = 'none';
         btnSound.classList.remove('active');
+        btnSound.setAttribute('aria-pressed', 'false');
         playing = false;
       }
     });
@@ -408,7 +210,7 @@
         gain2.gain.setValueAtTime(0.03, now + 0.06);
         gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
         osc2.start(now + 0.06); osc2.stop(now + 0.17);
-      } catch(e) {}
+      } catch (e) {}
     }
 
     // ── Click: agente confirmado ──
@@ -440,69 +242,28 @@
           g.gain.exponentialRampToValueAtTime(0.001, now + t + 0.08);
           o.start(now + t); o.stop(now + t + 0.09);
         });
-      } catch(e) {}
+      } catch (e) {}
     }
 
-    // ── Modal de contraseña para perfiles restringidos ──
-    // La validación de acceso ahora es server-side (vista login_acceso).
-    const PASSWORDS = {};
-
-    const modalOverlay = document.getElementById('modalOverlay');
-    const modalInput   = document.getElementById('modalInput');
-    const modalError   = document.getElementById('modalError');
-    const modalConfirm = document.getElementById('modalConfirm');
-    const modalCancel  = document.getElementById('modalCancel');
-    let   pendingHref  = null;
-    let   pendingRol   = null;
-
-    function openModal(href, rol) {
-      pendingHref = href;
-      pendingRol  = rol;
-      modalInput.value = '';
-      modalError.style.display = 'none';
-      modalOverlay.classList.add('visible');
-      setTimeout(() => modalInput.focus(), 100);
-    }
-
-    function closeModal() {
-      modalOverlay.classList.remove('visible');
-      pendingHref = null;
-      pendingRol  = null;
-    }
-
-    function checkPassword() {
-      const pass = PASSWORDS[pendingRol] || '';
-      if (modalInput.value === pass) {
-        const destino = pendingHref;
-        closeModal();
-        window.location.href = destino;
-      } else {
-        modalError.style.display = 'block';
-        modalInput.value = '';
-        modalInput.focus();
-      }
-    }
-
-    modalConfirm.addEventListener('click', checkPassword);
-    modalCancel.addEventListener('click', closeModal);
-    modalInput.addEventListener('keydown', e => { if (e.key === 'Enter') checkPassword(); });
-    modalOverlay.addEventListener('click', e => { if (e.target === modalOverlay) closeModal(); });
-
-    // ── Eventos ──
-    document.querySelectorAll('.perfil > a').forEach(link => {
-      link.addEventListener('mouseenter', playHoverSound);
-      link.addEventListener('click', (e) => {
-        e.preventDefault();
-        const href = link.getAttribute('href');
-        const rol  = link.dataset.rol;
-        if (link.classList.contains('restringido')) {
-          openModal(href, rol);
-        } else {
+    // ── Navegación con sonido ──
+    // El acceso de profesor/admin se valida server-side en la vista login_acceso.
+    function conectarNavegacion(selector, retardoMs) {
+      document.querySelectorAll(selector).forEach(link => {
+        link.addEventListener('mouseenter', playHoverSound);
+        link.addEventListener('click', (e) => {
+          if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+          e.preventDefault();
+          if (link.dataset.navegando === '1') return;
+          link.dataset.navegando = '1';
           playClickSound();
-          setTimeout(() => { window.location.href = href; }, 420);
-        }
+          const destino = link.getAttribute('href');
+          setTimeout(() => { window.location.href = destino; }, retardoMs);
+        });
       });
-    });
+    }
+
+    conectarNavegacion('.btn-iniciar', 420);
+    conectarNavegacion('.btn-staff', 180);
   </script>
 </body>
 </html>

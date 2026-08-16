@@ -78,8 +78,8 @@ body::before {
   position: relative;
   z-index: 1;
   width: min(1080px, calc(100vw - 185px));
-  min-height: clamp(640px, 82vh, 860px);
-  margin: 8px 0 26px;
+  min-height: clamp(640px, 86vh, 1080px);
+  margin: calc(var(--timer-bar-top) + var(--timer-bar-h) + 8px) 0 26px;
   padding: clamp(30px, 3.4vw, 48px);
   border-radius: 30px;
   text-align: center;
@@ -156,6 +156,36 @@ body::before {
 /* ─────────────────────────────────────────────
    TIMER
 ───────────────────────────────────────────── */
+
+/* Barra de tiempo fija — hijo directo de <body>, siempre visible.
+   --timer-bar-h es la altura reservada arriba de .pitch-editor para
+   que el contenido nunca quede tapado por la barra. */
+:root {
+  --timer-bar-h: clamp(106px, 11vw, 136px);
+  --timer-bar-top: 62px;
+}
+
+.timer-topbar {
+  position: fixed;
+  top: var(--timer-bar-top);
+  left: 0;
+  right: 0;
+  z-index: 400;
+  width: 100%;
+  height: var(--timer-bar-h);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: env(safe-area-inset-top, 0px);
+  background: linear-gradient(180deg, rgba(0, 8, 26, .92), rgba(0, 8, 26, .55) 80%, transparent);
+  pointer-events: none;
+}
+
+.timer-topbar .timer-wrap-pitch {
+  pointer-events: auto;
+  margin: 0;
+}
+
 .timer-wrap,
 .timer-wrap-pitch {
   width: 100%;
@@ -1104,7 +1134,7 @@ body:has(#inicio-fase-overlay:not(.overlay-hidden)) .metro-progreso-habilidades 
   }
 
   .pitch-editor {
-    margin: 14px 0;
+    margin: calc(var(--timer-bar-top) + var(--timer-bar-h) + 14px) 0;
     min-height: 560px;
   }
 
@@ -1131,5 +1161,67 @@ body:has(#inicio-fase-overlay:not(.overlay-hidden)) .metro-progreso-habilidades 
   * {
     animation: none !important;
     transition: none !important;
+  }
+}
+
+/* Coexistencia con los fijos de atajos.html (incluido en las 6 pantallas):
+   - .hud-tokens-ranking : chips esquina sup. derecha (top 14px, alto ~40px);
+     a <=620px pasa a ocupar TODO el ancho superior (top 8px, min-height 38px)
+   - .idioma-juego-box   : chip esquina sup. izquierda; a <=620px baja a top 54px
+   Ambos tienen z-index MAYOR que la barra. Como algunos timers son anchos
+   (la fila de sopa llega a 720px) y se cruzarían con los chips de esquina,
+   la barra se ubica SIEMPRE bajo ellos, en todos los anchos. */
+@media (max-width: 900px) {
+  :root { --timer-bar-top: 56px; }
+}
+@media (max-width: 620px) {
+  :root { --timer-bar-top: 90px; }
+}
+@media (max-width: 430px) {
+  :root { --timer-bar-top: 86px; }
+}
+
+/* ============================================================
+   TABLET / NOTEBOOK PEQUEÑO (<=1280px)
+   A este ancho la barra de progreso pasa a horizontal abajo
+   (linea_progreso_habilidades.html), así que:
+     - se libera la reserva lateral izquierda
+     - se reserva alto abajo para la barra (72px + aire)
+     - la tarjeta usa el ancho completo y deja de estirarse en alto,
+       para que el contenido quede compacto en vez de repartido
+   ============================================================ */
+@media (max-width: 1280px) {
+  body {
+    padding-left: clamp(14px, 2vw, 26px) !important;
+    padding-right: clamp(14px, 2vw, 26px) !important;
+    padding-bottom: 128px !important;
+  }
+
+  .pitch-editor {
+    width: min(1220px, calc(100vw - clamp(28px, 4vw, 52px))) !important;
+    min-height: 0 !important;
+  }
+}
+
+/* ============================================================
+   TABLET EN VERTICAL (<=1280px y más alto que ancho)
+   - La tarjeta deja de estirarse a lo ancho y crece en ALTO,
+     llenando el espacio entre el timer y la barra inferior.
+   - body deja de centrar (place-items:center dejaba la tarjeta
+     flotando lejos del timer) y pasa a estirar la fila.
+   ============================================================ */
+@media (max-width: 1280px) and (orientation: portrait) {
+  body {
+    display: grid !important;
+    grid-template-rows: 1fr !important;
+    align-items: stretch !important;
+    justify-items: center !important;
+    padding-bottom: 128px !important;
+  }
+
+  .pitch-editor {
+    width: min(920px, calc(100vw - clamp(24px, 4vw, 44px))) !important;
+    height: 100%;
+    min-height: 0 !important;
   }
 }
