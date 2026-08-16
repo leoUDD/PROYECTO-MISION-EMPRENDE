@@ -146,6 +146,7 @@
             <th>Grupo</th>
             <th>Código</th>
             <th>Tokens</th>
+            <th>Alumnos</th>
             <th>Ver</th>
           </tr>
         </thead>
@@ -155,6 +156,36 @@
             <td><span class="team-dot"></span>{{ grupo.nombregrupo }}</td>
             <td><span class="codigo">{{ grupo.codigoacceso }}</span></td>
             <td>{{ grupo.tokensgrupo|default:0 }}</td>
+            <td>
+              <button
+                type="button"
+                class="btn-alumnos"
+                data-target="alumnos-grupo-{{ grupo.idgrupo }}"
+                data-grupo="{{ grupo.nombregrupo|default:'Grupo'|escape }}"
+              >
+                👥 Ver
+              </button>
+
+              <div id="alumnos-grupo-{{ grupo.idgrupo }}" class="alumnos-data" hidden>
+                {% for alumno in grupo.alumno_set.all %}
+                  <div class="alumno-item">
+                    <span class="alumno-icono">👤</span>
+                    <div class="alumno-info">
+                      <strong>
+                        {{ alumno.nombrealumno|default:"Alumno" }}
+                        {{ alumno.apellidopaternoalumno|default:"" }}
+                        {{ alumno.apellidomaternoalumno|default:"" }}
+                      </strong>
+                      {% if alumno.emailalumno %}
+                        <small>{{ alumno.emailalumno }}</small>
+                      {% endif %}
+                    </div>
+                  </div>
+                {% empty %}
+                  <p class="alumnos-vacio">No hay alumnos asignados a este grupo.</p>
+                {% endfor %}
+              </div>
+            </td>
             <td>
               <a href="{% url 'ver_como_grupo' grupo.idgrupo %}" target="_blank" class="btn-ver">
                 👁 Ver grupo
@@ -222,9 +253,87 @@
   </main>
 </div>
 
+<!-- MODAL ALUMNOS POR GRUPO -->
+<div id="modalAlumnos" class="modal-alumnos" hidden>
+  <div class="modal-alumnos-backdrop" data-cerrar-alumnos></div>
+
+  <section class="modal-alumnos-panel"
+           role="dialog"
+           aria-modal="true"
+           aria-labelledby="modalAlumnosTitulo">
+    <div class="modal-alumnos-head">
+      <div>
+        <span class="modal-alumnos-kicker">INTEGRANTES</span>
+        <h2 id="modalAlumnosTitulo">Alumnos del grupo</h2>
+      </div>
+      <button type="button"
+              class="modal-alumnos-cerrar"
+              data-cerrar-alumnos
+              aria-label="Cerrar">×</button>
+    </div>
+
+    <div id="modalAlumnosContenido" class="modal-alumnos-contenido"></div>
+  </section>
+</div>
+
 <script>
 const sesionId = "{{ sesion.idsesion }}";
 const controlLayout = document.getElementById("controlLayout");
+
+const modalAlumnos = document.getElementById("modalAlumnos");
+const modalAlumnosTitulo = document.getElementById("modalAlumnosTitulo");
+const modalAlumnosContenido = document.getElementById("modalAlumnosContenido");
+let focoAnteriorAlumnos = null;
+
+function abrirModalAlumnos(boton) {
+  if (!modalAlumnos) return;
+
+  const origen = document.getElementById(boton.dataset.target);
+  if (!origen) return;
+
+  focoAnteriorAlumnos = document.activeElement;
+  modalAlumnosTitulo.textContent = `Alumnos · ${boton.dataset.grupo || "Grupo"}`;
+  modalAlumnosContenido.innerHTML = origen.innerHTML;
+
+  modalAlumnos.hidden = false;
+  document.body.classList.add("modal-alumnos-abierto");
+
+  requestAnimationFrame(() => {
+    modalAlumnos.classList.add("visible");
+    modalAlumnos.querySelector(".modal-alumnos-cerrar")?.focus();
+  });
+}
+
+function cerrarModalAlumnos() {
+  if (!modalAlumnos || modalAlumnos.hidden) return;
+
+  modalAlumnos.classList.remove("visible");
+  document.body.classList.remove("modal-alumnos-abierto");
+
+  setTimeout(() => {
+    modalAlumnos.hidden = true;
+    modalAlumnosContenido.innerHTML = "";
+    focoAnteriorAlumnos?.focus?.();
+  }, 160);
+}
+
+document.addEventListener("click", (event) => {
+  const boton = event.target.closest(".btn-alumnos");
+  if (boton) {
+    abrirModalAlumnos(boton);
+    return;
+  }
+
+  if (event.target.closest("[data-cerrar-alumnos]")) {
+    cerrarModalAlumnos();
+  }
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && modalAlumnos && !modalAlumnos.hidden) {
+    cerrarModalAlumnos();
+  }
+});
 
 function formatearTiempo(totalSegundos) {
   const segundos = Math.max(0, Number(totalSegundos || 0));
