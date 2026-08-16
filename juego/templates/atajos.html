@@ -76,6 +76,59 @@
       font-size: 9px;
     }
   }
+
+  /* Reflexión final: las preguntas son contenido para conversar,
+     no controles interactivos. Este selector solo existe en reflexion.html. */
+  .reflection-prompts {
+    counter-reset: reflexion-pregunta;
+    gap: 0 !important;
+    margin-top: 24px !important;
+    border-top: 1px solid rgba(0, 200, 255, .18);
+  }
+
+  .reflection-prompts li {
+    counter-increment: reflexion-pregunta;
+    position: relative;
+    padding: 17px 8px 17px 54px !important;
+    border: 0 !important;
+    border-bottom: 1px solid rgba(0, 200, 255, .14) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: #E6EEF8 !important;
+    cursor: default !important;
+    transition: none !important;
+  }
+
+  .reflection-prompts li::before {
+    content: counter(reflexion-pregunta, decimal-leading-zero) !important;
+    position: absolute !important;
+    left: 8px !important;
+    top: 18px !important;
+    transform: none !important;
+    color: #00FC98 !important;
+    font-size: 11px !important;
+    font-weight: 900 !important;
+    letter-spacing: .08em;
+    text-shadow: 0 0 9px rgba(0, 242, 109, .38) !important;
+  }
+
+  .reflection-prompts li:hover {
+    transform: none !important;
+    background: transparent !important;
+    border-color: rgba(0, 200, 255, .14) !important;
+  }
+
+  @media (max-width: 700px) {
+    .reflection-prompts li {
+      padding: 15px 4px 15px 46px !important;
+    }
+
+    .reflection-prompts li::before {
+      left: 4px !important;
+      top: 16px !important;
+    }
+  }
 </style>
 
 <script>
@@ -95,8 +148,25 @@
     });
   }
 
-  document.addEventListener("DOMContentLoaded", aplicarTraduccionAtajos);
-  window.addEventListener("idiomaJuegoCambiado", aplicarTraduccionAtajos);
+  function aplicarAjustesReflexionFinal() {
+    const qrHint = document.querySelector(".card-instagram .qr-hint");
+    if (!qrHint) return;
+
+    const idioma = window.i18nJuego?.obtenerIdioma?.() || "es";
+    qrHint.textContent = idioma === "en"
+      ? "Scan this QR and follow us on social media, or find us as @emprendimiento.udd."
+      : "Escanea este QR y síguenos en nuestras RRSS, o búscanos como @emprendimiento.udd.";
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    aplicarTraduccionAtajos();
+    aplicarAjustesReflexionFinal();
+  });
+
+  window.addEventListener("idiomaJuegoCambiado", () => {
+    aplicarTraduccionAtajos();
+    aplicarAjustesReflexionFinal();
+  });
 </script>
 
 {% if not ocultar_hud_ranking %}
