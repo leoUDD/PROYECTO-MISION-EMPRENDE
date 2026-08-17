@@ -9,6 +9,63 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/estilo_galeria_equipos.css' %}">
   <link rel="icon" href="{% url 'favicon' %}">
+
+  <style>
+    /* ============================================================
+       VIDEO FINAL PANTALLA COMPLETA
+    ============================================================ */
+    .viaje-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      background: #000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.65s ease;
+    }
+
+    .viaje-overlay.oculto { display: none; }
+
+    .viaje-overlay.activo {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .video-viaje {
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      background: #000;
+      display: block;
+    }
+
+    .viaje-fallback {
+      position: absolute;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      color: #fff;
+      font-family: "Poppins", sans-serif;
+      text-align: center;
+      background: #000;
+      z-index: 2;
+    }
+
+    .viaje-fallback.visible { display: flex; }
+
+    .viaje-fallback button {
+      margin-top: 18px;
+      border: 1px solid rgba(0, 200, 255, 0.7);
+      background: linear-gradient(135deg, rgba(0,200,255,.85), rgba(0,120,255,.85));
+      color: #fff;
+      border-radius: 999px;
+      padding: 12px 22px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+  </style>
 </head>
 
 <body>
@@ -55,14 +112,86 @@
     {% endif %}
 
     <section class="final-cta">
-      <a href="{% url 'reflexion' %}" class="btn-primary" data-i18n="galeria_equipos_continuar">
+      <a href="{% url 'reflexion' %}" class="btn-primary" data-i18n="galeria_equipos_continuar" id="btnContinuarGaleria">
         Continuar
       </a>
     </section>
 
   </main>
 
+  <!-- VIDEO FINAL PANTALLA COMPLETA -->
+  <div id="viajeOverlay" class="viaje-overlay oculto" aria-hidden="true">
+    <video id="viajeVideo" class="video-viaje" preload="auto" playsinline>
+      <source src="{% static 'videos/VideoFinal.mp4' %}" type="video/mp4">
+      Tu navegador no soporta video.
+    </video>
+
+    <div id="viajeFallback" class="viaje-fallback">
+      <div>
+        <p>No se pudo reproducir el video.</p>
+        <button type="button" id="btnContinuarFallback">Continuar</button>
+      </div>
+    </div>
+  </div>
+
   {% include "includes/sincronizacion_fase.html" %}
+
+  <script>
+    const btnContinuar = document.getElementById('btnContinuarGaleria');
+    const viajeOverlay = document.getElementById('viajeOverlay');
+    const viajeVideo = document.getElementById('viajeVideo');
+    const viajeFallback = document.getElementById('viajeFallback');
+    const btnContinuarFallback = document.getElementById('btnContinuarFallback');
+
+    let iniciandoVideo = false;
+
+    function irASiguienteVista() {
+      window.location.href = btnContinuar.href;
+    }
+
+    async function reproducirVideoFinal() {
+      if (iniciandoVideo) return;
+      iniciandoVideo = true;
+
+      viajeOverlay.classList.remove('oculto');
+      viajeOverlay.setAttribute('aria-hidden', 'false');
+
+      requestAnimationFrame(() => {
+        viajeOverlay.classList.add('activo');
+      });
+
+      try {
+        viajeVideo.currentTime = 0;
+        viajeVideo.muted = false;
+        viajeVideo.controls = false;
+
+        await viajeVideo.play();
+      } catch (error) {
+        console.error('No se pudo reproducir VideoFinal:', error);
+
+        if (viajeFallback) {
+          viajeFallback.classList.add('visible');
+        } else {
+          irASiguienteVista();
+        }
+      }
+    }
+
+    if (btnContinuar) {
+      btnContinuar.addEventListener('click', (e) => {
+        e.preventDefault();
+        reproducirVideoFinal();
+      });
+    }
+
+    if (viajeVideo) {
+      viajeVideo.addEventListener('ended', irASiguienteVista);
+    }
+
+    if (btnContinuarFallback) {
+      btnContinuarFallback.addEventListener('click', irASiguienteVista);
+    }
+  </script>
 
 </body>
 </html>
