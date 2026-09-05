@@ -118,7 +118,7 @@
 
   <!-- VIDEO VIAJE PANTALLA COMPLETA -->
   <div id="viajeOverlay" class="viaje-overlay oculto" aria-hidden="true">
-    <video id="viajeVideo" class="video-viaje" preload="auto" playsinline>
+    <video id="viajeVideo" class="video-viaje" preload="none" playsinline>
       <source src="{% static 'videos/Viaje.mp4' %}" type="video/mp4">
       Tu navegador no soporta video.
     </video>
@@ -265,6 +265,15 @@
 
     if (viajeVideo) {
       viajeVideo.addEventListener('ended', irASiguienteVista);
+
+      window.addEventListener('load', () => {
+        setTimeout(() => {
+          if (viajeVideo.preload !== 'auto') {
+            viajeVideo.preload = 'auto';
+            viajeVideo.load();
+          }
+        }, 3000);
+      });
     }
 
     if (btnContinuarFallback) {
