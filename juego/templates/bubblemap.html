@@ -1,5 +1,4 @@
 {% load static %}
-{% include "atajos.html" %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -14,6 +13,7 @@
 </head>
 
 <body class="bubblemap-page" data-sesion-id="{{ grupo.sesion.idsesion }}">
+  {% include "atajos.html" %}
 
   <!-- Música de fondo -->
   <audio id="musicaBubble" src="{% static 'sounds/musica_bubble.mp3' %}" loop preload="auto"></audio>

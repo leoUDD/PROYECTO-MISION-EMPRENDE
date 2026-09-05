@@ -1,5 +1,4 @@
 {% load static %}
-{% include "atajos.html" %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -12,6 +11,7 @@
 </head>
 
 <body data-sesion-id="{{ grupo.sesion.idsesion }}" class="dialogo-activo">
+  {% include "atajos.html" %}
 
   <main class="team-container-wrap">
     <div class="team-container" role="region" aria-label="Introducción a comunicación">

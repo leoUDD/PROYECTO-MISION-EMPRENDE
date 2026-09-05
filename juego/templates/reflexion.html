@@ -1,5 +1,4 @@
 {% load static %}
-{% include "atajos.html" with ocultar_mapa_habilidades=True ocultar_hud_ranking=True %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -12,6 +11,7 @@
 </head>
 
 <body>
+  {% include "atajos.html" with ocultar_mapa_habilidades=True ocultar_hud_ranking=True %}
 
   <!-- El diálogo va como hijo DIRECTO de <body>, nunca dentro de
        <main class="results-wrap">: ese contenedor tiene backdrop-filter +

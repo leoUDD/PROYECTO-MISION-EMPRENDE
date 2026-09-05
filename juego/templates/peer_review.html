@@ -1,8 +1,4 @@
 {% load static %}
-{% with grupo=evaluator_team %}
-  {% include "atajos.html" %}
-{% endwith %}
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -32,8 +28,9 @@
   class="peer-review-page"
   data-metro-habilidad="comunicacion"
 >
-
-
+  {% with grupo=evaluator_team %}
+    {% include "atajos.html" %}
+  {% endwith %}
 
   <div class="student-timer-host"
        data-student-timer

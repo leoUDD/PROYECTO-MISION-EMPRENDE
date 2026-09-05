@@ -1,5 +1,4 @@
 {% load static %}
-{% include "atajos.html" %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -322,6 +321,7 @@
   data-foto-guardada="{{ foto_equipo_guardada|yesno:'true,false' }}"
   data-palabras-encontradas="{{ palabras_encontradas|default:0 }}"
 >
+  {% include "atajos.html" %}
   <div class="student-timer-host"
        data-student-timer
        data-compact-after="48"

@@ -1,5 +1,4 @@
 {% load static %}
-{% include "atajos.html" %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -11,6 +10,7 @@
   <link rel="icon" href="{% url 'favicon' %}">
 </head>
 <body data-sesion-id="{{ grupo.sesion.idsesion }}">
+  {% include "atajos.html" %}
   <main class="transition-container">
     <section class="card">
 

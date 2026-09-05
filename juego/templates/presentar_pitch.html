@@ -1,5 +1,4 @@
 {% load static %}
-{% include "atajos.html" %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -309,6 +308,7 @@
 </head>
 
 <body class="presentar-pitch-page" data-sesion-id="{{ grupo.sesion.idsesion }}" data-grupo-id="{{ grupo.idgrupo }}">
+  {% include "atajos.html" %}
   <div class="student-timer-host"
        data-student-timer
        data-compact-after="48"
