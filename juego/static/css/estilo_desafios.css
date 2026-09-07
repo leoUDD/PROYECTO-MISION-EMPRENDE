@@ -7,7 +7,7 @@
 ========================================================= */
 
 :root {
-  --bg: #000712 url('/static/images/FondoDesafios.png') center/cover no-repeat fixed;
+  --bg: #000712 url('/static/images/FondoDesafios.webp') center/cover no-repeat fixed;
 
   --panel-bg: rgba(3, 14, 32, .58);
   --panel-bg-strong: rgba(3, 14, 32, .78);

@@ -4,7 +4,7 @@
   --udd-green:#00F26D;
   --udd-white:#FFFFFF;
 
-  --bg: #000712 url('/static/images/PitchFuturo.png') center/cover no-repeat fixed;
+  --bg: #000712 url('/static/images/PitchFuturo.webp') center/cover no-repeat fixed;
   --card:rgba(0,16,74,.92);
   --text:#FFFFFF;
   --muted:rgba(255,255,255,.78);

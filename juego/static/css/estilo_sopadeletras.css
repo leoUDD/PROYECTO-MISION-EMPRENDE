@@ -8,7 +8,7 @@
 
 /* ========== VARIABLES ========== */
 :root {
-  --bg: #04070e url('/static/images/ConocidosONo.png') center/cover no-repeat fixed;
+  --bg: #04070e url('/static/images/ConocidosONo.webp') center/cover no-repeat fixed;
 
   --udd-dark: #04070e;
   --panel-dark: rgba(6, 15, 34, .78);

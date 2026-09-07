@@ -2,7 +2,7 @@
    TEMÁTICAS — PANEL TRANSPARENTE + EDEMY INSTRUCCIONES
 ===================================================== */
 :root{
-  --bg: #000712 url('/static/images/FondoDesafios.png') center/cover no-repeat fixed;
+  --bg: #000712 url('/static/images/FondoDesafios.webp') center/cover no-repeat fixed;
   --panel: rgba(3, 15, 34, .58);
   --panel-strong: rgba(3, 15, 34, .84);
   --card-soft: rgba(4, 24, 50, .62);

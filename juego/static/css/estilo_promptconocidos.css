@@ -6,7 +6,7 @@
   --udd-white: #FFFFFF;
   --green: #00F26D;
 
-  --bg: #000712 url('/static/images/ConocidosONo.png') center/cover no-repeat fixed;
+  --bg: #000712 url('/static/images/ConocidosONo.webp') center/cover no-repeat fixed;
   --card: rgba(0, 16, 74, 0.86);
   --text: #FFFFFF;
   --muted: rgba(255,255,255,0.78);

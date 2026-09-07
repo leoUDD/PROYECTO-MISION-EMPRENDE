@@ -6,7 +6,7 @@
   --udd-cyan-soft: #5BE7FF;
   --udd-white: #FFFFFF;
 
-  --bg: #000712 url('/static/images/FondoTransiciones.png') center/cover no-repeat fixed;
+  --bg: #000712 url('/static/images/FondoTransiciones.webp') center/cover no-repeat fixed;
   --text: #FFFFFF;
   --muted: rgba(230, 238, 248, .82);
   --panel: rgba(3, 18, 42, .54);

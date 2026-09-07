@@ -1,5 +1,5 @@
 :root{
-  --bg: #000712 url('/static/images/FondoBubbleMap.png') center/cover no-repeat fixed;
+  --bg: #000712 url('/static/images/FondoBubbleMap.webp') center/cover no-repeat fixed;
   --card:#081A2D;
   --text:#E6EEF8;
   --muted:#AAB7C8;
@@ -607,7 +607,7 @@ body{
 ===================================================== */
 
 :root{
-  --bg: #000712 url('/static/images/FondoBubbleMap.png') center/cover no-repeat fixed;
+  --bg: #000712 url('/static/images/FondoBubbleMap.webp') center/cover no-repeat fixed;
   --text: #E6EEF8;
   --muted: rgba(230,238,248,.82);
   --primary: #00C8FF;
@@ -2650,7 +2650,7 @@ body.bubblemap-page::before {
 
   background:
     #000712
-    url('/static/images/FondoBubbleMap.png')
+    url('/static/images/FondoBubbleMap.webp')
     center center / cover
     no-repeat !important;
 

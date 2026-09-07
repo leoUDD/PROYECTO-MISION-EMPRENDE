@@ -5,7 +5,7 @@
 :root {
   --peer-bg:
     #000712
-    url("/static/images/FondoRanking.png")
+    url("/static/images/FondoRanking.webp")
     center / cover no-repeat fixed;
 
   --peer-panel: rgba(3, 16, 36, .88);
