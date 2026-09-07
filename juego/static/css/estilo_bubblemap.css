@@ -27,7 +27,6 @@ body{
 /* ── Contenedor principal ── */
 .bubblemap-container{
   width: clamp(360px, 96vw, 1100px);
-  background: url('/static/images/fondo_card.webp') center/cover no-repeat fixed;
   border-radius: 28px;
   box-shadow: var(--shadow);
   padding: 16px 24px 16px;

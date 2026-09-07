@@ -27,7 +27,6 @@ body {
 /* ================== CARD PRINCIPAL ================== */
 .team-container {
   width: clamp(600px, 80vw, 1100px);
-  background: url('/static/images/apoyo.webp') center/cover no-repeat;
   border-radius: 28px;
   box-shadow: var(--shadow);
 
