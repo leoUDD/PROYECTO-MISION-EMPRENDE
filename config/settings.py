@@ -15,6 +15,7 @@ Variables relevantes:
 
 from pathlib import Path
 import os
+import sys
 import pymysql
 
 pymysql.install_as_MySQLdb()
@@ -141,10 +142,47 @@ TIME_ZONE = 'America/Santiago'
 USE_I18N = True
 USE_TZ = True
 
+
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'juego' / 'static']
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# juego/static/ ya lo descubre AppDirectoriesFinder porque 'juego' esta en
+# INSTALLED_APPS. Declararlo tambien en STATICFILES_DIRS lo hacia recorrer dos
+# veces y provocaba avisos de archivo duplicado en collectstatic.
+
+# El manifiesto exige que collectstatic haya corrido: sin staticfiles.json,
+# cualquier {% static %} lanza ValueError. Django fuerza DEBUG=False durante
+# la suite de tests, asi que sin esta condicion 29 tests fallarian en un clon
+# recien hecho. En desarrollo y en tests se usa el backend simple.
+_EJECUTANDO_TESTS = "test" in sys.argv
+_MANIFIESTO_ESTATICOS = not DEBUG and not _EJECUTANDO_TESTS
+
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": (
+            "whitenoise.storage.CompressedManifestStaticFilesStorage"
+            if _MANIFIESTO_ESTATICOS
+            else "django.contrib.staticfiles.storage.StaticFilesStorage"
+        ),
+    },
+}
+
+# Borra las copias sin hash de STATIC_ROOT: sin esto cada archivo quedaria
+# duplicado y staticfiles/ pesaria el doble.
+WHITENOISE_KEEP_ONLY_HASHED_FILES = True
+
+# La lista por defecto de whitenoise 6.4 omite los formatos de audio, asi que
+# gzipea los MP3 sin ganar nada. Se agregan a mano.
+WHITENOISE_SKIP_COMPRESS_EXTENSIONS = (
+    "jpg", "jpeg", "png", "gif", "webp", "ico",
+    "zip", "gz", "tgz", "bz2", "tbz", "xz", "br",
+    "swf", "flv", "woff", "woff2",
+    "3gp", "3gpp", "asf", "avi", "m4v", "mov", "mp4", "mpeg", "mpg", "webm", "wmv",
+    "mp3", "m4a", "ogg", "opus", "wav",
+)
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
