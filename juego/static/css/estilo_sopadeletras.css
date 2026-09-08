@@ -717,11 +717,21 @@ p { font-size: var(--fs-body); color: var(--text); margin: 0 0 14px; }
    class="oculto" en el HTML, así que ESTA regla es la que evita que
    aparezca fuera de tiempo y descentre la tarjeta del juego. */
 body.dialogo-edemy-activo .game-container {
-  filter: blur(7px) brightness(.35) saturate(.78);
+  /* brightness .35 -> .19 : compensa el brightness(.55) removido del
+     #dialogo-backdrop (.35 x .55 = .1925). Misma oscuridad final. */
+  filter: blur(7px) brightness(.19) saturate(.78);
   transform: scale(1.012);
   pointer-events: none;
   user-select: none;
   transition: filter .35s ease, transform .35s ease;
+}
+
+/* PERFORMANCE: sus backdrop-filter quedan debajo del blur de 7px de la
+   regla de arriba, invisibles, pero el compositor los resolvia igual. */
+body.dialogo-edemy-activo .game-container,
+body.dialogo-edemy-activo .words {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 #dialogo-inicial-overlay {
@@ -755,8 +765,15 @@ body.dialogo-edemy-activo .game-container {
   background:
     radial-gradient(circle at center, rgba(64,196,255,.12), transparent 42%),
     rgba(2,6,14,.82);
-  backdrop-filter: blur(8px) brightness(.55);
-  -webkit-backdrop-filter: blur(8px) brightness(.55);
+
+  /* PERFORMANCE: backdrop-filter removido a proposito, mismo criterio que en
+     transicionempatia y transiciondesafio. Un blur de pantalla completa sobre
+     un elemento cuyo padre anima opacity obliga a re-muestrear el viewport
+     entero en cada frame; con el efecto maquina de escribir mutando texto
+     cada 28 ms eso dispara el INP del boton Siguiente. El contenido de atras
+     ya viene desenfocado por el `filter` de la regla del contenido, asi que
+     este blur no aportaba nada visible. El oscurecimiento de brightness(.55)
+     se compenso bajando brightness en esa regla. */
 }
 
 #dialogo-box {

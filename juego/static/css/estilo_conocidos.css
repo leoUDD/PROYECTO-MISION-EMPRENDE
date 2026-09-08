@@ -571,7 +571,9 @@ body.flash::after{
    Tamaños alineados con la transición de empatía.
    ========================= */
 body:has(#dialogo-inicial-overlay.visible) .zona-juego{
-  filter: blur(7px) brightness(.36) saturate(.75);
+  /* brightness .36 -> .20 : compensa el brightness(.55) removido del
+     #dialogo-backdrop (.36 x .55 = .198). Misma oscuridad final. */
+  filter: blur(7px) brightness(.20) saturate(.75);
   transform: scale(1.012);
   pointer-events: none;
   user-select: none;
@@ -606,8 +608,15 @@ body:has(#dialogo-inicial-overlay.visible) .zona-juego{
   background:
     radial-gradient(circle at center, rgba(0,252,152,.10), transparent 42%),
     rgba(0,5,18,.78);
-  backdrop-filter: blur(8px) brightness(.55);
-  -webkit-backdrop-filter: blur(8px) brightness(.55);
+
+  /* PERFORMANCE: backdrop-filter removido a proposito, mismo criterio que en
+     transicionempatia y transiciondesafio. Un blur de pantalla completa sobre
+     un elemento cuyo padre anima opacity obliga a re-muestrear el viewport
+     entero en cada frame; con el efecto maquina de escribir mutando texto
+     cada 28 ms eso dispara el INP del boton Siguiente. El contenido de atras
+     ya viene desenfocado por el `filter` de la regla del contenido, asi que
+     este blur no aportaba nada visible. El oscurecimiento de brightness(.55)
+     se compenso bajando brightness en esa regla. */
 }
 
 #dialogo-box{

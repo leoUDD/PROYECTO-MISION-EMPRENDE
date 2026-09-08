@@ -309,7 +309,9 @@ main.team-container-wrap {
 
 body.dialogo-activo .team-container-wrap,
 body.dialogo-activo .team-container {
-  filter: blur(5px) brightness(.42) saturate(.80);
+  /* brightness .42 -> .26 : compensa el brightness(.62) removido del
+     #dialogo-backdrop (.42 x .62 = .2604). Misma oscuridad final. */
+  filter: blur(5px) brightness(.26) saturate(.80);
   transform: scale(1.01);
   pointer-events: none;
   user-select: none;
@@ -330,14 +332,29 @@ body.dialogo-activo .team-container {
   display: flex;
 }
 
+/* PERFORMANCE: sus backdrop-filter quedan debajo del blur de 5px de la
+   regla del contenido, invisibles, pero se resolvian en cada frame. */
+body.dialogo-activo .team-container,
+body.dialogo-activo .mission-panel {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
 #dialogo-backdrop {
   position: absolute;
   inset: 0;
   background:
     radial-gradient(circle at center, rgba(0, 252, 152, .10), transparent 42%),
     rgba(0, 5, 18, .76);
-  backdrop-filter: blur(6px) brightness(.62);
-  -webkit-backdrop-filter: blur(6px) brightness(.62);
+
+  /* PERFORMANCE: backdrop-filter removido a proposito, mismo criterio que en
+     transicionempatia y transiciondesafio. Un blur de pantalla completa sobre
+     un elemento cuyo padre anima opacity obliga a re-muestrear el viewport
+     entero en cada frame; con el efecto maquina de escribir mutando texto
+     cada 18 ms eso dispara el INP del boton Siguiente. El contenido de atras
+     ya viene desenfocado por el `filter` de la regla del contenido, asi que
+     este blur no aportaba nada visible. El oscurecimiento de brightness(.62)
+     se compenso bajando brightness en esa regla. */
 }
 
 #dialogo-box {
