@@ -694,3 +694,66 @@ body.modal-alumnos-abierto { overflow: hidden; }
   .dev-grid { grid-template-columns: 1fr; }
   .btn-dev-10 { grid-column: auto; }
 }
+
+/* ============================================================
+   Panel simplificado — estilos de la vista compacta
+   ============================================================ */
+.control-layout { grid-template-columns: minmax(260px, 315px) minmax(0, 1fr); }
+.control-sidebar { padding: 22px 18px; gap: 14px; }
+.control-main { min-width: 0; padding: 22px 24px; gap: 16px; }
+.control-sidebar-top { margin-bottom: 0; }
+.control-title { font-size: 22px; margin-bottom: 12px; }
+.readout-card { padding: 18px; }
+.readout-heading { display: flex; gap: 10px; justify-content: space-between; align-items: center; margin: 18px 0 4px; }
+.readout-heading .mini-label { margin: 0; }
+.timer-status { font-size: 11px; font-weight: 700; color: var(--glass-muted); }
+.control-layout[data-timer-corriendo="true"] .timer-status { color: #6ee7b7; }
+.readout-ready { display: flex; gap: 10px; align-items: end; justify-content: space-between; padding-top: 16px; margin-top: 16px; border-top: 1px solid rgba(255,255,255,.15); }
+.readout-ready .mini-label { margin: 0 0 3px; }
+.ready-fraction { color: #fff; font-size: 25px; font-weight: 800; line-height: 1.1; }
+.readout-ready.completo .ready-fraction { color: #6ee7b7; }
+.ready-caption { color: var(--glass-muted); font-size: 10px; text-align: right; max-width: 105px; line-height: 1.35; }
+.progress-card .progreso { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
+.progress-card .paso { font-size: 11.2px; padding: 8px 9px; border-radius: 9px; }
+.dev-card { padding: 14px 16px; }
+.dev-card-head { list-style: none; cursor: pointer; margin: 0; }
+.dev-card-head::-webkit-details-marker { display: none; }
+.dev-card-head::after { content: '⌄'; font-size: 19px; color: var(--warning-ink); margin-left: auto; }
+.dev-card[open] .dev-card-head::after { content: '⌃'; }
+.dev-summary-title { font-size: 13px; font-weight: 800; }
+.dev-card .nota { margin: 14px 0 12px; }
+.dev-badge { font-size: 9px; }
+.panel-heading { display: flex; gap: 16px; align-items: flex-start; justify-content: space-between; margin-bottom: 15px; }
+.panel-heading h2 { margin-bottom: 0; }
+.panel-heading .nota { margin-top: 4px; }
+.panel-count { flex: none; border-radius: 999px; background: #eef6fc; color: #356496; font-size: 12px; font-weight: 800; padding: 6px 11px; }
+.table-scroll { overflow-x: auto; }
+.group-table { min-width: 790px; }
+.group-table th { white-space: nowrap; }
+.group-table td { padding-top: 14px; padding-bottom: 14px; }
+.ready-tag { display: inline-block; border-radius: 999px; padding: 6px 10px; font-size: 11px; font-weight: 800; background: #eef2f7; color: #566477; white-space: nowrap; }
+.ready-tag.listo { background: #dcfce7; color: #166534; }
+.ready-tag.pendiente { background: #fff7ed; color: #9a3412; }
+.group-detail { position: relative; font-size: 12px; }
+.group-detail summary { color: #3264a1; font-weight: 700; cursor: pointer; white-space: nowrap; }
+.group-detail[open] { min-width: 165px; }
+.detail-content { margin-top: 9px; padding: 10px; border: 1px solid var(--border); border-radius: 10px; background: #f8fafc; color: #475569; line-height: 1.7; }
+.detail-content strong { color: #334155; }
+.empty-groups { text-align: center; padding: 28px 10px; color: var(--muted); }
+.pitch-section[hidden] { display: none !important; }
+.pitch-section { max-width: 100%; }
+.pitch-timer-wrap { max-width: 420px; }
+@media (max-width: 1040px) {
+  .control-layout { grid-template-columns: 1fr; }
+  .control-sidebar { min-height: 0; }
+  .control-main { padding: 20px; }
+}
+@media (max-width: 560px) {
+  .control-sidebar { padding: 16px; }
+  .control-main { padding: 16px; }
+  .panel-heading { align-items: flex-start; }
+  .panel-count { font-size: 10px; }
+  .readout-ready { align-items: center; }
+  .dev-grid { grid-template-columns: 1fr 1fr; }
+  .btn-dev-10 { grid-column: 1 / -1; }
+}

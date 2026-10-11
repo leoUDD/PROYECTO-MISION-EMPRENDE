@@ -13,10 +13,7 @@
 
 <body>
 <div class="control-layout" id="controlLayout">
-<form style="display:none;">
-  {% csrf_token %}
-</form>
-
+  <form style="display:none;">{% csrf_token %}</form>
   <aside class="control-sidebar">
     <div class="control-sidebar-top">
       <p class="eyebrow">Panel de seguimiento</p>
@@ -27,210 +24,132 @@
       </div>
     </div>
 
-    <div class="readout-card">
+    <!-- Fase, tiempo, estado y grupos listos: un solo bloque en vivo -->
+    <section class="readout-card" aria-label="Estado de la sesión">
       <div class="mini-label">Actividad actual</div>
       <div class="pill" id="faseEtiqueta">{{ sesion.fase_actual }}</div>
-
-      <div class="mini-label readout-timer-label">Tiempo restante</div>
+      <div class="readout-heading">
+        <span class="mini-label">Tiempo restante</span>
+        <span class="timer-status" id="timerEstado">Detenido</span>
+      </div>
       <div class="readout-timer" id="timerGrande">00:00</div>
+      <div class="readout-ready" id="statListos">
+        <div>
+          <div class="mini-label">Grupos listos en esta etapa</div>
+          <div class="ready-fraction"><span id="listosInicio">0</span>/<span id="totalInicio">{{ grupos|length }}</span></div>
+        </div>
+        <span class="ready-caption">Según el estado de cada grupo</span>
+      </div>
+    </section>
 
-      <p class="nota">
-        Esta vista es solo de seguimiento. El avance, timers y acciones principales las realizan los estudiantes.
-      </p>
-    </div>
-
-    <div class="card">
+    <section class="card">
       <h2>🎯 Qué debe hacer el profesor</h2>
-      <div id="accionProfesor" class="accion-profesor">
-        Esperar el avance de los grupos.
-      </div>
-    </div>
+      <div id="accionProfesor" class="accion-profesor">Esperar el avance de los grupos.</div>
+    </section>
 
-    <div class="card dev-card">
-      <div class="dev-card-head">
-        <h2>Herramientas DEV</h2>
-        <span class="dev-badge">Solo pruebas</span>
-      </div>
-      <p class="nota">Botones temporales para pruebas.</p>
-
-      <div class="dev-grid">
-        <button type="button" class="btn-dev" onclick="avanzarFaseDev()">
-          Avanzar fase
-        </button>
-
-        <button type="button" class="btn-dev btn-dev-back" onclick="retrocederFaseDev()">
-          Retroceder fase
-        </button>
-
-        <button type="button" class="btn-dev btn-dev-start" onclick="iniciarTimerDev()">
-          Iniciar timer
-        </button>
-
-        <button type="button" class="btn-dev btn-dev-stop" onclick="detenerTimerDev()">
-          Detener timer
-        </button>
-
-        <button type="button" class="btn-dev btn-dev-reset" onclick="reiniciarTimerDev()">
-          Reiniciar tiempo de fase
-        </button>
-
-        <button type="button" class="btn-dev btn-dev-10" onclick="timer10Dev()">
-          Timer a 10 segundos
-        </button>
-      </div>
-    </div>
-
-    <div class="card">
+    <section class="card progress-card">
       <h2>🗺️ Avance general</h2>
-
       <div class="progreso">
-        <div class="paso" data-habilidad="f1">F1 · Trabajo en equipo</div>
+        <div class="paso" data-habilidad="f1">F1 · Equipo</div>
         <div class="paso" data-habilidad="f2">F2 · Empatía</div>
         <div class="paso" data-habilidad="f3">F3 · Creatividad</div>
         <div class="paso" data-habilidad="f4">F4 · Comunicación</div>
         <div class="paso" data-habilidad="f5">F5 · Apoyo</div>
         <div class="paso" data-habilidad="f6">Ranking / Cierre</div>
       </div>
-    </div>
+    </section>
 
-    <div class="card">
-      <h2>🔑 Códigos de acceso</h2>
-
-      <table class="mini-table">
-        <thead>
-          <tr>
-            <th>Grupo</th>
-            <th>Código</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for grupo in grupos %}
-          <tr>
-            <td>{{ grupo.nombregrupo }}</td>
-            <td><span class="codigo">{{ grupo.codigoacceso }}</span></td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+    <!-- Se mantienen TODOS los controles de pruebas, cerrados por defecto -->
+    <details class="card dev-card">
+      <summary class="dev-card-head">
+        <span class="dev-summary-title">⚙️ Herramientas DEV</span>
+        <span class="dev-badge">Solo pruebas</span>
+      </summary>
+      <p class="nota">Estos controles modifican el estado de la sesión.</p>
+      <div class="dev-grid">
+        <button type="button" class="btn-dev" onclick="avanzarFaseDev()">Avanzar fase</button>
+        <button type="button" class="btn-dev btn-dev-back" onclick="retrocederFaseDev()">Retroceder fase</button>
+        <button type="button" class="btn-dev btn-dev-start" onclick="iniciarTimerDev()">Iniciar timer</button>
+        <button type="button" class="btn-dev btn-dev-stop" onclick="detenerTimerDev()">Detener timer</button>
+        <button type="button" class="btn-dev btn-dev-reset" onclick="reiniciarTimerDev()">Reiniciar tiempo de fase</button>
+        <button type="button" class="btn-dev btn-dev-10" onclick="timer10Dev()">Timer a 10 segundos</button>
+      </div>
+    </details>
   </aside>
 
   <main class="control-main">
-
-    <div class="stats-grid">
-      <div class="stat-card stat-card-grupos">
-        <div class="mini-label">👥 Grupos en sesión</div>
-        <div class="big" id="totalGrupos">{{ grupos|length }}</div>
+    <section class="card group-panel">
+      <div class="panel-heading">
+        <div>
+          <h2>👥 Estado de los grupos</h2>
+          <p class="nota">Códigos de acceso, progreso y pantalla de cada equipo en un solo lugar.</p>
+        </div>
+        <span class="panel-count">{{ grupos|length }} grupos</span>
       </div>
-
-      <div class="stat-card stat-card-listos" id="statListos">
-        <div class="mini-label">✅ Grupos listos etapa actual</div>
-        <div class="big"><span id="listosInicio">0</span>/<span id="totalInicio">0</span></div>
-      </div>
-
-      <div class="stat-card stat-card-timer">
-        <div class="mini-label">⏱ Estado timer</div>
-        <div class="big" id="timerEstado">Detenido</div>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>👁 Ver pantalla de un grupo</h2>
-      <p class="nota">
-        Abre la vista del estudiante en otra pestaña. Úsalo como modo observación.
-      </p>
-
-      <table>
-        <thead>
-          <tr>
-            <th>Grupo</th>
-            <th>Código</th>
-            <th>Tokens</th>
-            <th>Alumnos</th>
-            <th>Ver</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for grupo in grupos %}
-          <tr class="team-row">
-            <td><span class="team-dot"></span>{{ grupo.nombregrupo }}</td>
-            <td><span class="codigo">{{ grupo.codigoacceso }}</span></td>
-            <td>{{ grupo.tokensgrupo|default:0 }}</td>
-            <td>
-              <button
-                type="button"
-                class="btn-alumnos"
-                data-target="alumnos-grupo-{{ grupo.idgrupo }}"
-                data-grupo="{{ grupo.nombregrupo|default:'Grupo'|escape }}"
-              >
-                👥 Ver
-              </button>
-
-              <div id="alumnos-grupo-{{ grupo.idgrupo }}" class="alumnos-data" hidden>
-                {% for alumno in grupo.alumno_set.all %}
-                  <div class="alumno-item">
-                    <span class="alumno-icono">👤</span>
-                    <div class="alumno-info">
-                      <strong>
-                        {{ alumno.nombrealumno|default:"Alumno" }}
-                        {{ alumno.apellidopaternoalumno|default:"" }}
-                        {{ alumno.apellidomaternoalumno|default:"" }}
-                      </strong>
-                      {% if alumno.emailalumno %}
-                        <small>{{ alumno.emailalumno }}</small>
-                      {% endif %}
+      <div class="table-scroll">
+        <table class="group-table">
+          <thead>
+            <tr>
+              <th>Grupo</th>
+              <th>Código</th>
+              <th>Tokens</th>
+              <th>Estado actual</th>
+              <th>Alumnos</th>
+              <th>Pantalla</th>
+              <th>Avance</th>
+            </tr>
+          </thead>
+          <tbody id="tablaGrupos">
+            {% for grupo in grupos %}
+            <tr class="team-row" data-grupo-id="{{ grupo.idgrupo }}" data-grupo-nombre="{{ grupo.nombregrupo|escape }}">
+              <td><span class="team-dot"></span><strong>{{ grupo.nombregrupo }}</strong></td>
+              <td><span class="codigo">{{ grupo.codigoacceso }}</span></td>
+              <td class="celda-tokens">{{ grupo.tokensgrupo|default:0 }}</td>
+              <td><span class="ready-tag celda-listo">Cargando…</span></td>
+              <td>
+                <button type="button" class="btn-alumnos"
+                        data-target="alumnos-grupo-{{ grupo.idgrupo }}"
+                        data-grupo="{{ grupo.nombregrupo|default:'Grupo'|escape }}">👥 Ver</button>
+                <div id="alumnos-grupo-{{ grupo.idgrupo }}" class="alumnos-data" hidden>
+                  {% for alumno in grupo.alumno_set.all %}
+                    <div class="alumno-item">
+                      <span class="alumno-icono">👤</span>
+                      <div class="alumno-info">
+                        <strong>{{ alumno.nombrealumno|default:"Alumno" }} {{ alumno.apellidopaternoalumno|default:"" }} {{ alumno.apellidomaternoalumno|default:"" }}</strong>
+                        {% if alumno.emailalumno %}<small>{{ alumno.emailalumno }}</small>{% endif %}
+                      </div>
                     </div>
+                  {% empty %}
+                    <p class="alumnos-vacio">No hay alumnos asignados a este grupo.</p>
+                  {% endfor %}
+                </div>
+              </td>
+              <td>
+                <a href="{% url 'ver_como_grupo' grupo.idgrupo %}" target="_blank" rel="noopener" class="btn-ver">👁 Ver grupo</a>
+              </td>
+              <td>
+                <details class="group-detail">
+                  <summary>Detalles</summary>
+                  <div class="detail-content">
+                    <div><strong>Temática:</strong> <span class="detalle-tematica">{{ grupo.tema_elegido|default:"—" }}</span></div>
+                    <div><strong>Desafío:</strong> <span class="detalle-desafio">{{ grupo.desafio_nombre|default:"—" }}</span></div>
+                    <div><strong>LEGO:</strong> <span class="detalle-lego">{% if grupo.foto_lego or grupo.lego_sin_foto %}Completado{% else %}Pendiente{% endif %}</span></div>
+                    <div><strong>Pitch:</strong> <span class="detalle-pitch">{% if grupo.pitch_texto %}Completado{% else %}Pendiente{% endif %}</span></div>
                   </div>
-                {% empty %}
-                  <p class="alumnos-vacio">No hay alumnos asignados a este grupo.</p>
-                {% endfor %}
-              </div>
-            </td>
-            <td>
-              <a href="{% url 'ver_como_grupo' grupo.idgrupo %}" target="_blank" class="btn-ver">
-                👁 Ver grupo
-              </a>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+                </details>
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="7" class="empty-groups">Todavía no hay grupos en esta sesión.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
 
-    <div class="card">
-      <h2>📊 Estado de grupos</h2>
-
-      <table>
-        <thead>
-          <tr>
-            <th>Grupo</th>
-            <th>Tokens</th>
-            <th>Listo</th>
-            <th>Temática</th>
-            <th>Desafío</th>
-            <th>LEGO</th>
-            <th>Pitch</th>
-          </tr>
-        </thead>
-        <tbody id="tablaGrupos">
-          {% for grupo in grupos %}
-          <tr class="team-row">
-            <td><span class="team-dot"></span>{{ grupo.nombregrupo }}</td>
-            <td>{{ grupo.tokensgrupo|default:0 }}</td>
-            <td>—</td>
-            <td>{{ grupo.tema_elegido|default:"—" }}</td>
-            <td>{{ grupo.desafio_nombre|default:"—" }}</td>
-            <td>{% if grupo.foto_lego or grupo.lego_sin_foto %}<span class="estado-ok">✅</span>{% else %}<span class="estado-no">❌</span>{% endif %}</td>
-            <td>{% if grupo.pitch_texto %}<span class="estado-ok">✅</span>{% else %}—{% endif %}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-
-    <div class="card">
+    <!-- No ocupa espacio fuera de las fases de presentación -->
+    <section class="card pitch-section" id="seccionPitch" hidden>
       <h2>🎤 Presentación de pitch</h2>
-
       <div class="pitch-actual">
         <div>
           <div class="mini-label">Grupo presentando</div>
@@ -238,18 +157,13 @@
         </div>
         <div id="grupoActualOrden" class="nota">—</div>
       </div>
-
       <div class="pitch-timer-wrap">
         <div class="mini-label">Tiempo de presentación</div>
         <div id="timerPitchProfesor" class="readout-timer readout-timer-sm">00:00</div>
       </div>
-
       <h3>Orden del pitch</h3>
-      <ol id="listaOrdenPitch" class="orden-lista">
-        <li>Aún no se ha sorteado el orden.</li>
-      </ol>
-    </div>
-
+      <ol id="listaOrdenPitch" class="orden-lista"><li>Aún no se ha sorteado el orden.</li></ol>
+    </section>
   </main>
 </div>
 
@@ -412,21 +326,43 @@ function listoActual(g, fase) {
   return false;
 }
 
+// Reutilizamos las filas renderizadas por Django para conservar sus enlaces,
+// códigos y botones de alumnos aunque la información se actualice en vivo.
 function actualizarTablaGrupos(data) {
-  const tabla = document.getElementById("tablaGrupos");
-  if (!tabla || !Array.isArray(data.grupos)) return;
+  const filas = [...document.querySelectorAll('#tablaGrupos .team-row')];
+  if (!Array.isArray(data.grupos)) return;
 
-  tabla.innerHTML = data.grupos.map(g => `
-    <tr class="team-row">
-      <td><span class="team-dot"></span>${g.nombre}</td>
-      <td>${g.tokens ?? 0}</td>
-      <td>${listoActual(g, data.faseActual) ? '<span class="estado-ok">✅</span>' : '<span class="estado-no">❌</span>'}</td>
-      <td>${g.temaElegido || g.tema_elegido || "—"}</td>
-      <td>${g.desafioNombre || g.desafio_nombre || "—"}</td>
-      <td>${g.legoConFoto || g.legoSinFoto ? '<span class="estado-ok">✅</span>' : '<span class="estado-no">❌</span>'}</td>
-      <td>${g.pitchTexto || g.pitch_texto ? '<span class="estado-ok">✅</span>' : "—"}</td>
-    </tr>
-  `).join("");
+  const porId = new Map(filas.map(f => [f.dataset.grupoId, f]));
+  const porNombre = new Map(filas.map(f => [f.dataset.grupoNombre.trim(), f]));
+
+  for (const g of data.grupos) {
+    const id = g.idgrupo ?? g.id ?? g.grupoId;
+    const fila = (id != null ? porId.get(String(id)) : null)
+      || porNombre.get(String(g.nombre ?? '').trim());
+    if (!fila) continue;
+
+    const tokens = fila.querySelector('.celda-tokens');
+    const estado = fila.querySelector('.celda-listo');
+    if (tokens) tokens.textContent = String(g.tokens ?? 0);
+    if (estado) {
+      const listo = Boolean(listoActual(g, data.faseActual));
+      estado.textContent = listo ? '✓ Listo' : 'Pendiente';
+      estado.classList.toggle('listo', listo);
+      estado.classList.toggle('pendiente', !listo);
+    }
+
+    // El detalle se muestra solo cuando el profesor lo solicita.
+    const detalles = {
+      '.detalle-tematica': g.temaElegido || g.tema_elegido || '—',
+      '.detalle-desafio': g.desafioNombre || g.desafio_nombre || '—',
+      '.detalle-lego': (g.legoConFoto || g.legoSinFoto) ? 'Completado' : 'Pendiente',
+      '.detalle-pitch': (g.pitchTexto || g.pitch_texto) ? 'Completado' : 'Pendiente'
+    };
+    for (const [selector, valor] of Object.entries(detalles)) {
+      const elemento = fila.querySelector(selector);
+      if (elemento) elemento.textContent = String(valor);
+    }
+  }
 }
 
 function renderOrdenPitch(ordenPitch, grupoActual) {
@@ -447,37 +383,36 @@ function renderOrdenPitch(ordenPitch, grupoActual) {
 }
 
 function actualizarUI(data) {
-  document.getElementById("faseEtiqueta").textContent = data.faseEtiqueta || data.faseActual;
-  document.getElementById("timerGrande").textContent = formatearTiempo(data.segundosRestantes);
-  document.getElementById("timerPitchProfesor").textContent = formatearTiempo(data.segundosRestantes);
-  document.getElementById("timerEstado").textContent = data.timerCorriendo ? "Corriendo" : "Detenido";
+  const fase = data.faseActual || '';
+  document.getElementById('faseEtiqueta').textContent = data.faseEtiqueta || fase;
+  document.getElementById('timerGrande').textContent = formatearTiempo(data.segundosRestantes);
+  document.getElementById('timerPitchProfesor').textContent = formatearTiempo(data.segundosRestantes);
+  document.getElementById('timerEstado').textContent = data.timerCorriendo ? 'En marcha' : 'Detenido';
 
-  if (controlLayout) {
-    controlLayout.dataset.timerCorriendo = data.timerCorriendo ? "true" : "false";
+  if (controlLayout) controlLayout.dataset.timerCorriendo = data.timerCorriendo ? 'true' : 'false';
+
+  // Un único criterio para el contador y los estados individuales.
+  // El dato "listosInicio" de la API puede representar otra condición de la fase.
+  if (Array.isArray(data.grupos)) {
+    const total = data.grupos.length;
+    const listos = data.grupos.filter(g => Boolean(listoActual(g, fase))).length;
+    document.getElementById('listosInicio').textContent = listos;
+    document.getElementById('totalInicio').textContent = total;
+    const tarjeta = document.getElementById('statListos');
+    if (tarjeta) tarjeta.classList.toggle('completo', total > 0 && listos === total);
   }
 
-  document.getElementById("totalGrupos").textContent = data.totalGrupos || 0;
-  document.getElementById("listosInicio").textContent = data.listosInicio || 0;
-  document.getElementById("totalInicio").textContent = data.totalListosInicio || data.totalGrupos || 0;
-
-  const totalListosEtapa = data.totalListosInicio || data.totalGrupos || 0;
-  const statListos = document.getElementById("statListos");
-  if (statListos) {
-    statListos.classList.toggle(
-      "completo",
-      totalListosEtapa > 0 && (data.listosInicio || 0) >= totalListosEtapa
-    );
-  }
-
-  document.getElementById("accionProfesor").textContent = textoAccionProfesor(data.faseActual);
-
-  marcarHabilidad(data.faseActual);
+  document.getElementById('accionProfesor').textContent = textoAccionProfesor(fase);
+  marcarHabilidad(fase);
   actualizarTablaGrupos(data);
 
-  const grupoActual = data.grupoActual;
-  document.getElementById("grupoActualNombre").textContent = grupoActual ? grupoActual.nombre : "Aún no sorteado";
-  document.getElementById("grupoActualOrden").textContent = grupoActual ? `Orden ${grupoActual.orden}` : "—";
+  // Mostrar presentación únicamente cuando se ordenan o presentan los pitch.
+  const seccionPitch = document.getElementById('seccionPitch');
+  if (seccionPitch) seccionPitch.hidden = !['f4_orden_pitch', 'f4_presentacion_pitch'].includes(fase);
 
+  const grupoActual = data.grupoActual;
+  document.getElementById('grupoActualNombre').textContent = grupoActual ? grupoActual.nombre : 'Aún no sorteado';
+  document.getElementById('grupoActualOrden').textContent = grupoActual ? `Orden ${grupoActual.orden}` : '—';
   renderOrdenPitch(data.ordenPitch, grupoActual);
 }
 
