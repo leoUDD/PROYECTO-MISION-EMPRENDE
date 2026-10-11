@@ -1,55 +1,78 @@
 {% load static %}
-{% include "atajos.html" %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title data-i18n="modo_juego_document_title">Misión Emprende UDD — Modo de juego</title>
+  <title>Misión Emprende UDD — Formación de equipos</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&family=Orbitron:wght@700;900&family=Exo+2:wght@700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/estilo_promptconocidos.css' %}" />
+  <link rel="icon" href="{% url 'favicon' %}">
 </head>
-
 <body>
-  <main class="mode-container" role="region" aria-label="Elegir modo de juego">
+  {% include "atajos.html" %}
+
+  <div id="dialogo-inicial-overlay" class="oculto" aria-modal="true" role="dialog" aria-label="Mensaje de EdEmy">
+    <div id="dialogo-backdrop"></div>
+
+    <div id="dialogo-box">
+      <div class="dialogo-personaje activo" id="pj-edemy">
+        <img class="dialogo-img" src="{% static 'images/EdemFeliz.webp' %}" alt="EdEmy">
+      </div>
+
+      <div class="dialogo-burbuja" id="dialogo-burbuja">
+        <div class="dialogo-hablante" id="dialogo-hablante">EdEmy</div>
+
+        <p class="dialogo-texto-rpg" id="dialogo-texto"></p>
+
+        <button class="dialogo-siguiente" id="btn-dialogo-continuar" type="button" onclick="dialogoSiguiente()">
+          <span id="btn-rpg-label">Siguiente</span>
+          <span class="dialogo-flecha">▶</span>
+        </button>
+
+        <div class="dialogo-progreso">
+          <div id="dialogo-dots"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main class="mode-container" role="region" aria-label="Elegir modo de equipo">
+    <div class="phase-title" data-i18n="promptconocidos_titulo_fase">Trabajo en Equipo</div>
+
     <header class="mode-header">
-      <h1 class="mode-title" data-i18n="modo_juego_titulo">Reclutas, seleccionen un modo de juego:</h1>
-      <p class="mode-subtitle" data-i18n="modo_juego_subtitulo">
-        ¿Ya se conocen o es su primera misión juntos?
+      <p class="mode-subtitle" data-i18n="promptconocidos_subtitulo">
+        Elijan con quién comenzar la misión: personas conocidas o nuevas. Cada opción abre un camino distinto.
       </p>
     </header>
-
     <section class="mode-grid">
-      <a href="{% url 'elegir_modo_conocidos' 'normal' %}" class="mode-card mode-intro">
+      <a href="{% url 'elegir_modo_conocidos' 'normal' %}" class="mode-card mode-intro" aria-label="Elegir equipo con personas que no se conocen">
         <div class="overlay"></div>
         <div class="mode-content">
-          <h2 class="mode-name" data-i18n="modo_juego_primera_vez">Primera vez juntos</h2>
-          <p class="mode-desc" data-i18n="modo_juego_primera_vez_desc">
-            Rompe el hielo, preséntense y activen la energía del escuadrón.
+          <h2 class="mode-name" data-i18n="promptconocidos_normal_titulo">Personas que no se conocen</h2>
+          <p class="mode-desc" data-i18n="promptconocidos_normal_desc">
+            Rompan el hielo, preséntense y descubran qué puede aportar cada integrante a la misión.
           </p>
+          <span class="mode-cta" data-i18n="promptconocidos_normal_cta">Aceptar desafío</span>
         </div>
       </a>
-
-      <a href="{% url 'elegir_modo_conocidos' 'rapido' %}" class="mode-card mode-known">
+      <a href="{% url 'elegir_modo_conocidos' 'rapido' %}" class="mode-card mode-known" aria-label="Elegir equipo con personas conocidas">
         <div class="overlay"></div>
         <div class="mode-content">
-          <h2 class="mode-name" data-i18n="modo_juego_viejos_conocidos">Viejos conocidos</h2>
-          <p class="mode-desc" data-i18n="modo_juego_viejos_conocidos_desc">
-            Este modo está pensado para escuadrones con experiencia previa.
+          <h2 class="mode-name" data-i18n="promptconocidos_rapido_titulo">Personas conocidas</h2>
+          <p class="mode-desc" data-i18n="promptconocidos_rapido_desc">
+            Usen la confianza previa para organizarse rápido y avanzar sincronizados.
           </p>
+          <span class="mode-cta" data-i18n="promptconocidos_rapido_cta">Usar ventaja</span>
         </div>
       </a>
     </section>
   </main>
-
   <audio id="musica-fondo" src="{% static 'sounds/musica_promptconocidos.mp3' %}" loop preload="auto"></audio>
-
   {% include "includes/sincronizacion_fase.html" %}
-
   <script>
   const musicaFondo = document.getElementById("musica-fondo");
   musicaFondo.volume = 0.4;
-
   function intentarReproducir() {
     musicaFondo.play().catch(() => {
       const reanudar = () => {
@@ -61,9 +84,7 @@
       document.addEventListener("touchstart", reanudar, { once: true });
     });
   }
-
   intentarReproducir();
-
   let audioCtx = null;
   function getAudioCtx() {
     if (!audioCtx || audioCtx.state === 'closed') {
@@ -71,7 +92,6 @@
     }
     return audioCtx;
   }
-
   function playHoverSound() {
     try {
       const ctx = getAudioCtx();
@@ -89,10 +109,188 @@
       osc.stop(now + 0.2);
     } catch(e) {}
   }
-
   document.querySelectorAll('.mode-card').forEach(card => {
     card.addEventListener('mouseenter', playHoverSound);
   });
+  </script>
+
+  <script>
+  (function () {
+    function sonarTecla() {
+      try {
+        const c = getAudioCtx();
+        const o = c.createOscillator();
+        const g = c.createGain();
+        o.connect(g);
+        g.connect(c.destination);
+        o.type = "square";
+        o.frequency.setValueAtTime(520, c.currentTime);
+        o.frequency.exponentialRampToValueAtTime(380, c.currentTime + 0.04);
+        g.gain.setValueAtTime(0.06, c.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.05);
+        o.start(c.currentTime);
+        o.stop(c.currentTime + 0.06);
+      } catch (_) {}
+    }
+
+    function sonarBoton() {
+      try {
+        const c = getAudioCtx();
+        const o1 = c.createOscillator();
+        const g1 = c.createGain();
+        o1.connect(g1);
+        g1.connect(c.destination);
+        o1.type = "sine";
+        o1.frequency.setValueAtTime(440, c.currentTime);
+        o1.frequency.exponentialRampToValueAtTime(600, c.currentTime + 0.08);
+        g1.gain.setValueAtTime(0.18, c.currentTime);
+        g1.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.14);
+        o1.start(c.currentTime);
+        o1.stop(c.currentTime + 0.15);
+
+        const o2 = c.createOscillator();
+        const g2 = c.createGain();
+        o2.connect(g2);
+        g2.connect(c.destination);
+        o2.type = "sine";
+        o2.frequency.setValueAtTime(660, c.currentTime + 0.06);
+        o2.frequency.exponentialRampToValueAtTime(880, c.currentTime + 0.18);
+        g2.gain.setValueAtTime(0.12, c.currentTime + 0.06);
+        g2.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.22);
+        o2.start(c.currentTime + 0.06);
+        o2.stop(c.currentTime + 0.24);
+      } catch (_) {}
+    }
+
+    function tJuego(clave, fallback = "") {
+      const idioma = window.i18nJuego?.obtenerIdioma?.() || "es";
+      return window.i18nJuego?.traducciones?.[idioma]?.[clave] || fallback;
+    }
+
+    const GUION = [
+      { key: "bienvenida_dialogo_1", texto: "¡Agentes soy Edemy, bienvenidos al año 2060! " },
+      { key: "bienvenida_dialogo_2", texto: "Los traje desde el pasado porque ustedes aún conservan aquello que aquí se perdió…" },
+      { key: "bienvenida_dialogo_3", texto: "La tecnología resolvió casi todos los problemas... pero la humanidad dejó de crear nuevas soluciones." },
+      { key: "bienvenida_dialogo_4", texto: "Cada actividad recuperará una habilidad necesaria para reconstruir el futuro." },
+      { key: "bienvenida_dialogo_5", texto: "¿Están listos? Comencemos la misión."}
+    ];
+
+    let paso = 0;
+    let escribiendo = false;
+    let textoCompleto = "";
+    let timerEscritura = null;
+    let teclaCounter = 0;
+    let dialogoInicializado = false;
+
+    const overlayDialogo = document.getElementById("dialogo-inicial-overlay");
+    const burbuja        = document.getElementById("dialogo-burbuja");
+    const textoEl        = document.getElementById("dialogo-texto");
+    const btnDialogo     = document.getElementById("btn-dialogo-continuar");
+    const btnLabel       = document.getElementById("btn-rpg-label");
+    const dotsEl         = document.getElementById("dialogo-dots");
+
+    if (!overlayDialogo || !textoEl || !btnDialogo) return;
+
+    function crearDots() {
+      dotsEl.innerHTML = "";
+      GUION.forEach((_, i) => {
+        const d = document.createElement("div");
+        d.className = "d-dot";
+        d.id = "dot-" + i;
+        dotsEl.appendChild(d);
+      });
+    }
+
+    function actualizarDots() {
+      GUION.forEach((_, i) => {
+        const d = document.getElementById("dot-" + i);
+        if (d) d.className = "d-dot" + (i < paso ? " hecho" : i === paso ? " activo" : "");
+      });
+    }
+
+    function cambiarTextoBoton(texto) {
+      if (btnLabel) btnLabel.textContent = texto;
+    }
+
+    function escribirTexto(txt) {
+      textoCompleto = txt;
+      escribiendo = true;
+      textoEl.innerHTML = "";
+      teclaCounter = 0;
+
+      const cursor = document.createElement("span");
+      cursor.className = "cursor-rpg";
+
+      let i = 0;
+      clearInterval(timerEscritura);
+
+      timerEscritura = setInterval(() => {
+        if (i < txt.length) {
+          textoEl.textContent = txt.slice(0, i + 1);
+          textoEl.appendChild(cursor);
+          teclaCounter++;
+
+          if (teclaCounter % 2 === 0 && txt[i] !== " ") {
+            sonarTecla();
+          }
+
+          i++;
+        } else {
+          clearInterval(timerEscritura);
+          escribiendo = false;
+          textoEl.textContent = txt;
+        }
+      }, 28);
+    }
+
+    function mostrarPaso(n) {
+      paso = n;
+      actualizarDots();
+      if (btnDialogo) btnDialogo.disabled = false;
+      cambiarTextoBoton(n === GUION.length - 1 ? tJuego("dialogo_boton_entendido", "¡Entendido!") : tJuego("dialogo_boton_siguiente", "Siguiente"));
+      escribirTexto(tJuego(GUION[n].key, GUION[n].texto));
+    }
+
+    window.dialogoSiguiente = function () {
+      sonarBoton();
+
+      if (escribiendo) {
+        clearInterval(timerEscritura);
+        escribiendo = false;
+        textoEl.textContent = textoCompleto;
+        return;
+      }
+
+      if (paso < GUION.length - 1) {
+        mostrarPaso(paso + 1);
+        return;
+      }
+
+      overlayDialogo.classList.remove("visible");
+      overlayDialogo.classList.add("oculto");
+    };
+
+    window.mostrarDialogoInicial = function () {
+      if (!overlayDialogo || !burbuja) return;
+
+      crearDots();
+      overlayDialogo.classList.remove("oculto");
+      overlayDialogo.classList.add("visible");
+
+      setTimeout(() => {
+        burbuja.classList.add("visible");
+
+        if (!dialogoInicializado) {
+          dialogoInicializado = true;
+          mostrarPaso(0);
+        }
+      }, 120);
+    };
+
+    setTimeout(() => {
+      window.mostrarDialogoInicial();
+    }, 600);
+  })();
   </script>
 </body>
 </html>

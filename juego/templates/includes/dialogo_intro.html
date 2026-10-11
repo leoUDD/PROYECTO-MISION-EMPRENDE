@@ -1,31 +1,31 @@
-<!-- POPUP DIÁLOGO INTRO — Trabajo en Equipo -->
+{% load static %}
 
-<div id="dialogo-overlay" aria-modal="true" role="dialog" aria-label="Introducción de agentes">
+<!-- POPUP DIÁLOGO INTRO — Trabajo en Equipo / EdEmy -->
+
+<div id="dialogo-overlay" aria-modal="true" role="dialog" aria-label="Introducción de EdEmy">
   <div id="dialogo-backdrop"></div>
 
   <div id="dialogo-box">
 
-    <!-- Personaje IZQUIERDA (foto6 — Nova, mujer pelirroja) -->
-    <div class="dialogo-personaje izquierda" id="pj-izq">
-      <img src="/static/images/foto6.webp" alt="Capitana Solaris" class="dialogo-img">
+    <!-- Robot EdEmy -->
+    <div class="dialogo-personaje activo" id="pj-edemy">
+      <img src="{% static 'images/EdemFeliz.webp' %}" alt="EdEmy" class="dialogo-img">
     </div>
 
     <!-- Burbuja central -->
     <div class="dialogo-burbuja" id="dialogo-burbuja">
-      <div class="dialogo-hablante" id="dialogo-hablante"></div>
+      <div class="dialogo-hablante" id="dialogo-hablante">EdEmy</div>
+
       <p class="dialogo-texto" id="dialogo-texto"></p>
-      <button class="dialogo-siguiente" id="dialogo-siguiente" onclick="dialogoSiguiente()">
+
+      <button class="dialogo-siguiente" id="dialogo-siguiente" type="button" onclick="dialogoSiguiente()">
         <span id="btn-label">Siguiente</span>
         <span class="dialogo-flecha">▶</span>
       </button>
+
       <div class="dialogo-progreso">
         <div id="dialogo-dots"></div>
       </div>
-    </div>
-
-    <!-- Personaje DERECHA (foto5 — Rex, hombre rubio) -->
-    <div class="dialogo-personaje derecha" id="pj-der">
-      <img src="/static/images/foto5.webp" alt="Almirante Cosmo" class="dialogo-img">
     </div>
 
   </div>
@@ -36,7 +36,7 @@
 #dialogo-overlay {
   position: fixed;
   inset: 0;
-  z-index: 1000;
+  z-index: 9999; /* sobre el sidebar RUTA DE MISIÓN (9998), igual que conocidos */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -44,6 +44,7 @@
   opacity: 0;
   transition: opacity .4s ease;
 }
+
 #dialogo-overlay.visible {
   opacity: 1;
   pointer-events: all;
@@ -52,70 +53,83 @@
 #dialogo-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(0, 5, 15, 0.68);
-  backdrop-filter: blur(3px);
-  -webkit-backdrop-filter: blur(3px);
+  background:
+    radial-gradient(circle at center, rgba(0,252,152,.10), transparent 42%),
+    rgba(0, 5, 18, 0.45);
+  /* backdrop-filter (blur) removido a propósito por performance: un blur de
+     pantalla completa sobre un elemento cuyo padre anima opacity fuerza a
+     Chrome a recalcular el blur en cada frame de la transición. Confirmado
+     que mejora el INP sin cambio visual perceptible.
+
+     El efecto de vidrio esmerilado ahora se logra distinto: filter (no
+     backdrop-filter) aplicado directo sobre <main> y sobre la sidebar más
+     abajo, gatillado por body:has(#dialogo-overlay.visible). filter procesa
+     el bitmap ya renderizado del propio elemento — no muestrea en vivo lo
+     que hay detrás como backdrop-filter — así que no sufre el mismo
+     problema de recalcularse en cada frame aunque el overlay esté animando
+     su opacity.
+
+     La opacidad de esta cortina bajó de .66 a .45: el brightness() del
+     filter de abajo ya oscurece el contenido; si esta cortina se queda muy
+     opaca encima, el resultado es doble-oscurecido y lo que debería verse
+     borroso se ve directamente negro. */
 }
 
 /* ===== CAJA PRINCIPAL ===== */
 #dialogo-box {
   position: relative;
   z-index: 2;
-  width: min(760px, calc(100vw - 200px));
-  margin-left: 140px;
+  width: min(1320px, 92vw);
+  min-height: min(620px, 76vh);
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
+  gap: clamp(36px, 5vw, 90px);
 }
 
-/* ===== PERSONAJES ===== */
+/* ===== ROBOT ===== */
 .dialogo-personaje {
   flex-shrink: 0;
   display: flex;
-  align-items: flex-end;
-  transition: opacity .4s, transform .4s, filter .4s;
+  align-items: center;
   position: relative;
   z-index: 3;
-}
-
-.dialogo-personaje.inactivo {
-  opacity: 0.40;
-  filter: grayscale(45%) brightness(0.65);
-  transform: scale(0.93) translateY(6px);
-}
-.dialogo-personaje.activo {
   opacity: 1;
-  filter: none;
-  transform: scale(1.05) translateY(0);
+  transform: scale(1) translateY(0);
+  transition: opacity .4s, transform .4s, filter .4s;
 }
 
 .dialogo-img {
-  width: clamp(80px, 10vw, 130px);
+  width: clamp(260px, 25vw, 440px);
   height: auto;
   display: block;
   object-fit: contain;
-  margin-bottom: -8px;
+  margin-right: 0;
+  margin-bottom: 0;
+  filter: drop-shadow(0 0 18px rgba(0, 242, 109, 0.35));
 }
 
 /* ===== BURBUJA ===== */
 .dialogo-burbuja {
   flex: 1;
   min-width: 0;
-  background: linear-gradient(160deg, rgba(4,16,34,0.97), rgba(6,22,46,0.97));
-  border: 1.8px solid rgba(0,200,255,0.75);
-  border-radius: 20px;
-  padding: 20px 22px 14px;
+  max-width: 820px;
+  min-height: 290px;
+  background: linear-gradient(160deg, rgba(0,16,74,0.97), rgba(3,12,38,0.97));
+  border: 2.2px solid rgba(0,242,109,0.72);
+  border-radius: 28px;
+  padding: clamp(30px, 3vw, 46px);
   box-shadow:
-    0 0 30px rgba(0,180,255,.28),
-    0 0 80px rgba(0,100,255,.14),
+    0 0 30px rgba(0,242,109,.22),
+    0 0 80px rgba(0,59,255,.14),
     0 20px 50px rgba(0,0,0,.6);
   position: relative;
   z-index: 2;
-  margin: 0 -6px;
   transform: translateY(20px);
   opacity: 0;
   transition: transform .4s cubic-bezier(.34,1.2,.64,1), opacity .4s ease;
 }
+
 .dialogo-burbuja.visible {
   transform: translateY(0);
   opacity: 1;
@@ -126,64 +140,85 @@
 .dialogo-burbuja::after {
   content: "";
   position: absolute;
-  width: 14px; height: 14px;
-  border-color: rgba(0,200,255,.6);
+  width: 18px;
+  height: 18px;
+  border-color: rgba(0,242,109,.62);
   border-style: solid;
 }
-.dialogo-burbuja::before { top:-1px; left:-1px; border-width:2px 0 0 2px; border-radius:4px 0 0 0; }
-.dialogo-burbuja::after  { top:-1px; right:-1px; border-width:2px 2px 0 0; border-radius:0 4px 0 0; }
+
+.dialogo-burbuja::before {
+  top: -1px;
+  left: -1px;
+  border-width: 2px 0 0 2px;
+  border-radius: 5px 0 0 0;
+}
+
+.dialogo-burbuja::after {
+  top: -1px;
+  right: -1px;
+  border-width: 2px 2px 0 0;
+  border-radius: 0 5px 0 0;
+}
 
 .dialogo-hablante {
   font-family: "Poppins", sans-serif;
-  font-size: clamp(10px, 1.1vw, 12px);
-  font-weight: 700;
-  letter-spacing: 2.5px;
-  color: #FF7A1A;
+  font-size: clamp(16px, 1.35vw, 24px);
+  font-weight: 900;
+  letter-spacing: 4px;
+  color: #00F26D;
   text-transform: uppercase;
-  margin-bottom: 8px;
+  margin-bottom: 20px;
 }
 
 .dialogo-texto {
   font-family: "Poppins", sans-serif;
-  font-size: clamp(13px, 1.4vw, 16px);
+  font-size: clamp(25px, 2.25vw, 40px);
   color: #E6EEF8;
-  line-height: 1.6;
-  min-height: 56px;
-  margin: 0 0 14px 0;
+  line-height: 1.42;
+  min-height: 130px;
+  margin: 0 0 30px 0;
+  font-weight: 800;
 }
 
 .cursor-rpg {
   display: inline-block;
-  width: 2px;
-  height: 1.1em;
-  background: #00C8FF;
+  width: 4px;
+  height: 1.15em;
+  background: #00F26D;
   vertical-align: text-bottom;
-  margin-left: 2px;
+  margin-left: 3px;
+  box-shadow: 0 0 10px rgba(0,242,109,.9);
   animation: parpadeo .65s step-end infinite;
 }
-@keyframes parpadeo { 0%,100%{opacity:1} 50%{opacity:0} }
+
+@keyframes parpadeo {
+  0%,100% { opacity: 1; }
+  50% { opacity: 0; }
+}
 
 .dialogo-siguiente {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 10px;
   width: 100%;
-  padding: 10px 16px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, rgba(0,200,255,.18), rgba(0,120,255,.18));
-  border: 1.5px solid rgba(0,200,255,.60);
+  min-height: 62px;
+  padding: 17px 28px;
+  border-radius: 17px;
+  background: linear-gradient(135deg, rgba(0,242,109,.18), rgba(0,59,255,.22));
+  border: 2px solid rgba(0,242,109,.62);
   color: #E6EEF8;
   font-family: "Poppins", sans-serif;
-  font-size: clamp(12px, 1.3vw, 14px);
-  font-weight: 700;
+  font-size: clamp(17px, 1.5vw, 24px);
+  font-weight: 900;
   cursor: pointer;
   transition: background .2s, transform .15s, border-color .2s;
-  letter-spacing: .5px;
+  letter-spacing: .05em;
 }
+
 .dialogo-siguiente:hover {
-  background: linear-gradient(135deg, rgba(0,200,255,.30), rgba(0,120,255,.28));
-  border-color: rgba(0,200,255,.90);
+  background: linear-gradient(135deg, rgba(0,242,109,.28), rgba(0,59,255,.30));
+  border-color: rgba(0,242,109,.95);
   transform: translateY(-1px);
 }
 
@@ -191,26 +226,152 @@
   font-size: .85em;
   animation: flechaPulso 1s ease-in-out infinite;
 }
-@keyframes flechaPulso { 0%,100%{transform:translateX(0)} 50%{transform:translateX(4px)} }
+
+@keyframes flechaPulso {
+  0%,100% { transform: translateX(0); }
+  50% { transform: translateX(4px); }
+}
 
 /* Dots de progreso */
-.dialogo-progreso { display:flex; justify-content:center; margin-top:10px; }
-#dialogo-dots { display:flex; gap:6px; }
+.dialogo-progreso {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+#dialogo-dots {
+  display: flex;
+  gap: 11px;
+}
+
 .d-dot {
-  width:6px; height:6px; border-radius:50%;
-  background:rgba(0,200,255,.22);
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: rgba(0,242,109,.22);
   transition: background .3s, transform .3s;
 }
-.d-dot.activo { background:#00C8FF; transform:scale(1.35); }
-.d-dot.hecho  { background:rgba(0,200,255,.55); }
+
+.d-dot.activo {
+  background: #00F26D;
+  transform: scale(1.45);
+}
+
+.d-dot.hecho {
+  background: rgba(0,242,109,.55);
+}
+
+/* =====================================================
+   BLUR DE FONDO MIENTRAS EDEMY HABLA
+   filter (no backdrop-filter) sobre <main> y sobre la sidebar, gatillado
+   por :has() en vez de JS. Se rasteriza una vez por cambio de estado (no en
+   cada frame), así que no reintroduce el problema de performance que
+   motivó sacar el backdrop-filter de #dialogo-backdrop arriba. El target de
+   <main> es genérico a propósito: este include se comparte entre vistas, y
+   todas envuelven su contenido en <main> (team-container-wrap en
+   trabajoenequipo.html y afines), así que no hace falta apuntar a una clase
+   específica de cada página.
+
+   OJO: el diálogo (#dialogo-box, hasta 1320px) es más ancho que la tarjeta
+   de misión (.team-container, hasta 980px), ambos centrados — a resoluciones
+   de escritorio normales la tarjeta queda completamente tapada por el
+   diálogo. Este blur sí se nota en los márgenes que asoman a los costados
+   del diálogo, pero no va a mostrar la tarjeta completa detrás salvo que se
+   angoste el diálogo. */
+body:has(#dialogo-overlay.visible) main {
+  filter: blur(5px) brightness(.42) saturate(.80);
+  transform: scale(1.01);
+  pointer-events: none;
+  user-select: none;
+  transition: filter .35s ease, transform .35s ease;
+}
+
+/* La sidebar "RUTA DE MISIÓN" vive fuera de <main> (la inyecta atajos.html
+   antes) y tiene su propio z-index (9998) por debajo del diálogo (9999),
+   así que necesita su propia regla. A diferencia de la tarjeta de misión,
+   la sidebar SIEMPRE queda fuera del ancho del diálogo, así que este blur
+   sí se ve completo. */
+body:has(#dialogo-overlay.visible) .metro-progreso-habilidades {
+  filter: blur(8px) brightness(.5) saturate(.75);
+  opacity: .7;
+  pointer-events: none;
+  transition: filter .35s ease, opacity .35s ease;
+}
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 900px) {
-  #dialogo-box { width: min(600px, calc(100vw - 160px)); margin-left: 100px; }
+  #dialogo-box {
+    width: 94vw;
+    min-height: auto;
+    gap: 28px;
+  }
+
+  .dialogo-img {
+    width: clamp(200px, 28vw, 310px);
+  }
+
+  .dialogo-burbuja {
+    max-width: 680px;
+    min-height: 250px;
+    padding: 28px;
+  }
+
+  .dialogo-texto {
+    font-size: clamp(21px, 3vw, 31px);
+    min-height: 115px;
+  }
 }
+
 @media (max-width: 700px) {
-  #dialogo-box { width: calc(100vw - 30px); margin-left: 0; }
-  .dialogo-img { width: clamp(70px, 14vw, 110px); }
+  #dialogo-box {
+    width: 94vw;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+  }
+
+  .dialogo-img {
+    width: clamp(160px, 42vw, 250px);
+    margin-right: 0;
+    margin-bottom: 0;
+  }
+
+  .dialogo-burbuja {
+    width: 100%;
+    max-width: 100%;
+    min-height: 230px;
+    padding: 24px 20px;
+  }
+
+  .dialogo-hablante {
+    font-size: 15px;
+  }
+
+  .dialogo-texto {
+    font-size: clamp(19px, 5vw, 27px);
+    min-height: 105px;
+  }
+
+  .dialogo-siguiente {
+    min-height: 56px;
+    font-size: 17px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  body:has(#dialogo-overlay.visible) main {
+    filter: brightness(.42) saturate(.80);
+    transform: none;
+  }
+
+  body:has(#dialogo-overlay.visible) .metro-progreso-habilidades {
+    filter: brightness(.5) saturate(.75);
+  }
 }
 </style>
 
@@ -227,86 +388,107 @@
     return ctx;
   }
 
-  /* Sonido de tecla: clic corto y seco */
   function sonarTecla() {
     try {
       const c = getCtx();
       const o = c.createOscillator();
       const g = c.createGain();
-      o.connect(g); g.connect(c.destination);
+
+      o.connect(g);
+      g.connect(c.destination);
+
       o.type = "square";
       o.frequency.setValueAtTime(520, c.currentTime);
       o.frequency.exponentialRampToValueAtTime(380, c.currentTime + 0.04);
+
       g.gain.setValueAtTime(0.06, c.currentTime);
       g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.05);
+
       o.start(c.currentTime);
       o.stop(c.currentTime + 0.06);
     } catch(_) {}
   }
 
-  /* Sonido de botón: click más grave y confirmatorio */
   function sonarBoton() {
     try {
       const c = getCtx();
 
       const o1 = c.createOscillator();
       const g1 = c.createGain();
-      o1.connect(g1); g1.connect(c.destination);
+
+      o1.connect(g1);
+      g1.connect(c.destination);
+
       o1.type = "sine";
       o1.frequency.setValueAtTime(440, c.currentTime);
       o1.frequency.exponentialRampToValueAtTime(600, c.currentTime + 0.08);
+
       g1.gain.setValueAtTime(0.18, c.currentTime);
       g1.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.14);
+
       o1.start(c.currentTime);
       o1.stop(c.currentTime + 0.15);
 
       const o2 = c.createOscillator();
       const g2 = c.createGain();
-      o2.connect(g2); g2.connect(c.destination);
+
+      o2.connect(g2);
+      g2.connect(c.destination);
+
       o2.type = "sine";
       o2.frequency.setValueAtTime(660, c.currentTime + 0.06);
       o2.frequency.exponentialRampToValueAtTime(880, c.currentTime + 0.18);
+
       g2.gain.setValueAtTime(0.12, c.currentTime + 0.06);
       g2.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.22);
+
       o2.start(c.currentTime + 0.06);
       o2.stop(c.currentTime + 0.24);
     } catch(_) {}
   }
 
-  /* ── GUIÓN ── */
+  /* ── GUIÓN EdEmy ── */
+  function tJuego(clave, fallback = "") {
+    const idioma = window.i18nJuego?.obtenerIdioma?.() || "es";
+    return window.i18nJuego?.traducciones?.[idioma]?.[clave] || fallback;
+  }
+
   const GUION = [
-    { hablante:"izq", nombre:"CAPITANA SOLARIS",
-      texto:"¡Bienvenidos, agentes! Soy la Capitana Solaris y él es el Almirante Cosmo. Estamos aquí para prepararte para la misión." },
-    { hablante:"der", nombre:"ALMIRANTE COSMO",
-      texto:"Antes de arrancar, necesitamos hablar de algo clave: el trabajo en equipo." },
-    { hablante:"izq", nombre:"CAPITANA SOLARIS",
-      texto:"Ninguna misión se completa en solitario. Cada miembro del equipo tiene algo único que aportar." },
-    { hablante:"der", nombre:"ALMIRANTE COSMO",
-      texto:"Escúchense entre sí. Una idea que parece pequeña puede cambiar todo el rumbo de la misión." },
-    { hablante:"izq", nombre:"CAPITANA SOLARIS",
-      texto:"Repartan tareas según las fortalezas de cada uno. Juntos llegan mucho más lejos que solos." },
-    { hablante:"der", nombre:"ALMIRANTE COSMO",
-      texto:"Si el equipo falla, todos fallan. Si el equipo gana, ¡todos ganan! Así funciona esto." },
-    { hablante:"izq", nombre:"CAPITANA SOLARIS",
-      texto:"¿Listos? Cuando todo el equipo esté de acuerdo, presionen «¡Estoy listo!». ¡Buena suerte, agentes!" },
+    {
+      nombre: "EdEmy",
+      key: "trabajo_equipo_dialogo_1",
+      texto: "El futuro perdió la capacidad de colaborar. Cada persona dependía únicamente de la tecnología."
+    },
+    {
+      nombre: "EdEmy",
+      key: "trabajo_equipo_dialogo_2",
+      texto: "Hoy recuperaremos esa habilidad."
+    },
+    {
+      nombre: "EdEmy",
+      key: "trabajo_equipo_dialogo_3",
+      texto: "Organicen sus fortalezas y trabajen como un solo equipo."
+    },
+    {
+      nombre: "EdEmy",
+      key: "trabajo_equipo_dialogo_4",
+      texto: "Activando la primera prueba..."
+    }
   ];
 
-  let paso      = 0;
+  let paso = 0;
   let escribiendo = false;
   let textoCompleto = "";
   let timerEscritura = null;
   let teclaCounter = 0;
 
-  const overlay  = document.getElementById("dialogo-overlay");
-  const burbuja  = document.getElementById("dialogo-burbuja");
-  const habEl    = document.getElementById("dialogo-hablante");
-  const textoEl  = document.getElementById("dialogo-texto");
+  const overlay = document.getElementById("dialogo-overlay");
+  const burbuja = document.getElementById("dialogo-burbuja");
+  const habEl = document.getElementById("dialogo-hablante");
+  const textoEl = document.getElementById("dialogo-texto");
   const btnLabel = document.getElementById("btn-label");
-  const dotsEl   = document.getElementById("dialogo-dots");
-  const pjIzq    = document.getElementById("pj-izq");
-  const pjDer    = document.getElementById("pj-der");
+  const dotsEl = document.getElementById("dialogo-dots");
 
-  /* Construir dots */
   GUION.forEach((_, i) => {
     const d = document.createElement("div");
     d.className = "d-dot";
@@ -321,53 +503,57 @@
     });
   }
 
-  function actualizarPersonajes(hab) {
-    pjIzq.className = "dialogo-personaje izquierda " + (hab === "izq" ? "activo" : "inactivo");
-    pjDer.className = "dialogo-personaje derecha "   + (hab === "der" ? "activo" : "inactivo");
-  }
-
   function escribirTexto(txt) {
     textoCompleto = txt;
-    escribiendo   = true;
+    escribiendo = true;
     textoEl.innerHTML = "";
-    teclaCounter  = 0;
+    teclaCounter = 0;
 
+    const textoNodo = document.createTextNode("");
     const cursor = document.createElement("span");
     cursor.className = "cursor-rpg";
+    textoEl.appendChild(textoNodo);
+    textoEl.appendChild(cursor);
 
     let i = 0;
+
     clearInterval(timerEscritura);
+
     timerEscritura = setInterval(() => {
       if (i < txt.length) {
-        textoEl.textContent = txt.slice(0, i + 1);
-        textoEl.appendChild(cursor);
-        /* sonido cada 2 caracteres para no saturar */
+        textoNodo.data = txt.slice(0, i + 1);
+
         teclaCounter++;
-        if (teclaCounter % 2 === 0 && txt[i] !== " ") sonarTecla();
+
+        if (teclaCounter % 2 === 0 && txt[i] !== " ") {
+          sonarTecla();
+        }
+
         i++;
       } else {
         clearInterval(timerEscritura);
         escribiendo = false;
-        textoEl.textContent = txt; /* quitar cursor al terminar */
+        textoNodo.data = txt;
+        cursor.remove();
       }
     }, 30);
   }
 
   function mostrarPaso(n) {
-    const linea  = GUION[n];
+    const linea = GUION[n];
+
     habEl.textContent = linea.nombre;
-    actualizarPersonajes(linea.hablante);
     actualizarDots();
-    btnLabel.textContent = (n === GUION.length - 1) ? "¡Entendido!" : "Siguiente";
-    escribirTexto(linea.texto);
+
+    btnLabel.textContent = (n === GUION.length - 1) ? tJuego("dialogo_boton_entendido", "¡Entendido!") : tJuego("dialogo_boton_siguiente", "Siguiente");
+
+    escribirTexto(tJuego(linea.key, linea.texto));
   }
 
-  /* Botón siguiente */
   window.dialogoSiguiente = function () {
     sonarBoton();
 
     if (escribiendo) {
-      /* Mostrar texto completo de golpe */
       clearInterval(timerEscritura);
       escribiendo = false;
       textoEl.textContent = textoCompleto;
@@ -375,17 +561,19 @@
     }
 
     paso++;
+
     if (paso >= GUION.length) {
       overlay.classList.remove("visible");
       burbuja.classList.remove("visible");
       return;
     }
+
     mostrarPaso(paso);
   };
 
-  /* Arrancar */
   setTimeout(() => {
     overlay.classList.add("visible");
+
     setTimeout(() => {
       burbuja.classList.add("visible");
       mostrarPaso(0);

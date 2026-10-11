@@ -1,17 +1,25 @@
 :root{
-  --bg: #000712 url('/static/images/fondo_bienvenida.webp') center/cover no-repeat fixed;
-  --card:#081A2D;
-  --text:#E6EEF8;
-  --muted:#AAB7C8;
-  --primary:#00C8FF;
-  --accent:#FF7A1A;
-  --radius:28px;
-  --shadow:0 18px 40px rgba(0,0,0,.6);
-  --glow:0 0 25px rgba(0,200,255,.35);
+  --udd-blue: #003BFF;
+  --udd-dark: #00104A;
+  --udd-panel: #061735;
+  --udd-green: #00F26D;
+  --udd-white: #FFFFFF;
+  --green: #00F26D;
+
+  --bg: #000712 url('/static/images/ConocidosONo.webp') center/cover no-repeat fixed;
+  --card: rgba(0, 16, 74, 0.86);
+  --text: #FFFFFF;
+  --muted: rgba(255,255,255,0.78);
+  --primary: var(--udd-green);
+  --accent: var(--udd-white);
+  --radius: 28px;
+  --shadow: 0 18px 40px rgba(0,0,0,.6);
+  --glow: 0 0 25px rgba(0,242,109,.38);
 }
 
 *{box-sizing:border-box}
 html,body{height:100%}
+
 body{
   margin:0;
   background:var(--bg);
@@ -21,78 +29,154 @@ body{
   display:flex;
   align-items:center;
   justify-content:center;
-  padding:20px;
+  /* arriba: HUD (ESCUADRÓN/Ranking) · izquierda: ruta de misión */
+  padding:clamp(84px, 9vh, 104px) 20px 24px 168px;
+  overflow:hidden;
+}
+
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  background:linear-gradient(rgba(0,0,0,.18), rgba(0,0,0,.35));
+  pointer-events:none;
+  z-index:0;
 }
 
 /* Contenedor */
 .mode-container{
+  position:relative;
+  z-index:1;
   width:clamp(360px, 94vw, 980px);
-  background:var(--card);
+  background:
+    radial-gradient(circle at top left, rgba(0,242,109,.10), transparent 34%),
+    linear-gradient(160deg, rgba(0,16,74,.92), rgba(2,10,35,.94));
+  border:1px solid rgba(0,242,109,.20);
   border-radius:28px;
-  box-shadow:var(--shadow);
+  box-shadow:
+    var(--shadow),
+    0 0 28px rgba(0,242,109,.14),
+    0 0 45px rgba(0,59,255,.12);
   padding:clamp(24px, 4vw, 44px);
+  backdrop-filter: blur(5px);
+}
+
+/* Título de fase */
+.phase-title{
+  display:block;
+  width:fit-content;
+  max-width:100%;
+  margin:clamp(20px, 4vw, 44px) auto clamp(14px, 2.2vw, 22px);
+  padding:clamp(10px, 1.6vw, 16px) clamp(20px, 3vw, 40px);
+  text-align:center;
+  font-family:'Orbitron', sans-serif;
+  font-size:clamp(26px, 4.2vw, 42px);
+  font-weight:900;
+  letter-spacing:0.06em;
+  text-transform:uppercase;
+  color:var(--udd-green);
+  text-shadow:
+    0 0 16px rgba(0,242,109,.55),
+    0 0 34px rgba(0,242,109,.30),
+    0 2px 10px rgba(0,0,0,.6);
+  border:2px solid rgba(0,242,109,.40);
+  border-radius:18px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(0,242,109,.12), transparent 60%),
+    linear-gradient(160deg, rgba(0,16,74,.55), rgba(2,10,35,.45));
+  box-shadow:
+    0 0 22px rgba(0,242,109,.18),
+    inset 0 0 18px rgba(0,242,109,.06);
 }
 
 /* Encabezado */
 .mode-header{
   text-align:center;
-  margin-bottom:clamp(16px, 2.5vw, 24px);
+  margin-bottom:clamp(16px, 2.5vw, 26px);
 }
+
+.mode-kicker{
+  display:inline-block;
+  margin-bottom:10px;
+  padding:7px 14px;
+  border-radius:999px;
+  border:1px solid rgba(0,242,109,.46);
+  background:rgba(0,242,109,.10);
+  color:var(--udd-green);
+  font-family:'Orbitron', sans-serif;
+  font-size:clamp(11px, 1.5vw, 13px);
+  font-weight:900;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  text-shadow:0 0 10px rgba(0,242,109,.42);
+}
+
 .mode-title{
-  margin:0 0 6px;
-  font-size:clamp(24px, 4.2vw, 36px);
-  font-weight:800;
-  color:var(--primary);
+  margin:0 0 10px;
+  font-family:'Orbitron', sans-serif;
+  font-size:clamp(23px, 4vw, 36px);
+  font-weight:900;
+  color:var(--udd-green);
+  text-shadow:0 0 14px rgba(0,242,109,.48);
+  letter-spacing:0.04em;
+  line-height:1.18;
 }
+
 .mode-subtitle{
-  margin:0;
+  max-width:760px;
+  margin:0 auto;
   color:var(--muted);
-  font-size:clamp(14px, 2vw, 18px);
+  font-size:clamp(14px, 1.75vw, 18px);
+  line-height:1.55;
+}
+
+.mode-subtitle strong{
+  color:#fff;
+  font-weight:800;
 }
 
 /* Grid de opciones */
 .mode-grid{
   display:grid;
   grid-template-columns:1fr;
+  align-items:stretch;
   gap:clamp(14px, 2vw, 20px);
-  margin-top:clamp(14px, 2vw, 20px);
+  margin-top:clamp(18px, 2.5vw, 26px);
 }
+
 @media (min-width: 720px){
   .mode-grid{ grid-template-columns:repeat(2, 1fr); }
 }
 
-/* ===== Tarjeta con imagen de fondo ===== */
+/* Tarjeta */
 .mode-card{
   position:relative;
   display:flex;
-  height:clamp(240px, 34vw, 320px);
+  width:100%;
   border-radius:20px;
   overflow:hidden;
   text-decoration:none;
   color:#fff;
-  box-shadow:0 10px 22px rgba(0,0,0,.14);
-  transition:transform .18s ease, box-shadow .18s ease, filter .18s ease;
   background-position:center -15px;
   background-size:cover;
   background-repeat:no-repeat;
-
+  border:2px solid rgba(255,255,255,.12);
+  box-shadow:0 10px 22px rgba(0,0,0,.18);
+  transition:transform .18s ease, box-shadow .18s ease, filter .18s ease, border-color .18s ease;
   animation: cardGlow 5.2s ease-in-out infinite;
 }
 
-/* Desfase entre cada card para que no se animen igual */
-.mode-grid .mode-card:nth-child(1){
-  animation-delay: 0s;
-}
-.mode-grid .mode-card:nth-child(2){
-  animation-delay: 1.3s;
-}
+.mode-grid .mode-card:nth-child(1){ animation-delay:0s; }
+.mode-grid .mode-card:nth-child(2){ animation-delay:1.3s; }
 
-/* imágenes por tarjeta */
-.mode-intro{
-  background-image:url("/static/images/desconocidos.webp");
-}
+/* Fondo neutro azul marino (reemplaza las fotos) */
+.mode-intro,
 .mode-known{
-  background-image:url("/static/images/conocidoos.webp");
+  background-image:none;
+  background-color:#08183f;
+  background:
+    radial-gradient(circle at 30% 20%, rgba(0,242,109,.08), transparent 45%),
+    linear-gradient(160deg, #0a1c47 0%, #061334 100%);
 }
 
 /* overlay para contraste */
@@ -101,109 +185,530 @@ body{
   inset:0;
   background:linear-gradient(
       180deg,
-      rgba(10,19,40,.55) 0%,
-      rgba(10,19,40,.35) 45%,
-      rgba(10,19,40,.65) 100%
+      rgba(0,16,74,.55) 0%,
+      rgba(0,16,74,.28) 42%,
+      rgba(0,10,35,.78) 100%
   );
   pointer-events:none;
+}
+
+.mode-card::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:radial-gradient(circle at 22% 15%, rgba(0,242,109,.14), transparent 36%);
+  opacity:.75;
+  pointer-events:none;
+  z-index:1;
 }
 
 .mode-content{
   position:relative;
   display:flex;
   flex-direction:column;
-  justify-content:flex-end;
+  justify-content:flex-start;
   gap:8px;
   width:100%;
+  min-height:100%;
   padding:clamp(16px, 2.4vw, 22px);
-  z-index:1;
-}
-
-/* chip/emoji */
-.mode-emoji{
-  width:54px;height:54px;
-  display:grid;place-items:center;
-  border-radius:14px;
-  background:rgba(255,255,255,.18);
-  backdrop-filter:saturate(180%) blur(6px);
-  border:1px solid rgba(255,255,255,.35);
-  font-size:26px;
-  box-shadow:inset 0 0 0 2px rgba(255,255,255,.08);
+  z-index:2;
 }
 
 /* textos */
 .mode-name{
   margin:6px 0 0;
-  font-size:clamp(18px, 2.2vw, 22px);
-  font-weight:800;
+  font-size:clamp(18px, 2.2vw, 23px);
+  font-weight:900;
   line-height:1.2;
-  text-shadow:0 2px 8px rgba(0,0,0,.4);
+  color:var(--udd-green);
+  text-shadow:0 0 12px rgba(0,242,109,.45), 0 2px 8px rgba(0,0,0,.65);
 }
+
 .mode-desc{
   margin:0;
   font-size:clamp(13px, 1.8vw, 16px);
   line-height:1.45;
   color:#eef3ff;
-  text-shadow:0 2px 8px rgba(0,0,0,.35);
+  text-shadow:0 2px 8px rgba(0,0,0,.45);
 }
 
 .mode-cta{
-  margin-top:8px;
-  align-self:flex-end;
-  background:#ffffff;
-  color:#1e2a44;
-  font-weight:800;
-  font-size:14px;
+  margin-top:auto;
+  align-self:flex-start;
+  background:var(--udd-green);
+  color:var(--udd-dark);
+  font-weight:900;
+  font-size:13px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
   padding:10px 14px;
   border-radius:12px;
-  box-shadow:0 10px 20px rgba(0,0,0,.18);
-  transition:transform .15s ease, background .15s ease;
+  box-shadow:0 10px 20px rgba(0,0,0,.22), 0 0 16px rgba(0,242,109,.28);
+  transition:transform .15s ease, background .15s ease, box-shadow .15s ease;
   user-select:none;
 }
 
-.mode-card:hover {
+.mode-card:hover{
   transform:translateY(-3px);
-  box-shadow:0 16px 32px rgba(0,0,0,.23);
-  filter:brightness(1.03);
+  border-color:rgba(0,242,109,.74);
+  box-shadow:
+    0 16px 34px rgba(0,0,0,.35),
+    0 0 22px rgba(0,242,109,.26),
+    inset 0 0 12px rgba(0,242,109,.08);
+  filter:brightness(1.04);
 }
+
 .mode-card:hover .mode-cta{
   transform:translateY(-1px);
-  background:#eaf0ff;
+  background:#fff;
+  box-shadow:0 10px 20px rgba(0,0,0,.25), 0 0 18px rgba(255,255,255,.32);
 }
 
 /* Accesibilidad */
 .mode-card:focus-visible{
   outline:none;
-  box-shadow:0 0 0 4px rgba(255,255,255,.9), 0 0 0 8px rgba(75,116,170,.45);
+  box-shadow:0 0 0 4px rgba(255,255,255,.9), 0 0 0 8px rgba(0,242,109,.45);
 }
 
 @keyframes cardGlow{
   0%,100%{
-    box-shadow:0 10px 22px rgba(0,0,0,.14);
+    box-shadow:0 10px 22px rgba(0,0,0,.18);
     filter:brightness(1);
   }
   50%{
-    box-shadow:0 18px 40px rgba(0,0,0,.28);
-    filter:brightness(1.04);
+    box-shadow:0 18px 40px rgba(0,0,0,.30), 0 0 16px rgba(0,242,109,.14);
+    filter:brightness(1.035);
   }
 }
 
-/* ── Título ── */
-.mode-title {
-  font-family: 'Orbitron', sans-serif;
+/* ==========================================================================
+   RESPONSIVE — coordinado con los breakpoints del sidebar "RUTA DE MISIÓN"
+   (linea_progreso_habilidades) y el HUD superior (ESCUADRÓN/Ranking).
+
+   Sidebar por rango:
+   · >=1101px  → left:22px  width:122px  (reservar ~168px izq)
+   · 701–1100  → left:10px  width:86px   (reservar ~110px izq)  ← iPad
+   · <=700px   → pasa ABAJO (píldora horizontal) → reservar espacio inferior
+   ========================================================================== */
+
+/* ── Tablet: sidebar angosto a la izquierda (701px – 1100px) ─────────────── */
+@media (max-width: 1100px){
+  body{
+    padding:86px 18px 96px;
+  }
+
+  .mode-container{
+    width:100%;
+  }
+
+  #dialogo-box{
+    width: 94vw;
+    min-height: auto;
+    gap: 28px;
+  }
+
+  .dialogo-img{
+    width: clamp(210px, 26vw, 320px);
+  }
+
+  .dialogo-burbuja{
+    max-width: 680px;
+    min-height: 250px;
+    padding: 28px;
+  }
+
+  .dialogo-texto-rpg{
+    font-size: clamp(21px, 3vw, 31px);
+    min-height: 115px;
+  }
+}
+
+/* ── Móvil / tablet chico: el sidebar se va ABAJO (<=700px) ──────────────── */
+@media (max-width: 700px){
+  body{
+    /* sin espacio izquierdo; sí abajo para la píldora del sidebar */
+    padding:clamp(72px, 8vh, 92px) 16px 96px 16px;
+    align-items:flex-start;
+    overflow:auto;
+  }
+
+  .mode-container{
+    width:100%;
+    padding:24px 18px;
+    margin:auto;
+  }
+
+  .mode-card{
+    background-position:center center;
+  }
+
+  #dialogo-box{
+    width: 94vw;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .dialogo-img{
+    width: clamp(160px, 42vw, 250px);
+  }
+
+  .dialogo-burbuja{
+    width: 100%;
+    max-width: 100%;
+    min-height: 230px;
+    padding: 24px 20px;
+  }
+
+  .dialogo-hablante{
+    font-size: 15px;
+  }
+
+  .dialogo-texto-rpg{
+    font-size: clamp(19px, 5vw, 27px);
+    min-height: 105px;
+  }
+
+  .dialogo-siguiente{
+    min-height: 56px;
+    font-size: 17px;
+  }
+}
+
+/* ── Móvil (≤ 480px) ─────────────────────────────────────────────────────── */
+@media (max-width: 480px){
+  body{
+    padding:clamp(64px, 7vh, 84px) 12px 90px 12px;
+  }
+
+  .mode-container{
+    border-radius:22px;
+    padding:22px 14px;
+  }
+
+  .phase-title{
+    font-size:clamp(24px, 8vw, 34px);
+    padding:10px 18px;
+    border-radius:14px;
+  }
+
+  .mode-subtitle{
+    font-size:14px;
+  }
+
+  .mode-card{
+    border-radius:18px;
+  }
+
+  .mode-content{
+    padding:16px;
+  }
+
+  .mode-name{
+    font-size:19px;
+  }
+
+  .mode-desc{
+    font-size:13px;
+  }
+
+  .mode-cta{
+    font-size:12px;
+    padding:9px 12px;
+  }
+}
+
+/* ── Móvil muy chico: la píldora del sidebar es más angosta (≤ 420px) ────── */
+@media (max-width: 420px){
+  body{
+    padding-bottom:84px;
+  }
+}
+
+/* ── Altura reducida: permite scroll y compacta el título ────────────────── */
+@media (max-height: 650px){
+  body{
+    overflow:auto;
+    align-items:flex-start;
+    padding-top:clamp(70px, 8vh, 90px);
+  }
+
+  .mode-container{
+    margin:auto;
+  }
+
+  .phase-title{
+    font-size:clamp(24px, 4.5vw, 40px);
+    margin-bottom:12px;
+    padding:8px 20px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce){
+  *{ animation:none !important; transition:none !important; }
+}
+
+/* =====================================================================
+   DIÁLOGO INICIAL EdEmy — mismo patrón que conocidos.html
+   (clases dialogo-*, overlay #dialogo-inicial-overlay con oculto/visible,
+   backdrop con blur, burbuja con animación de entrada).
+===================================================================== */
+
+/* Mientras el diálogo está visible, se atenúa y difumina el panel principal
+   (equivalente a .zona-juego en conocidos.html) y el sidebar, que tiene su
+   propio backdrop-filter y por eso necesita su propia regla. */
+body:has(#dialogo-inicial-overlay.visible) .mode-container{
+  /* brightness bajo de .36 a .20 para compensar el brightness(.55) que se
+     quito del #dialogo-backdrop: .36 x .55 = .198. Misma oscuridad final. */
+  filter: blur(7px) brightness(.20) saturate(.75);
+  transform: scale(1.012);
+  pointer-events: none;
+  user-select: none;
+  transition: filter .35s ease, transform .35s ease;
+
+  /* PERFORMANCE: el backdrop-filter de 5px de .mode-container queda debajo
+     del blur de 7px de esta misma regla, asi que no se ve, pero el
+     compositor lo resolvia igual en cada frame. */
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+body:has(#dialogo-inicial-overlay.visible) .metro-progreso-habilidades{
+  filter: blur(7px) brightness(.20) saturate(.75);
+  transition: filter .35s ease;
+}
+
+#dialogo-inicial-overlay{
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(24px, 4vw, 72px);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .4s ease;
+}
+
+#dialogo-inicial-overlay.visible{
+  opacity: 1;
+  pointer-events: all;
+}
+
+#dialogo-inicial-overlay.oculto{
+  display: none !important;
+}
+
+#dialogo-backdrop{
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at center, rgba(0,252,152,.10), transparent 42%),
+    rgba(0,5,18,.78);
+
+  /* PERFORMANCE: sin backdrop-filter. Lo que hay detras ya viene desenfocado
+     por el `filter` de .mode-container, asi que este tercer blur no aportaba
+     nada visible y obligaba a re-muestrear el viewport entero en cada
+     mutacion de texto del dialogo (una cada 28 ms). Era la causa del INP de
+     624 ms en el boton Siguiente. El oscurecimiento de brightness(.55) se
+     compenso bajando brightness en la regla del contenido. */
+}
+
+#dialogo-box{
+  width: min(1320px, 92vw);
+  min-height: min(620px, 76vh);
+  margin-left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(36px, 5vw, 90px);
+  position: relative;
+  z-index: 3;
+}
+
+.dialogo-personaje{
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 3;
+  transition: opacity .4s, transform .4s, filter .4s;
+}
+
+.dialogo-personaje.activo{
+  opacity: 1;
+  filter: none;
+  transform: scale(1) translateY(0);
+}
+
+.dialogo-img{
+  width: clamp(260px, 25vw, 440px);
+  height: auto;
+  margin-bottom: 0;
+  object-fit: contain;
+  filter:
+    drop-shadow(0 0 22px rgba(0,252,152,.45))
+    drop-shadow(0 0 46px rgba(0,200,255,.22));
+}
+
+.dialogo-burbuja{
+  flex: 1;
+  min-width: 0;
+  max-width: 820px;
+  min-height: 290px;
+  padding: clamp(30px, 3vw, 46px);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at top left, rgba(0,252,152,.12), transparent 34%),
+    linear-gradient(160deg, rgba(0,16,74,.98), rgba(2,8,30,.98));
+  border: 2.2px solid rgba(0,252,152,.82);
+  box-shadow:
+    0 0 34px rgba(0,252,152,.25),
+    0 0 90px rgba(0,59,255,.18),
+    0 24px 70px rgba(0,0,0,.70);
+  position: relative;
+  z-index: 2;
+  transform: translateY(20px);
+  opacity: 0;
+  transition: transform .4s cubic-bezier(.34,1.2,.64,1), opacity .4s ease;
+}
+
+.dialogo-burbuja.visible{
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.dialogo-burbuja::before,
+.dialogo-burbuja::after{
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-color: rgba(0,252,152,.70);
+  border-style: solid;
+}
+
+.dialogo-burbuja::before{
+  top: -1px;
+  left: -1px;
+  border-width: 2px 0 0 2px;
+  border-radius: 5px 0 0 0;
+}
+
+.dialogo-burbuja::after{
+  top: -1px;
+  right: -1px;
+  border-width: 2px 2px 0 0;
+  border-radius: 0 5px 0 0;
+}
+
+.dialogo-hablante{
+  font-size: clamp(16px, 1.35vw, 24px);
   font-weight: 900;
-  color: #FF7A1A;
-  text-shadow: 0 0 12px rgba(255, 122, 26, 0.5);
-  letter-spacing: 0.04em;
+  letter-spacing: 4px;
+  color: var(--green);
+  text-transform: uppercase;
+  margin-bottom: 20px;
 }
 
-/* ── Hover en cards ── */
-.mode-card {
-  transition: border 0.3s ease, box-shadow 0.3s ease;
-  border: 2px solid transparent;
+.dialogo-texto-rpg{
+  font-size: clamp(25px, 2.25vw, 40px);
+  color: #F3FAFF;
+  line-height: 1.42;
+  min-height: 130px;
+  margin: 0 0 30px;
+  font-weight: 800;
+  text-shadow: 0 0 10px rgba(0,200,255,.24);
 }
 
-.mode-card:hover {
-  border: 2px solid rgba(0, 200, 255, 0.6);
-  box-shadow: 0 0 20px rgba(0, 200, 255, 0.25), inset 0 0 12px rgba(0, 200, 255, 0.06);
+.cursor-rpg{
+  display: inline-block;
+  width: 4px;
+  height: 1.15em;
+  background: var(--green);
+  vertical-align: text-bottom;
+  margin-left: 3px;
+  box-shadow: 0 0 10px rgba(0,252,152,.90);
+  animation: parpadeo .65s step-end infinite;
+}
+
+@keyframes parpadeo{
+  0%,100%{ opacity: 1; }
+  50%{ opacity: 0; }
+}
+
+.dialogo-siguiente{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 62px;
+  padding: 17px 28px;
+  border-radius: 17px;
+  background: linear-gradient(135deg, rgba(0,252,152,.22), rgba(0,200,255,.24));
+  border: 2px solid rgba(0,252,152,.78);
+  color: #fff;
+  font-size: clamp(17px, 1.5vw, 24px);
+  font-weight: 900;
+  letter-spacing: .05em;
+  cursor: pointer;
+  box-shadow:
+    0 0 18px rgba(0,252,152,.25),
+    inset 0 0 20px rgba(0,200,255,.10);
+  transition: background .2s, transform .15s, border-color .2s, box-shadow .2s;
+}
+
+.dialogo-siguiente:hover{
+  transform: translateY(-2px) scale(1.02);
+  border-color: rgba(0,252,152,1);
+  box-shadow:
+    0 0 26px rgba(0,252,152,.38),
+    inset 0 0 24px rgba(0,200,255,.14);
+}
+
+.dialogo-siguiente:disabled{
+  opacity: .62;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.dialogo-flecha{
+  font-size: .9em;
+  animation: flechaPulso 1s ease-in-out infinite;
+}
+
+@keyframes flechaPulso{
+  0%,100%{ transform: translateX(0); }
+  50%{ transform: translateX(4px); }
+}
+
+.dialogo-progreso{
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+#dialogo-dots{
+  display: flex;
+  gap: 11px;
+}
+
+.d-dot{
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: rgba(0,252,152,.22);
+  transition: background .3s, transform .3s;
+}
+
+.d-dot.activo{
+  background: var(--green);
+  transform: scale(1.45);
+  box-shadow: 0 0 12px rgba(0,252,152,.75);
+}
+
+.d-dot.hecho{
+  background: rgba(0,252,152,.62);
 }

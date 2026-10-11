@@ -115,6 +115,9 @@ if (Number.isNaN(timeLeft) || timeLeft <= 0) {
   timeLeft = 300;
 }
 
+// NUEVO: guarda el tiempo total inicial (no se muta) para calcular el % de la barra
+const TIEMPO_TOTAL_SOPA = timeLeft;
+
 let timerStartedByProfesor = false;
 let ultimaFaseDetectada = null;
 
@@ -424,6 +427,16 @@ function renderTimer() {
   } else {
     timerEl.classList.remove("low-time");
   }
+
+  // NUEVO: actualizar la barra de tiempo (si existe en el HTML; si no, no hace nada)
+  const fillEl = document.getElementById("timer-bar-fill");
+  if (fillEl) {
+    const pct = TIEMPO_TOTAL_SOPA > 0
+      ? Math.max(0, Math.min(100, (tiempoSeguro / TIEMPO_TOTAL_SOPA) * 100))
+      : 0;
+    fillEl.style.width = pct + "%";
+    fillEl.classList.toggle("low-time", tiempoSeguro <= 10);
+  }
 }
 
 function pauseTimerLocally() {
@@ -447,36 +460,99 @@ function startTimer() {
   }, 1000);
 }
 
+/* ============================================================================
+   DIMENSIONADO DEL TABLERO
+   Este bloque escribe --cell-size INLINE en <html>, así que manda por sobre
+   cualquier valor de estilo_sopadeletras.css. Todo el tamaño del tablero se
+   decide acá.
+
+   Reglas:
+   · CELDA_MIN / CELDA_MAX acotan el resultado (antes: 22 / 60 → el tablero
+     quedaba pegado al piso en laptops de ~700px de alto).
+   · SCROLL_PERMITIDO deja que el tablero sea más alto que el viewport en una
+     cantidad controlada; la página ya scrolleaba por el alto de la cabecera +
+     lista de palabras, así que se aprovecha ese margen en vez de encoger.
+   · Se mide por ID (#tituloSopa, #subtituloSopa, #wordsBox). El querySelector("p")
+     anterior tomaba el primer <p> del documento — podía ser el de la tarjeta de
+     inicio de fase o el del diálogo, inflando headerH y achicando la celda.
+   ========================================================================== */
 (function makeGridResponsive() {
   const root = document.documentElement;
+
+  const CELDA_MIN = 26;
+  const CELDA_MAX = 80;
+  const SCROLL_PERMITIDO = 140;
+  const MARGENES_V = 48;   // márgenes verticales entre h1, subtítulo, timer y grid
+
+  let rafPendiente = null;
+
+  function altoVisible(el) {
+    // offsetParent null ⇒ display:none (no ocupa alto real)
+    return el && el.offsetParent !== null ? el.offsetHeight : 0;
+  }
+
   function adjustGrid() {
+    const container = document.querySelector(".game-container");
+    if (!container) return;
+
     const cols = gridSize;
     const rows = gridSize;
-    const gap = 4;
-    const container = document.querySelector(".game-container");
-    const wordsBox = document.querySelector(".words");
-    const titleEl = document.querySelector("h1");
-    const subEl = document.querySelector("p");
+    const gap = window.innerWidth <= 700 ? 3 : 4;
+
+    const titleEl = document.getElementById("tituloSopa") || container.querySelector("h1");
+    const subEl = document.getElementById("subtituloSopa");
     const timerBox = document.getElementById("timer-container");
-    if (!container) return;
+    const wordsBox = document.getElementById("wordsBox") || document.querySelector(".words");
+
     const cs = getComputedStyle(container);
+    const bodyCS = getComputedStyle(document.body);
+
+    // ── Presupuesto horizontal ──
     const innerW = container.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
     const maxWidth = Math.min(innerW, window.innerWidth * 0.94);
-    const wordsH = wordsBox ? wordsBox.offsetHeight : 0;
-    const headerH = (titleEl?.offsetHeight || 0) + (subEl?.offsetHeight || 0) + (timerBox?.offsetHeight || 0);
+
+    // ── Presupuesto vertical ──
+    const bodyVPadding = parseFloat(bodyCS.paddingTop) + parseFloat(bodyCS.paddingBottom);
     const containerVPadding = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
-    const verticalMargins = 40;
-    const availableH = window.innerHeight - headerH - wordsH - containerVPadding - verticalMargins;
+    const headerH = altoVisible(titleEl) + altoVisible(subEl) + altoVisible(timerBox);
+    const wordsH = altoVisible(wordsBox);
+
+    const presupuestoH = window.innerHeight - bodyVPadding + SCROLL_PERMITIDO;
+    const availableH = presupuestoH - headerH - wordsH - containerVPadding - MARGENES_V;
+
     const cellByWidth = (maxWidth - (cols - 1) * gap - 2 * gap) / cols;
     const cellByHeight = (availableH - (rows - 1) * gap - 2 * gap) / rows;
+
     const cell = Math.floor(Math.min(cellByWidth, cellByHeight));
-    const finalSize = Math.max(22, Math.min(cell, 60));
+    const finalSize = Math.max(CELDA_MIN, Math.min(cell, CELDA_MAX));
+
     root.style.setProperty("--cell-size", finalSize + "px");
     root.style.setProperty("--cols", cols);
     root.style.setProperty("--rows", rows);
     root.style.setProperty("--gap", gap + "px");
   }
-  window.addEventListener("resize", adjustGrid);
+
+  function pedirAjuste() {
+    if (rafPendiente) return;
+    rafPendiente = requestAnimationFrame(() => {
+      rafPendiente = null;
+      adjustGrid();
+    });
+  }
+
+  // Se expone para poder recalcular después de render() y de cambiar idioma:
+  // el alto de la lista de palabras (chips) cambia y con él el del tablero.
+  window.ajustarGridSopa = pedirAjuste;
+
+  window.addEventListener("resize", pedirAjuste);
+  window.addEventListener("orientationchange", pedirAjuste);
+  window.addEventListener("load", pedirAjuste);
+
+  // Share Tech Mono cambia el alto de los chips al cargar → recalcular.
+  if (document.fonts?.ready) {
+    document.fonts.ready.then(pedirAjuste).catch(() => {});
+  }
+
   adjustGrid();
 })();
 
@@ -534,6 +610,7 @@ async function revisarEstadoProfesor() {
 
 window.addEventListener("idiomaJuegoCambiado", () => {
   updateStatus();
+  window.ajustarGridSopa?.();
 });
 
 (function init() {
@@ -542,6 +619,7 @@ window.addEventListener("idiomaJuegoCambiado", () => {
   render();
   updateStatus();
   renderTimer();
+  window.ajustarGridSopa?.();
   revisarEstadoProfesor();
   syncInterval = setInterval(revisarEstadoProfesor, 1500);
 })();

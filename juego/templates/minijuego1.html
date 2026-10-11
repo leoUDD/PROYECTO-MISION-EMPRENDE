@@ -1,156 +1,360 @@
 {% load static %}
-{% include "atajos.html" %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Misión Emprende UDD — Sopa de Letras</title>
+  <link rel="stylesheet" href="{% static 'css/linea_progreso_habilidades.css' %}">
   <link rel="stylesheet" href="{% static 'css/estilo_sopadeletras.css' %}">
+<link rel="stylesheet" href="{% static 'css/student_timer.css' %}">
+  <link rel="icon" href="{% url 'favicon' %}">
+
   <style>
-    .game-container { position: relative; }
-
-    .inicio-fase-overlay {
-      position: absolute; inset: 0;
-      display: flex; align-items: flex-start; justify-content: center;
-      padding: 26px 18px 18px;
-      z-index: 20; pointer-events: none;
+    body.foto-equipo-abierta {
+      overflow: hidden;
     }
 
-    .inicio-fase-card {
-      width: min(92%, 860px);
-      background: rgba(8, 24, 48, 0.88);
-      border: 1px solid rgba(0, 200, 255, 0.30);
-      box-shadow: 0 12px 30px rgba(0,0,0,.24);
-      border-radius: 22px; padding: 18px 22px;
-      color: #fff; backdrop-filter: blur(6px);
-      pointer-events: auto;
+    body.foto-equipo-abierta .game-container {
+      filter: blur(7px) brightness(.34) saturate(.72);
+      pointer-events: none;
+      user-select: none;
     }
 
-    .inicio-fase-badge {
-      display: inline-block; margin-bottom: 12px; padding: 7px 14px;
-      border-radius: 999px; background: rgba(0, 200, 255, 0.12);
-      border: 1px solid rgba(0, 200, 255, 0.28);
-      font-weight: 700; font-size: 0.88rem; color: #dff7ff;
+    .foto-equipo-modal[hidden],
+    .foto-equipo-confirmacion[hidden],
+    .foto-equipo-placeholder[hidden],
+    .foto-equipo-acciones[hidden],
+    .foto-equipo-alternativa[hidden],
+    .foto-equipo-espera[hidden] {
+      display: none !important;
     }
 
-    .inicio-fase-card h3 { margin: 0 0 10px 0; font-size: 1.15rem; font-weight: 800; }
-    .inicio-fase-card p  { margin: 0 0 10px 0; line-height: 1.5; font-size: 1rem; }
-
-    .btn-chip {
-      display: inline-flex; align-items: center; gap: 8px;
-      margin-top: 12px; padding: 10px 18px; border-radius: 999px;
-      border: 1px solid rgba(0, 200, 255, 0.4);
-      background: linear-gradient(135deg, rgba(0, 200, 255, 0.15), rgba(0, 120, 255, 0.25));
-      color: #E6F7FF; font-weight: 600; font-size: 0.95rem; cursor: pointer;
-      transition: all 0.25s ease; box-shadow: 0 0 10px rgba(0, 200, 255, 0.25);
-      backdrop-filter: blur(4px);
+    .foto-equipo-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 12000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: clamp(12px, 2.4vw, 32px);
     }
-    .btn-chip:hover { transform: translateY(-1px) scale(1.03); background: linear-gradient(135deg, rgba(0, 200, 255, 0.35), rgba(0, 120, 255, 0.45)); box-shadow: 0 0 18px rgba(0, 200, 255, 0.45); }
-    .btn-chip:active { transform: scale(0.97); }
-    .btn-chip:disabled { opacity: 0.65; cursor: not-allowed; box-shadow: none; }
 
-    .contador-fase { margin-top: 10px; font-size: 0.95rem; opacity: 0.95; }
+    .foto-equipo-backdrop {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 50% 18%, rgba(0,252,152,.12), transparent 34%),
+        radial-gradient(circle at 50% 82%, rgba(0,200,255,.13), transparent 38%),
+        rgba(0,5,18,.90);
+      backdrop-filter: blur(10px) brightness(.52);
+    }
 
-    .blur-target-bloqueado { filter: blur(6px); pointer-events: none; user-select: none; opacity: .70; transition: all .3s ease; }
-    .blur-target-activo    { filter: none; pointer-events: auto; user-select: auto; opacity: 1; transition: all .3s ease; }
-    .timer-esperando { opacity: .55; }
-    .overlay-hidden  { display: none; }
+    .foto-equipo-panel {
+      position: relative;
+      z-index: 2;
+      width: min(920px, 96vw);
+      max-height: 94vh;
+      overflow-y: auto;
+      padding: clamp(22px, 3vw, 38px);
+      border: 2px solid rgba(0,252,152,.78);
+      border-radius: 28px;
+      background:
+        radial-gradient(circle at top left, rgba(0,252,152,.12), transparent 32%),
+        radial-gradient(circle at bottom right, rgba(0,200,255,.10), transparent 34%),
+        linear-gradient(155deg, rgba(3,20,48,.98), rgba(2,8,28,.99));
+      color: #fff;
+      text-align: center;
+      box-shadow:
+        0 0 34px rgba(0,252,152,.24),
+        0 0 90px rgba(0,59,255,.18),
+        0 28px 80px rgba(0,0,0,.72);
+    }
 
-    .modal { background: rgba(0,0,0,.72); backdrop-filter: blur(4px); }
-    .modal-content {
-      background: rgba(7, 21, 43, 0.96); color: #fff;
-      border: 1px solid rgba(0,200,255,.25); box-shadow: 0 12px 30px rgba(0,0,0,.35);
+    .foto-equipo-etiqueta {
+      display: inline-flex;
+      padding: 6px 13px;
+      border: 1px solid rgba(0,200,255,.54);
+      border-radius: 999px;
+      background: rgba(0,200,255,.10);
+      color: #5be7ff;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .16em;
     }
-    .modal-content h2, .modal-content p { color: #fff; text-shadow: none; }
-    .modal-content button {
-      display: inline-flex; align-items: center; justify-content: center;
-      margin-top: 12px; padding: 10px 18px; border-radius: 999px;
-      border: 1px solid rgba(0,200,255,.4);
-      background: linear-gradient(135deg, rgba(0,200,255,.15), rgba(0,120,255,.25));
-      color: #E6F7FF; font-weight: 600; font-size: 0.95rem; cursor: pointer;
-      transition: all 0.25s ease; box-shadow: 0 0 10px rgba(0,200,255,.25);
-    }
-    .modal-content button:hover { transform: translateY(-1px); background: linear-gradient(135deg, rgba(0,200,255,.35), rgba(0,120,255,.45)); }
 
-    /* Mejora visual celdas */
-    .cell.found {
-      background: linear-gradient(135deg, #22c55e, #86efac) !important;
-      color: #052e16 !important; font-weight: 900 !important;
-      border: 2px solid #bbf7d0 !important;
-      box-shadow: 0 0 10px rgba(34,197,94,.85), inset 0 0 0 2px rgba(255,255,255,.35) !important;
-      transform: scale(1.04); z-index: 3;
+    .foto-equipo-panel h2 {
+      margin: 13px 0 8px;
+      color: #00fc98;
+      font-size: clamp(30px, 4vw, 52px);
+      font-weight: 900;
     }
-    .cell.selected {
-      background: linear-gradient(135deg, #38bdf8, #0ea5e9) !important;
-      color: #fff !important; font-weight: 900 !important;
-      border: 2px solid #bae6fd !important;
-      box-shadow: 0 0 12px rgba(14,165,233,.85), inset 0 0 0 2px rgba(255,255,255,.28) !important;
-      transform: scale(1.03); z-index: 4;
-    }
-    #word-list li.found { text-decoration: line-through; color: #22c55e !important; font-weight: 900; opacity: 1 !important; }
 
-    /* Botón mute */
-    #btn-musica {
-      position: fixed; bottom: 20px; right: 20px; z-index: 500;
-      background: rgba(0,20,40,.85); border: 1.5px solid rgba(0,200,255,.6);
-      border-radius: 50%; width: 44px; height: 44px; font-size: 20px;
-      cursor: pointer; display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 0 14px rgba(0,200,255,.25); transition: border-color .2s, box-shadow .2s, transform .15s;
+    .foto-equipo-encabezado p {
+      margin: 0 auto;
+      max-width: 760px;
+      color: rgba(230,238,248,.84);
+      font-size: clamp(15px, 1.25vw, 19px);
+      line-height: 1.48;
     }
-    #btn-musica:hover { border-color: rgba(0,200,255,.9); box-shadow: 0 0 22px rgba(0,200,255,.45); transform: scale(1.08); }
 
-    @media (max-width: 900px) {
-      .inicio-fase-card { width: min(94%, 760px); padding: 16px 18px; }
+    .foto-equipo-nombre {
+      display: inline-flex;
+      margin-top: 17px;
+      padding: 8px 17px;
+      border: 1px solid rgba(0,252,152,.46);
+      border-radius: 999px;
+      background: rgba(0,252,152,.09);
+      font-weight: 900;
     }
+
+    .foto-equipo-visor {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: min(100%, 760px);
+      min-height: clamp(260px, 42vh, 470px);
+      margin: 20px auto 12px;
+      overflow: hidden;
+      border: 1.8px solid rgba(0,200,255,.56);
+      border-radius: 22px;
+      background: rgba(0,6,18,.84);
+    }
+
+    .foto-equipo-visor video,
+    .foto-equipo-visor img {
+      width: 100%;
+      max-height: 58vh;
+      object-fit: contain;
+    }
+
+    .foto-equipo-visor video[hidden],
+    .foto-equipo-visor img[hidden] {
+      display: none !important;
+    }
+
+    .foto-equipo-placeholder,
+    .foto-equipo-confirmacion {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: min(100%, 520px);
+      padding: 30px;
+      gap: 8px;
+    }
+
+    .foto-equipo-camara {
+      font-size: clamp(56px, 7vw, 84px);
+    }
+
+    .foto-equipo-check {
+      display: grid;
+      place-items: center;
+      width: 86px;
+      height: 86px;
+      border: 2px solid rgba(0,252,152,.82);
+      border-radius: 50%;
+      background: rgba(0,252,152,.14);
+      color: #00fc98;
+      font-size: 52px;
+      font-weight: 900;
+    }
+
+    .foto-equipo-mensaje {
+      min-height: 24px;
+      margin: 8px 0 4px;
+      color: rgba(230,238,248,.82);
+      font-weight: 700;
+    }
+
+    .foto-equipo-mensaje.es-error {
+      color: #ffbfc8;
+    }
+
+    .foto-equipo-mensaje.es-exito {
+      color: #26ffc2;
+    }
+
+    .foto-equipo-acciones,
+    .foto-equipo-alternativa {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 11px;
+      margin-top: 15px;
+    }
+
+    .foto-equipo-boton {
+      min-height: 52px;
+      padding: 13px 23px;
+      border-radius: 999px;
+      color: #fff;
+      font: inherit;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .foto-equipo-boton:disabled {
+      opacity: .55;
+      cursor: wait;
+    }
+
+    .foto-equipo-boton-principal {
+      border: 1.8px solid rgba(0,252,152,.76);
+      background: linear-gradient(135deg, rgba(0,252,152,.24), rgba(0,200,255,.24));
+    }
+
+    .foto-equipo-boton-secundario,
+    .foto-equipo-boton-archivo {
+      border: 1.5px solid rgba(0,200,255,.62);
+      background: rgba(0,200,255,.10);
+    }
+
+    .foto-equipo-alternativa {
+      color: rgba(230,238,248,.70);
+      font-size: 14px;
+    }
+
+    .foto-equipo-boton-archivo {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 42px;
+      padding: 9px 17px;
+      font-size: 14px;
+    }
+
+    .foto-equipo-espera {
+      width: min(100%, 720px);
+      margin: 18px auto 0;
+      padding: 16px 18px;
+      border: 1px solid rgba(0,252,152,.42);
+      border-radius: 17px;
+      background: rgba(0,252,152,.07);
+    }
+
+    .foto-equipo-espera-texto {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 11px;
+      text-align: left;
+    }
+
+    .foto-equipo-espera-texto span {
+      color: #26ffc2;
+      font-weight: 900;
+    }
+
+    .foto-equipo-progreso {
+      width: 100%;
+      height: 10px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: rgba(255,255,255,.10);
+    }
+
+    .foto-equipo-progreso span {
+      display: block;
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #00fc98, #00c8ff);
+      transition: width .35s ease;
+    }
+
+    #btnWinFoto,
+    #btnRetry {
+      margin-top: 18px;
+      min-height: 52px;
+      padding: 13px 26px;
+      border: 2px solid #00fc98;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #00fc98, #00c8ff);
+      color: #031424;
+      font: inherit;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
     @media (max-width: 640px) {
-      .inicio-fase-overlay { padding: 14px 12px 12px; }
-      .inicio-fase-card { width: 100%; border-radius: 18px; padding: 14px 14px 16px; }
-      .inicio-fase-card h3 { font-size: 1rem; }
-      .inicio-fase-card p  { font-size: 0.92rem; line-height: 1.4; }
-      .btn-chip { width: 100%; justify-content: center; }
-      .contador-fase { font-size: 0.9rem; }
+      .foto-equipo-modal {
+        padding: 8px;
+      }
+
+      .foto-equipo-panel {
+        width: 100%;
+        max-height: 97vh;
+        padding: 18px 12px 20px;
+        border-radius: 21px;
+      }
+
+      .foto-equipo-visor {
+        min-height: 235px;
+      }
+
+      .foto-equipo-acciones {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+
+      .foto-equipo-boton {
+        width: 100%;
+      }
+
+      .foto-equipo-espera-texto {
+        flex-direction: column;
+        gap: 4px;
+      }
     }
   </style>
+
 </head>
 
-<body
+<body class="sopa-page"
   data-sesion-id="{{ grupo.sesion.idsesion }}"
-  data-tiempo-inicial="{{ grupo.sesion.segundos_restantes|default:grupo.sesion.t_diferencias|default:300 }}"
+  data-tiempo-inicial="{{ grupo.sesion.segundos_restantes|default:grupo.sesion.t_diferencias|default:240 }}"
   data-sopa-ganada="{{ sopa_ganada|yesno:'true,false' }}"
+  data-foto-guardada="{{ foto_equipo_guardada|yesno:'true,false' }}"
+  data-palabras-encontradas="{{ palabras_encontradas|default:0 }}"
 >
+  {% include "atajos.html" %}
+  <div class="student-timer-host"
+       data-student-timer
+       data-compact-after="48"
+       role="timer"
+       aria-live="polite">
+    <div class="student-timer-card student-timer-card--progress">
+      <div id="timer-container" class="blur-target-bloqueado timer-esperando">
+        <span data-i18n="sopa_tiempo_restante">Tiempo restante:</span>
+        <div id="timer-bar-track" class="timer-bar-track">
+          <div id="timer-bar-fill" class="timer-bar-fill"></div>
+        </div>
+        <span id="timer" class="timer student-timer-value">00:00</span>
+      </div>
+    </div>
+  </div>
+
   <main class="game-container">
 
-    <!-- Overlay inicio de fase -->
-    <div id="inicio-fase-overlay" class="inicio-fase-overlay">
-      <section id="inicio-fase-card" class="inicio-fase-card">
-        <div class="inicio-fase-badge" data-i18n="sopa_badge">MISIÓN DE RASTREO</div>
-        <h3 data-i18n="sopa_antes">Antes de comenzar</h3>
-        <p data-i18n="sopa_intro_1">El sistema ha ocultado conceptos clave del emprendimiento dentro de la sopa de letras.</p>
-        <p data-i18n="sopa_intro_2">Tendrán 1 minuto para encontrarlos. Cuando todos los escuadrones estén listos, el rastreo comenzará automáticamente.</p>
-        <button type="button" id="btn-listo-fase" class="btn-chip" data-i18n="sopa_boton_listo">⚡ Listo para comenzar</button>
-        <div id="texto-espera-fase" class="contador-fase" data-i18n="sopa_esperando">Esperando a los demás equipos...</div>
-        <div id="contador-listos-fase" class="contador-fase">0/0 grupos listos</div>
-      </section>
-    </div>
-
-    <h1 id="tituloSopa" class="blur-target-bloqueado" data-i18n="sopa_titulo">Sopa de Letras</h1>
+    <h1 id="tituloSopa" class="blur-target-bloqueado" data-i18n="sopa_titulo">Trabajo En Equipo</h1>
     <p id="subtituloSopa" class="blur-target-bloqueado" data-i18n="sopa_subtitulo">Encuentra las palabras ocultas relacionadas con el emprendimiento</p>
 
-    <div id="timer-container" class="blur-target-bloqueado timer-esperando">
-      <span data-i18n="sopa_tiempo_restante">Tiempo restante:</span><span> </span>
-      <span id="timer" class="timer">00:00</span>
-    </div>
-
-    <audio id="alarm-audio"   src="{% static 'sounds/alarma.mp3' %}"  preload="auto"></audio>
+<audio id="alarm-audio"   src="{% static 'sounds/alarma.mp3' %}"  preload="auto"></audio>
     <audio id="victory-sound" src="{% static 'sounds/victory.mp3' %}" preload="auto"></audio>
     <audio id="musica-fondo"  src="{% static 'sounds/musica_sopa.mp3' %}" loop preload="auto"></audio>
 
-    <div id="timeModal" class="modal" aria-hidden="true" role="dialog">
+    <div id="timeModal" class="modal" aria-hidden="true" role="dialog" aria-labelledby="timeModalTitle">
       <div class="modal-content">
-        <h2 data-i18n="sopa_tiempo_terminado_titulo">⏰ ¡Tiempo terminado!</h2>
-        <p data-i18n="sopa_tiempo_terminado_texto">Se acabó el tiempo para completar la sopa de letras.</p>
-        <button id="btnRetry" type="button" data-i18n="sopa_ok">Continuar</button>
+        <h2 id="timeModalTitle" data-i18n="sopa_time_titulo">⏰ ¡Tiempo terminado!</h2>
+        <p id="timeModalText" data-i18n="sopa_time_texto">
+          No alcanzaron a completar la sopa, pero cada palabra encontrada fue recompensada.
+        </p>
+        <p id="timeModalReward"><strong>0 palabras encontradas · 0 tokens obtenidos</strong></p>
+        <button id="btnRetry" type="button" data-i18n="sopa_boton_aceptar_foto">Aceptar y tomar foto</button>
       </div>
     </div>
 
@@ -160,8 +364,11 @@
       <div class="modal-content">
         <img src="{% static 'gifs/token_dorado_clean_grande.gif' %}" alt="Token de recompensa" class="token-animado">
         <h2 id="winTitle" data-i18n="sopa_win_titulo">¡Buen trabajo!</h2>
-        <p id="winText" data-i18n="sopa_win_texto">Se han encontrado todas las palabras. ¡Impresionante!</p>
-        <p id="winEspera" style="margin-top:12px; font-weight:700; opacity:0.8; color:#AEEBFF;">
+        <p id="winText" data-i18n="sopa_win_texto">
+          Encontraron todas las palabras y recibieron su recompensa.
+        </p>
+        <button id="btnWinFoto" type="button" data-i18n="sopa_boton_aceptar_foto">Aceptar y tomar foto</button>
+        <p id="winEspera" class="win-espera" hidden data-i18n="sopa_win_espera">
           Esperando a los demás escuadrones...
         </p>
       </div>
@@ -190,13 +397,778 @@
       data-registrar-palabra-url="{% url 'registrar_palabra_sopa' %}"
       data-sopa-completada-api-url="{% url 'sopa_completada' %}"
       data-sesion-id="{{ grupo.sesion.idsesion }}"
-      data-tiempo="{{ grupo.sesion.segundos_restantes|default:grupo.sesion.t_diferencias|default:300 }}"
-      data-tiempo-inicial="{{ grupo.sesion.segundos_restantes|default:grupo.sesion.t_diferencias|default:300 }}"
+      data-tiempo="{{ grupo.sesion.segundos_restantes|default:grupo.sesion.t_diferencias|default:240 }}"
+      data-tiempo-inicial="{{ grupo.sesion.segundos_restantes|default:grupo.sesion.t_diferencias|default:240 }}"
       data-sopa-ganada="{{ sopa_ganada|yesno:'true,false' }}"
     ></div>
   </main>
 
+  <div id="dialogo-inicial-overlay" class="oculto" aria-modal="true" role="dialog" aria-label="Mensaje de EdEmy">
+    <div id="dialogo-backdrop"></div>
+
+    <div id="dialogo-box">
+      <div class="dialogo-personaje activo" id="pj-edemy">
+        <img class="dialogo-img" src="{% static 'images/EdemFeliz.webp' %}" alt="EdEmy">
+      </div>
+
+      <div class="dialogo-burbuja" id="dialogo-burbuja">
+        <div class="dialogo-hablante" id="dialogo-hablante">EdEmy</div>
+
+        <p class="dialogo-texto-rpg" id="dialogo-texto"></p>
+
+        <button class="dialogo-siguiente" id="btn-dialogo-continuar" type="button" onclick="dialogoSiguiente()">
+          <span id="btn-rpg-label">Siguiente</span>
+          <span class="dialogo-flecha">▶</span>
+        </button>
+
+        <div class="dialogo-espera-wrap dialogo-info-oculta" id="dialogo-espera-wrap">
+          <div id="texto-espera-fase" class="contador-fase" data-i18n="sopa_esperando">Esperando a los demás equipos...</div>
+          <div id="contador-listos-fase" class="contador-fase">0/0 grupos listos</div>
+        </div>
+
+        <div class="dialogo-progreso">
+          <div id="dialogo-dots"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Fotografía obligatoria después de la sopa de letras -->
+  <div
+    id="foto-equipo-modal"
+    class="foto-equipo-modal"
+    data-guardada="{{ foto_equipo_guardada|yesno:'true,false' }}"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="foto-equipo-titulo"
+    hidden
+  >
+    <div class="foto-equipo-backdrop" aria-hidden="true"></div>
+
+    <section class="foto-equipo-panel">
+      <div class="foto-equipo-encabezado">
+        <span class="foto-equipo-etiqueta">REGISTRO DE MISIÓN</span>
+        <h2 id="foto-equipo-titulo" data-i18n="foto_equipo_titulo">¡Foto del equipo!</h2>
+        <p data-i18n="foto_equipo_intro">
+          Reúnanse frente a la cámara. Al guardar la fotografía quedarán listos
+          y esperarán hasta que todos los equipos terminen.
+        </p>
+      </div>
+
+      <div class="foto-equipo-nombre">
+        {{ grupo.nombregrupo|default:"Equipo" }}
+      </div>
+
+      <div class="foto-equipo-visor">
+        <video id="foto-equipo-video" autoplay playsinline muted hidden></video>
+
+        <img
+          id="foto-equipo-preview"
+          alt="Vista previa de la fotografía del equipo"
+          hidden
+        >
+
+        <canvas id="foto-equipo-canvas" hidden></canvas>
+
+        <div id="foto-equipo-placeholder" class="foto-equipo-placeholder">
+          <span class="foto-equipo-camara" aria-hidden="true">📷</span>
+          <strong id="foto-equipo-placeholder-titulo" data-i18n="foto_equipo_placeholder_titulo">
+            Registren a todo el equipo
+          </strong>
+          <span id="foto-equipo-placeholder-texto" data-i18n="foto_equipo_placeholder_texto">
+            Presionen “Activar cámara” para comenzar.
+          </span>
+        </div>
+
+        <div
+          id="foto-equipo-confirmacion"
+          class="foto-equipo-confirmacion"
+          hidden
+        >
+          <span class="foto-equipo-check" aria-hidden="true">✓</span>
+          <strong data-i18n="foto_equipo_guardada_titulo">Fotografía guardada</strong>
+          <span>
+            Fotografía guardada. 
+          </span>
+        </div>
+      </div>
+
+      <p
+        id="foto-equipo-mensaje"
+        class="foto-equipo-mensaje"
+        aria-live="polite"
+      ></p>
+
+      <div id="foto-equipo-acciones" class="foto-equipo-acciones">
+        <button
+          type="button"
+          id="foto-equipo-activar"
+          class="foto-equipo-boton foto-equipo-boton-principal"
+          data-i18n="sopa_boton_activar_camara"
+        >
+          Activar cámara
+        </button>
+
+        <button
+          type="button"
+          id="foto-equipo-capturar"
+          class="foto-equipo-boton foto-equipo-boton-principal"
+          hidden
+          data-i18n="sopa_boton_tomar_foto"
+        >
+          Tomar foto
+        </button>
+
+        <button
+          type="button"
+          id="foto-equipo-repetir"
+          class="foto-equipo-boton foto-equipo-boton-secundario"
+          hidden
+          data-i18n="sopa_boton_repetir"
+        >
+          Repetir
+        </button>
+
+        <button
+          type="button"
+          id="foto-equipo-guardar"
+          class="foto-equipo-boton foto-equipo-boton-principal"
+          hidden
+          data-i18n="sopa_boton_guardar_foto"
+        >
+          Guardar foto y quedar listo
+        </button>
+      </div>
+
+      <div id="foto-equipo-alternativa" class="foto-equipo-alternativa">
+        <span data-i18n="foto_equipo_alt_pregunta">¿No se pudo abrir la cámara?</span>
+
+        <label class="foto-equipo-boton foto-equipo-boton-archivo">
+          <span data-i18n="foto_equipo_boton_archivo">Tomar o seleccionar foto</span>
+          <input
+            type="file"
+            id="foto-equipo-archivo"
+            accept="image/*"
+            capture="user"
+            hidden
+          >
+        </label>
+      </div>
+
+      <div id="foto-equipo-espera" class="foto-equipo-espera" hidden>
+        <div class="foto-equipo-espera-texto">
+          <strong data-i18n="foto_equipo_espera_titulo">Esperando a los demás equipos…</strong>
+          <span id="foto-equipo-contador">0/0 equipos con foto</span>
+        </div>
+
+        <div
+          class="foto-equipo-progreso"
+          role="progressbar"
+          aria-label="Equipos con fotografía guardada"
+          aria-valuemin="0"
+          aria-valuemax="0"
+          aria-valuenow="0"
+        >
+          <span id="foto-equipo-progreso-barra"></span>
+        </div>
+      </div>
+    </section>
+  </div>
+
+
   <script src="{% static 'js/sopadeletras.js' %}"></script>
+
+
+  <script>
+  /* Resultado de la sopa: primero se acepta la recompensa y después se toma la foto. */
+  (function () {
+    function tJuego(clave, fallback = "") {
+      const idioma = window.i18nJuego?.obtenerIdioma?.() || "es";
+      return window.i18nJuego?.traducciones?.[idioma]?.[clave] || fallback;
+    }
+
+    const timeModal = document.getElementById("timeModal");
+    const winModal = document.getElementById("winModal");
+    const timeText = document.getElementById("timeModalText");
+    const timeReward = document.getElementById("timeModalReward");
+    const winText = document.getElementById("winText");
+
+    let resultadoAceptado = false;
+    let resultadoMostrado = false;
+
+    function mostrarModal(modal) {
+      if (!modal) return;
+      modal.style.display = "flex";
+      modal.classList.add("show", "visible");
+      modal.setAttribute("aria-hidden", "false");
+    }
+
+    function ocultarModal(modal) {
+      if (!modal) return;
+      modal.style.display = "none";
+      modal.classList.remove("show", "visible");
+      modal.setAttribute("aria-hidden", "true");
+    }
+
+    window.ocultarResultadosSopa = function () {
+      ocultarModal(timeModal);
+      ocultarModal(winModal);
+    };
+
+    window.mostrarResultadoTiempoSopa = function (palabrasEncontradas = 0) {
+      if (resultadoAceptado || resultadoMostrado) return;
+
+      resultadoMostrado = true;
+
+      const cantidad = Math.max(0, Number(palabrasEncontradas) || 0);
+      const plantilla = cantidad === 1
+        ? tJuego("sopa_time_recompensa_singular", "{n} palabra encontrada · {n} token obtenido")
+        : tJuego("sopa_time_recompensa_plural", "{n} palabras encontradas · {n} tokens obtenidos");
+
+      if (timeText) {
+        timeText.textContent = tJuego(
+          "sopa_time_texto",
+          "No alcanzaron a completar la sopa de letras, pero cada palabra encontrada fue recompensada."
+        );
+      }
+
+      if (timeReward) {
+        timeReward.innerHTML = `<strong>${plantilla.replaceAll("{n}", cantidad)}</strong>`;
+      }
+
+      mostrarModal(timeModal);
+    };
+
+    window.mostrarResultadoGanadorSopa = function (palabrasEncontradas = 8) {
+      if (resultadoAceptado || resultadoMostrado) return;
+
+      resultadoMostrado = true;
+
+      const cantidad = Math.max(0, Number(palabrasEncontradas) || 0);
+
+      if (
+        winText &&
+        !/token|bono|recompensa|reward|bonus/i.test(winText.textContent || "")
+      ) {
+        winText.textContent = tJuego(
+          "sopa_win_texto_detalle",
+          "Encontraron las {n} palabras. Los tokens por palabra y el bono final ya fueron agregados al equipo."
+        ).replaceAll("{n}", cantidad || 8);
+      }
+
+      mostrarModal(winModal);
+    };
+
+    function aceptarResultado(event) {
+      const boton = event.target.closest("#btnRetry, #btnWinFoto");
+      if (!boton) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+
+      resultadoAceptado = true;
+      window.ocultarResultadosSopa?.();
+      window.abrirPopupFotoEquipo?.();
+    }
+
+    // Se usa captura para evitar que el botón antiguo de “Continuar”
+    // ejecute una redirección registrada en sopadeletras.js.
+    document.addEventListener("click", aceptarResultado, true);
+  })();
+  </script>
+
+  <script>
+  /* Captura y guardado de la fotografía del equipo. */
+  (function () {
+    const modal = document.getElementById("foto-equipo-modal");
+    if (!modal) return;
+
+    function tJuego(clave, fallback = "") {
+      const idioma = window.i18nJuego?.obtenerIdioma?.() || "es";
+      return window.i18nJuego?.traducciones?.[idioma]?.[clave] || fallback;
+    }
+
+    const video = document.getElementById("foto-equipo-video");
+    const preview = document.getElementById("foto-equipo-preview");
+    const canvas = document.getElementById("foto-equipo-canvas");
+    const placeholder = document.getElementById("foto-equipo-placeholder");
+    const placeholderTitulo = document.getElementById("foto-equipo-placeholder-titulo");
+    const placeholderTexto = document.getElementById("foto-equipo-placeholder-texto");
+    const confirmacion = document.getElementById("foto-equipo-confirmacion");
+    const mensaje = document.getElementById("foto-equipo-mensaje");
+
+    const btnActivar = document.getElementById("foto-equipo-activar");
+    const btnCapturar = document.getElementById("foto-equipo-capturar");
+    const btnRepetir = document.getElementById("foto-equipo-repetir");
+    const btnGuardar = document.getElementById("foto-equipo-guardar");
+    const acciones = document.getElementById("foto-equipo-acciones");
+
+    const alternativa = document.getElementById("foto-equipo-alternativa");
+    const inputArchivo = document.getElementById("foto-equipo-archivo");
+
+    const espera = document.getElementById("foto-equipo-espera");
+    const contador = document.getElementById("foto-equipo-contador");
+    const progreso = modal.querySelector(".foto-equipo-progreso");
+    const progresoBarra = document.getElementById("foto-equipo-progreso-barra");
+
+    let stream = null;
+    let fotoBlob = null;
+    let previewUrl = null;
+    let guardada = modal.dataset.guardada === "true";
+    let guardando = false;
+
+    function mostrarMensaje(texto, tipo = "") {
+      if (!mensaje) return;
+
+      mensaje.textContent = texto || "";
+      mensaje.classList.toggle("es-error", tipo === "error");
+      mensaje.classList.toggle("es-exito", tipo === "exito");
+    }
+
+    function detenerCamara() {
+      if (!stream) return;
+
+      stream.getTracks().forEach(track => track.stop());
+      stream = null;
+
+      if (video) {
+        video.srcObject = null;
+      }
+    }
+
+    function limpiarPreviewUrl() {
+      if (!previewUrl) return;
+      URL.revokeObjectURL(previewUrl);
+      previewUrl = null;
+    }
+
+    function ocultarElementosVisor() {
+      if (video) video.hidden = true;
+      if (preview) preview.hidden = true;
+      if (placeholder) placeholder.hidden = true;
+      if (confirmacion) confirmacion.hidden = true;
+    }
+
+    function prepararEstadoInicial() {
+      ocultarElementosVisor();
+
+      if (placeholder) placeholder.hidden = false;
+
+      if (placeholderTitulo) {
+        placeholderTitulo.textContent = tJuego("foto_equipo_placeholder_titulo", "Registren a todo el equipo");
+      }
+
+      if (placeholderTexto) {
+        placeholderTexto.textContent =
+          tJuego("foto_equipo_placeholder_texto", "Presionen “Activar cámara” para comenzar.");
+      }
+
+      if (acciones) acciones.hidden = false;
+      if (alternativa) alternativa.hidden = false;
+      if (espera) espera.hidden = true;
+
+      if (btnActivar) {
+        btnActivar.hidden = false;
+        btnActivar.disabled = false;
+      }
+
+      if (btnCapturar) btnCapturar.hidden = true;
+      if (btnRepetir) btnRepetir.hidden = true;
+      if (btnGuardar) btnGuardar.hidden = true;
+
+      mostrarMensaje("");
+    }
+
+    function mostrarVistaPrevia(blob) {
+      if (!blob) return;
+
+      fotoBlob = blob;
+      limpiarPreviewUrl();
+      previewUrl = URL.createObjectURL(blob);
+
+      ocultarElementosVisor();
+
+      if (preview) {
+        preview.src = previewUrl;
+        preview.hidden = false;
+      }
+
+      if (btnActivar) btnActivar.hidden = true;
+      if (btnCapturar) btnCapturar.hidden = true;
+
+      if (btnRepetir) {
+        btnRepetir.hidden = false;
+        btnRepetir.disabled = false;
+      }
+
+      if (btnGuardar) {
+        btnGuardar.hidden = false;
+        btnGuardar.disabled = false;
+      }
+
+      mostrarMensaje(
+        tJuego("foto_equipo_msg_revisar_preview", "Revisen que aparezca todo el equipo antes de guardar.")
+      );
+    }
+
+    function mostrarEstadoGuardado() {
+      guardada = true;
+      guardando = false;
+      detenerCamara();
+
+      if (inputArchivo) {
+        inputArchivo.value = "";
+        inputArchivo.disabled = true;
+      }
+
+      if (acciones) acciones.hidden = true;
+      if (alternativa) alternativa.hidden = true;
+      if (espera) espera.hidden = false;
+
+      if (!preview || preview.hidden || !preview.src) {
+        ocultarElementosVisor();
+
+        if (confirmacion) {
+          confirmacion.hidden = false;
+        }
+      }
+
+      mostrarMensaje(
+        tJuego("foto_equipo_msg_guardada", "Fotografía guardada correctamente."),
+        "exito"
+      );
+    }
+
+    function actualizarProgreso(listos, total) {
+      const listosNumero = Math.max(0, Number(listos) || 0);
+      const totalNumero = Math.max(0, Number(total) || 0);
+      const porcentaje = totalNumero > 0
+        ? Math.min(100, (listosNumero / totalNumero) * 100)
+        : 0;
+
+      if (contador) {
+        contador.textContent =
+          `${listosNumero}/${totalNumero} ${tJuego("foto_equipo_contador_sufijo", "equipos con foto")}`;
+      }
+
+      if (progreso) {
+        progreso.setAttribute("aria-valuemax", String(totalNumero));
+        progreso.setAttribute("aria-valuenow", String(listosNumero));
+      }
+
+      if (progresoBarra) {
+        progresoBarra.style.width = `${porcentaje}%`;
+      }
+    }
+
+    window.actualizarEstadoFotoEquipo = function ({
+      guardada: estaGuardada = false,
+      gruposListos = 0,
+      totalGrupos = 0
+    } = {}) {
+      actualizarProgreso(gruposListos, totalGrupos);
+
+      if (estaGuardada && !guardada) {
+        mostrarEstadoGuardado();
+      } else if (guardada && espera) {
+        espera.hidden = false;
+      }
+    };
+
+    window.abrirPopupFotoEquipo = function () {
+      window.ocultarResultadosSopa?.();
+      window.ocultarDialogoInicial?.();
+
+      modal.hidden = false;
+      document.body.classList.add("foto-equipo-abierta");
+
+      if (guardada) {
+        mostrarEstadoGuardado();
+      } else if (!stream && !fotoBlob) {
+        prepararEstadoInicial();
+      }
+    };
+
+    async function activarCamara() {
+      mostrarMensaje("");
+
+      if (!navigator.mediaDevices?.getUserMedia) {
+        if (placeholderTitulo) {
+          placeholderTitulo.textContent =
+            tJuego("foto_equipo_sin_camara_titulo", "La cámara directa no está disponible");
+        }
+
+        if (placeholderTexto) {
+          placeholderTexto.textContent =
+            tJuego("foto_equipo_usar_alt_boton", "Usen el botón “Tomar o seleccionar foto”.");
+        }
+
+        mostrarMensaje(
+          tJuego("foto_equipo_msg_sin_soporte", "El navegador no permitió abrir la cámara directamente."),
+          "error"
+        );
+        return;
+      }
+
+      if (btnActivar) btnActivar.disabled = true;
+
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          audio: false,
+          video: {
+            facingMode: "user",
+            width: { ideal: 1920 },
+            height: { ideal: 1080 }
+          }
+        });
+
+        ocultarElementosVisor();
+
+        if (video) {
+          video.srcObject = stream;
+          video.hidden = false;
+          await video.play();
+        }
+
+        if (btnActivar) btnActivar.hidden = true;
+        if (btnCapturar) btnCapturar.hidden = false;
+
+        mostrarMensaje(
+          tJuego("foto_equipo_msg_listos_tomar", "Cuando estén listos, presionen “Tomar foto”.")
+        );
+      } catch (error) {
+        console.error("No se pudo abrir la cámara:", error);
+
+        if (placeholder) placeholder.hidden = false;
+
+        if (placeholderTitulo) {
+          placeholderTitulo.textContent = tJuego("foto_equipo_error_camara_titulo", "No se pudo abrir la cámara");
+        }
+
+        if (placeholderTexto) {
+          placeholderTexto.textContent =
+            tJuego("foto_equipo_usar_alt_boton", "Usen el botón “Tomar o seleccionar foto”.");
+        }
+
+        mostrarMensaje(
+          tJuego("foto_equipo_msg_error_permiso", "Revisen el permiso de cámara o utilicen la opción alternativa."),
+          "error"
+        );
+      } finally {
+        if (btnActivar) btnActivar.disabled = false;
+      }
+    }
+
+    function capturarFoto() {
+      if (
+        !video ||
+        !video.videoWidth ||
+        !video.videoHeight ||
+        !canvas
+      ) {
+        mostrarMensaje(
+          tJuego("foto_equipo_msg_camara_no_lista", "La cámara todavía no está lista."),
+          "error"
+        );
+        return;
+      }
+
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+
+      const contexto = canvas.getContext("2d");
+
+      contexto.drawImage(
+        video,
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      );
+
+      canvas.toBlob(
+        blob => {
+          if (!blob) {
+            mostrarMensaje(
+              tJuego("foto_equipo_msg_error_generar", "No fue posible generar la fotografía."),
+              "error"
+            );
+            return;
+          }
+
+          mostrarVistaPrevia(blob);
+        },
+        "image/jpeg",
+        0.95
+      );
+    }
+
+    function repetirFoto() {
+      if (guardando || guardada) return;
+
+      fotoBlob = null;
+      limpiarPreviewUrl();
+
+      if (preview) {
+        preview.removeAttribute("src");
+        preview.hidden = true;
+      }
+
+      if (stream) {
+        ocultarElementosVisor();
+
+        if (video) video.hidden = false;
+        if (btnCapturar) btnCapturar.hidden = false;
+        if (btnRepetir) btnRepetir.hidden = true;
+        if (btnGuardar) btnGuardar.hidden = true;
+
+        mostrarMensaje(
+          tJuego("foto_equipo_msg_nueva_foto", "Cuando estén listos, tomen una nueva foto.")
+        );
+      } else {
+        prepararEstadoInicial();
+      }
+    }
+
+    async function guardarFoto() {
+      if (!fotoBlob || guardando || guardada) {
+        if (!fotoBlob) {
+          mostrarMensaje(
+            tJuego("foto_equipo_msg_falta_foto", "Primero deben tomar o seleccionar una fotografía."),
+            "error"
+          );
+        }
+        return;
+      }
+
+      guardando = true;
+
+      if (btnGuardar) btnGuardar.disabled = true;
+      if (btnRepetir) btnRepetir.disabled = true;
+      if (inputArchivo) inputArchivo.disabled = true;
+
+      mostrarMensaje(
+        tJuego("foto_equipo_msg_guardando", "Guardando la fotografía y el registro del equipo…")
+      );
+
+      const formulario = new FormData();
+
+      formulario.append(
+        "foto_equipo",
+        fotoBlob,
+        "foto_equipo.jpg"
+      );
+
+      try {
+        const respuesta = await fetch(
+          "{% url 'guardar_foto_equipo' %}",
+          {
+            method: "POST",
+            credentials: "same-origin",
+            headers: {
+              "X-CSRFToken": "{{ csrf_token }}"
+            },
+            body: formulario
+          }
+        );
+
+        let datos = {};
+
+        try {
+          datos = await respuesta.json();
+        } catch (_) {
+          datos = {};
+        }
+
+        if (!respuesta.ok || !datos.ok) {
+          throw new Error(
+            datos.error ||
+            tJuego("foto_equipo_msg_error_guardar", "No fue posible guardar la fotografía.")
+          );
+        }
+
+        mostrarEstadoGuardado();
+
+        actualizarProgreso(
+          Number(datos.gruposFotosEquipo ?? 0),
+          Number(datos.totalGrupos ?? 0)
+        );
+
+        if (
+          datos.faseActual &&
+          datos.faseActual !== "f1_sopa" &&
+          datos.rutaAlumno
+        ) {
+          window.location.href = datos.rutaAlumno;
+        }
+      } catch (error) {
+        console.error("Error guardando la foto:", error);
+
+        guardando = false;
+
+        if (btnGuardar) btnGuardar.disabled = false;
+        if (btnRepetir) btnRepetir.disabled = false;
+        if (inputArchivo) inputArchivo.disabled = false;
+
+        mostrarMensaje(
+          error.message ||
+          tJuego("foto_equipo_msg_error_guardar", "No fue posible guardar la fotografía."),
+          "error"
+        );
+      }
+    }
+
+    btnActivar?.addEventListener("click", activarCamara);
+    btnCapturar?.addEventListener("click", capturarFoto);
+    btnRepetir?.addEventListener("click", repetirFoto);
+    btnGuardar?.addEventListener("click", guardarFoto);
+
+    inputArchivo?.addEventListener("change", () => {
+      const archivo = inputArchivo.files?.[0];
+
+      if (!archivo) return;
+
+      if (!archivo.type.startsWith("image/")) {
+        inputArchivo.value = "";
+        mostrarMensaje(
+          tJuego("foto_equipo_msg_archivo_invalido", "El archivo seleccionado no es una imagen."),
+          "error"
+        );
+        return;
+      }
+
+      mostrarVistaPrevia(archivo);
+    });
+
+    window.addEventListener("beforeunload", () => {
+      detenerCamara();
+      limpiarPreviewUrl();
+    });
+
+    window.addEventListener("idiomaJuegoCambiado", () => {
+      if (contador) {
+        const p = contador.textContent.match(/(\d+)\/(\d+)/);
+        if (p) {
+          contador.textContent =
+            `${p[1]}/${p[2]} ${tJuego("foto_equipo_contador_sufijo", "equipos con foto")}`;
+        }
+      }
+
+      if (placeholder && !placeholder.hidden) {
+        if (placeholderTitulo) {
+          placeholderTitulo.textContent = tJuego("foto_equipo_placeholder_titulo", "Registren a todo el equipo");
+        }
+        if (placeholderTexto) {
+          placeholderTexto.textContent =
+            tJuego("foto_equipo_placeholder_texto", "Presionen “Activar cámara” para comenzar.");
+        }
+      }
+    });
+  })();
+  </script>
+
 
   <script>
   /* ── Música de fondo ── */
@@ -232,30 +1204,98 @@
     window.addEventListener("beforeunload", () => audio.pause());
   })();
 
-  /* ── Lógica de inicio de fase — idéntica al bubblemap ── */
+  /* ── Sonidos de diálogo (tecleo / botón) — igual que en las demás vistas con EdEmy ── */
+  (function () {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+
+    let ctx = null;
+
+    function getCtx() {
+      if (!ctx) ctx = new AudioCtx();
+      if (ctx.state === "suspended") ctx.resume();
+      return ctx;
+    }
+
+    window.sonarTecla = function () {
+      try {
+        const c = getCtx();
+        const o = c.createOscillator();
+        const g = c.createGain();
+
+        o.connect(g);
+        g.connect(c.destination);
+
+        o.type = "square";
+        o.frequency.setValueAtTime(520, c.currentTime);
+        o.frequency.exponentialRampToValueAtTime(380, c.currentTime + 0.04);
+
+        g.gain.setValueAtTime(0.05, c.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.05);
+
+        o.start(c.currentTime);
+        o.stop(c.currentTime + 0.06);
+      } catch(_) {}
+    };
+
+    window.sonarBoton = function () {
+      try {
+        const c = getCtx();
+
+        [
+          [440, 600, 0, 0.08, 0.18, 0.14],
+          [660, 880, 0.06, 0.18, 0.12, 0.22]
+        ].forEach(([f1, f2, delay, ramp, vol, stop]) => {
+          const o = c.createOscillator();
+          const g = c.createGain();
+
+          o.connect(g);
+          g.connect(c.destination);
+
+          o.type = "sine";
+          o.frequency.setValueAtTime(f1, c.currentTime + delay);
+          o.frequency.exponentialRampToValueAtTime(f2, c.currentTime + delay + ramp);
+
+          g.gain.setValueAtTime(vol, c.currentTime + delay);
+          g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + delay + stop);
+
+          o.start(c.currentTime + delay);
+          o.stop(c.currentTime + delay + stop + 0.02);
+        });
+      } catch(_) {}
+    };
+  })();
+
+  /* ── Lógica de inicio de fase con diálogo de EdEmy ── */
   document.addEventListener("DOMContentLoaded", () => {
     function tJuego(clave, fallback = "") {
       const idioma = window.i18nJuego?.obtenerIdioma?.() || "es";
       return window.i18nJuego?.traducciones?.[idioma]?.[clave] || fallback;
     }
-    function textoGruposListos(listos, total) { return `${listos}/${total} ${tJuego("sopa_grupos_listos", "grupos listos")}`; }
-    function textoEsperando() { return tJuego("sopa_boton_esperando", "Esperando..."); }
-    function textoListo()     { return tJuego("sopa_boton_listo", "⚡ Listo para comenzar"); }
 
-    const sesionId   = "{{ grupo.sesion.idsesion }}";
-    const grupoId    = "{{ grupo.idgrupo }}";
-    const csrfToken  = "{{ csrf_token }}";
+    function textoGruposListos(listos, total) {
+      return `${listos}/${total} ${tJuego("sopa_grupos_listos", "grupos listos")}`;
+    }
 
-    const boton      = document.getElementById("btn-listo-fase");
-    const textoEspera= document.getElementById("texto-espera-fase");
-    const contador   = document.getElementById("contador-listos-fase");
-    const overlay    = document.getElementById("inicio-fase-overlay");
+    function textoEsperando() {
+      return tJuego("sopa_boton_esperando", "Esperando...");
+    }
 
-    // ── Variables idénticas al bubblemap ──
+    function textoListo() {
+      return tJuego("sopa_boton_listo", "⚡ Confirmar equipo listo");
+    }
+
+    const sesionId    = "{{ grupo.sesion.idsesion }}";
+    const grupoId     = "{{ grupo.idgrupo }}";
+    const csrfToken   = "{{ csrf_token }}";
+    const textoEspera = document.getElementById("texto-espera-fase");
+    const contador    = document.getElementById("contador-listos-fase");
+
     let countdownMostrado          = false;
     let countdownEnCurso           = false;
     let timerRealSolicitado        = false;
     let timerLiberadoTrasCountdown = false;
+    let yaListo                    = false;
 
     const blurTargets = [
       document.getElementById("tituloSopa"),
@@ -265,13 +1305,193 @@
       document.getElementById("wordsBox"),
     ];
 
+    (function instalarDialogoEdemy() {
+
+      const GUION = [
+        { key: "sopa_dialogo_1", texto: "Con el paso de los años, incluso los conceptos del emprendimiento comenzaron a olvidarse…" },
+        { key: "sopa_dialogo_2", texto: "El sistema los ha ocultado para poner a prueba su capacidad de reconocerlos." },
+        { key: "sopa_dialogo_3", texto: "¡Tienen poco tiempo para encontrarlos, trabajen en equipo!" },
+        { key: "sopa_dialogo_4", texto: "Recuperemos ese conocimiento." }
+      ];
+
+      let paso = 0;
+      let escribiendo = false;
+      let textoCompleto = "";
+      let timerEscritura = null;
+      let teclaCounter = 0;
+      let dotsCreados = false;
+      let dialogoInicializado = false;
+
+      const overlayDialogo = document.getElementById("dialogo-inicial-overlay");
+      const burbuja        = document.getElementById("dialogo-burbuja");
+      const textoEl        = document.getElementById("dialogo-texto");
+      const btnDialogo     = document.getElementById("btn-dialogo-continuar");
+      const btnLabel       = document.getElementById("btn-rpg-label");
+      const dotsEl         = document.getElementById("dialogo-dots");
+      const esperaWrap     = document.getElementById("dialogo-espera-wrap");
+
+      function crearDots() {
+        if (!dotsEl || dotsCreados) return;
+
+        dotsEl.innerHTML = "";
+
+        GUION.forEach((_, i) => {
+          const d = document.createElement("div");
+          d.className = "d-dot";
+          d.id = "dot-" + i;
+          dotsEl.appendChild(d);
+        });
+
+        dotsCreados = true;
+      }
+
+      function actualizarDots() {
+        GUION.forEach((_, i) => {
+          const d = document.getElementById("dot-" + i);
+          if (!d) return;
+          d.className = "d-dot" + (i < paso ? " hecho" : i === paso ? " activo" : "");
+        });
+      }
+
+      function mostrarInfoEspera(mostrar) {
+        if (esperaWrap) {
+          esperaWrap.classList.toggle("dialogo-info-oculta", !mostrar);
+        }
+      }
+
+      function cambiarTextoBoton(texto) {
+        if (btnLabel) btnLabel.textContent = texto;
+      }
+
+      function escribirTexto(txt) {
+        if (!textoEl) return;
+
+        textoCompleto = txt;
+        escribiendo = true;
+        textoEl.innerHTML = "";
+        teclaCounter = 0;
+
+        const cursor = document.createElement("span");
+        cursor.className = "cursor-rpg";
+
+        let i = 0;
+        clearInterval(timerEscritura);
+
+        timerEscritura = setInterval(() => {
+          if (i < txt.length) {
+            textoEl.textContent = txt.slice(0, i + 1);
+            textoEl.appendChild(cursor);
+            teclaCounter++;
+
+            if (teclaCounter % 2 === 0 && txt[i] !== " " && typeof window.sonarTecla === "function") {
+              window.sonarTecla();
+            }
+
+            i++;
+          } else {
+            clearInterval(timerEscritura);
+            escribiendo = false;
+            textoEl.textContent = txt;
+          }
+        }, 28);
+      }
+
+      function mostrarPaso(n) {
+        paso = n;
+        mostrarInfoEspera(false);
+        actualizarDots();
+
+        if (btnDialogo) btnDialogo.disabled = false;
+
+        cambiarTextoBoton(n === GUION.length - 1 ? textoListo() : tJuego("dialogo_boton_siguiente", "Siguiente"));
+        escribirTexto(tJuego(GUION[n].key, GUION[n].texto));
+      }
+
+      window.dialogoSiguiente = async function () {
+        if (typeof window.sonarBoton === "function") window.sonarBoton();
+
+        if (escribiendo) {
+          clearInterval(timerEscritura);
+          escribiendo = false;
+          if (textoEl) textoEl.textContent = textoCompleto;
+          return;
+        }
+
+        if (paso < GUION.length - 1) {
+          mostrarPaso(paso + 1);
+          return;
+        }
+
+        if (typeof window.marcarListoFase === "function") {
+          await window.marcarListoFase();
+        }
+      };
+
+      window.mostrarDialogoInicial = function () {
+        if (!overlayDialogo || !burbuja) return;
+
+        crearDots();
+        document.body.classList.add("dialogo-edemy-activo");
+        overlayDialogo.classList.remove("oculto");
+        overlayDialogo.classList.add("visible");
+
+        setTimeout(() => {
+          burbuja.classList.add("visible");
+
+          if (!dialogoInicializado) {
+            dialogoInicializado = true;
+            mostrarPaso(0);
+          }
+        }, 120);
+      };
+
+      window.ocultarDialogoInicial = function () {
+        if (!overlayDialogo) return;
+
+        document.body.classList.remove("dialogo-edemy-activo");
+        overlayDialogo.classList.remove("visible");
+        overlayDialogo.classList.add("oculto");
+      };
+
+      window.marcarDialogoComoEsperando = function () {
+        if (!overlayDialogo || !textoEl || !btnDialogo) return;
+
+        window.mostrarDialogoInicial?.();
+        clearInterval(timerEscritura);
+        escribiendo = false;
+        paso = GUION.length - 1;
+        actualizarDots();
+
+        textoEl.textContent = "Confirmación registrada. Esperen mientras los demás escuadrones terminan de confirmar.";
+        btnDialogo.disabled = true;
+        cambiarTextoBoton(textoEsperando());
+        mostrarInfoEspera(true);
+      };
+
+      window.habilitarDialogoListoDeNuevo = function () {
+        if (!btnDialogo) return;
+
+        btnDialogo.disabled = false;
+        cambiarTextoBoton(textoListo());
+        mostrarInfoEspera(false);
+      };
+
+      window.actualizarContadorDialogo = function (texto) {
+        if (contador) {
+          contador.textContent = texto;
+          contador.classList.remove("dialogo-info-oculta");
+        }
+      };
+    })();
+
     function activarFase() {
       blurTargets.forEach(el => {
         if (!el) return;
-        el.classList.remove("blur-target-bloqueado","timer-esperando");
+        el.classList.remove("blur-target-bloqueado", "timer-esperando");
         el.classList.add("blur-target-activo");
       });
-      if (overlay) overlay.classList.add("overlay-hidden");
+
+      window.ocultarDialogoInicial?.();
     }
 
     function bloquearFase() {
@@ -280,21 +1500,32 @@
         el.classList.remove("blur-target-activo");
         el.classList.add("blur-target-bloqueado");
       });
+
       const tc = document.getElementById("timer-container");
       if (tc) tc.classList.add("timer-esperando");
-      if (overlay) overlay.classList.remove("overlay-hidden");
+
+      if (!yaListo) {
+        window.mostrarDialogoInicial?.();
+      } else {
+        window.marcarDialogoComoEsperando?.();
+      }
     }
 
-    // ── Idéntico al bubblemap ──
     async function iniciarTimerRealDespuesCountdown() {
       if (timerRealSolicitado) return;
       timerRealSolicitado = true;
+
       try {
         const res = await fetch(`/sesion/${sesionId}/iniciar-timer-inicio-fase/`, {
-          method: "POST", credentials: "same-origin",
-          headers: { "Content-Type": "application/json", "X-CSRFToken": csrfToken },
+          method: "POST",
+          credentials: "same-origin",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrfToken,
+          },
           body: JSON.stringify({})
         });
+
         const data = await res.json();
         if (!res.ok || !data.ok) throw new Error(data.error || "No se pudo iniciar el timer.");
       } catch (err) {
@@ -303,33 +1534,116 @@
       }
     }
 
+    window.marcarListoFase = async function () {
+      if (yaListo) return;
+
+      const btnDialogo = document.getElementById("btn-dialogo-continuar");
+      const btnLabel = document.getElementById("btn-rpg-label");
+
+      if (btnDialogo) btnDialogo.disabled = true;
+      if (btnLabel) btnLabel.textContent = textoEsperando();
+
+      try {
+        const res = await fetch(`/grupo/${grupoId}/listo/`, {
+          method: "POST",
+          credentials: "same-origin",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrfToken,
+          },
+          body: JSON.stringify({})
+        });
+
+        const data = await res.json();
+        if (!res.ok || !data.ok) throw new Error(data.error || "No se pudo marcar listo.");
+
+        yaListo = true;
+
+        const textoContador = textoGruposListos(data.listos || 0, data.total || 0);
+        if (contador) contador.textContent = textoContador;
+        if (textoEspera) textoEspera.textContent = tJuego("sopa_esperando", "Esperando a los demás equipos...");
+
+        window.marcarDialogoComoEsperando?.();
+        consultarEstado();
+      } catch (err) {
+        console.error("Error marcando listo:", err);
+        yaListo = false;
+        window.habilitarDialogoListoDeNuevo?.();
+
+        if (textoEspera) {
+          textoEspera.textContent = tJuego("sopa_error_listo", "No se pudo registrar. Intenta nuevamente.");
+        }
+      }
+    };
+
     async function consultarEstado() {
       try {
-        const res = await fetch(`/sesion/${sesionId}/estado/`, { credentials: "same-origin", cache: "no-store" });
+        const res = await fetch(`/sesion/${sesionId}/estado/`, {
+          credentials: "same-origin",
+          cache: "no-store"
+        });
+
         if (!res.ok) return;
+
         const data = await res.json();
 
-        if (contador) {
-          contador.textContent = textoGruposListos(data.listosInicio || 0, data.totalListosInicio || 0);
-        }
+        const textoContador = textoGruposListos(
+          data.listosInicio || 0,
+          data.totalListosInicio || 0
+        );
 
-        const miGrupo = (data.grupos || []).find(g => Number(g.id) === Number(grupoId));
-        if (miGrupo && miGrupo.listoF1) {
-          boton.disabled = true;
-          boton.textContent = textoEsperando();
-          if (textoEspera) textoEspera.textContent = tJuego("sopa_esperando", "Esperando a los demás equipos...");
-        }
+        if (contador) contador.textContent = textoContador;
+        window.actualizarContadorDialogo?.(textoContador);
 
-        if (data.faseActual && data.faseActual !== "f1_sopa" && data.rutaAlumno) {
+        const miGrupo = (data.grupos || []).find(
+          g => Number(g.id) === Number(grupoId)
+        ) || null;
+
+        window.actualizarEstadoFotoEquipo?.({
+          guardada: Boolean(miGrupo?.fotoEquipoGuardada),
+          gruposListos: Number(data.gruposFotosEquipo ?? 0),
+          totalGrupos: Number(data.totalGrupos ?? 0)
+        });
+
+        if (
+          data.faseActual &&
+          data.faseActual !== "f1_sopa" &&
+          data.rutaAlumno
+        ) {
           if (window.location.pathname !== data.rutaAlumno) {
             window.location.href = data.rutaAlumno;
           }
           return;
         }
 
+        if (miGrupo?.fotoEquipoGuardada) {
+          window.abrirPopupFotoEquipo?.();
+          return;
+        }
+
+        if (miGrupo?.sopaGanada) {
+          window.mostrarResultadoGanadorSopa?.(
+            miGrupo.palabrasSopa ?? 8
+          );
+          return;
+        }
+
+        if (data.sopaTiempoTerminado) {
+          window.mostrarResultadoTiempoSopa?.(
+            miGrupo?.palabrasSopa ?? 0
+          );
+          return;
+        }
+
+        if (miGrupo?.listoF1) {
+          yaListo = true;
+          window.marcarDialogoComoEsperando?.();
+        }
+
         if (data.inicioFaseHabilitado) {
-          // Activar si el countdown ya terminó
-          if (countdownMostrado && !countdownEnCurso) activarFase();
+          if (countdownMostrado && !countdownEnCurso) {
+            activarFase();
+          }
         } else {
           countdownMostrado = false;
           countdownEnCurso = false;
@@ -338,51 +1652,36 @@
           bloquearFase();
         }
 
-        // ── Flujo countdown idéntico al bubblemap ──
-        if (data.inicioFaseHabilitado && !countdownMostrado && !countdownEnCurso) {
+        if (
+          data.inicioFaseHabilitado &&
+          !countdownMostrado &&
+          !countdownEnCurso
+        ) {
           countdownEnCurso = true;
+
           window.oaiCountdown.run(async () => {
             countdownMostrado = true;
             countdownEnCurso = false;
             timerLiberadoTrasCountdown = true;
+
             await iniciarTimerRealDespuesCountdown();
             activarFase();
           });
         }
-
       } catch (err) {
         console.error("Error consultando estado:", err);
       }
     }
 
-    if (boton) {
-      boton.addEventListener("click", async () => {
-        boton.disabled = true;
-        boton.textContent = textoEsperando();
-        try {
-          const res = await fetch(`/grupo/${grupoId}/listo/`, {
-            method: "POST", credentials: "same-origin",
-            headers: { "Content-Type": "application/json", "X-CSRFToken": csrfToken },
-            body: JSON.stringify({})
-          });
-          const data = await res.json();
-          if (!res.ok || !data.ok) throw new Error(data.error || "No se pudo marcar listo.");
-          if (contador) contador.textContent = textoGruposListos(data.listos || 0, data.total || 0);
-          if (textoEspera) textoEspera.textContent = tJuego("sopa_esperando", "Esperando a los demás equipos...");
-          consultarEstado();
-        } catch (err) {
-          console.error("Error marcando listo:", err);
-          boton.disabled = false;
-          boton.textContent = textoListo();
-          if (textoEspera) textoEspera.textContent = tJuego("sopa_error_listo", "No se pudo registrar. Intenta nuevamente.");
-        }
-      });
-    }
-
     window.addEventListener("idiomaJuegoCambiado", () => {
-      if (contador) { const p = contador.textContent.match(/(\d+)\/(\d+)/); if (p) contador.textContent = textoGruposListos(p[1], p[2]); }
-      if (boton) boton.textContent = boton.disabled ? textoEsperando() : textoListo();
-      if (textoEspera) textoEspera.textContent = tJuego("sopa_esperando", "Esperando a los demás equipos...");
+      if (contador) {
+        const p = contador.textContent.match(/(\d+)\/(\d+)/);
+        if (p) contador.textContent = textoGruposListos(p[1], p[2]);
+      }
+
+      if (textoEspera) {
+        textoEspera.textContent = tJuego("sopa_esperando", "Esperando a los demás equipos...");
+      }
     });
 
     bloquearFase();
@@ -393,5 +1692,6 @@
 
   {% include "includes/countdown_inicio_fase.html" %}
   {% include "includes/sincronizacion_fase.html" %}
+  <script src="{% static 'js/student_timer.js' %}"></script>
 </body>
 </html>

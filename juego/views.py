@@ -1,4 +1,8 @@
 #NUEVO
+from .onedrive_service import (
+    nombre_seguro_onedrive,
+    descargar_archivo_onedrive,
+)
 from django.shortcuts import render, redirect
 from django.core.files.storage import default_storage
 from django.conf import settings
@@ -18,7 +22,8 @@ from django.views.decorators.cache import never_cache
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.views.decorators.http import require_POST
-from django.http import JsonResponse
+from django.http import JsonResponse, FileResponse, Http404
+from django.contrib.staticfiles import finders
 from django.db.models import Count, Q
 from .models import Tematica, Desafio, Grupo, RuletaLegoOpcion
 from django.db import IntegrityError
@@ -27,6 +32,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 #NUEVO CIERRRE
 from django.shortcuts import redirect, render
 from django.contrib import messages
+from .models import PreguntaRompehielo
 from django.views.decorators.http import require_http_methods
 from .models import Tematica, Desafio
 import openpyxl
@@ -43,43 +49,60 @@ import random
 from math import ceil
 from django.utils import timezone
 from django.db.models import F
+from django.db.models.functions import Coalesce
 
+import logging
+
+from django.core.files.base import ContentFile
+from PIL import Image, ImageOps, UnidentifiedImageError
+
+from .models import FotoEquipo
+
+from .onedrive_service import (
+    nombre_seguro_onedrive,
+)
+
+from .tasks import (
+    subir_foto_equipo_onedrive,
+)
+
+from .auth import requiere_staff, requiere_admin, profesor_autenticado, es_admin, es_staff
+from django.core.cache import cache
+from django.http import HttpResponse
+
+logger = logging.getLogger(__name__)
 
 
 FASES_ORDEN = [
-    "intro_habilidades",
     "f1_bienvenida",
     "f1_conocidos",
     "f1_pre_sopa",
     "f1_sopa",
     "f1_ranking",
 
-    "mapa_f2_empatia",
     "f2_transicion",
     "f2_tematicas",
     "f2_transicion_empatia",
     "f2_bubblemap",
     "f2_ranking",
 
-    "mapa_f3_creatividad",
     "f3_transicion_creatividad",
     "f3_lego",
     "f3_ranking",
 
-    "mapa_f4_final",
     "f4_transicion_comunicacion",
     "f4_construccion_pitch",
     "f4_orden_pitch",
     "f4_presentacion_pitch",
-    "f5_evaluacion_pitch",
 
+    "f5_evaluacion_pitch",
     "f6_ranking",
     "reflexion",
 ]
 
 RUTA_POR_FASE = {
     "lobby": "pantalla_espera",
-    "intro_habilidades": "habilidades_intro",
+
     "f1_bienvenida": "pantalla_inicio",
     "f1_conocidos": "promptconocidos",
     "f1_pre_sopa": "trabajoenequipo",
@@ -91,9 +114,6 @@ RUTA_POR_FASE = {
     "f2_transicion_empatia": "transicionempatia",
     "f2_bubblemap": "bubblemap",
     "f2_ranking": "ranking",
-    "mapa_f2_empatia": "habilidades_intro",
-    "mapa_f3_creatividad": "habilidades_intro",
-    "mapa_f4_final": "habilidades_intro",
 
     "f3_transicion_creatividad": "transicioncreatividad",
     "f3_lego": "lego",
@@ -104,19 +124,18 @@ RUTA_POR_FASE = {
     "f4_orden_pitch": "orden_presentacion_alumno",
     "f4_presentacion_pitch": "presentar_pitch",
 
-    "f5_transicion_apoyo": "transicionapoyo",
+    # f5_transicion_apoyo fue eliminada del flujo: la vista y la URL se
+    # conservan solo porque sincronizacion_fase.html referencia la URL.
     "f5_evaluacion_pitch": "peer_review",
-
     "f6_ranking": "ranking",
-    "reflexion": "reflexion",
+    # La fase "reflexion" primero muestra la galería con las fotos de
+    # equipo elegidas por el admin; desde ahí el alumno continúa
+    # manualmente a "reflexion" (mismo gate de fase, sin fase nueva).
+    "reflexion": "galeria_equipos",
 }
 
 ETIQUETA_FASE = {
 
-    "intro_habilidades": "Mapa · Trabajo en equipo",
-    "mapa_f2_empatia": "Mapa · Empatía",
-    "mapa_f3_creatividad": "Mapa · Creatividad",
-    "mapa_f4_final": "Mapa · Misión final",
     "f1_bienvenida": "F1 · Bienvenida",
     "f1_conocidos": "F1 · Conocerse",
     "f1_pre_sopa": "F1 · Trabajo en equipo",
@@ -138,7 +157,6 @@ ETIQUETA_FASE = {
     "f4_orden_pitch": "F4 · Sorteo orden pitch",
     "f4_presentacion_pitch": "F4 · Presentación pitch",
 
-    "f5_transicion_apoyo": "F5 · Transición Apoyo",
     "f5_evaluacion_pitch": "F5 · Evaluación pitch",
 
     "f6_ranking": "Ranking final",
@@ -149,10 +167,21 @@ FASES_CON_INICIO_POR_ALUMNOS = {
     "f1_conocidos",
     "f1_sopa",
     "f2_tematicas",
-    "f2_bubblemap",
-    "f3_lego",
     "f4_construccion_pitch",
 }
+# f2_bubblemap salió de este set: la confirmación de "empatía" en
+# transicionempatia.html ya implica que todos están listos para bubblemap
+# (autoavanzar_si_todos_listos solo cambia de fase cuando el último grupo
+# confirma), así que un segundo gate adentro del bubble map era redundante.
+# El timer ahora arranca solo al entrar a la fase (ver autoavanzar_si_todos_listos
+# y profesor_siguiente_fase).
+# f3_lego salió por el mismo motivo: la confirmación "¡Estoy listo!" en
+# transicioncreatividad.html (fase_clave="f3") ya es la señal de que todos
+# están listos para lego.
+# f4_construccion_pitch volvió a este set: pitch.html tiene un diálogo de
+# EdEmy que no debe dejar avanzar el tiempo mientras se lee, así que necesita
+# su propio gate otra vez — a diferencia de bubblemap/lego, acá sí hace falta
+# esperar a que cada grupo termine de leer antes de arrancar el timer real.
 
 
 def reset_listos_inicio_fase(sesion, fase):
@@ -168,13 +197,6 @@ def reset_listos_inicio_fase(sesion, fase):
             sopa_tiempo_segundos=None,
             sopa_completada_en=None,
         )
-
-    elif fase == "f2_bubblemap":
-        grupos.update(listo_f2=False, bubble_tokens_otorgados=False)
-
-    elif fase == "f3_lego":
-        grupos.update(listo_inicio_f3=False)
-        grupos.update(listo_f3=False)
 
     elif fase == "f2_tematicas":
         grupos.update(
@@ -235,11 +257,31 @@ def iniciar_timer_de_sesion(sesion):
     ])
 
 
+CLAVES_SESSION_GRUPO = [
+    "grupo_id",
+    "sesion_id",
+    "ranking_flags_reseteados",
+    "modo_profesor",
+    "modo_conocidos",
+]
+
+
+def limpiar_session_grupo(request):
+    """
+    Elimina de la sesión solo las claves del grupo/alumno, preservando
+    el login de profesor/admin (profesor_id, es_admin). Un flush total
+    aquí cerraba la sesión de staff en todas las pestañas y rompía,
+    por ejemplo, las herramientas DEV del panel de control.
+    """
+    for clave in CLAVES_SESSION_GRUPO:
+        request.session.pop(clave, None)
+
+
 def obtener_grupo_desde_session(request):
     grupo_id = request.session.get("grupo_id")
     sesion_id = request.session.get("sesion_id")
 
-    print("obtener_grupo_desde_session -> grupo_id:", grupo_id, "| sesion_id:", sesion_id)
+    logger.debug("obtener_grupo_desde_session -> grupo_id=%s sesion_id=%s", grupo_id, sesion_id)
 
     if not grupo_id or not sesion_id:
         return None
@@ -250,15 +292,15 @@ def obtener_grupo_desde_session(request):
             sesion_id=sesion_id,
         )
     except Grupo.DoesNotExist:
-        print("obtener_grupo_desde_session -> grupo no existe, flush session")
-        request.session.flush()
+        logger.debug("obtener_grupo_desde_session -> grupo no existe, limpiando claves de grupo")
+        limpiar_session_grupo(request)
         return None
 
-    print("obtener_grupo_desde_session -> grupo real:", grupo.idgrupo, "| nombre:", grupo.nombregrupo)
+    logger.debug("obtener_grupo_desde_session -> grupo=%s nombre=%s", grupo.idgrupo, grupo.nombregrupo)
     return grupo
 
 def salir_grupo(request):
-    request.session.flush()
+    limpiar_session_grupo(request)
     messages.success(request, "Sesión del grupo cerrada correctamente.")
     return redirect("registro")
 
@@ -283,6 +325,7 @@ def fase_anterior_automatica(fase_actual):
     return fase_actual
 
 @require_POST
+@requiere_staff
 def profesor_fase_anterior(request, sesion_id):
     sesion = get_object_or_404(Sesion, pk=sesion_id)
 
@@ -455,13 +498,13 @@ def tiempo_por_fase(sesion, fase):
     tiempos = {
         "f1_conocidos": getattr(sesion, "t_rompehielo", 10),
         "f1_pre_sopa": 0,
-        "f1_sopa": getattr(sesion, "t_diferencias", 60),
+        "f1_sopa": getattr(sesion, "t_diferencias", 240),
         "f1_ranking": 0,
 
         "f2_transicion": 0,
         "f2_tematicas": getattr(sesion, "t_tematicas", 120),
         "f2_transicion_empatia": 0,
-        "f2_bubblemap": getattr(sesion, "t_empatia", 10),
+        "f2_bubblemap": getattr(sesion, "t_empatia", 360),
         "f2_ranking": 0,
 
         "f3_transicion_creatividad": 0,
@@ -501,7 +544,18 @@ def calcular_segundos_restantes(sesion):
 
         # ===================== F4 PRESENTACION PITCH =====================
         if fase_vencida == "f4_presentacion_pitch":
+            ahora = timezone.now()
+            segundos_evaluacion = tiempo_por_fase(sesion, "f5_evaluacion_pitch")
+
             sesion.fase_actual = "f5_evaluacion_pitch"
+            sesion.segundos_restantes = segundos_evaluacion
+            sesion.timer_corriendo = segundos_evaluacion > 0
+            sesion.timer_inicio_at = ahora if sesion.timer_corriendo else None
+            sesion.timer_fin_at = (
+                ahora + timedelta(seconds=segundos_evaluacion)
+                if sesion.timer_corriendo else None
+            )
+
             sesion.save(update_fields=[
                 "fase_actual",
                 "timer_corriendo",
@@ -509,12 +563,11 @@ def calcular_segundos_restantes(sesion):
                 "timer_inicio_at",
                 "timer_fin_at",
             ])
-            return 0
+            return segundos_evaluacion
 
         # ===================== F2 TEMATICAS =====================
         fases_con_autoavance = {
             "f1_conocidos",
-            "f1_sopa",
             "f4_construccion_pitch",
         }
 
@@ -542,7 +595,9 @@ def calcular_segundos_restantes(sesion):
 
             for e in evaluaciones:
                 total = (e.claridad or 0) + (e.creatividad or 0) + (e.viabilidad or 0) + (e.equipo or 0) + (e.presentacion or 0)
-                gid = e.grupo_evaluado.id
+                # La PK de Grupo es idgrupo: usar .id lanzaba AttributeError
+                # (error 500 en el polling de estado_sesion al expirar la evaluación).
+                gid = e.grupo_evaluado_id
                 puntaje_recibido[gid] = puntaje_recibido.get(gid, 0) + total
 
             if puntaje_recibido:
@@ -608,7 +663,7 @@ def autoavanzar_si_todos_listos(sesion):
 
     elif fase_actual == "f1_ranking":
         if grupos.filter(listo_f6=True).count() == total:
-            nueva_fase = "mapa_f2_empatia"
+            nueva_fase = "f2_transicion"
 
     elif fase_actual == "f2_transicion":
         if grupos.filter(listo_f2=True).count() == total:
@@ -624,7 +679,7 @@ def autoavanzar_si_todos_listos(sesion):
 
     elif fase_actual == "f2_ranking":
         if grupos.filter(listo_f6=True).count() == total:
-            nueva_fase = "mapa_f3_creatividad"
+            nueva_fase = "f3_transicion_creatividad"
 
     elif fase_actual == "f3_transicion_creatividad":
         if grupos.filter(listo_f3=True).count() == total:
@@ -636,7 +691,7 @@ def autoavanzar_si_todos_listos(sesion):
 
     elif fase_actual == "f3_ranking":
         if grupos.filter(listo_f6=True).count() == total:
-            nueva_fase = "mapa_f4_final"
+            nueva_fase = "f4_transicion_comunicacion"
 
     elif fase_actual == "f4_transicion_comunicacion":
         if grupos.filter(listo_f4=True).count() == total:
@@ -698,11 +753,34 @@ def autoavanzar_si_todos_listos(sesion):
     sesion.timer_inicio_at = None
     sesion.timer_fin_at = None
 
-    if nueva_fase in {"f5_evaluacion_pitch"}:
+    # f2_tematicas ya no tiene compuerta de listos propia: la sincronización se
+    # hace en f2_transicion, así que el timer arranca en el mismo instante en
+    # que el último grupo confirma ahí. Mismo criterio que profesor_siguiente_fase.
+    # f2_bubblemap y f3_lego se agregan por el mismo motivo: la confirmación en
+    # su transición previa ya es la confirmación de entrar a la fase, no hace
+    # falta un segundo gate. f4_construccion_pitch NO se agrega acá: tiene su
+    # propio diálogo de EdEmy que debe leerse antes de que el tiempo corra, así
+    # que sigue el flujo clásico (inicio_fase_habilitado + iniciar-timer-inicio-fase).
+    if nueva_fase in {"f2_tematicas", "f5_evaluacion_pitch", "f2_bubblemap", "f3_lego"}:
         ahora = timezone.now()
         sesion.timer_corriendo = sesion.segundos_restantes > 0
         sesion.timer_inicio_at = ahora if sesion.timer_corriendo else None
         sesion.timer_fin_at = ahora + timedelta(seconds=sesion.segundos_restantes) if sesion.timer_corriendo else None
+
+    if nueva_fase == "f2_bubblemap":
+        # bubble_tokens_otorgados debe limpiarse cada vez que se entra a la fase
+        # (por ejemplo si el profesor retrocede y vuelve a avanzar), o
+        # otorgar_tokens_bubblemap la va a tratar como ya completada.
+        Grupo.objects.filter(sesion=sesion).update(
+            listo_f2=False,
+            bubble_tokens_otorgados=False,
+        )
+
+    if nueva_fase == "f3_lego":
+        Grupo.objects.filter(sesion=sesion).update(
+            listo_inicio_f3=False,
+            listo_f3=False,
+        )
 
     if nueva_fase in {"f1_ranking", "f2_ranking", "f3_ranking", "f6_ranking"}:
         Grupo.objects.filter(sesion=sesion).update(
@@ -801,11 +879,11 @@ def acceso_permitido(grupo, nombre_vista):
         "orden_presentacion_alumno": ["f4_orden_pitch"],
         "presentar_pitch": ["f4_presentacion_pitch"],
 
-        "transicionapoyo": ["f5_transicion_apoyo"],
         "peer_review": ["f5_evaluacion_pitch"],
         "mision_cumplida": ["f5_evaluacion_pitch"],
 
         "ranking": ["f1_ranking", "f2_ranking", "f3_ranking", "f6_ranking"],
+        "galeria_equipos": ["reflexion"],
         "reflexion": ["reflexion"],
     }
 
@@ -922,6 +1000,12 @@ def estado_presentacion_pitch(request, sesion_id):
 
 @require_POST
 def iniciar_presentacion_pitch(request, sesion_id):
+    """
+    La dispara el propio grupo que está presentando desde
+    presentar_pitch.html, así que NO lleva @requiere_staff: la
+    autorización se hace más abajo exigiendo que el grupo en sesión
+    sea exactamente sesion.grupo_presentando.
+    """
     sesion = get_object_or_404(Sesion, pk=sesion_id)
 
     grupo = obtener_grupo_desde_session(request)
@@ -976,6 +1060,7 @@ def iniciar_presentacion_pitch(request, sesion_id):
 
 
 @require_POST
+@requiere_staff
 def siguiente_grupo_pitch(request, sesion_id):
     sesion = get_object_or_404(Sesion, pk=sesion_id)
 
@@ -1012,16 +1097,102 @@ def siguiente_grupo_pitch(request, sesion_id):
 def estado_sesion(request, sesion_id):
     sesion = get_object_or_404(Sesion, pk=sesion_id)
 
-    if sesion.fase_actual == "f5_evaluacion_pitch" and evaluacion_actual_completa(sesion):
+    # Actualiza el cronómetro.
+    calcular_segundos_restantes(sesion)
+    sesion.refresh_from_db()
+
+    # En la sopa de letras, las fotografías determinan el avance
+    # al ranking. La comprobación se ejecuta aunque todavía quede tiempo,
+    # porque todos los grupos podrían terminar antes.
+    if sesion.fase_actual == "f1_sopa":
+        sincronizar_fotos_equipo_y_avanzar(sesion)
+        sesion.refresh_from_db()
+
+    if (
+        sesion.fase_actual == "f5_evaluacion_pitch"
+        and evaluacion_actual_completa(sesion)
+    ):
         avanzar_al_siguiente_pitch_o_ranking(sesion)
+        sesion.refresh_from_db()
 
     autoavanzar_si_todos_listos(sesion)
     sesion.refresh_from_db()
 
-    grupos = Grupo.objects.filter(sesion=sesion).order_by("idgrupo")
+    # Valor real del temporizador después de ejecutar todos los posibles
+    # cambios de estado anteriores.
+    segundos_restantes = calcular_segundos_restantes(sesion)
+    sesion.refresh_from_db()
+
+    grupos = list(
+        Grupo.objects
+        .filter(sesion=sesion)
+        .order_by("idgrupo")
+    )
+
+    total_grupos = len(grupos)
+
+    palabras_sopa_por_grupo = {
+        fila["grupo_id"]: fila["total"]
+        for fila in (
+            PalabraSopaEncontrada.objects
+            .filter(sesion=sesion)
+            .values("grupo_id")
+            .annotate(total=Count("pk"))
+        )
+    }
+
+    # Grupos que ya tienen su fotografía correctamente subida a Drive.
+    grupos_con_foto_temporal_ids = set(
+        FotoEquipo.objects
+        .filter(
+            sesion=sesion,
+            foto_temporal__isnull=False,
+        )
+        .exclude(
+            foto_temporal=""
+        )
+        .values_list(
+            "grupo_id",
+            flat=True,
+        )
+    )
+
+    grupos_con_foto_onedrive_ids = set(
+        FotoEquipo.objects
+        .filter(
+            sesion=sesion,
+            subida_onedrive=True,
+        )
+        .exclude(
+            onedrive_foto_id=""
+        )
+        .values_list(
+            "grupo_id",
+            flat=True,
+        )
+    )
+
+    grupos_con_foto_equipo_ids = (
+        grupos_con_foto_temporal_ids
+        |
+        grupos_con_foto_onedrive_ids
+    )
+
+    grupos_fotos_equipo = len(
+        grupos_con_foto_equipo_ids
+    )
+
+    todos_fotos_equipo = (
+        total_grupos > 0
+        and grupos_fotos_equipo >= total_grupos
+    )
 
     fase_actual = sesion.fase_actual
-    nombre_url = RUTA_POR_FASE.get(fase_actual, "pantalla_espera")
+    nombre_url = RUTA_POR_FASE.get(
+        fase_actual,
+        "pantalla_espera",
+    )
+
     if fase_actual == "f1_conocidos":
         modo = request.session.get("modo_conocidos")
 
@@ -1037,75 +1208,263 @@ def estado_sesion(request, sesion_id):
             "esProfesor": True,
             "id": g.idgrupo,
             "nombre": g.nombregrupo,
-           "tokens": g.tokensgrupo or 0,
-           "temaElegido": g.tema_elegido or "",
+            "tokens": g.tokensgrupo or 0,
+
+            "temaElegido": g.tema_elegido or "",
             "desafioNombre": g.desafio_nombre or "",
-            "desafioDescripcion": g.desafio_descripcion or "",
-            "desafioIdExterno": g.desafio_id_externo or "",
-            "bubbleTokensOtorgados": getattr(g, "bubble_tokens_otorgados", False),
+            "desafioDescripcion": (
+                g.desafio_descripcion or ""
+            ),
+            "desafioIdExterno": (
+                g.desafio_id_externo or ""
+            ),
+
+            "bubbleTokensOtorgados": getattr(
+                g,
+                "bubble_tokens_otorgados",
+                False,
+            ),
+
             "listoLobby": g.listo_lobby,
             "listoF1": g.listo_f1,
             "listoF2": g.listo_f2_desafio,
-            "listoF2Tematicas": g.listo_f2_tematicas,
-           "listoF2Generico": g.listo_f2,
-            "listoF2Empatia": getattr(g, "listo_f2_empatia", False),
+            "listoF2Tematicas": (
+                g.listo_f2_tematicas
+            ),
+            "listoF2Generico": g.listo_f2,
+            "listoF2Empatia": getattr(
+                g,
+                "listo_f2_empatia",
+                False,
+            ),
+
             "listoF3": g.listo_f3,
-            "listoInicioF3": getattr(g, "listo_inicio_f3", False),
-           "listoF3Lego": getattr(g, "listo_f3_lego", False),
-           "legoSinFoto": getattr(g, "lego_sin_foto", False),
-           "legoConFoto": bool(getattr(g, "foto_lego", None)) and getattr(g, "listo_f3_lego", False),
-           "listoF4": g.listo_f4,
-           "listoF4Orden": getattr(g, "listo_f4_orden", False),
-           "listoF5": getattr(g, "listo_f5", False),
-          "listoF6": getattr(g, "listo_f6", False),
+            "listoInicioF3": getattr(
+                g,
+                "listo_inicio_f3",
+                False,
+            ),
+            "listoF3Lego": getattr(
+                g,
+                "listo_f3_lego",
+                False,
+            ),
+
+            "legoSinFoto": getattr(
+                g,
+                "lego_sin_foto",
+                False,
+            ),
+            "legoConFoto": (
+                bool(getattr(g, "foto_lego", None))
+                and getattr(
+                    g,
+                    "listo_f3_lego",
+                    False,
+                )
+            ),
+
+            # Resultado individual de la sopa y fotografía final.
+            "sopaGanada": bool(
+                getattr(g, "sopa_ganada", False)
+            ),
+            "palabrasSopa": palabras_sopa_por_grupo.get(
+                g.idgrupo,
+                0,
+            ),
+            "fotoEquipoGuardada": (
+                g.idgrupo
+                in grupos_con_foto_equipo_ids
+            ),
+
+            "listoF4": g.listo_f4,
+            "listoF4Orden": getattr(
+                g,
+                "listo_f4_orden",
+                False,
+            ),
+            "listoF5": getattr(
+                g,
+                "listo_f5",
+                False,
+            ),
+            "listoF6": getattr(
+                g,
+                "listo_f6",
+                False,
+            ),
         }
         for g in grupos
-]
+    ]
 
-    total_grupos = len(grupos_data)
+    grupos_listos_lobby = sum(
+        1
+        for g in grupos_data
+        if g["listoLobby"]
+    )
+    todos_listos_lobby = (
+        total_grupos > 0
+        and grupos_listos_lobby == total_grupos
+    )
 
-    grupos_listos_lobby = sum(1 for g in grupos_data if g["listoLobby"])
-    todos_listos_lobby = total_grupos > 0 and grupos_listos_lobby == total_grupos
+    grupos_listos_f1 = sum(
+        1
+        for g in grupos_data
+        if g["listoF1"]
+    )
+    todos_listos_f1 = (
+        total_grupos > 0
+        and grupos_listos_f1 == total_grupos
+    )
 
-    grupos_listos_f1 = sum(1 for g in grupos_data if g["listoF1"])
-    todos_listos_f1 = total_grupos > 0 and grupos_listos_f1 == total_grupos
+    grupos_listos_f2_generico = sum(
+        1
+        for g in grupos_data
+        if g["listoF2Generico"]
+    )
+    todos_listos_f2_generico = (
+        total_grupos > 0
+        and grupos_listos_f2_generico
+        == total_grupos
+    )
 
-    grupos_listos_f2_generico = sum(1 for g in grupos_data if g["listoF2Generico"])
-    todos_listos_f2_generico = total_grupos > 0 and grupos_listos_f2_generico == total_grupos
+    grupos_listos_f2_tematicas = sum(
+        1
+        for g in grupos_data
+        if g["listoF2Tematicas"]
+    )
+    todos_listos_f2_tematicas = (
+        total_grupos > 0
+        and grupos_listos_f2_tematicas
+        == total_grupos
+    )
 
-    grupos_listos_f2_tematicas = sum(1 for g in grupos_data if g["listoF2Tematicas"])
-    todos_listos_f2_tematicas = total_grupos > 0 and grupos_listos_f2_tematicas == total_grupos
+    grupos_listos_f2 = sum(
+        1
+        for g in grupos_data
+        if g["listoF2"]
+    )
+    todos_listos_f2 = (
+        total_grupos > 0
+        and grupos_listos_f2 == total_grupos
+    )
 
-    grupos_listos_f2 = sum(1 for g in grupos_data if g["listoF2"])
-    todos_listos_f2 = total_grupos > 0 and grupos_listos_f2 == total_grupos
+    grupos_listos_f2_empatia = sum(
+        1
+        for g in grupos_data
+        if g["listoF2Empatia"]
+    )
+    todos_listos_f2_empatia = (
+        total_grupos > 0
+        and grupos_listos_f2_empatia
+        == total_grupos
+    )
 
-    grupos_listos_f2_empatia = sum(1 for g in grupos_data if g["listoF2Empatia"])
-    todos_listos_f2_empatia = total_grupos > 0 and grupos_listos_f2_empatia == total_grupos
+    grupos_listos_f3 = sum(
+        1
+        for g in grupos_data
+        if g["listoF3"]
+    )
+    todos_listos_f3 = (
+        total_grupos > 0
+        and grupos_listos_f3 == total_grupos
+    )
 
-    grupos_listos_f3 = sum(1 for g in grupos_data if g["listoF3"])
-    todos_listos_f3 = total_grupos > 0 and grupos_listos_f3 == total_grupos
-    grupos_listos_f3_lego = sum(1 for g in grupos_data if g["listoF3Lego"])
-    todos_listos_f3_lego = total_grupos > 0 and grupos_listos_f3_lego == total_grupos
+    grupos_listos_f3_lego = sum(
+        1
+        for g in grupos_data
+        if g["listoF3Lego"]
+    )
+    todos_listos_f3_lego = (
+        total_grupos > 0
+        and grupos_listos_f3_lego
+        == total_grupos
+    )
 
-    grupos_con_foto_lego = sum(1 for g in grupos_data if g["legoConFoto"])
-    grupos_sin_foto_lego = sum(1 for g in grupos_data if g["legoSinFoto"])
-    grupos_listos_f4 = sum(1 for g in grupos_data if g["listoF4"])
-    todos_listos_f4 = total_grupos > 0 and grupos_listos_f4 == total_grupos
-    grupos_listos_f4_orden = sum(1 for g in grupos_data if g["listoF4Orden"])
-    todos_listos_f4_orden = total_grupos > 0 and grupos_listos_f4_orden == total_grupos
+    grupos_con_foto_lego = sum(
+        1
+        for g in grupos_data
+        if g["legoConFoto"]
+    )
 
-    grupos_listos_f5 = sum(1 for g in grupos_data if g["listoF5"])
-    todos_listos_f5 = total_grupos > 0 and grupos_listos_f5 == total_grupos
+    grupos_sin_foto_lego = sum(
+        1
+        for g in grupos_data
+        if g["legoSinFoto"]
+    )
 
-    grupos_listos_f6 = sum(1 for g in grupos_data if g["listoF6"])
-    todos_listos_f6 = total_grupos > 0 and grupos_listos_f6 == total_grupos
+    grupos_listos_f4 = sum(
+        1
+        for g in grupos_data
+        if g["listoF4"]
+    )
+    todos_listos_f4 = (
+        total_grupos > 0
+        and grupos_listos_f4 == total_grupos
+    )
 
-    grupos_listos_ranking = Grupo.objects.filter(sesion=sesion, listo_ranking=True).count()
-    todos_listos_ranking = total_grupos > 0 and grupos_listos_ranking == total_grupos
-    total_inicio, listos_inicio, todos_inicio = contar_listos_inicio_fase(sesion, sesion.fase_actual)
+    grupos_listos_f4_orden = sum(
+        1
+        for g in grupos_data
+        if g["listoF4Orden"]
+    )
+    todos_listos_f4_orden = (
+        total_grupos > 0
+        and grupos_listos_f4_orden
+        == total_grupos
+    )
 
+    grupos_listos_f5 = sum(
+        1
+        for g in grupos_data
+        if g["listoF5"]
+    )
+    todos_listos_f5 = (
+        total_grupos > 0
+        and grupos_listos_f5 == total_grupos
+    )
+
+    grupos_listos_f6 = sum(
+        1
+        for g in grupos_data
+        if g["listoF6"]
+    )
+    todos_listos_f6 = (
+        total_grupos > 0
+        and grupos_listos_f6 == total_grupos
+    )
+
+    grupos_listos_ranking = (
+        Grupo.objects
+        .filter(
+            sesion=sesion,
+            listo_ranking=True,
+        )
+        .count()
+    )
+
+    todos_listos_ranking = (
+        total_grupos > 0
+        and grupos_listos_ranking
+        == total_grupos
+    )
+
+    total_inicio, listos_inicio, todos_inicio = (
+        contar_listos_inicio_fase(
+            sesion,
+            sesion.fase_actual,
+        )
+    )
+
+    sopa_tiempo_terminado = (
+        fase_actual == "f1_sopa"
+        and sesion.inicio_fase_habilitado
+        and not sesion.timer_corriendo
+        and segundos_restantes <= 0
+    )
 
     pitch_data = {}
+
     if fase_actual in {
         "f4_orden_pitch",
         "f4_presentacion_pitch",
@@ -1115,47 +1474,97 @@ def estado_sesion(request, sesion_id):
         "f3_ranking",
         "f6_ranking",
     }:
-        pitch_data = serializar_estado_pitch(sesion)
-
+        pitch_data = serializar_estado_pitch(
+            sesion
+        )
 
     data = {
         "sesionId": sesion.idsesion,
         "faseActual": fase_actual,
-        "faseEtiqueta": ETIQUETA_FASE.get(fase_actual, fase_actual),
+        "faseEtiqueta": ETIQUETA_FASE.get(
+            fase_actual,
+            fase_actual,
+        ),
         "rutaAlumno": reverse(nombre_url),
-        "timerCorriendo": sesion.timer_corriendo,
-        "segundosRestantes": calcular_segundos_restantes(sesion),
+
+        "timerCorriendo": (
+            sesion.timer_corriendo
+        ),
+        "segundosRestantes": segundos_restantes,
+        "sopaTiempoTerminado": sopa_tiempo_terminado,
 
         "totalGrupos": total_grupos,
         "grupos": grupos_data,
         "esProfesor": request.user.is_staff,
 
-        "gruposListosLobby": grupos_listos_lobby,
-        "todosListosLobby": todos_listos_lobby,
+        # Fotografías tomadas después de la sopa de letras.
+        "gruposFotosEquipo": (
+            grupos_fotos_equipo
+        ),
+        "todosFotosEquipo": (
+            todos_fotos_equipo
+        ),
+
+        "gruposListosLobby": (
+            grupos_listos_lobby
+        ),
+        "todosListosLobby": (
+            todos_listos_lobby
+        ),
 
         "gruposListosF1": grupos_listos_f1,
         "todosListosF1": todos_listos_f1,
 
-        "gruposListosF2Tematicas": grupos_listos_f2_tematicas,
-    "todosListosF2Tematicas": todos_listos_f2_tematicas,
-        "gruposListosF2Generico": grupos_listos_f2_generico,
-        "todosListosF2Generico": todos_listos_f2_generico,
-        "gruposListosF2Empatia": grupos_listos_f2_empatia,
-        "todosListosF2Empatia": todos_listos_f2_empatia,
+        "gruposListosF2Tematicas": (
+            grupos_listos_f2_tematicas
+        ),
+        "todosListosF2Tematicas": (
+            todos_listos_f2_tematicas
+        ),
+
+        "gruposListosF2Generico": (
+            grupos_listos_f2_generico
+        ),
+        "todosListosF2Generico": (
+            todos_listos_f2_generico
+        ),
+
+        "gruposListosF2Empatia": (
+            grupos_listos_f2_empatia
+        ),
+        "todosListosF2Empatia": (
+            todos_listos_f2_empatia
+        ),
+
         "gruposListosF2": grupos_listos_f2,
         "todosListosF2": todos_listos_f2,
 
-        "gruposListosF3Lego": grupos_listos_f3_lego,
-        "todosListosF3Lego": todos_listos_f3_lego,
-        "gruposConFotoLego": grupos_con_foto_lego,
-        "gruposSinFotoLego": grupos_sin_foto_lego,
+        "gruposListosF3Lego": (
+            grupos_listos_f3_lego
+        ),
+        "todosListosF3Lego": (
+            todos_listos_f3_lego
+        ),
+
+        "gruposConFotoLego": (
+            grupos_con_foto_lego
+        ),
+        "gruposSinFotoLego": (
+            grupos_sin_foto_lego
+        ),
+
         "gruposListosF3": grupos_listos_f3,
         "todosListosF3": todos_listos_f3,
 
         "gruposListosF4": grupos_listos_f4,
         "todosListosF4": todos_listos_f4,
-        "gruposListosF4Orden": grupos_listos_f4_orden,
-        "todosListosF4Orden": todos_listos_f4_orden,
+
+        "gruposListosF4Orden": (
+            grupos_listos_f4_orden
+        ),
+        "todosListosF4Orden": (
+            todos_listos_f4_orden
+        ),
 
         "gruposListosF5": grupos_listos_f5,
         "todosListosF5": todos_listos_f5,
@@ -1163,14 +1572,24 @@ def estado_sesion(request, sesion_id):
         "gruposListosF6": grupos_listos_f6,
         "todosListosF6": todos_listos_f6,
 
-        "gruposListosRanking": grupos_listos_ranking,
-        "todosListosRanking": todos_listos_ranking,
+        "gruposListosRanking": (
+            grupos_listos_ranking
+        ),
+        "todosListosRanking": (
+            todos_listos_ranking
+        ),
 
-        "inicioFaseHabilitado": sesion.inicio_fase_habilitado,
+        "inicioFaseHabilitado": (
+            sesion.inicio_fase_habilitado
+        ),
         "totalListosInicio": total_inicio,
         "listosInicio": listos_inicio,
         "todosListosInicio": todos_inicio,
-        "faseRequiereInicio": sesion.fase_actual in FASES_CON_INICIO_POR_ALUMNOS,
+
+        "faseRequiereInicio": (
+            sesion.fase_actual
+            in FASES_CON_INICIO_POR_ALUMNOS
+        ),
 
         **pitch_data,
     }
@@ -1434,6 +1853,7 @@ def desbloquear_desafio(request):
     return JsonResponse({"ok": True})
 
 @require_POST
+@requiere_staff
 def profesor_actualizar_estado(request, sesion_id):
     sesion = get_object_or_404(Sesion, pk=sesion_id)
     payload = json.loads(request.body or "{}")
@@ -1501,6 +1921,18 @@ def profesor_actualizar_estado(request, sesion_id):
         else:
             sesion.inicio_fase_habilitado = True
 
+            if nueva_fase == "f2_bubblemap":
+                Grupo.objects.filter(sesion=sesion).update(
+                    listo_f2=False,
+                    bubble_tokens_otorgados=False,
+                )
+
+            if nueva_fase == "f3_lego":
+                Grupo.objects.filter(sesion=sesion).update(
+                    listo_inicio_f3=False,
+                    listo_f3=False,
+                )
+
             if nueva_fase == "f5_evaluacion_pitch":
                 Grupo.objects.filter(sesion=sesion).update(
                     listo_ranking=False,
@@ -1554,14 +1986,32 @@ def profesor_actualizar_estado(request, sesion_id):
     })
 
 @require_POST
+@requiere_staff
 def dev_timer_10_segundos(request, sesion_id):
-    if not settings.DEBUG:
-        return JsonResponse({
-            "ok": False,
-            "error": "Esta función solo está disponible en modo desarrollo."
-        }, status=403)
+    """
+    Herramienta de prueba para dejar el temporizador
+    de la fase actual en 10 segundos.
 
-    sesion = get_object_or_404(Sesion, pk=sesion_id)
+    Solo está disponible cuando DEV_TOOLS_ENABLED=True
+    y para usuarios autorizados como staff/profesor.
+    """
+
+    if not settings.DEV_TOOLS_ENABLED:
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": (
+                    "Las herramientas DEV "
+                    "están deshabilitadas."
+                ),
+            },
+            status=403,
+        )
+
+    sesion = get_object_or_404(
+        Sesion,
+        pk=sesion_id,
+    )
 
     segundos = 10
     ahora = timezone.now()
@@ -1569,21 +2019,30 @@ def dev_timer_10_segundos(request, sesion_id):
     sesion.segundos_restantes = segundos
     sesion.timer_corriendo = True
     sesion.timer_inicio_at = ahora
-    sesion.timer_fin_at = ahora + timedelta(seconds=segundos)
-    sesion.save(update_fields=[
-        "segundos_restantes",
-        "timer_corriendo",
-        "timer_inicio_at",
-        "timer_fin_at",
-    ])
+    sesion.timer_fin_at = (
+        ahora
+        + timedelta(seconds=segundos)
+    )
 
-    return JsonResponse({
-        "ok": True,
-        "segundosRestantes": segundos,
-        "faseActual": sesion.fase_actual,
-    })
+    sesion.save(
+        update_fields=[
+            "segundos_restantes",
+            "timer_corriendo",
+            "timer_inicio_at",
+            "timer_fin_at",
+        ]
+    )
+
+    return JsonResponse(
+        {
+            "ok": True,
+            "segundosRestantes": segundos,
+            "faseActual": sesion.fase_actual,
+        }
+    )
 
 @require_POST
+@requiere_staff
 def profesor_siguiente_fase(request, sesion_id):
     sesion = get_object_or_404(Sesion, pk=sesion_id)
 
@@ -1615,11 +2074,23 @@ def profesor_siguiente_fase(request, sesion_id):
     sesion.timer_fin_at = None
 
 
-    if nueva_fase in {"f2_tematicas", "f5_evaluacion_pitch"}:
+    if nueva_fase in {"f2_tematicas", "f5_evaluacion_pitch", "f2_bubblemap", "f3_lego"}:
         ahora = timezone.now()
         sesion.timer_corriendo = sesion.segundos_restantes > 0
         sesion.timer_inicio_at = ahora if sesion.timer_corriendo else None
         sesion.timer_fin_at = ahora + timedelta(seconds=sesion.segundos_restantes) if sesion.timer_corriendo else None
+
+    if nueva_fase == "f2_bubblemap":
+        Grupo.objects.filter(sesion=sesion).update(
+            listo_f2=False,
+            bubble_tokens_otorgados=False,
+        )
+
+    if nueva_fase == "f3_lego":
+        Grupo.objects.filter(sesion=sesion).update(
+            listo_inicio_f3=False,
+            listo_f3=False,
+        )
 
     if nueva_fase == "f4_orden_pitch":
         Grupo.objects.filter(sesion=sesion).update(listo_f4_orden=False, orden_presentacion=None)
@@ -1655,7 +2126,13 @@ def profesor_siguiente_fase(request, sesion_id):
 
 @require_POST
 def marcar_listo_ranking(request, grupo_id):
-    grupo = get_object_or_404(Grupo, pk=grupo_id)
+    grupo = obtener_grupo_desde_session(request)
+
+    if not grupo:
+        return JsonResponse({"ok": False, "error": "No se pudo identificar tu grupo."}, status=403)
+
+    if grupo.idgrupo != grupo_id:
+        return JsonResponse({"ok": False, "error": "No puedes marcar listo a otro grupo."}, status=403)
 
     grupo.listo_ranking = True
     grupo.save(update_fields=["listo_ranking"])
@@ -1676,7 +2153,14 @@ def marcar_listo_ranking(request, grupo_id):
 
 @require_POST
 def marcar_grupo_listo(request, grupo_id):
-    grupo = get_object_or_404(Grupo, pk=grupo_id)
+    grupo = obtener_grupo_desde_session(request)
+
+    if not grupo:
+        return JsonResponse({"ok": False, "error": "No se pudo identificar tu grupo."}, status=403)
+
+    if grupo.idgrupo != grupo_id:
+        return JsonResponse({"ok": False, "error": "No puedes marcar listo a otro grupo."}, status=403)
+
     sesion = grupo.sesion
     fase_actual = sesion.fase_actual
 
@@ -1857,37 +2341,6 @@ def marcar_grupo_listo(request, grupo_id):
         })
 
     # ============================================================
-    # F2 — BUBBLE MAP
-    # ============================================================
-    if fase_actual == "f2_bubblemap" and fase_clave == "f2_bubblemap":
-        if not grupo.listo_f2:
-            grupo.listo_f2 = True
-            grupo.save(update_fields=["listo_f2"])
-
-        total = Grupo.objects.filter(sesion=sesion).count()
-        listos = Grupo.objects.filter(sesion=sesion, listo_f2=True).count()
-        todos = total > 0 and listos == total
-
-        if todos and not sesion.inicio_fase_habilitado:
-            sesion.inicio_fase_habilitado = True
-            sesion.save(update_fields=["inicio_fase_habilitado"])
-
-        return JsonResponse({
-            "ok": True,
-            "fase": fase_actual,
-            "faseActual": sesion.fase_actual,
-            "total": total,
-            "listos": listos,
-            "gruposListos": listos,
-            "totalGrupos": total,
-            "todos_listos": todos,
-            "gruposListosF2": listos,
-            "todosListosF2": todos,
-            "inicio_fase_habilitado": sesion.inicio_fase_habilitado,
-            "segundosRestantes": sesion.segundos_restantes,
-        })
-
-    # ============================================================
     # F3 — TRANSICIÓN CREATIVIDAD
     # ============================================================
     if fase_actual == "f3_transicion_creatividad" and fase_clave == "f3":
@@ -1910,37 +2363,6 @@ def marcar_grupo_listo(request, grupo_id):
             "todos_listos": todos,
             "gruposListosF3": listos,
             "todosListosF3": todos,
-        })
-
-    # ============================================================
-    # F3 — INICIO LEGO
-    # ============================================================
-    if fase_actual == "f3_lego" and fase_clave in ["inicio_f3", "f3_lego", "f3", None, ""]:
-        if not grupo.listo_inicio_f3:
-            grupo.listo_inicio_f3 = True
-            grupo.save(update_fields=["listo_inicio_f3"])
-
-        total = Grupo.objects.filter(sesion=sesion).count()
-        listos = Grupo.objects.filter(sesion=sesion, listo_inicio_f3=True).count()
-        todos = total > 0 and listos == total
-
-        if todos and not sesion.inicio_fase_habilitado:
-            sesion.inicio_fase_habilitado = True
-            sesion.save(update_fields=["inicio_fase_habilitado"])
-
-        return JsonResponse({
-            "ok": True,
-            "fase": fase_actual,
-            "faseActual": sesion.fase_actual,
-            "total": total,
-            "listos": listos,
-            "gruposListos": listos,
-            "totalGrupos": total,
-            "todos_listos": todos,
-            "gruposListosInicioF3": listos,
-            "todosListosInicioF3": todos,
-            "inicio_fase_habilitado": sesion.inicio_fase_habilitado,
-            "segundosRestantes": sesion.segundos_restantes,
         })
 
     # ============================================================
@@ -1970,6 +2392,8 @@ def marcar_grupo_listo(request, grupo_id):
 
     # ============================================================
     # F4 — INICIO CONSTRUCCIÓN PITCH
+    # Se dispara automáticamente cuando cada grupo termina de leer el
+    # diálogo de EdEmy en pitch.html (ya no hay botón "Listo" propio).
     # ============================================================
     if fase_actual == "f4_construccion_pitch" and fase_clave in ["f4_pitch", "f4_construccion_pitch", "f4", None, ""]:
         if not grupo.listo_f4:
@@ -2175,11 +2599,21 @@ def iniciar_timer_inicio_fase(request, sesion_id):
             "error": "La fase actual no usa inicio grupal."
         }, status=400)
 
+    # f2_tematicas se mantiene en FASES_CON_INICIO_POR_ALUMNOS solo para que
+    # siga corriendo reset_listos_inicio_fase (limpia listo_f2_desafio), pero
+    # ya no tiene compuerta de listos: la sincronización se hace en
+    # f2_transicion. Normalmente el timer ya viene corriendo desde
+    # autoavanzar_si_todos_listos; esto cubre el caso en que el profesor salte
+    # directo a la fase desde el panel.
     if not sesion.inicio_fase_habilitado:
-        return JsonResponse({
-            "ok": False,
-            "error": "La fase aún no está habilitada."
-        }, status=400)
+        if sesion.fase_actual == "f2_tematicas":
+            sesion.inicio_fase_habilitado = True
+            sesion.save(update_fields=["inicio_fase_habilitado"])
+        else:
+            return JsonResponse({
+                "ok": False,
+                "error": "La fase aún no está habilitada."
+            }, status=400)
 
     if not sesion.timer_corriendo:
         iniciar_timer_de_sesion(sesion)
@@ -2228,69 +2662,6 @@ def continuar_desde_mapa(request):
     return redirect(ruta_alumno_por_estado(grupo))
 
 @never_cache
-def habilidades_intro(request):
-    grupo = obtener_grupo_desde_session(request)
-
-    if not grupo:
-        return redirect("registro")
-
-    sesion = grupo.sesion
-    fase_actual = sesion.fase_actual
-
-    estado_mapa = {
-        "habilidad_activa": "trabajo en equipo",
-        "habilidades_completadas": [],
-        "ruta_continuar": reverse("continuar_desde_mapa"),
-        "texto_boton": "CONTINUAR A TRABAJO EN EQUIPO",
-        "titulo_mapa": "HABILIDADES DE MISIÓN",
-    }
-
-    if fase_actual in ["mapa_f2_empatia", "f2_transicion", "f2_tematicas", "f2_transicion_empatia", "f2_bubblemap", "f2_ranking"]:
-        estado_mapa = {
-            "habilidad_activa": "empatia",
-            "habilidades_completadas": ["trabajo en equipo"],
-            "ruta_continuar": reverse("continuar_desde_mapa"),
-            "texto_boton": "CONTINUAR A EMPATÍA",
-            "titulo_mapa": "HABILIDADES DE MISIÓN",
-        }
-
-    elif fase_actual in ["mapa_f3_creatividad", "f3_transicion_creatividad", "f3_lego", "f3_ranking"]:
-        estado_mapa = {
-            "habilidad_activa": "creatividad",
-            "habilidades_completadas": ["trabajo en equipo", "empatia"],
-            "ruta_continuar": reverse("continuar_desde_mapa"),
-            "texto_boton": "CONTINUAR A CREATIVIDAD",
-            "titulo_mapa": "HABILIDADES DE MISIÓN",
-        }
-
-    elif fase_actual in [
-        "mapa_f4_final",
-        "f4_transicion_comunicacion",
-        "f4_construccion_pitch",
-        "f4_orden_pitch",
-        "f4_presentacion_pitch",
-        "f5_evaluacion_pitch",
-        "f6_ranking",
-    ]:
-        estado_mapa = {
-            "habilidad_activa": "mision final",
-            "habilidades_completadas": ["trabajo en equipo", "empatia", "creatividad"],
-            "ruta_continuar": reverse("continuar_desde_mapa"),
-            "texto_boton": "CONTINUAR A MISIÓN FINAL",
-            "titulo_mapa": "MISIÓN FINAL",
-        }
-
-    return render(request, "habilidades_intro.html", {
-    "grupo": grupo,
-    "sesion": sesion,
-    "estado_mapa": estado_mapa,
-    "habilidades_completadas_json": json.dumps(
-        estado_mapa["habilidades_completadas"],
-        ensure_ascii=False
-    ),
-})
-
-@never_cache
 def pantalla_espera(request):
     grupo = obtener_grupo_desde_session(request)
     if not grupo:
@@ -2312,6 +2683,535 @@ def pantalla_inicio(request):
         return redirect("pantalla_espera")
     return render(request, "pantalla_inicio.html", {"grupo": grupo})
 
+def nombre_completo_alumno(alumno):
+    partes = [
+        alumno.nombrealumno,
+        alumno.apellidopaternoalumno,
+        alumno.apellidomaternoalumno,
+    ]
+
+    nombre = " ".join(
+        str(parte).strip()
+        for parte in partes
+        if parte and str(parte).strip()
+    )
+
+    return nombre or f"Alumno {alumno.idalumno}"
+
+
+def convertir_foto_equipo_a_jpeg(archivo):
+    """
+    Valida la imagen y la convierte a JPEG.
+
+    No se convierte a WebP.
+    """
+
+    tamanio_maximo = 15 * 1024 * 1024
+
+    if archivo.size > tamanio_maximo:
+        raise ValueError(
+            "La fotografía supera el máximo permitido de 15 MB."
+        )
+
+    contenido_original = archivo.read()
+
+    try:
+        with Image.open(io.BytesIO(contenido_original)) as imagen:
+            imagen = ImageOps.exif_transpose(imagen)
+
+            if imagen.mode != "RGB":
+                imagen = imagen.convert("RGB")
+
+            salida = io.BytesIO()
+
+            imagen.save(
+                salida,
+                format="JPEG",
+                quality=95,
+                optimize=True,
+            )
+
+            return salida.getvalue()
+
+    except UnidentifiedImageError as exc:
+        raise ValueError(
+            "El archivo recibido no es una imagen válida."
+        ) from exc
+
+    except OSError as exc:
+        raise ValueError(
+            "El formato de la fotografía no es compatible."
+        ) from exc
+
+
+def crear_txt_integrantes(
+    grupo,
+    integrantes,
+    fecha_captura,
+):
+    """
+    Genera el archivo TXT que acompañará a la fotografía.
+    """
+
+    lineas = [
+        "MISIÓN EMPRENDE",
+        "",
+        f"Sesión: {grupo.sesion.nombre}",
+        (
+            "Fecha de sesión: "
+            f"{fecha_captura.strftime('%d-%m-%Y')}"
+        ),
+        f"Grupo: {grupo.nombregrupo or 'Sin nombre'}",
+        f"ID interno del grupo: {grupo.idgrupo}",
+        "",
+        "Integrantes:",
+    ]
+
+    if integrantes:
+        for posicion, integrante in enumerate(
+            integrantes,
+            start=1,
+        ):
+            lineas.append(
+                f"{posicion}. {integrante['nombre']}"
+            )
+    else:
+        lineas.append(
+            "No se encontraron integrantes registrados."
+        )
+
+    lineas.extend([
+        "",
+        (
+            "Fotografía tomada: "
+            f"{fecha_captura.strftime('%d-%m-%Y %H:%M:%S')}"
+        ),
+    ])
+
+    return "\n".join(lineas).encode("utf-8")
+
+
+
+
+def sincronizar_fotos_equipo_y_avanzar(sesion):
+    """
+Avanza desde la sopa de letras hacia el ranking
+cuando todos los grupos tienen una fotografía
+guardada temporalmente.
+La subida a OneDrive ocurre en segundo plano.
+"""
+
+    with transaction.atomic():
+        sesion_bloqueada = (
+            Sesion.objects
+            .select_for_update()
+            .get(pk=sesion.pk)
+        )
+
+        total_grupos = (
+            Grupo.objects
+            .filter(sesion=sesion_bloqueada)
+            .count()
+        )
+
+        grupos_con_foto = (
+            FotoEquipo.objects
+            .filter(
+                sesion=sesion_bloqueada,
+                foto_temporal__isnull=False,
+            )
+            .exclude(
+                foto_temporal=""
+            )
+            .values("grupo_id")
+            .distinct()
+            .count()
+        )
+
+        todos_listos = (
+            total_grupos > 0
+            and grupos_con_foto >= total_grupos
+        )
+
+        if (
+            todos_listos
+            and sesion_bloqueada.fase_actual == "f1_sopa"
+        ):
+            Grupo.objects.filter(
+                sesion=sesion_bloqueada
+            ).update(
+                listo_f6=False,
+                listo_ranking=False,
+            )
+
+            sesion_bloqueada.fase_actual = "f1_ranking"
+            sesion_bloqueada.segundos_restantes = 0
+            sesion_bloqueada.timer_corriendo = False
+            sesion_bloqueada.timer_inicio_at = None
+            sesion_bloqueada.timer_fin_at = None
+            sesion_bloqueada.inicio_fase_habilitado = True
+
+            sesion_bloqueada.save(
+                update_fields=[
+                    "fase_actual",
+                    "segundos_restantes",
+                    "timer_corriendo",
+                    "timer_inicio_at",
+                    "timer_fin_at",
+                    "inicio_fase_habilitado",
+                ]
+            )
+
+        return {
+            "totalGrupos": total_grupos,
+            "gruposFotosEquipo": grupos_con_foto,
+            "todosFotosEquipo": todos_listos,
+            "faseActual": sesion_bloqueada.fase_actual,
+            "rutaAlumno": reverse(
+                RUTA_POR_FASE.get(
+                    sesion_bloqueada.fase_actual,
+                    "pantalla_espera",
+                )
+            ),
+        }
+
+@require_POST
+def guardar_foto_equipo(request):
+    """
+    Recibe una foto del grupo activo después de la sopa de letras.
+
+    La fotografía:
+    - se guarda temporalmente en el servidor;
+    - se envía a OneDrive en segundo plano mediante Celery;
+    - NO obliga al alumno a esperar la subida a OneDrive.
+
+    El grupo puede tomar la fotografía cuando:
+    - completó la sopa de letras; o
+    - se terminó el tiempo de la sopa.
+    """
+
+    grupo = obtener_grupo_desde_session(request)
+
+    if not grupo:
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": "No se encontró un grupo activo.",
+            },
+            status=401,
+        )
+
+    sesion = grupo.sesion
+
+    if not sesion:
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": "El grupo no tiene una sesión asociada.",
+            },
+            status=400,
+        )
+
+    # Actualiza el temporizador en el backend.
+    restantes = calcular_segundos_restantes(sesion)
+
+    sesion.refresh_from_db()
+    grupo.refresh_from_db()
+
+    if sesion.fase_actual != "f1_sopa":
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": (
+                    "La fotografía solo puede guardarse "
+                    "al finalizar la sopa de letras."
+                ),
+            },
+            status=409,
+        )
+
+    tiempo_terminado = (
+        sesion.inicio_fase_habilitado
+        and not sesion.timer_corriendo
+        and restantes <= 0
+    )
+
+    puede_tomar_foto = (
+        bool(grupo.sopa_ganada)
+        or tiempo_terminado
+    )
+
+    if not puede_tomar_foto:
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": (
+                    "La fotografía estará disponible cuando "
+                    "completen la sopa de letras o cuando "
+                    "termine el tiempo."
+                ),
+            },
+            status=409,
+        )
+
+    # ---------------------------------------------------------
+    # FOTO YA REGISTRADA
+    #
+    # Ya NO esperamos subida_drive=True.
+    # Basta con que la fotografía haya quedado guardada
+    # temporalmente en el servidor.
+    # ---------------------------------------------------------
+
+    registro_existente = (
+        FotoEquipo.objects
+        .filter(
+            grupo=grupo,
+            sesion=sesion,
+            foto_temporal__isnull=False,
+        )
+        .exclude(
+            foto_temporal=""
+        )
+        .first()
+    )
+
+    if registro_existente:
+        foto_url = reverse(
+            "foto_equipo_imagen",
+            args=[registro_existente.pk],
+        )
+
+        estado_fotos = (
+            sincronizar_fotos_equipo_y_avanzar(
+                sesion
+            )
+        )
+
+        return JsonResponse(
+            {
+                "ok": True,
+                "yaExistia": True,
+                "fotoUrl": foto_url,
+                "nombreArchivo": (
+                    registro_existente.nombre_archivo
+                ),
+                "gruposFotosEquipo": (
+                    estado_fotos["gruposFotosEquipo"]
+                ),
+                "totalGrupos": (
+                    estado_fotos["totalGrupos"]
+                ),
+                "todosFotosEquipo": (
+                    estado_fotos["todosFotosEquipo"]
+                ),
+                "faseActual": (
+                    estado_fotos["faseActual"]
+                ),
+                "rutaAlumno": (
+                    estado_fotos["rutaAlumno"]
+                ),
+                "respaldoOneDrive": (
+                    "completado"
+                    if registro_existente.subida_onedrive
+                    else "pendiente"
+                ),
+            }
+        )
+
+    # ---------------------------------------------------------
+    # RECIBIR FOTO
+    # ---------------------------------------------------------
+
+    archivo = request.FILES.get("foto_equipo")
+
+    if not archivo:
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": "No se recibió la fotografía.",
+            },
+            status=400,
+        )
+
+    # ---------------------------------------------------------
+    # CONVERTIR A JPEG
+    # ---------------------------------------------------------
+
+    try:
+        foto_jpeg = convertir_foto_equipo_a_jpeg(
+            archivo
+        )
+
+    except ValueError as exc:
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": str(exc),
+            },
+            status=400,
+        )
+
+    # ---------------------------------------------------------
+    # OBTENER INTEGRANTES
+    # ---------------------------------------------------------
+
+    alumnos = (
+        Alumno.objects
+        .filter(
+            sesion=sesion,
+            grupo=grupo,
+        )
+        .order_by(
+            "nombrealumno",
+            "apellidopaternoalumno",
+            "idalumno",
+        )
+    )
+
+    integrantes = [
+        {
+            "id": alumno.idalumno,
+            "nombre": nombre_completo_alumno(
+                alumno
+            ),
+        }
+        for alumno in alumnos
+    ]
+
+    fecha_captura = timezone.localtime(
+        timezone.now()
+    )
+
+    # ---------------------------------------------------------
+    # NOMBRE DE ARCHIVO
+    # ---------------------------------------------------------
+
+    nombre_grupo = nombre_seguro_onedrive(
+        grupo.nombregrupo or "Equipo"
+    )
+
+    nombre_base = (
+        f"{nombre_grupo} - Grupo {grupo.idgrupo}"
+    )
+
+    nombre_foto = f"{nombre_base}.jpg"
+
+    # ---------------------------------------------------------
+    # CREAR / ACTUALIZAR REGISTRO
+    # ---------------------------------------------------------
+
+    registro, _ = FotoEquipo.objects.get_or_create(
+        grupo=grupo,
+        defaults={
+            "sesion": sesion,
+        },
+    )
+
+    registro.sesion = sesion
+    registro.integrantes_snapshot = integrantes
+    registro.nombre_archivo = nombre_foto
+
+    # Estado de OneDrive.
+    registro.subida_onedrive = False
+    registro.error_onedrive = ""
+
+    # ---------------------------------------------------------
+    # BORRAR FOTO TEMPORAL ANTERIOR
+    # ---------------------------------------------------------
+
+    if registro.foto_temporal:
+        try:
+            registro.foto_temporal.delete(
+                save=False
+            )
+
+        except Exception:
+            logger.exception(
+                "No se pudo eliminar la foto "
+                "temporal anterior del grupo %s.",
+                grupo.idgrupo,
+            )
+
+    # ---------------------------------------------------------
+    # GUARDAR FOTO TEMPORAL
+    #
+    # Esta parte es rápida y ocurre antes de responder
+    # al navegador.
+    # ---------------------------------------------------------
+
+    registro.foto_temporal.save(
+        f"grupo_{grupo.idgrupo}.jpg",
+        ContentFile(foto_jpeg),
+        save=False,
+    )
+
+    registro.save()
+
+    # ---------------------------------------------------------
+    # SUBIR A ONEDRIVE EN SEGUNDO PLANO
+    #
+    # IMPORTANTE:
+    # Django NO espera que OneDrive termine.
+    #
+    # transaction.on_commit evita que Celery intente leer
+    # FotoEquipo antes de que la transacción esté confirmada.
+    # ---------------------------------------------------------
+
+    transaction.on_commit(
+        lambda foto_id=registro.pk: (
+            subir_foto_equipo_onedrive.delay(
+                foto_id
+            )
+        )
+    )
+
+    # ---------------------------------------------------------
+    # ACTUALIZAR AVANCE DEL JUEGO
+    #
+    # El avance ahora depende de que exista la foto temporal,
+    # NO de que OneDrive haya terminado.
+    # ---------------------------------------------------------
+
+    estado_fotos = (
+        sincronizar_fotos_equipo_y_avanzar(
+            sesion
+        )
+    )
+
+    # ---------------------------------------------------------
+    # RESPUESTA INMEDIATA
+    # ---------------------------------------------------------
+
+    return JsonResponse(
+        {
+            "ok": True,
+            "yaExistia": False,
+            "fotoUrl": reverse(
+                "foto_equipo_imagen",
+                args=[registro.pk],
+            ),
+            "nombreArchivo": nombre_foto,
+            "integrantes": integrantes,
+            "gruposFotosEquipo": (
+                estado_fotos["gruposFotosEquipo"]
+            ),
+            "totalGrupos": (
+                estado_fotos["totalGrupos"]
+            ),
+            "todosFotosEquipo": (
+                estado_fotos["todosFotosEquipo"]
+            ),
+            "faseActual": (
+                estado_fotos["faseActual"]
+            ),
+            "rutaAlumno": (
+                estado_fotos["rutaAlumno"]
+            ),
+
+            # OneDrive todavía puede estar trabajando.
+            "respaldoOneDrive": "pendiente",
+        }
+    )
 
 def trabajoenequipo(request):
     grupo = obtener_grupo_desde_session(request)
@@ -2418,6 +3318,13 @@ def lego(request):
 
 
 #NUEVO CIERRRE
+def favicon_view(request):
+    ruta = finders.find("images/favicon.ico")
+    if not ruta:
+        raise Http404("favicon no encontrado")
+    return FileResponse(open(ruta, "rb"), content_type="image/x-icon")
+
+
 def perfiles(request):
     return render(request, 'perfiles.html')
 
@@ -2467,16 +3374,29 @@ def registro(request):
         grupo.nombregrupo = nombre_grupo[:100]
         grupo.save(update_fields=["nombregrupo"])
 
+        # El flush + cycle_key protege contra fijación de sesión, pero
+        # borraba también el login de profesor/admin si el registro se
+        # hacía en el mismo navegador (caso típico en pruebas). Se
+        # preservan esas claves explícitamente.
+        profesor_id_previo = request.session.get("profesor_id")
+        es_admin_previo = request.session.get("es_admin")
+
         request.session.flush()
         request.session.cycle_key()
+
+        if profesor_id_previo:
+            request.session["profesor_id"] = profesor_id_previo
+        if es_admin_previo:
+            request.session["es_admin"] = es_admin_previo
+
         request.session["grupo_id"] = grupo.idgrupo
         request.session["sesion_id"] = grupo.sesion_id
         request.session["ranking_flags_reseteados"] = False
         request.session.modified = True
 
-        print(
-            f"registro -> codigo={codigo} | grupo={grupo.idgrupo} "
-            f"| nombre={grupo.nombregrupo} | sesion={grupo.sesion.idsesion if grupo.sesion else 'SIN SESION'}"
+        logger.debug(
+            "registro -> codigo=%s grupo=%s nombre=%s sesion=%s",
+            codigo, grupo.idgrupo, grupo.nombregrupo, grupo.sesion_id,
         )
 
         return redirect("bienvenida")
@@ -2500,131 +3420,710 @@ def promptconocidos(request):
         return redirect("pantalla_espera")
     return render(request, "promptconocidos.html", {"grupo": grupo})
 
+PREGUNTAS_BASE_FALLBACK = {
+    "desconocidos": (
+        "Cada integrante debe decir su nombre "
+        "y la carrera que estudia."
+    ),
+    "conocidos": (
+        "Cada integrante debe contar qué rol "
+        "suele asumir cuando trabajan juntos."
+    ),
+}
+
+
+PREGUNTAS_EXTRA_FALLBACK = {
+    "desconocidos": (
+        "¿Cuál es tu comida favorita?"
+    ),
+    "conocidos": (
+        "¿Qué experiencia anterior puede ayudar "
+        "al equipo durante esta misión?"
+    ),
+}
+
+
+def obtener_preguntas_rompehielo_grupo(
+    grupo,
+    tipo_equipo,
+):
+    """
+    Devuelve una pregunta base y una pregunta extra.
+
+    La pregunta extra queda guardada en el grupo para que:
+    - no cambie al recargar;
+    - todos sus integrantes vean la misma;
+    - cada grupo pueda recibir una diferente.
+    """
+
+    if tipo_equipo not in {
+        "conocidos",
+        "desconocidos",
+    }:
+        tipo_equipo = "desconocidos"
+
+    with transaction.atomic():
+        grupo_bloqueado = (
+            Grupo.objects
+            .select_for_update()
+            .select_related(
+                "pregunta_rompehielo_asignada"
+            )
+            .get(pk=grupo.pk)
+        )
+
+        campos_actualizados = []
+
+        if (
+            grupo_bloqueado.modo_conocidos
+            != tipo_equipo
+        ):
+            grupo_bloqueado.modo_conocidos = (
+                tipo_equipo
+            )
+
+            grupo_bloqueado.pregunta_rompehielo_asignada = (
+                None
+            )
+
+            campos_actualizados.extend([
+                "modo_conocidos",
+                "pregunta_rompehielo_asignada",
+            ])
+
+        pregunta_base_obj = (
+            PreguntaRompehielo.objects
+            .filter(
+                tipo_equipo=tipo_equipo,
+                tipo_pregunta="base",
+                activa=True,
+            )
+            .order_by(
+                "orden",
+                "idpregunta",
+            )
+            .first()
+        )
+
+        pregunta_extra_obj = (
+            grupo_bloqueado
+            .pregunta_rompehielo_asignada
+        )
+
+        asignacion_valida = (
+            pregunta_extra_obj is not None
+            and pregunta_extra_obj.tipo_equipo
+            == tipo_equipo
+            and pregunta_extra_obj.tipo_pregunta
+            == "pool"
+        )
+
+        if not asignacion_valida:
+            preguntas_disponibles = list(
+                PreguntaRompehielo.objects
+                .filter(
+                    tipo_equipo=tipo_equipo,
+                    tipo_pregunta="pool",
+                    activa=True,
+                )
+                .order_by(
+                    "orden",
+                    "idpregunta",
+                )
+            )
+
+            pregunta_extra_obj = (
+                random.choice(
+                    preguntas_disponibles
+                )
+                if preguntas_disponibles
+                else None
+            )
+
+            grupo_bloqueado.pregunta_rompehielo_asignada = (
+                pregunta_extra_obj
+            )
+
+            if (
+                "pregunta_rompehielo_asignada"
+                not in campos_actualizados
+            ):
+                campos_actualizados.append(
+                    "pregunta_rompehielo_asignada"
+                )
+
+        if campos_actualizados:
+            grupo_bloqueado.save(
+                update_fields=campos_actualizados
+            )
+
+    pregunta_base = (
+        pregunta_base_obj.texto
+        if pregunta_base_obj
+        else PREGUNTAS_BASE_FALLBACK[
+            tipo_equipo
+        ]
+    )
+
+    pregunta_extra = (
+        pregunta_extra_obj.texto
+        if pregunta_extra_obj
+        else PREGUNTAS_EXTRA_FALLBACK[
+            tipo_equipo
+        ]
+    )
+
+    return pregunta_base, pregunta_extra
+
 def conocidos(request):
+    """
+    Actividad para integrantes que no se conocen.
+    Todos los integrantes del grupo reciben la misma
+    pregunta base y la misma pregunta adicional.
+    """
+
     grupo = obtener_grupo_desde_session(request)
+
     if not grupo:
         return redirect("registro")
-    if not acceso_permitido(grupo, "conocidos"):
+
+    if not acceso_permitido(
+        grupo,
+        "conocidos",
+    ):
         return redirect("pantalla_espera")
-    return render(request, "conocidos.html", {"grupo": grupo})
+
+    pregunta_base, pregunta_extra = (
+        obtener_preguntas_rompehielo_grupo(
+            grupo,
+            "desconocidos",
+        )
+    )
+
+    return render(
+        request,
+        "conocidos.html",
+        {
+            "grupo": grupo,
+            "modo_rapido": False,
+            "pregunta_base": pregunta_base,
+            "pregunta_extra": pregunta_extra,
+        },
+    )
+
+
+def conocidos_rapido(request):
+    """
+    Actividad para integrantes que ya se conocen.
+    Todos los integrantes del grupo reciben la misma
+    pregunta base y la misma pregunta adicional.
+    """
+
+    grupo = obtener_grupo_desde_session(request)
+
+    if not grupo:
+        return redirect("registro")
+
+    if not acceso_permitido(
+        grupo,
+        "conocidos_rapido",
+    ):
+        return redirect("pantalla_espera")
+
+    pregunta_base, pregunta_extra = (
+        obtener_preguntas_rompehielo_grupo(
+            grupo,
+            "conocidos",
+        )
+    )
+
+    return render(
+        request,
+        "conocidos.html",
+        {
+            "grupo": grupo,
+            "modo_rapido": True,
+            "pregunta_base": pregunta_base,
+            "pregunta_extra": pregunta_extra,
+        },
+    )
 
 def minijuego1(request):
-    grupo = obtener_grupo_desde_session(request)
+    grupo = obtener_grupo_desde_session(
+        request
+    )
+
     if not grupo:
         return redirect("registro")
-    if not acceso_permitido(grupo, "minijuego1"):
+
+    if not acceso_permitido(
+        grupo,
+        "minijuego1",
+    ):
         return redirect("pantalla_espera")
-    return render(request, "minijuego1.html", {
-        "grupo": grupo,
-        "sopa_ganada": bool(grupo.sopa_ganada),
+
+    foto_equipo_guardada = (
+        FotoEquipo.objects
+        .filter(
+            grupo=grupo,
+            sesion=grupo.sesion,
+            foto_temporal__isnull=False,
+        )
+        .exclude(
+            foto_temporal=""
+        )
+        .exists()
+    )
+
+    palabras_encontradas = (
+        PalabraSopaEncontrada.objects
+        .filter(
+            grupo=grupo,
+            sesion=grupo.sesion,
+        )
+        .count()
+    )
+
+    return render(
+        request,
+        "minijuego1.html",
+        {
+            "grupo": grupo,
+            "sopa_ganada": bool(
+                grupo.sopa_ganada
+            ),
+            "foto_equipo_guardada": (
+                foto_equipo_guardada
+            ),
+            "palabras_encontradas": (
+                palabras_encontradas
+            ),
+        },
+    )
+
+@requiere_admin
+def admin_preguntas_rompehielo(request):
+    if request.method == "POST":
+        idpregunta = request.POST.get("idpregunta")
+
+        tipo_equipo = request.POST.get(
+            "tipo_equipo",
+            "desconocidos",
+        )
+
+        tipo_pregunta = request.POST.get(
+            "tipo_pregunta",
+            "pool",
+        )
+
+        texto = request.POST.get(
+            "texto",
+            "",
+        ).strip()
+
+        orden = request.POST.get("orden") or 0
+        activa = request.POST.get("activa") == "on"
+
+        if tipo_equipo not in {
+            "desconocidos",
+            "conocidos",
+        }:
+            messages.error(
+                request,
+                "Tipo de equipo inválido.",
+            )
+            return redirect(
+                "admin_preguntas_rompehielo"
+            )
+
+        if tipo_pregunta not in {
+            "base",
+            "pool",
+        }:
+            messages.error(
+                request,
+                "Función de pregunta inválida.",
+            )
+            return redirect(
+                "admin_preguntas_rompehielo"
+            )
+
+        if not texto:
+            messages.error(
+                request,
+                "La pregunta no puede estar vacía.",
+            )
+            return redirect(
+                "admin_preguntas_rompehielo"
+            )
+
+        try:
+            orden = max(int(orden), 0)
+        except (TypeError, ValueError):
+            orden = 0
+
+        with transaction.atomic():
+            pregunta = None
+            tipo_equipo_anterior = None
+            tipo_pregunta_anterior = None
+
+            if idpregunta:
+                pregunta = get_object_or_404(
+                    PreguntaRompehielo,
+                    idpregunta=idpregunta,
+                )
+
+                tipo_equipo_anterior = (
+                    pregunta.tipo_equipo
+                )
+                tipo_pregunta_anterior = (
+                    pregunta.tipo_pregunta
+                )
+
+            # Solo puede existir una pregunta base
+            # activa por cada modalidad.
+            if (
+                tipo_pregunta == "base"
+                and activa
+            ):
+                otras_preguntas_base = (
+                    PreguntaRompehielo.objects
+                    .filter(
+                        tipo_equipo=tipo_equipo,
+                        tipo_pregunta="base",
+                        activa=True,
+                    )
+                )
+
+                if pregunta:
+                    otras_preguntas_base = (
+                        otras_preguntas_base.exclude(
+                            pk=pregunta.pk
+                        )
+                    )
+
+                otras_preguntas_base.update(
+                    activa=False
+                )
+
+            if pregunta:
+                pregunta.tipo_equipo = tipo_equipo
+                pregunta.tipo_pregunta = (
+                    tipo_pregunta
+                )
+                pregunta.texto = texto
+                pregunta.orden = orden
+                pregunta.activa = activa
+
+                pregunta.save()
+
+                cambio_modalidad = (
+                    tipo_equipo_anterior
+                    != tipo_equipo
+                )
+                cambio_funcion = (
+                    tipo_pregunta_anterior
+                    != tipo_pregunta
+                )
+
+                # Limpia las asignaciones si la pregunta
+                # ya no puede usarse como pregunta del pool.
+                if (
+                    not activa
+                    or tipo_pregunta != "pool"
+                    or cambio_modalidad
+                    or cambio_funcion
+                ):
+                    pregunta.grupos_asignados.update(
+                        pregunta_rompehielo_asignada=None
+                    )
+
+                messages.success(
+                    request,
+                    "Pregunta actualizada correctamente.",
+                )
+
+            else:
+                PreguntaRompehielo.objects.create(
+                    tipo_equipo=tipo_equipo,
+                    tipo_pregunta=tipo_pregunta,
+                    texto=texto,
+                    orden=orden,
+                    activa=activa,
+                )
+
+                messages.success(
+                    request,
+                    "Pregunta creada correctamente.",
+                )
+
+        return redirect(
+            "admin_preguntas_rompehielo"
+        )
+
+    preguntas_desconocidos = (
+        PreguntaRompehielo.objects
+        .filter(
+            tipo_equipo="desconocidos"
+        )
+        .order_by(
+            "tipo_pregunta",
+            "orden",
+            "idpregunta",
+        )
+    )
+
+    preguntas_conocidos = (
+        PreguntaRompehielo.objects
+        .filter(
+            tipo_equipo="conocidos"
+        )
+        .order_by(
+            "tipo_pregunta",
+            "orden",
+            "idpregunta",
+        )
+    )
+
+    return render(
+        request,
+        "admin_preguntas_rompehielo.html",
+        {
+            "preguntas_desconocidos": (
+                preguntas_desconocidos
+            ),
+            "preguntas_conocidos": (
+                preguntas_conocidos
+            ),
+            "pregunta_editando": None,
+        },
+    )
+
+
+@requiere_admin
+def admin_preguntas_rompehielo_editar(request, idpregunta):
+    pregunta_editando = get_object_or_404(PreguntaRompehielo, idpregunta=idpregunta)
+
+    preguntas_desconocidos = PreguntaRompehielo.objects.filter(
+        tipo_equipo="desconocidos"
+    ).order_by("orden", "idpregunta")
+
+    preguntas_conocidos = PreguntaRompehielo.objects.filter(
+        tipo_equipo="conocidos"
+    ).order_by("orden", "idpregunta")
+
+    return render(request, "admin_preguntas_rompehielo.html", {
+        "preguntas_desconocidos": preguntas_desconocidos,
+        "preguntas_conocidos": preguntas_conocidos,
+        "pregunta_editando": pregunta_editando,
     })
+
+
+@requiere_admin
+def admin_preguntas_rompehielo_toggle(request, idpregunta):
+    pregunta = get_object_or_404(PreguntaRompehielo, idpregunta=idpregunta)
+
+    if request.method == "POST":
+        pregunta.activa = not pregunta.activa
+        pregunta.save()
+        messages.success(request, "Estado de la pregunta actualizado.")
+
+    return redirect("admin_preguntas_rompehielo")
+
+
+@requiere_admin
+def admin_preguntas_rompehielo_eliminar(request, idpregunta):
+    pregunta = get_object_or_404(PreguntaRompehielo, idpregunta=idpregunta)
+
+    if request.method == "POST":
+        pregunta.delete()
+        messages.success(request, "Pregunta eliminada correctamente.")
+
+    return redirect("admin_preguntas_rompehielo")
 
 @require_POST
 def sopa_completada(request):
     grupo = obtener_grupo_desde_session(request)
 
     if not grupo:
-        return JsonResponse({
-            "ok": False,
-            "error": "No se pudo identificar tu grupo."
-        }, status=403)
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": "No se pudo identificar tu grupo.",
+            },
+            status=403,
+        )
 
     with transaction.atomic():
-        grupo = Grupo.objects.select_for_update().get(pk=grupo.pk)
-        sesion = Sesion.objects.select_for_update().get(pk=grupo.sesion_id)
+        grupo = (
+            Grupo.objects
+            .select_for_update()
+            .get(pk=grupo.pk)
+        )
+
+        sesion = (
+            Sesion.objects
+            .select_for_update()
+            .get(pk=grupo.sesion_id)
+        )
+
+        if sesion.fase_actual != "f1_sopa":
+            return JsonResponse(
+                {
+                    "ok": False,
+                    "error": (
+                        "La sesión ya no está en la "
+                        "sopa de letras."
+                    ),
+                },
+                status=409,
+            )
+
+        palabras_encontradas = (
+            PalabraSopaEncontrada.objects
+            .filter(
+                sesion=sesion,
+                grupo=grupo,
+            )
+            .count()
+        )
+
+        foto_guardada = (
+            FotoEquipo.objects
+            .filter(
+                grupo=grupo,
+               sesion=sesion,
+                foto_temporal__isnull=False,
+            )
+            .exclude(
+                foto_temporal=""
+            )
+            .exists()
+        )
 
         if grupo.sopa_ganada:
-            return JsonResponse({
-                "ok": True,
-                "ya_completada": True,
-                "bonus_otorgado": 0,
-                "primer_equipo": False,
-                "todos_terminaron": False,
-                "ranking_disparado": False,
-                "faseActual": sesion.fase_actual,
-                "rutaAlumno": reverse("minijuego1"),
-                "sopa_tiempo_segundos": grupo.sopa_tiempo_segundos,
-            })
+            return JsonResponse(
+                {
+                    "ok": True,
+                    "ya_completada": True,
+                    "bonus_otorgado": 0,
+                    "primer_equipo": False,
+                    "todos_terminaron": False,
+                    "ranking_disparado": False,
+                    "faseActual": sesion.fase_actual,
+                    "rutaAlumno": reverse("minijuego1"),
+                    "sopa_tiempo_segundos": (
+                        grupo.sopa_tiempo_segundos
+                    ),
+                    "palabrasEncontradas": (
+                        palabras_encontradas
+                    ),
+                    "tokensPorPalabras": (
+                        palabras_encontradas
+                    ),
+                    "fotoEquipoGuardada": foto_guardada,
+                }
+            )
 
-        ya_habia_otro = Grupo.objects.select_for_update().filter(
-            sesion=sesion,
-            sopa_ganada=True
-        ).exclude(pk=grupo.pk).exists()
+        ya_habia_otro = (
+            Grupo.objects
+            .select_for_update()
+            .filter(
+                sesion=sesion,
+                sopa_ganada=True,
+            )
+            .exclude(pk=grupo.pk)
+            .exists()
+        )
 
         primer_equipo = not ya_habia_otro
-
-        # Regla:
-        # - Primer equipo: 5 tokens
-        # - Equipos siguientes: 3 tokens
         bonus = 5 if primer_equipo else 3
 
         ahora = timezone.now()
-
-        # Tiempo usado desde que comenzó realmente el timer de la fase.
-        # Si por alguna razón no existe timer_inicio_at, se guarda None.
         tiempo_segundos = None
 
         if sesion.timer_inicio_at:
-            tiempo_segundos = int((ahora - sesion.timer_inicio_at).total_seconds())
-            tiempo_segundos = max(tiempo_segundos, 0)
+            tiempo_segundos = int(
+                (
+                    ahora
+                    - sesion.timer_inicio_at
+                ).total_seconds()
+            )
+            tiempo_segundos = max(
+                tiempo_segundos,
+                0,
+            )
 
-        grupo.tokensgrupo = (grupo.tokensgrupo or 0) + bonus
+        grupo.tokensgrupo = (
+            grupo.tokensgrupo or 0
+        ) + bonus
+
         grupo.sopa_ganada = True
         grupo.sopa_tiempo_segundos = tiempo_segundos
         grupo.sopa_completada_en = ahora
 
-        grupo.save(update_fields=[
-            "tokensgrupo",
-            "sopa_ganada",
-            "sopa_tiempo_segundos",
-            "sopa_completada_en",
-        ])
+        grupo.save(
+            update_fields=[
+                "tokensgrupo",
+                "sopa_ganada",
+                "sopa_tiempo_segundos",
+                "sopa_completada_en",
+            ]
+        )
 
-        total_grupos = Grupo.objects.filter(sesion=sesion).count()
-        grupos_terminados = Grupo.objects.filter(
-            sesion=sesion,
-            sopa_ganada=True
-        ).count()
+        total_grupos = (
+            Grupo.objects
+            .filter(sesion=sesion)
+            .count()
+        )
 
-        todos_terminaron = total_grupos > 0 and grupos_terminados == total_grupos
-        ranking_disparado = False
-
-        if todos_terminaron:
-            sesion.fase_actual = "f1_ranking"
-            sesion.segundos_restantes = 0
-            sesion.timer_corriendo = False
-            sesion.timer_inicio_at = None
-            sesion.timer_fin_at = None
-            sesion.inicio_fase_habilitado = True
-
-            sesion.save(update_fields=[
-                "fase_actual",
-                "segundos_restantes",
-                "timer_corriendo",
-                "timer_inicio_at",
-                "timer_fin_at",
-                "inicio_fase_habilitado",
-            ])
-
-            Grupo.objects.filter(sesion=sesion).update(
-                listo_f6=False,
-                listo_ranking=False,
+        grupos_terminados = (
+            Grupo.objects
+            .filter(
+                sesion=sesion,
+                sopa_ganada=True,
             )
+            .count()
+        )
 
-            ranking_disparado = True
+        todos_terminaron = (
+            total_grupos > 0
+            and grupos_terminados == total_grupos
+        )
 
-    return JsonResponse({
-        "ok": True,
-        "bonus_otorgado": bonus,
-        "primer_equipo": primer_equipo,
-        "todos_terminaron": todos_terminaron,
-        "ranking_disparado": ranking_disparado,
-        "gruposTerminados": grupos_terminados,
-        "totalGrupos": total_grupos,
-        "faseActual": sesion.fase_actual,
-        "rutaAlumno": reverse("ranking") if ranking_disparado else reverse("minijuego1"),
-        "sopa_tiempo_segundos": tiempo_segundos,
-    })
+    return JsonResponse(
+        {
+            "ok": True,
+            "ya_completada": False,
+            "bonus_otorgado": bonus,
+            "primer_equipo": primer_equipo,
+            "todos_terminaron": todos_terminaron,
+
+            # El ranking ahora depende de las fotos.
+            "ranking_disparado": False,
+
+            "gruposTerminados": grupos_terminados,
+            "totalGrupos": total_grupos,
+            "faseActual": sesion.fase_actual,
+            "rutaAlumno": reverse("minijuego1"),
+
+            "sopa_tiempo_segundos": (
+                tiempo_segundos
+            ),
+
+            "palabrasEncontradas": (
+                palabras_encontradas
+            ),
+            "tokensPorPalabras": (
+                palabras_encontradas
+            ),
+            "tokensGanadosSopa": (
+                palabras_encontradas + bonus
+            ),
+
+            "fotoEquipoGuardada": False,
+        }
+    )
 
 @require_POST
 def registrar_palabra_sopa(request):
@@ -2649,22 +4148,30 @@ def registrar_palabra_sopa(request):
         )
 
         if creada:
-            Grupo.objects.filter(pk=grupo.pk).update(tokensgrupo=F("tokensgrupo") + 1)
+            # Coalesce evita que un tokensgrupo NULL deje la suma en NULL.
+            Grupo.objects.filter(pk=grupo.pk).update(
+                tokensgrupo=Coalesce(F("tokensgrupo"), 0) + 1
+            )
 
     return JsonResponse({
         "ok": True,
         "nueva": creada,
     })
 
+@requiere_staff
 def dashboardprofesor(request):
-    profesor = Profesor.objects.first()
+    profesor = profesor_autenticado(request)
     sesion = None
 
     if profesor:
         sesion = Sesion.objects.filter(profesor=profesor).order_by("-fecha_creacion").first()
+    elif es_admin(request):
+        # El administrador puede supervisar la sesión más reciente.
+        sesion = Sesion.objects.order_by("-fecha_creacion").first()
 
-    return render(request, "dashboardprofesor.html", {"sesion": sesion})
+    return render(request, "dashboardprofesor.html", {"sesion": sesion, "profesor": profesor})
 
+@requiere_staff
 def control_sesion(request, sesion_id):
     sesion = get_object_or_404(Sesion, pk=sesion_id)
     grupos = Grupo.objects.filter(sesion=sesion).order_by("idgrupo")
@@ -2683,6 +4190,7 @@ def porcentaje(parte, total):
     return round((parte / total) * 100)
 
 
+@requiere_admin
 def dashboardadmin(request):
     total_grupos = Grupo.objects.count()
 
@@ -2738,7 +4246,7 @@ def dashboardadmin(request):
 
         sesiones_recientes.append({
             "nombre": f"Sesión {sesion.idsesion}",
-            "fase_actual": sesion.fase_actual,
+            "fase_actual": ETIQUETA_FASE.get(sesion.fase_actual, sesion.fase_actual),
             "total_grupos": total,
             "sopa": porcentaje(grupos.filter(sopa_ganada=True).count(), total),
             "pitch": porcentaje(
@@ -2751,11 +4259,23 @@ def dashboardadmin(request):
             ),
         })
 
+    # Un alumno "ha jugado" si quedó asignado a un grupo y su sesión avanzó
+    # más allá de la fase inicial (es decir, la partida efectivamente comenzó).
+    alumnos_registrados = Alumno.objects.count()
+    alumnos_jugado = (
+        Alumno.objects
+        .filter(grupo__isnull=False, sesion__isnull=False)
+        .exclude(sesion__fase_actual=FASES_ORDEN[0])
+        .count()
+    )
+
     kpis = {
         "profesores": Profesor.objects.count(),
         "grupos": total_grupos,
         "sesiones": Sesion.objects.count(),
         "desafios_activos": Desafio.objects.filter(activo=True).count(),
+        "alumnos_registrados": alumnos_registrados,
+        "alumnos_jugado": alumnos_jugado,
         "pct_sopa": porcentaje(grupos_sopa, total_grupos),
         "pct_pitch": porcentaje(grupos_pitch, total_grupos),
         "pct_lego": porcentaje(grupos_lego, total_grupos),
@@ -2769,6 +4289,7 @@ def dashboardadmin(request):
     })
 
 
+@requiere_admin
 def agregardesafio(request):
 
     admin = Idadministrador.objects.first()
@@ -2794,6 +4315,7 @@ def agregardesafio(request):
     
     return render(request, 'agregardesafio.html')
 
+@requiere_admin
 def lista_desafios(request):
     desafios = Desafio.objects.all().order_by('iddesafio')
     return render(request, 'listadesafios.html', {
@@ -2801,14 +4323,13 @@ def lista_desafios(request):
     })
 
 
+@require_POST
+@requiere_admin
 def eliminar_desafio(request, iddesafio):
     desafio = get_object_or_404(Desafio, pk=iddesafio)
 
-    if request.method == "POST":
-        desafio.delete()
-        messages.success(request, "Desafío eliminado correctamente 🗑️")
-        return redirect('lista_desafios')
-
+    desafio.delete()
+    messages.success(request, "Desafío eliminado correctamente 🗑️")
     return redirect('lista_desafios')
 
 def transicionempatia(request):
@@ -2913,6 +4434,7 @@ def asignar_alumnos_a_grupos(sesion: Sesion):
     return index_alumno
 
 
+@requiere_staff
 def registrargrupos(request):
     profesor = Profesor.objects.first()
 
@@ -2968,6 +4490,7 @@ def generar_codigo_acceso(longitud=6):
         if not Grupo.objects.filter(codigoacceso=codigo).exists():
             return codigo
 
+@requiere_staff
 def cargar_alumnos(request):
     profesor = Profesor.objects.first()
 
@@ -3061,36 +4584,52 @@ def cambiar_tematica(request):
     return redirect("tematicas")
 
 def elegir_modo_conocidos(request, modo):
-    grupo = obtener_grupo_desde_session(request)
+    grupo = obtener_grupo_desde_session(
+        request
+    )
+
     if not grupo:
         return redirect("registro")
 
-    if not acceso_permitido(grupo, "promptconocidos"):
+    if not acceso_permitido(
+        grupo,
+        "promptconocidos",
+    ):
         return redirect("pantalla_espera")
+
+    if modo not in {
+        "normal",
+        "rapido",
+    }:
+        return redirect("promptconocidos")
+
+    tipo_equipo = (
+        "conocidos"
+        if modo == "rapido"
+        else "desconocidos"
+    )
 
     request.session["modo_conocidos"] = modo
     request.session.modified = True
+
+    if grupo.modo_conocidos != tipo_equipo:
+        grupo.modo_conocidos = tipo_equipo
+        grupo.pregunta_rompehielo_asignada = None
+
+        grupo.save(
+            update_fields=[
+                "modo_conocidos",
+                "pregunta_rompehielo_asignada",
+            ]
+        )
 
     if modo == "rapido":
         return redirect("conocidos_rapido")
 
     return redirect("conocidos")
 
-
-def conocidos_rapido(request):
-    grupo = obtener_grupo_desde_session(request)
-    if not grupo:
-        return redirect("registro")
-
-    if not acceso_permitido(grupo, "conocidos_rapido"):
-        return redirect("pantalla_espera")
-
-    return render(request, "conocidos.html", {
-        "grupo": grupo,
-        "modo_rapido": True,
-    })
-
 @require_http_methods(["POST"])
+@requiere_staff
 def agregar_alumno_manual(request):
     """
     Agrega un alumno manualmente a la SESIÓN ACTIVA del profesor.
@@ -3427,6 +4966,7 @@ def guardar_pitch(request):
 
 
 @require_POST
+@requiere_staff
 def profesor_sortear_orden_pitch(request, sesion_id):
     sesion = get_object_or_404(Sesion, pk=sesion_id)
 
@@ -3485,6 +5025,7 @@ def presentar_pitch(request):
     })
 
 
+@requiere_staff
 def registraralumnos(request):
     return cargar_alumnos(request)
 
@@ -3527,7 +5068,13 @@ def issue_challenge_view(request, challenge_id):
         messages.error(request, "Selecciona un equipo objetivo.")
         return redirect("market")
 
-    grupo_receptor = get_object_or_404(Grupo, pk=target_team_id)
+    grupo_receptor = get_object_or_404(
+        Grupo, pk=target_team_id, sesion=grupo_emisor.sesion
+    )
+
+    if grupo_receptor.pk == grupo_emisor.pk:
+        messages.error(request, "No puedes retarte a ti mismo.")
+        return redirect("market")
 
     cost = int(reto.costoreto or 0)
 
@@ -3661,22 +5208,41 @@ def peer_review_view(request):
 
 
 
+@requiere_admin
 def registrarprofesor(request):
     if request.method == "POST":
-        email = request.POST.get("email")
-        facultad = request.POST.get("facultad")
+        email = (request.POST.get("email") or "").strip()
+        facultad = (request.POST.get("facultad") or "").strip()
+        clave = request.POST.get("clave") or ""
 
-        if email and facultad:
-            usuario = Usuario.objects.create(password="temp")
+        if email and facultad and clave:
+            if Profesor.objects.filter(emailprofesor__iexact=email).exists():
+                messages.error(request, "Ya existe un profesor con ese email.")
+                return redirect("registrarprofesor")
 
-            Profesor.objects.create(
+            from .auth import errores_de_clave
+            errores = errores_de_clave(clave)
+
+            if errores:
+                for error in errores:
+                    messages.error(request, error)
+                return redirect("registrarprofesor")
+
+            usuario = Usuario.objects.create(password="")
+
+            profesor = Profesor.objects.create(
                 usuario_idusuario=usuario,
                 emailprofesor=email,
                 facultad=facultad
             )
 
+            from .auth import asignar_clave_profesor
+            asignar_clave_profesor(profesor, clave)
+
             messages.success(request, "Profesor registrado correctamente.")
             return redirect("registrarprofesor")
+
+        messages.error(request, "Debes completar email, facultad y clave.")
 
     profesores = Profesor.objects.all().order_by("emailprofesor")
 
@@ -3685,6 +5251,7 @@ def registrarprofesor(request):
     })
 
 
+@requiere_admin
 def listar_profesores(request):
     profesores = Profesor.objects.all().order_by('-idprofesor')
     return render(request, 'listar_profesores.html', {'profesores': profesores})
@@ -3692,6 +5259,7 @@ def listar_profesores(request):
 
 
 @require_http_methods(["POST"])
+@requiere_staff
 def eliminar_alumno(request, idalumno):
     alumno = get_object_or_404(Alumno, idalumno=idalumno)
     try:
@@ -3704,20 +5272,282 @@ def eliminar_alumno(request, idalumno):
 
 def finalizar_mision(request):
     request.session.pop("grupo_id", None)
+    request.session.pop("sesion_id", None)
     return redirect("perfiles")
 
-def reflexion(request):
+@never_cache
+def galeria_equipos(request):
+    """
+    Pantalla previa a la reflexión final: muestra las fotos de equipo
+    que el admin eligió mostrar (selección global, vale para todas las
+    sesiones hasta que se cambie). No es una fase nueva del juego: usa
+    el mismo gate que "reflexion" (sesion.fase_actual == "reflexion").
+    """
+
     grupo = obtener_grupo_desde_session(request)
     if not grupo:
         return redirect("registro")
 
-    if grupo and grupo.sesion:
-        borrar_fotos_lego_sesion(grupo.sesion)    
-
-    if not acceso_permitido(grupo, "reflexion"):
+    if not acceso_permitido(grupo, "galeria_equipos"):
         return redirect("pantalla_espera")
 
-    return render(request, "reflexion.html", {"grupo": grupo})
+    fotos_equipo = (
+        FotoEquipo.objects
+        .filter(
+            subida_onedrive=True,
+            seleccionada_galeria=True,
+        )
+        .exclude(onedrive_foto_id__exact="")
+        .select_related("grupo")
+        .order_by("grupo__idgrupo")
+    )
+
+    # Mismo criterio que el KPI del panel admin: un alumno "ha jugado"
+    # si quedó asignado a un grupo y su sesión avanzó más allá de la
+    # fase inicial.
+    total_alumnos_jugado = (
+        Alumno.objects
+        .filter(grupo__isnull=False, sesion__isnull=False)
+        .exclude(sesion__fase_actual=FASES_ORDEN[0])
+        .count()
+    )
+
+    return render(request, "galeria_equipos.html", {
+        "grupo": grupo,
+        "fotos_equipo": fotos_equipo,
+        "total_alumnos_jugado": total_alumnos_jugado,
+    })
+
+
+def foto_equipo_imagen(request, foto_id):
+    """
+    Proxy de imágenes de las fotografías de equipo.
+
+    Mientras existe la copia temporal:
+    - se sirve directamente desde el servidor.
+
+    Cuando la copia temporal ya fue eliminada:
+    - se descarga la copia permanente desde OneDrive;
+    - se mantiene un cache temporal para evitar llamadas
+      innecesarias a Microsoft Graph.
+
+    Acceso:
+    - staff/admin; o
+    - alumno con grupo activo.
+    """
+
+    if (
+        not es_staff(request)
+        and not obtener_grupo_desde_session(request)
+    ):
+        raise Http404()
+
+    foto = (
+        FotoEquipo.objects
+        .filter(pk=foto_id)
+        .first()
+    )
+
+    if not foto:
+        raise Http404()
+
+    # =========================================================
+    # 1. COPIA TEMPORAL
+    # =========================================================
+    #
+    # Mientras la sesión sigue activa preferimos leer
+    # directamente del servidor.
+    #
+
+    if foto.foto_temporal:
+        try:
+            foto.foto_temporal.open("rb")
+
+            contenido = (
+                foto.foto_temporal.read()
+            )
+
+            foto.foto_temporal.close()
+
+            respuesta = HttpResponse(
+                contenido,
+                content_type="image/jpeg",
+            )
+
+            respuesta["Cache-Control"] = (
+                "private, max-age=300"
+            )
+
+            return respuesta
+
+        except Exception:
+            logger.exception(
+                "No se pudo leer la fotografía "
+                "temporal del grupo %s.",
+                foto.grupo_id,
+            )
+
+            # Si falla la copia temporal,
+            # intentamos recuperar desde OneDrive.
+            try:
+                foto.foto_temporal.close()
+            except Exception:
+                pass
+
+    # =========================================================
+    # 2. COPIA PERMANENTE EN ONEDRIVE
+    # =========================================================
+
+    if (
+        not foto.subida_onedrive
+        or not foto.onedrive_foto_id
+    ):
+        raise Http404()
+
+    clave_cache = (
+        f"foto_equipo_onedrive_"
+        f"{foto.pk}_"
+        f"{foto.onedrive_foto_id}"
+    )
+
+    contenido = cache.get(
+        clave_cache
+    )
+
+    if contenido is None:
+
+        try:
+            contenido = descargar_archivo_onedrive(
+                foto.onedrive_foto_id
+            )
+
+        except Exception:
+            logger.exception(
+                "No se pudo descargar desde "
+                "OneDrive la foto del grupo %s "
+                "(archivo %s).",
+                foto.grupo_id,
+                foto.onedrive_foto_id,
+            )
+
+            raise Http404()
+
+        # Cache durante una hora.
+        cache.set(
+            clave_cache,
+            contenido,
+            3600,
+        )
+
+    respuesta = HttpResponse(
+        contenido,
+        content_type="image/jpeg",
+    )
+
+    respuesta["Cache-Control"] = (
+        "private, max-age=3600"
+    )
+
+    return respuesta
+
+
+def borrar_fotos_equipo_temporales_sesion(sesion):
+    """
+    Elimina del servidor las copias temporales de las fotos
+    de equipo que ya tienen respaldo permanente confirmado
+    en OneDrive.
+
+    Nunca elimina archivos de OneDrive.
+    """
+
+    registros = (
+        FotoEquipo.objects
+        .filter(
+            sesion=sesion,
+            subida_onedrive=True,
+        )
+        .exclude(
+            onedrive_foto_id=""
+        )
+        .exclude(
+            foto_temporal=""
+        )
+    )
+
+    for registro in registros:
+
+        if not registro.foto_temporal:
+            continue
+
+        try:
+            registro.foto_temporal.delete(
+                save=False
+            )
+
+            registro.foto_temporal = None
+
+            registro.save(
+                update_fields=[
+                    "foto_temporal",
+                    "actualizada_en",
+                ]
+            )
+
+            logger.info(
+                "Foto temporal eliminada del grupo %s "
+                "después de respaldarse en OneDrive.",
+                registro.grupo_id,
+            )
+
+        except Exception:
+            logger.exception(
+                "No se pudo eliminar la foto temporal "
+                "del grupo %s.",
+                registro.grupo_id,
+            )
+
+def reflexion(request):
+    grupo = obtener_grupo_desde_session(request)
+
+    if not grupo:
+        return redirect("registro")
+
+    if not acceso_permitido(
+        grupo,
+        "reflexion",
+    ):
+        return redirect(
+            "pantalla_espera"
+        )
+
+    # Solo hacemos la limpieza después de comprobar
+    # que realmente estamos en la fase de Reflexión.
+    #
+    # De esta manera alguien no puede entrar manualmente
+    # a /reflexion/ antes de tiempo y provocar la limpieza.
+    if grupo.sesion:
+
+        # Limpieza existente de las fotos LEGO.
+        borrar_fotos_lego_sesion(
+            grupo.sesion
+        )
+
+        # Limpieza de fotos temporales de equipo.
+        #
+        # Solo se borran aquellas que ya tienen
+        # respaldo confirmado en OneDrive.
+        borrar_fotos_equipo_temporales_sesion(
+            grupo.sesion
+        )
+
+    return render(
+        request,
+        "reflexion.html",
+        {
+            "grupo": grupo,
+        },
+    )
+
 def leer_filas_archivo(archivo):
     """Lee un .xlsx (openpyxl) o .csv (csv nativo) y devuelve una lista de
     diccionarios {encabezado: valor}, usando '' para celdas vacias.
@@ -3813,17 +5643,35 @@ def crear_grupos_para_alumnos(sesion, alumnos, max_por_grupo=8, cantidad_grupos_
 
     return len(grupos)
 
+@requiere_staff
 def crear_sesion(request):
-    profesor = Profesor.objects.first()
+    # La sesión pertenece al profesor autenticado. El administrador puede
+    # crear sesiones para un profesor indicando su email en el formulario.
+    profesor = profesor_autenticado(request)
 
-    if not profesor:
-        messages.warning(request, "Primero debes registrar un profesor.")
-        return redirect("registrarprofesor")
+    contexto_base = {
+        "profesor_actual": profesor,
+        "es_admin_actual": es_admin(request) and profesor is None,
+    }
 
     if request.method == "POST":
         nombre = (request.POST.get("nombre") or "").strip()
         email_profesor = (request.POST.get("email_profesor") or "").strip()
         facultad = (request.POST.get("facultad") or "").strip()
+
+        if profesor is None:
+            # Admin sin identidad de profesor: resolver por email.
+            if not email_profesor:
+                messages.error(request, "Debes ingresar el correo del profesor dueño de la sesión.")
+                return render(request, "crear_sesion.html", contexto_base)
+
+            profesor = Profesor.objects.filter(
+                emailprofesor__iexact=email_profesor
+            ).first()
+
+            if not profesor:
+                messages.error(request, "No existe un profesor con ese correo. Regístralo primero.")
+                return render(request, "crear_sesion.html", contexto_base)
 
         modo_creacion = request.POST.get("modo_creacion", "recomendado")
         archivo = request.FILES.get("archivo_excel")
@@ -3833,34 +5681,22 @@ def crear_sesion(request):
 
         if not nombre:
             messages.error(request, "Debes darle un nombre a la sesión.")
-            return render(request, "crear_sesion.html")
-
-        if not email_profesor:
-            messages.error(request, "Debes ingresar el correo del profesor.")
-            return render(request, "crear_sesion.html")
-
-        if not facultad:
-            messages.error(request, "Debes seleccionar una facultad.")
-            return render(request, "crear_sesion.html")
+            return render(request, "crear_sesion.html", contexto_base)
 
         if not archivo:
             messages.error(request, "Debes subir el archivo de estudiantes.")
-            return render(request, "crear_sesion.html")
+            return render(request, "crear_sesion.html", contexto_base)
 
         try:
             df = leer_alumnos_desde_archivo(archivo)
 
             if not df:
                 messages.error(request, "El archivo no tiene estudiantes.")
-                return render(request, "crear_sesion.html")
+                return render(request, "crear_sesion.html", contexto_base)
 
             sesiones_creadas = []
 
             with transaction.atomic():
-
-                profesor.emailprofesor = email_profesor
-                profesor.facultad = facultad
-                profesor.save()
 
                 if modo_creacion == "dividir_dos":
                     cantidad_sesiones = 2
@@ -3918,23 +5754,27 @@ def crear_sesion(request):
                 messages.success(request, "Sesión creada correctamente.")
 
             return render(request, "crear_sesion.html", {
+                **contexto_base,
                 "sesiones_creadas": sesiones_creadas,
             })
 
         except Exception as e:
             messages.error(request, f"No se pudo procesar la sesión: {e}")
-            return render(request, "crear_sesion.html")
+            return render(request, "crear_sesion.html", contexto_base)
 
-    return render(request, "crear_sesion.html")
+    return render(request, "crear_sesion.html", contexto_base)
 
+@requiere_staff
 def listar_sesiones(request):
-    profesor = Profesor.objects.first()
+    profesor = profesor_autenticado(request)
 
-    if not profesor:
-        messages.warning(request, "Aún no hay profesores registrados.")
-        return redirect("registrarprofesor")
-
-    sesiones = Sesion.objects.filter(profesor=profesor).order_by("-fecha_creacion")
+    if profesor:
+        sesiones = Sesion.objects.filter(profesor=profesor).order_by("-fecha_creacion")
+    elif es_admin(request):
+        # El administrador supervisa todas las sesiones.
+        sesiones = Sesion.objects.select_related("profesor").order_by("-fecha_creacion")
+    else:
+        sesiones = Sesion.objects.none()
 
     sesiones_info = []
 
@@ -4049,6 +5889,7 @@ def mision_cumplida_view(request):
         "grupo": grupo,
     })
 
+@requiere_staff
 def preview_pantalla_profesor(request, sesion_id):
     sesion = get_object_or_404(Sesion, pk=sesion_id)
 
@@ -4073,11 +5914,10 @@ def preview_pantalla_profesor(request, sesion_id):
         "f4_orden_pitch": "orden_presentacion.html",
         "f4_presentacion_pitch": "presentar_pitch.html",
 
-        "f5_transicion_apoyo": "transicionapoyo.html",
         "f5_evaluacion_pitch": "peer_review.html",
 
         "f6_ranking": "ranking.html",
-        "reflexion": "reflexion.html",
+        "reflexion": "galeria_equipos.html",
     }
 
     template_name = plantilla_por_fase.get(sesion.fase_actual, "pantalla_espera_preview.html")
@@ -4098,6 +5938,7 @@ def preview_pantalla_profesor(request, sesion_id):
 
     return render(request, template_name, context)
 
+@requiere_admin
 def admin_desafios(request):
     if request.method == "POST":
         accion = request.POST.get("accion")
@@ -4190,6 +6031,7 @@ def admin_desafios(request):
 
 
 @require_POST
+@requiere_admin
 def eliminar_profesor(request, profesor_id):
     profesor = get_object_or_404(Profesor, idprofesor=profesor_id)
 
@@ -4218,15 +6060,76 @@ def eliminar_profesor(request, profesor_id):
 
 
 @require_POST
-def eliminar_profesor_forzado(request, profesor_id):
+@requiere_admin
+def restablecer_clave_profesor(request, profesor_id):
+    """El admin restablece la clave de un profesor ingresando una nueva.
+
+    La clave debe cumplir los mismos requisitos que en el registro:
+    mínimo 8 caracteres, con letras, números y símbolos. No se generan
+    claves aleatorias; en la base solo queda el hash.
+    """
+    from .auth import asignar_clave_profesor, errores_de_clave
+
     profesor = get_object_or_404(Profesor, idprofesor=profesor_id)
 
-    Alumno.objects.filter(profesor_idprofesor=profesor).delete()
-    Sesion.objects.filter(profesor=profesor).delete()
+    clave_nueva = request.POST.get("clave_nueva") or ""
 
-    profesor.delete()
+    if not clave_nueva:
+        messages.error(request, "Debes ingresar la clave nueva.")
+        return redirect("registrarprofesor")
 
-    messages.success(request, "Profesor y datos asociados eliminados correctamente.")
+    errores = errores_de_clave(clave_nueva)
+    if errores:
+        for error in errores:
+            messages.error(request, error)
+        return redirect("registrarprofesor")
+
+    asignar_clave_profesor(profesor, clave_nueva)
+
+    messages.success(
+        request,
+        f"Clave actualizada para {profesor.emailprofesor}. "
+        "La clave anterior dejó de funcionar."
+    )
+    return redirect("registrarprofesor")
+
+
+@require_POST
+@requiere_admin
+def eliminar_profesor_forzado(request, profesor_id):
+    from .models import Desafiolego, Encuesta, Retogrupo, Tokens
+
+    profesor = get_object_or_404(Profesor, idprofesor=profesor_id)
+
+    try:
+        with transaction.atomic():
+            grupos = Grupo.objects.filter(sesion__profesor=profesor)
+
+            # Estas tablas apuntan a Grupo con on_delete=DO_NOTHING: hay que
+            # borrarlas explícitamente o la FK de la base impide el cascade
+            # de Sesion -> Grupo (IntegrityError).
+            Retogrupo.objects.filter(
+                Q(grupo_emisor__in=grupos) | Q(grupo_receptor__in=grupos)
+            ).delete()
+            Tokens.objects.filter(grupo_idgrupo__in=grupos).delete()
+            Encuesta.objects.filter(grupo_idgrupo__in=grupos).delete()
+            Desafiolego.objects.filter(grupo_idgrupo__in=grupos).delete()
+
+            Alumno.objects.filter(profesor_idprofesor=profesor).delete()
+            Sesion.objects.filter(profesor=profesor).delete()
+
+            usuario = profesor.usuario_idusuario
+            profesor.delete()
+
+            # No dejar el Usuario huérfano (Profesor -> Usuario es DO_NOTHING).
+            if usuario and not Profesor.objects.filter(usuario_idusuario=usuario).exists():
+                usuario.delete()
+
+        messages.success(request, "Profesor y datos asociados eliminados correctamente.")
+    except Exception as e:
+        logger.exception("Error en eliminación forzada del profesor %s", profesor_id)
+        messages.error(request, f"No se pudo completar la eliminación: {e}")
+
     return redirect("registrarprofesor")
 
 def guardar_imagen_tematica(request_file):
@@ -4245,6 +6148,7 @@ def guardar_imagen_tematica(request_file):
     return settings.MEDIA_URL + ruta
 
 
+@requiere_admin
 def admin_tematicas(request):
     if request.method == "POST":
         accion = request.POST.get("accion")
@@ -4366,6 +6270,7 @@ def admin_tematicas(request):
         "tematicas": tematicas,
     })
 
+@requiere_admin
 def admin_desafio_info(request, desafio_id):
     desafio = get_object_or_404(Desafio, iddesafio=desafio_id)
 
@@ -4429,6 +6334,7 @@ def borrar_fotos_lego_sesion(sesion):
     for grupo in grupos:
         borrar_foto_lego_grupo(grupo)
 
+@requiere_admin
 def admin_ruleta(request):
     if request.method == "POST":
         accion = request.POST.get("accion")
@@ -4523,6 +6429,7 @@ def admin_ruleta(request):
         "total_activas": total_activas,
     })
 
+@requiere_admin
 def admin_tiempos(request):
     if request.method == "POST":
         ids = request.POST.getlist("tiempo_id")
@@ -4542,6 +6449,114 @@ def admin_tiempos(request):
         "tiempos": tiempos,
     })
 
+@requiere_admin
+def admin_galeria_fotos(request):
+    """
+    Panel donde el administrador elige qué fotos
+    de equipo, ya respaldadas en OneDrive, se
+    muestran en la galería previa a la reflexión.
+
+    La selección es global:
+    no se filtra por sesión y permanece hasta
+    que el administrador vuelva a modificarla.
+    """
+
+    if request.method == "POST":
+
+        ids_visibles = set(
+            request.POST.getlist(
+                "foto_id"
+            )
+        )
+
+        ids_seleccionados = set(
+            request.POST.getlist(
+                "seleccionada"
+            )
+        )
+
+        for foto_id in ids_visibles:
+
+            foto = (
+                FotoEquipo.objects
+                .filter(pk=foto_id)
+                .first()
+            )
+
+            if not foto:
+                continue
+
+            nueva_seleccion = (
+                foto_id
+                in ids_seleccionados
+            )
+
+            if (
+                foto.seleccionada_galeria
+                != nueva_seleccion
+            ):
+
+                foto.seleccionada_galeria = (
+                    nueva_seleccion
+                )
+
+                foto.save(
+                    update_fields=[
+                        "seleccionada_galeria"
+                    ]
+                )
+
+        messages.success(
+            request,
+            "Selección de la galería actualizada."
+        )
+
+        return redirect(
+            "admin_galeria_fotos"
+        )
+
+    # ---------------------------------------------------------
+    # Solamente mostramos fotografías cuyo respaldo
+    # permanente en OneDrive está confirmado.
+    # ---------------------------------------------------------
+
+    fotos_equipo = (
+        FotoEquipo.objects
+        .filter(
+            subida_onedrive=True
+        )
+        .exclude(
+            onedrive_foto_id__exact=""
+        )
+        .select_related(
+            "grupo",
+            "sesion",
+        )
+        .order_by(
+            "-actualizada_en"
+        )
+    )
+
+    total_seleccionadas = (
+        fotos_equipo
+        .filter(
+            seleccionada_galeria=True
+        )
+        .count()
+    )
+
+    return render(
+        request,
+        "admin_galeria_fotos.html",
+        {
+            "fotos_equipo": fotos_equipo,
+            "total_seleccionadas": (
+                total_seleccionadas
+            ),
+        },
+    )
+
+@requiere_staff
 def ver_como_grupo(request, grupo_id):
     grupo = get_object_or_404(Grupo, idgrupo=grupo_id)
 
@@ -4551,3 +6566,132 @@ def ver_como_grupo(request, grupo_id):
     request.session["modo_profesor"] = True 
 
     return redirect("pantalla_espera")
+
+
+# ============================================================
+# PRUEBA CONEXION MICROSOFT ONEDRIVE
+# Se retirara/ajustara cuando la integracion definitiva funcione.
+# ============================================================
+
+def onedrive_conectar(request):
+    from .onedrive_service import iniciar_autorizacion
+
+    try:
+        flow = iniciar_autorizacion()
+
+        request.session["onedrive_auth_flow"] = flow
+
+        return redirect(flow["auth_uri"])
+
+    except Exception as exc:
+        logger.exception(
+            "No fue posible iniciar autorización OneDrive."
+        )
+
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": str(exc),
+            },
+            status=500,
+        )
+
+
+def onedrive_callback(request):
+    from .onedrive_service import (
+        completar_autorizacion,
+        obtener_usuario_onedrive,
+    )
+
+    flow = request.session.get(
+        "onedrive_auth_flow"
+    )
+
+    if not flow:
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": (
+                    "No existe una autorización "
+                    "de OneDrive pendiente."
+                ),
+            },
+            status=400,
+        )
+
+    try:
+        completar_autorizacion(
+            flow,
+            request.GET.dict(),
+        )
+
+        usuario = obtener_usuario_onedrive()
+
+        request.session.pop(
+            "onedrive_auth_flow",
+            None,
+        )
+
+        return JsonResponse(
+            {
+                "ok": True,
+                "mensaje": (
+                    "AUTORIZACION DE ONEDRIVE "
+                    "GUARDADA CORRECTAMENTE"
+                ),
+                "cuenta": usuario.get(
+                    "userPrincipalName"
+                ),
+                "nombre": usuario.get(
+                    "displayName"
+                ),
+            }
+        )
+
+    except Exception as exc:
+        logger.exception(
+            "Error completando autorización OneDrive."
+        )
+
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": str(exc),
+            },
+            status=400,
+        )
+
+
+def onedrive_probar(request):
+    from .onedrive_service import (
+        obtener_usuario_onedrive,
+    )
+
+    try:
+        usuario = obtener_usuario_onedrive()
+
+        return JsonResponse(
+            {
+                "ok": True,
+                "mensaje": (
+                    "TOKEN PERSISTENTE DE "
+                    "ONEDRIVE FUNCIONANDO"
+                ),
+                "cuenta": usuario.get(
+                    "userPrincipalName"
+                ),
+            }
+        )
+
+    except Exception as exc:
+        logger.exception(
+            "Error probando token OneDrive."
+        )
+
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": str(exc),
+            },
+            status=500,
+        )

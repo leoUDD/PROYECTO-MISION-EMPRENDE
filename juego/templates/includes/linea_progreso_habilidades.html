@@ -12,51 +12,83 @@ Panel lateral de misión.
   <div class="metro-linea-base"></div>
   <div class="metro-linea-activa" id="metroLineaActiva"></div>
 
-  <div class="metro-punto" data-fases="conocidos,trabajoenequipo,minijuego1,sopa" data-index="0">
+  <div
+    class="metro-punto"
+    data-fases="bienvenida,inicio,pantalla_inicio,conocidos,trabajoenequipo,minijuego1,sopa"
+    data-index="0"
+  >
     <span class="metro-circulo">1</span>
     <small data-i18n="mapa_trabajo_equipo_html">Trabajo<br>en equipo</small>
   </div>
 
-  <div class="metro-punto" data-fases="transicion,desafios,tematicas,espera_eleccion,bubblemap,empatia" data-index="1">
+  <div
+    class="metro-punto"
+    data-fases="transicion,transiciondesafio,desafios,tematicas,espera_eleccion,bubblemap,empatia,transicionempatia"
+    data-index="1"
+  >
     <span class="metro-circulo">2</span>
     <small data-i18n="mapa_empatia">Empatía</small>
   </div>
 
-  <div class="metro-punto" data-fases="creatividad,lego" data-index="2">
+  <div
+    class="metro-punto"
+    data-fases="creatividad,transicioncreatividad,lego"
+    data-index="2"
+  >
     <span class="metro-circulo">3</span>
     <small data-i18n="mapa_creatividad">Creatividad</small>
   </div>
 
-  <div class="metro-punto" data-fases="comunicacion,pitch,orden_presentacion,presentar_pitch" data-index="3">
+  <div
+    class="metro-punto"
+    data-fases="comunicacion,transicioncomunicacion,pitch,orden_presentacion,presentar_pitch,apoyo,transicionapoyo,peer-review,peer_review,peerreview,peer-review-form,peer_review_form,evaluacion,evaluacion-pitch,evaluacion_pitch,mision_cumplida,ranking,reflexion"
+    data-index="3"
+  >
     <span class="metro-circulo">4</span>
     <small data-i18n="mapa_comunicacion">Comunicación</small>
-  </div>
-
-  <div class="metro-punto" data-fases="apoyo,peer_review,evaluacion,ranking,reflexion" data-index="4">
-    <span class="metro-circulo">5</span>
-    <small data-i18n="mapa_apoyo">Apoyo</small>
   </div>
 </div>
 
 <style>
+  :root {
+    --metro-bg: rgba(5, 17, 36, .93);
+    --metro-bg-strong: rgba(3, 12, 28, .97);
+
+    --metro-blue: #00C8FF;
+    --metro-blue-soft: #5BE7FF;
+    --metro-green: #00FF88;
+    --metro-green-soft: #26FFC2;
+
+    --metro-text: #E6EEF8;
+    --metro-muted: #AAB7C8;
+
+    --metro-border-blue: rgba(0, 200, 255, .45);
+    --metro-border-green: rgba(0, 255, 136, .55);
+
+    --metro-glow-blue: rgba(0, 200, 255, .35);
+    --metro-glow-green: rgba(0, 255, 136, .38);
+  }
+
   .metro-progreso-habilidades {
     position: fixed;
     top: 50%;
     left: 22px;
     transform: translateY(-50%);
     width: 122px;
-    min-height: 560px;
+    min-height: 480px;
     padding: 18px 10px 22px;
     border-radius: 30px;
     background:
-      radial-gradient(circle at top, rgba(0, 200, 255, .28), transparent 35%),
-      linear-gradient(180deg, rgba(8, 26, 45, .92), rgba(2, 10, 24, .96));
-    border: 2px solid rgba(0, 200, 255, .45);
+      radial-gradient(circle at top, rgba(0, 255, 136, .20), transparent 32%),
+      radial-gradient(circle at bottom, rgba(0, 200, 255, .18), transparent 36%),
+      linear-gradient(180deg, var(--metro-bg), var(--metro-bg-strong));
+    border: 2px solid var(--metro-border-blue);
     box-shadow:
-      0 0 26px rgba(0, 200, 255, .25),
-      0 18px 36px rgba(0,0,0,.36),
-      inset 0 0 0 1px rgba(255,255,255,.08);
+      0 0 26px rgba(0, 200, 255, .22),
+      0 18px 36px rgba(0, 0, 0, .36),
+      inset 0 0 0 1px rgba(255, 255, 255, .08);
     backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     z-index: 9998;
     display: flex;
     flex-direction: column;
@@ -65,8 +97,22 @@ Panel lateral de misión.
     font-family: "Poppins", Arial, sans-serif;
   }
 
+  .metro-progreso-habilidades::before {
+    content: "";
+    position: absolute;
+    inset: 8px;
+    border-radius: 24px;
+    border: 1px solid rgba(0, 255, 136, .12);
+    pointer-events: none;
+    box-shadow:
+      inset 0 0 20px rgba(0, 200, 255, .08),
+      inset 0 0 18px rgba(0, 255, 136, .06);
+  }
+
   .metro-header {
-    color: #AEEBFF;
+    position: relative;
+    z-index: 2;
+    color: var(--metro-blue-soft);
     font-size: 9px;
     font-weight: 900;
     letter-spacing: .12em;
@@ -79,9 +125,12 @@ Panel lateral de misión.
 
   .metro-header-icon {
     display: block;
-    color: #FF7A1A;
+    color: var(--metro-green);
     font-size: 14px;
     margin-bottom: 2px;
+    text-shadow:
+      0 0 8px rgba(0, 255, 136, .75),
+      0 0 14px rgba(0, 200, 255, .35);
   }
 
   .metro-linea-base,
@@ -97,43 +146,111 @@ Panel lateral de misión.
   }
 
   .metro-linea-base {
-    background: rgba(174, 235, 255, .18);
-    box-shadow: inset 0 0 8px rgba(0,0,0,.55);
+    background: rgba(174, 235, 255, .16);
+    box-shadow:
+      inset 0 0 8px rgba(0, 0, 0, .55),
+      0 0 12px rgba(0, 200, 255, .10);
   }
 
   .metro-linea-activa {
     height: 0%;
     bottom: auto;
-    background: linear-gradient(180deg, #00C8FF, #7c3aed, #FF7A1A);
-    box-shadow: 0 0 14px rgba(0, 200, 255, .8);
-    transition: height .45s ease;
+    background:
+      linear-gradient(
+        180deg,
+        var(--metro-blue),
+        var(--metro-green-soft),
+        var(--metro-green)
+      );
+    background-size: 100% 220%;
+    box-shadow:
+      0 0 14px rgba(0, 200, 255, .75),
+      0 0 22px rgba(0, 255, 136, .45);
+    transition: height .75s cubic-bezier(.18, .9, .25, 1);
+    overflow: visible;
+    animation: metroFlujoEnergia 2.2s linear infinite;
+  }
+
+  .metro-linea-activa::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: -7px;
+    transform: translateX(-50%);
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--metro-green);
+    opacity: 0;
+    box-shadow:
+      0 0 12px rgba(0, 255, 136, .85),
+      0 0 24px rgba(0, 200, 255, .55);
+  }
+
+  .metro-progreso-habilidades.animando .metro-linea-activa::after {
+    opacity: 1;
+    animation: metroPulsoEnergia 1s ease-out 2;
   }
 
   .metro-punto {
     position: relative;
     z-index: 2;
     text-align: center;
-    color: #AAB7C8;
+    color: var(--metro-muted);
     width: 100%;
   }
 
   .metro-circulo {
+    position: relative;
     width: 42px;
     height: 42px;
     margin: 0 auto 6px;
     border-radius: 50%;
-    background: #061326;
+    background:
+      radial-gradient(circle at 35% 25%, rgba(91, 231, 255, .15), transparent 35%),
+      #061326;
     border: 3px solid rgba(174, 235, 255, .55);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #E6EEF8;
+    color: var(--metro-text);
     font-weight: 900;
     box-sizing: border-box;
-    transition: .25s ease;
+    transition:
+      transform .28s ease,
+      background .28s ease,
+      border-color .28s ease,
+      color .28s ease,
+      box-shadow .28s ease;
     box-shadow:
       0 0 10px rgba(0, 200, 255, .18),
       inset 0 0 10px rgba(0, 200, 255, .12);
+  }
+
+  .metro-circulo::before,
+  .metro-circulo::after {
+    content: "";
+    position: absolute;
+    inset: -12px;
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0;
+  }
+
+  .metro-circulo::before {
+    border: 1px solid rgba(0, 255, 136, .55);
+    box-shadow:
+      0 0 12px rgba(0, 255, 136, .55),
+      inset 0 0 12px rgba(0, 200, 255, .22);
+  }
+
+  .metro-circulo::after {
+    background:
+      radial-gradient(circle at 15% 25%, var(--metro-green) 0 2px, transparent 3px),
+      radial-gradient(circle at 85% 20%, var(--metro-blue-soft) 0 2px, transparent 3px),
+      radial-gradient(circle at 80% 82%, var(--metro-green-soft) 0 2px, transparent 3px),
+      radial-gradient(circle at 18% 78%, var(--metro-blue) 0 2px, transparent 3px);
+    filter: drop-shadow(0 0 6px rgba(0, 255, 136, .75));
   }
 
   .metro-punto small {
@@ -144,32 +261,150 @@ Panel lateral de misión.
   }
 
   .metro-punto.completado .metro-circulo {
-    background: #00C8FF;
-    border-color: #AEEBFF;
+    background:
+      radial-gradient(circle at 35% 25%, rgba(255, 255, 255, .28), transparent 34%),
+      linear-gradient(135deg, var(--metro-blue), var(--metro-green-soft));
+    border-color: rgba(230, 255, 248, .85);
     color: #00101C;
-    box-shadow: 0 0 16px rgba(0, 200, 255, .75);
+    box-shadow:
+      0 0 16px rgba(0, 200, 255, .65),
+      0 0 22px rgba(0, 255, 136, .35);
+  }
+
+  .metro-punto.completado small {
+    color: rgba(230, 238, 248, .82);
   }
 
   .metro-punto.activo .metro-circulo {
-    background: #FF7A1A;
-    border-color: #FFD2A8;
-    color: #081A2D;
-    transform: scale(1.16);
+    background:
+      radial-gradient(circle at 35% 25%, rgba(255, 255, 255, .32), transparent 34%),
+      linear-gradient(135deg, var(--metro-green), var(--metro-blue-soft));
+    border-color: rgba(230, 255, 248, .95);
+    color: #00101C;
+    transform: scale(1.12);
     box-shadow:
-      0 0 0 8px rgba(255, 122, 26, .18),
-      0 0 20px rgba(255, 122, 26, .85);
+      0 0 0 8px rgba(0, 255, 136, .16),
+      0 0 20px rgba(0, 255, 136, .78),
+      0 0 34px rgba(0, 200, 255, .45);
   }
 
   .metro-punto.activo small {
     color: #FFFFFF;
-    text-shadow: 0 0 8px rgba(255, 122, 26, .75);
+    text-shadow:
+      0 0 8px rgba(0, 255, 136, .65),
+      0 0 12px rgba(0, 200, 255, .35);
+  }
+
+  .metro-punto.animando .metro-circulo {
+    animation: metroActivarCirculo 1.15s cubic-bezier(.16, 1, .3, 1);
+  }
+
+  .metro-punto.animando .metro-circulo::before {
+    animation: metroOndaCircular 1.15s ease-out;
+  }
+
+  .metro-punto.animando .metro-circulo::after {
+    animation: metroDestellos 1.15s ease-out;
+  }
+
+  @keyframes metroFlujoEnergia {
+    0% {
+      background-position: 0% 0%;
+    }
+
+    100% {
+      background-position: 0% 220%;
+    }
+  }
+
+  @keyframes metroPulsoEnergia {
+    0% {
+      transform: translateX(-50%) scale(.6);
+      opacity: 0;
+    }
+
+    35% {
+      transform: translateX(-50%) scale(1.25);
+      opacity: 1;
+    }
+
+    100% {
+      transform: translateX(-50%) scale(.9);
+      opacity: 0;
+    }
+  }
+
+  @keyframes metroActivarCirculo {
+    0% {
+      transform: scale(.95);
+      filter: brightness(1);
+    }
+
+    28% {
+      transform: scale(1.34);
+      filter: brightness(1.45);
+    }
+
+    54% {
+      transform: scale(1.02);
+      filter: brightness(1.12);
+    }
+
+    76% {
+      transform: scale(1.20);
+      filter: brightness(1.28);
+    }
+
+    100% {
+      transform: scale(1.12);
+      filter: brightness(1);
+    }
+  }
+
+  @keyframes metroOndaCircular {
+    0% {
+      opacity: 0;
+      transform: scale(.55);
+    }
+
+    30% {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    100% {
+      opacity: 0;
+      transform: scale(1.75);
+    }
+  }
+
+  @keyframes metroDestellos {
+    0% {
+      opacity: 0;
+      transform: scale(.45) rotate(0deg);
+    }
+
+    24% {
+      opacity: 1;
+      transform: scale(1.05) rotate(30deg);
+    }
+
+    62% {
+      opacity: .9;
+      transform: scale(1.38) rotate(95deg);
+    }
+
+    100% {
+      opacity: 0;
+      transform: scale(1.72) rotate(150deg);
+    }
   }
 
   @media (max-width: 1100px) {
     .metro-progreso-habilidades {
       left: 10px;
       width: 86px;
-      min-height: 460px;
+      min-height: 390px;
       padding: 14px 8px 18px;
     }
 
@@ -208,6 +443,11 @@ Panel lateral de misión.
       flex-direction: row;
     }
 
+    .metro-progreso-habilidades::before {
+      inset: 6px;
+      border-radius: 999px;
+    }
+
     .metro-header {
       display: none;
     }
@@ -227,8 +467,27 @@ Panel lateral de misión.
       width: 0%;
       height: 6px;
       right: auto;
-      background: linear-gradient(90deg, #00C8FF, #7c3aed, #FF7A1A);
-      transition: width .45s ease;
+      background:
+        linear-gradient(
+          90deg,
+          var(--metro-blue),
+          var(--metro-green-soft),
+          var(--metro-green)
+        );
+      background-size: 220% 100%;
+      transition: width .75s cubic-bezier(.18, .9, .25, 1);
+      animation: metroFlujoEnergiaHorizontal 2.2s linear infinite;
+    }
+
+    .metro-linea-activa::after {
+      left: auto;
+      right: -7px;
+      bottom: 50%;
+      transform: translateY(50%);
+    }
+
+    .metro-progreso-habilidades.animando .metro-linea-activa::after {
+      animation: metroPulsoEnergiaHorizontal 1s ease-out 2;
     }
 
     .metro-circulo {
@@ -236,12 +495,776 @@ Panel lateral de misión.
       height: 32px;
       font-size: 12px;
       margin-bottom: 0;
+      border-width: 2px;
     }
 
     .metro-punto small {
       display: none;
     }
+
+    .metro-punto.activo .metro-circulo {
+      transform: scale(1.10);
+    }
+
+    @keyframes metroFlujoEnergiaHorizontal {
+      0% {
+        background-position: 0% 0%;
+      }
+
+      100% {
+        background-position: 220% 0%;
+      }
+    }
+
+    @keyframes metroPulsoEnergiaHorizontal {
+      0% {
+        transform: translateY(50%) scale(.6);
+        opacity: 0;
+      }
+
+      35% {
+        transform: translateY(50%) scale(1.25);
+        opacity: 1;
+      }
+
+      100% {
+        transform: translateY(50%) scale(.9);
+        opacity: 0;
+      }
+    }
+
+    @keyframes metroActivarCirculo {
+      0% {
+        transform: scale(.95);
+        filter: brightness(1);
+      }
+
+      28% {
+        transform: scale(1.25);
+        filter: brightness(1.45);
+      }
+
+      54% {
+        transform: scale(1.02);
+        filter: brightness(1.12);
+      }
+
+      76% {
+        transform: scale(1.14);
+        filter: brightness(1.28);
+      }
+
+      100% {
+        transform: scale(1.10);
+        filter: brightness(1);
+      }
+    }
   }
+
+  @media (max-width: 420px) {
+    .metro-progreso-habilidades {
+      width: calc(100vw - 16px);
+      bottom: 8px;
+      height: 64px;
+      padding: 8px 12px;
+    }
+
+    .metro-linea-base,
+    .metro-linea-activa {
+      left: 28px;
+      right: 28px;
+      height: 5px;
+    }
+
+    .metro-linea-activa {
+      height: 5px;
+    }
+
+    .metro-circulo {
+      width: 28px;
+      height: 28px;
+      font-size: 11px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .metro-linea-activa,
+    .metro-punto.animando .metro-circulo,
+    .metro-punto.animando .metro-circulo::before,
+    .metro-punto.animando .metro-circulo::after,
+    .metro-progreso-habilidades.animando .metro-linea-activa::after {
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+
+  /*
+ * Evita que el punto luminoso de la línea
+ * sobresalga por debajo del círculo activo.
+ */
+.metro-linea-activa::after,
+.metro-progreso-habilidades.animando
+.metro-linea-activa::after {
+  display: none !important;
+}
+
+
+  /* ==========================================================
+     METRO GLOBAL — TABLET VERTICAL HORIZONTAL
+     Se aplica a TODAS las vistas que incluyen esta barra.
+     ========================================================== */
+  @media (min-width: 701px) and (max-width: 1100px) and (orientation: portrait) {
+    .metro-progreso-habilidades.metro-tablet-horizontal {
+      position: relative !important;
+      inset: auto !important;
+      top: auto !important;
+      right: auto !important;
+      bottom: auto !important;
+      left: auto !important;
+      transform: none !important;
+
+      width: min(calc(100vw - 32px), 920px) !important;
+      max-width: 920px !important;
+      min-height: 112px !important;
+      height: 112px !important;
+
+      margin: 18px auto 24px !important;
+      padding: 34px 28px 12px !important;
+      border-radius: 24px !important;
+
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: flex-start !important;
+      justify-content: space-between !important;
+      gap: 0 !important;
+      overflow: visible !important;
+    }
+
+    .metro-progreso-habilidades.metro-tablet-horizontal::before {
+      inset: 6px !important;
+      border-radius: 18px !important;
+    }
+
+    .metro-progreso-habilidades.metro-tablet-horizontal .metro-header {
+      position: absolute !important;
+      top: 9px !important;
+      left: 50% !important;
+      transform: translateX(-50%) !important;
+
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 6px !important;
+
+      width: max-content !important;
+      margin: 0 !important;
+
+      font-size: 9px !important;
+      line-height: 1 !important;
+      letter-spacing: .08em !important;
+    }
+
+    .metro-progreso-habilidades.metro-tablet-horizontal .metro-header-icon {
+      display: inline !important;
+      margin: 0 !important;
+      font-size: 11px !important;
+    }
+
+    .metro-progreso-habilidades.metro-tablet-horizontal .metro-header span:last-child {
+      display: inline !important;
+    }
+
+    .metro-progreso-habilidades.metro-tablet-horizontal .metro-punto {
+      position: relative !important;
+      z-index: 2 !important;
+
+      flex: 1 1 25% !important;
+      width: 25% !important;
+      min-width: 0 !important;
+
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: flex-start !important;
+
+      text-align: center !important;
+    }
+
+    .metro-progreso-habilidades.metro-tablet-horizontal .metro-circulo {
+      width: 34px !important;
+      height: 34px !important;
+      margin: 0 auto 7px !important;
+      border-width: 2px !important;
+      font-size: 12px !important;
+    }
+
+    .metro-progreso-habilidades.metro-tablet-horizontal .metro-punto small {
+      display: block !important;
+      max-width: 135px !important;
+      margin: 0 auto !important;
+      font-size: clamp(9px, 1.2vw, 11px) !important;
+      line-height: 1.12 !important;
+      white-space: normal !important;
+    }
+
+    .metro-progreso-habilidades.metro-tablet-horizontal .metro-linea-base,
+    .metro-progreso-habilidades.metro-tablet-horizontal .metro-linea-activa {
+      bottom: auto !important;
+      right: auto !important;
+      height: 6px !important;
+      border-radius: 999px !important;
+    }
+
+    .metro-progreso-habilidades.metro-tablet-horizontal .metro-linea-activa {
+      background:
+        linear-gradient(
+          90deg,
+          var(--metro-blue),
+          var(--metro-green-soft),
+          var(--metro-green)
+        ) !important;
+      background-size: 220% 100% !important;
+      transition: width .75s cubic-bezier(.18, .9, .25, 1) !important;
+    }
+
+    .metro-progreso-habilidades.metro-tablet-horizontal
+    .metro-punto.activo .metro-circulo {
+      transform: scale(1.10) !important;
+    }
+  }
+
+
+
+  /* ==========================================================
+     METRO TABLET GLOBAL FINAL
+     Tablet vertical (701–1100):
+     - contenido centrado
+     - ruta horizontal
+     - ruta debajo del <main>
+     ========================================================== */
+  @media (min-width: 701px) and (max-width: 1100px) and (orientation: portrait) {
+
+    body.metro-tablet-route-page {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: flex-start !important;
+
+      width: 100% !important;
+      min-height: 100dvh !important;
+
+      overflow-x: hidden !important;
+    }
+
+    body.metro-tablet-route-page > .student-timer-host {
+      order: 1 !important;
+      flex: 0 0 auto !important;
+
+      margin-left: auto !important;
+      margin-right: auto !important;
+    }
+
+    body.metro-tablet-route-page > main {
+      order: 2 !important;
+      flex: 0 0 auto !important;
+
+      width: 100% !important;
+      max-width: 100% !important;
+
+      margin-left: auto !important;
+      margin-right: auto !important;
+    }
+
+    body.metro-tablet-route-page >
+    .metro-progreso-habilidades.metro-tablet-horizontal {
+      order: 3 !important;
+      flex: 0 0 auto !important;
+
+      position: relative !important;
+
+      inset: auto !important;
+      top: auto !important;
+      right: auto !important;
+      bottom: auto !important;
+      left: auto !important;
+
+      transform: none !important;
+
+      width: min(calc(100vw - 32px), 920px) !important;
+      max-width: 920px !important;
+
+      min-height: 112px !important;
+      height: 112px !important;
+
+      margin:
+        clamp(14px, 2vh, 22px)
+        auto
+        clamp(20px, 3vh, 30px) !important;
+
+      padding: 34px 28px 12px !important;
+
+      border-radius: 24px !important;
+
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: flex-start !important;
+      justify-content: space-between !important;
+      gap: 0 !important;
+
+      overflow: visible !important;
+    }
+
+    body.metro-tablet-route-page >
+    .metro-progreso-habilidades.metro-tablet-horizontal::before {
+      inset: 6px !important;
+      border-radius: 18px !important;
+    }
+
+    .metro-tablet-horizontal .metro-header {
+      position: absolute !important;
+
+      top: 9px !important;
+      left: 50% !important;
+
+      transform: translateX(-50%) !important;
+
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 6px !important;
+
+      width: max-content !important;
+
+      margin: 0 !important;
+
+      font-size: 9px !important;
+      line-height: 1 !important;
+      letter-spacing: .08em !important;
+    }
+
+    .metro-tablet-horizontal .metro-header-icon {
+      display: inline !important;
+
+      margin: 0 !important;
+
+      font-size: 11px !important;
+    }
+
+    .metro-tablet-horizontal .metro-header span:last-child {
+      display: inline !important;
+    }
+
+    .metro-tablet-horizontal .metro-punto {
+      position: relative !important;
+      z-index: 2 !important;
+
+      flex: 1 1 25% !important;
+
+      width: 25% !important;
+      min-width: 0 !important;
+
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: flex-start !important;
+
+      text-align: center !important;
+    }
+
+    .metro-tablet-horizontal .metro-circulo {
+      width: 34px !important;
+      height: 34px !important;
+
+      margin: 0 auto 7px !important;
+
+      border-width: 2px !important;
+
+      font-size: 12px !important;
+    }
+
+    .metro-tablet-horizontal .metro-punto small {
+      display: block !important;
+
+      max-width: 135px !important;
+
+      margin: 0 auto !important;
+
+      font-size: clamp(9px, 1.2vw, 11px) !important;
+      line-height: 1.12 !important;
+
+      white-space: normal !important;
+    }
+
+    .metro-tablet-horizontal .metro-linea-base,
+    .metro-tablet-horizontal .metro-linea-activa {
+      bottom: auto !important;
+      right: auto !important;
+
+      height: 6px !important;
+
+      border-radius: 999px !important;
+    }
+
+    .metro-tablet-horizontal .metro-linea-activa {
+      background:
+        linear-gradient(
+          90deg,
+          var(--metro-blue),
+          var(--metro-green-soft),
+          var(--metro-green)
+        ) !important;
+
+      background-size: 220% 100% !important;
+
+      transition:
+        width .75s cubic-bezier(.18, .9, .25, 1) !important;
+    }
+
+    .metro-tablet-horizontal .metro-punto.activo .metro-circulo {
+      transform: scale(1.10) !important;
+    }
+
+    /*
+     * Quita reservas laterales antiguas.
+     */
+    body.metro-tablet-route-page .team-container-wrap,
+    body.metro-tablet-route-page .team-container,
+    body.metro-tablet-route-page .game-container,
+    body.metro-tablet-route-page .selector-container,
+    body.metro-tablet-route-page .bubblemap-container,
+    body.metro-tablet-route-page .phone,
+    body.metro-tablet-route-page .pitch-editor,
+    body.metro-tablet-route-page .pitch-container,
+    body.metro-tablet-route-page .peer-stage {
+      margin-left: auto !important;
+      margin-right: auto !important;
+    }
+
+    body.metro-tablet-route-page .team-container-wrap {
+      width: 100% !important;
+      max-width: 100% !important;
+    }
+  }
+
+
+
+  /* ==========================================================
+     METRO TABLET — CENTRADO Y SAFE TOP FINAL
+     - Reserva espacio para HUD superior
+     - Centra main y cards
+     - Mantiene Ruta de misión debajo
+     ========================================================== */
+  @media (min-width: 701px) and (max-width: 1100px) and (orientation: portrait) {
+
+    body.metro-tablet-route-page {
+      box-sizing: border-box !important;
+
+      width: 100% !important;
+      min-height: 100dvh !important;
+
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: flex-start !important;
+
+      /*
+       * 76px dejan una franja segura para:
+       * idioma + escuadrón + tokens + ranking.
+       */
+      padding:
+        max(76px, calc(env(safe-area-inset-top) + 68px))
+        16px
+        28px !important;
+
+      gap: 0 !important;
+
+      overflow-x: hidden !important;
+      overflow-y: auto !important;
+    }
+
+    /*
+     * Si existe timer, queda primero y centrado.
+     */
+    body.metro-tablet-route-page > .student-timer-host {
+      order: 1 !important;
+
+      align-self: center !important;
+
+      width: fit-content !important;
+      max-width: calc(100vw - 32px) !important;
+
+      margin:
+        0
+        auto
+        12px !important;
+    }
+
+    /*
+     * Main completamente centrado respecto del viewport.
+     */
+    body.metro-tablet-route-page > main {
+      order: 2 !important;
+
+      align-self: center !important;
+
+      width: min(100%, 920px) !important;
+      max-width: 920px !important;
+      min-width: 0 !important;
+
+      margin:
+        0
+        auto !important;
+
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+    }
+
+    /*
+     * Contenedores principales de las distintas vistas.
+     * Sobrescribe cálculos antiguos como:
+     * calc(100vw - 185px)
+     * calc(100vw - 320px)
+     */
+    body.metro-tablet-route-page .team-container,
+    body.metro-tablet-route-page .game-container,
+    body.metro-tablet-route-page .selector-container,
+    body.metro-tablet-route-page .bubblemap-container,
+    body.metro-tablet-route-page .phone,
+    body.metro-tablet-route-page .pitch-editor,
+    body.metro-tablet-route-page .pitch-container,
+    body.metro-tablet-route-page .peer-stage {
+      width: min(100%, 920px) !important;
+      max-width: 920px !important;
+      min-width: 0 !important;
+
+      margin-left: auto !important;
+      margin-right: auto !important;
+    }
+
+    /*
+     * Wrapper especial usado en Trabajo en Equipo.
+     */
+    body.metro-tablet-route-page .team-container-wrap {
+      width: 100% !important;
+      max-width: 920px !important;
+      min-width: 0 !important;
+
+      margin:
+        0
+        auto !important;
+
+      padding:
+        0 !important;
+
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+
+    /*
+     * Trabajo en Equipo:
+     * el CSS original usa calc(100vw - 185px).
+     * Aquí aprovechamos el ancho tablet sin descentrarlo.
+     */
+    body.metro-tablet-route-page .team-container {
+      width: min(100%, 900px) !important;
+    }
+
+    /*
+     * Ruta horizontal debajo del main.
+     */
+    body.metro-tablet-route-page >
+    .metro-progreso-habilidades.metro-tablet-horizontal {
+      order: 3 !important;
+
+      align-self: center !important;
+
+      width: min(100%, 920px) !important;
+      max-width: 920px !important;
+
+      margin:
+        16px
+        auto
+        0 !important;
+    }
+  }
+
+
+
+  /* ==========================================================
+     TABLET VERTICAL — ACABADO FINAL CENTRADO Y LEGIBILIDAD
+     - Centra verticalmente el conjunto principal
+     - Mantiene zona segura para el HUD
+     - Deja margen inferior equivalente
+     - Mejora legibilidad de Trabajo en Equipo
+     ========================================================== */
+  @media (min-width: 701px) and (max-width: 1100px) and (orientation: portrait) {
+
+    /*
+     * El body ya está en columna por los ajustes anteriores.
+     * Ahora usamos el espacio vertical disponible para centrar
+     * main + Ruta de misión como un conjunto.
+     */
+    body.metro-tablet-route-page {
+      min-height: 100dvh !important;
+
+      justify-content: center !important;
+
+      /*
+       * Zona segura superior para HUD + aire visual inferior.
+       * El padding es deliberadamente simétrico en sensación,
+       * aunque arriba reservamos algo más por los controles.
+       */
+      padding:
+        max(84px, calc(env(safe-area-inset-top) + 76px))
+        16px
+        64px !important;
+    }
+
+    /*
+     * Cuando existe timer, conserva su posición dentro del flujo
+     * y el conjunto sigue centrado.
+     */
+    body.metro-tablet-route-page > .student-timer-host {
+      margin-bottom: 14px !important;
+    }
+
+    /*
+     * Separación contenida entre card y Ruta de misión.
+     */
+    body.metro-tablet-route-page >
+    .metro-progreso-habilidades.metro-tablet-horizontal {
+      margin-top: 18px !important;
+      margin-bottom: 0 !important;
+    }
+
+
+    /* ========================================================
+       TRABAJO EN EQUIPO — LEGIBILIDAD TABLET
+       ======================================================== */
+
+    body.metro-tablet-route-page .team-container {
+      /*
+       * Mantiene el ancho ya centrado, pero da un poco más
+       * de aire interno en tablet vertical.
+       */
+      padding:
+        clamp(38px, 4.8vw, 56px)
+        clamp(34px, 4.6vw, 52px) !important;
+    }
+
+    body.metro-tablet-route-page .team-section {
+      gap: clamp(30px, 3.4vh, 42px) !important;
+    }
+
+    body.metro-tablet-route-page .title-wrapper {
+      gap: 14px !important;
+    }
+
+    body.metro-tablet-route-page .title-wrapper h1 {
+      font-size: clamp(50px, 6vw, 66px) !important;
+      line-height: 1 !important;
+    }
+
+    body.metro-tablet-route-page .mission-badge {
+      font-size: clamp(13px, 1.5vw, 15px) !important;
+      padding: 9px 18px !important;
+    }
+
+    body.metro-tablet-route-page .mission-panel {
+      width: min(100%, 700px) !important;
+
+      padding:
+        clamp(26px, 3.2vw, 36px) !important;
+
+      gap: 16px !important;
+    }
+
+    body.metro-tablet-route-page .mission-panel p {
+      font-size: clamp(18px, 2vw, 22px) !important;
+      line-height: 1.5 !important;
+    }
+
+    body.metro-tablet-route-page .mission-panel .mission-lead {
+      font-size: clamp(21px, 2.35vw, 26px) !important;
+      line-height: 1.34 !important;
+    }
+
+    body.metro-tablet-route-page .tablet-reminder {
+      padding: 13px 16px !important;
+
+      font-size: clamp(15px, 1.7vw, 18px) !important;
+      line-height: 1.35 !important;
+    }
+
+    /*
+     * Punto de control / botón.
+     * Se usan selectores amplios para no depender del nombre
+     * exacto del wrapper del botón.
+     */
+    body.metro-tablet-route-page .team-container button {
+      min-height: 54px;
+
+      padding:
+        14px
+        28px !important;
+
+      font-size: clamp(15px, 1.7vw, 18px) !important;
+    }
+
+    /*
+     * Textos pequeños del panel inferior (ej. 0/2 grupos listos).
+     */
+    body.metro-tablet-route-page .team-container small,
+    body.metro-tablet-route-page .team-container .small,
+    body.metro-tablet-route-page .team-container [class*="status"],
+    body.metro-tablet-route-page .team-container [class*="ready"] {
+      font-size: max(12px, 1.25vw) !important;
+    }
+
+
+    /* ========================================================
+       RUTA DE MISIÓN — un poco más legible
+       ======================================================== */
+
+    body.metro-tablet-route-page
+    .metro-tablet-horizontal .metro-header {
+      font-size: 10px !important;
+    }
+
+    body.metro-tablet-route-page
+    .metro-tablet-horizontal .metro-circulo {
+      width: 38px !important;
+      height: 38px !important;
+
+      font-size: 13px !important;
+    }
+
+    body.metro-tablet-route-page
+    .metro-tablet-horizontal .metro-punto small {
+      font-size: clamp(10px, 1.35vw, 12px) !important;
+      line-height: 1.15 !important;
+    }
+  }
+
+
+  /* ==========================================================
+     TABLET VERTICAL CON POCA ALTURA
+     Evita cortar contenido si el viewport es más bajo.
+     ========================================================== */
+  @media (min-width: 701px) and (max-width: 1100px)
+         and (orientation: portrait) and (max-height: 950px) {
+
+    body.metro-tablet-route-page {
+      justify-content: flex-start !important;
+
+      padding-top:
+        max(76px, calc(env(safe-area-inset-top) + 68px)) !important;
+
+      padding-bottom: 32px !important;
+    }
+  }
+
 </style>
 
 <script>
@@ -258,43 +1281,870 @@ Panel lateral de misión.
     }
 
     const pathname = window.location.pathname.toLowerCase();
-    const puntos = Array.from(barra.querySelectorAll(".metro-punto"));
-    const lineaActiva = document.getElementById("metroLineaActiva");
+    const puntos = Array.from(
+      barra.querySelectorAll(".metro-punto")
+    );
 
-    let activo = -1;
+    const lineaBase = barra.querySelector(
+      ".metro-linea-base"
+    );
 
-    puntos.forEach((punto, index) => {
-      const fases = (punto.dataset.fases || "")
-        .split(",")
-        .map(fase => fase.trim().toLowerCase());
+    const lineaActiva = document.getElementById(
+      "metroLineaActiva"
+    );
 
-      if (fases.some(fase => pathname.includes(fase))) {
-        activo = index;
-      }
-    });
+    /*
+     * Algunas pantallas pueden indicar directamente qué habilidad
+     * debe mostrarse activa mediante:
+     *
+     * <body data-metro-habilidad="comunicacion">
+     *
+     * La pantalla de Evaluación también se reconoce mediante su
+     * clase peer-review-page, aunque la URL cambie.
+     */
+    const habilidadDeclarada = (
+      document.body?.dataset?.metroHabilidad || ""
+    )
+      .trim()
+      .toLowerCase();
+
+    const habilidadForzada = habilidadDeclarada || (
+      document.body?.classList.contains("peer-review-page")
+        ? "comunicacion"
+        : ""
+    );
+
+    const indicesHabilidades = {
+      "trabajo-equipo": 0,
+      "trabajo_equipo": 0,
+      "empatia": 1,
+      "creatividad": 2,
+      "comunicacion": 3,
+    };
+
+    let activo = Object.prototype.hasOwnProperty.call(
+      indicesHabilidades,
+      habilidadForzada
+    )
+      ? indicesHabilidades[habilidadForzada]
+      : -1;
+
+    /*
+     * Si la pantalla no forzó una habilidad, se identifica
+     * utilizando el nombre de la ruta actual.
+     */
+    if (activo === -1) {
+      puntos.forEach((punto, index) => {
+        const fases = (punto.dataset.fases || "")
+          .split(",")
+          .map(fase => fase.trim().toLowerCase())
+          .filter(Boolean);
+
+        if (
+          fases.some(fase =>
+            pathname.includes(fase)
+          )
+        ) {
+          activo = index;
+        }
+      });
+    }
 
     if (activo === -1) {
       barra.style.display = "none";
       return;
     }
 
+    const totalPuntos = puntos.length - 1;
+    const porcentajeFinal = activo === 0 ? 0 : (activo / totalPuntos) * 100;
+
+    const claveStorage = "metroProgresoHabilidadesActivo";
+    const activoAnteriorGuardado = Number(sessionStorage.getItem(claveStorage));
+    const tieneAnterior = Number.isFinite(activoAnteriorGuardado);
+    const activoAnterior = tieneAnterior ? activoAnteriorGuardado : Math.max(0, activo - 1);
+
+    const porcentajeInicial =
+      activoAnterior <= 0 ? 0 : (activoAnterior / totalPuntos) * 100;
+
+    const esTransicion = [
+      "transicion",
+      "transiciondesafio",
+      "transicionempatia",
+      "transicioncreatividad",
+      "transicioncomunicacion"
+    ].some(nombre => pathname.includes(nombre));
+
+    const debeAnimar =
+      esTransicion ||
+      !tieneAnterior ||
+      activoAnterior !== activo;
+
     puntos.forEach((punto, index) => {
-      punto.classList.remove("activo", "completado");
-      if (index < activo) punto.classList.add("completado");
-      if (index === activo) punto.classList.add("activo");
+      punto.classList.remove("activo", "completado", "animando");
+
+      if (index < activo) {
+        punto.classList.add("completado");
+      }
+
+      if (index === activo) {
+        punto.classList.add("activo");
+      }
     });
 
-    const porcentaje = activo === 0 ? 0 : (activo / (puntos.length - 1)) * 100;
+function aplicarProgreso(porcentaje, animar) {
+  if (!lineaActiva || !lineaBase || !puntos.length) {
+    return;
+  }
 
-    if (window.innerWidth <= 700) {
-      lineaActiva.style.width = porcentaje + "%";
-      lineaActiva.style.height = "6px";
+  const circulos = puntos
+    .map((punto) =>
+      punto.querySelector(".metro-circulo")
+    )
+    .filter(Boolean);
+
+  if (!circulos.length) {
+    return;
+  }
+
+  const totalTramos = Math.max(
+    circulos.length - 1,
+    1
+  );
+
+  const porcentajeSeguro = Math.max(
+    0,
+    Math.min(
+      100,
+      Number(porcentaje) || 0
+    )
+  );
+
+  const indiceObjetivo = Math.max(
+    0,
+    Math.min(
+      circulos.length - 1,
+      Math.round(
+        (
+          porcentajeSeguro /
+          100
+        ) * totalTramos
+      )
+    )
+  );
+
+  const primerPunto = puntos[0];
+  const ultimoPunto =
+    puntos[puntos.length - 1];
+
+  const puntoObjetivo =
+    puntos[indiceObjetivo];
+
+  const primerCirculo = circulos[0];
+  const ultimoCirculo =
+    circulos[circulos.length - 1];
+
+  const circuloObjetivo =
+    circulos[indiceObjetivo];
+
+  if (!animar) {
+    lineaActiva.style.transition = "none";
+  }
+
+  /*
+   * En pantallas pequeñas el mapa es horizontal.
+   */
+  const metroHorizontal =
+  window.innerWidth <= 700 ||
+  (
+    document.body.classList.contains("conocidos-page") &&
+    window.innerWidth <= 1100 &&
+    window.matchMedia("(orientation: portrait)").matches
+  );
+
+if (metroHorizontal) {
+    const inicioX =
+      primerPunto.offsetLeft +
+      primerCirculo.offsetLeft +
+      primerCirculo.offsetWidth -
+      2;
+
+    const finalX =
+      ultimoPunto.offsetLeft +
+      ultimoCirculo.offsetLeft +
+      2;
+
+    const objetivoX =
+      indiceObjetivo === 0
+        ? inicioX
+        : (
+            puntoObjetivo.offsetLeft +
+            circuloObjetivo.offsetLeft +
+            2
+          );
+
+    const centroY =
+      primerPunto.offsetTop +
+      primerCirculo.offsetTop +
+      primerCirculo.offsetHeight / 2;
+
+    const grosor =
+      window.innerWidth <= 420
+        ? 5
+        : 6;
+
+    Object.assign(
+      lineaBase.style,
+      {
+        top: `${centroY}px`,
+        bottom: "auto",
+        left: `${inicioX}px`,
+        right: "auto",
+        width: `${
+          Math.max(
+            0,
+            finalX - inicioX
+          )
+        }px`,
+        height: `${grosor}px`,
+        transform: "translateY(-50%)",
+      }
+    );
+
+    Object.assign(
+      lineaActiva.style,
+      {
+        top: `${centroY}px`,
+        bottom: "auto",
+        left: `${inicioX}px`,
+        right: "auto",
+        width: `${
+          Math.max(
+            0,
+            objetivoX - inicioX
+          )
+        }px`,
+        height: `${grosor}px`,
+        transform: "translateY(-50%)",
+      }
+    );
+  } else {
+    /*
+     * En escritorio el mapa es vertical.
+     *
+     * La línea empieza dentro del borde inferior
+     * del primer círculo.
+     */
+    const inicioY =
+      primerPunto.offsetTop +
+      primerCirculo.offsetTop +
+      primerCirculo.offsetHeight -
+      2;
+
+    /*
+     * La línea base termina dentro del borde
+     * superior del último círculo.
+     */
+    const finalY =
+      ultimoPunto.offsetTop +
+      ultimoCirculo.offsetTop +
+      2;
+
+    /*
+     * La línea activa termina dentro del borde
+     * superior del círculo activo.
+     */
+    const objetivoY =
+      indiceObjetivo === 0
+        ? inicioY
+        : (
+            puntoObjetivo.offsetTop +
+            circuloObjetivo.offsetTop +
+            2
+          );
+
+    Object.assign(
+      lineaBase.style,
+      {
+        top: `${inicioY}px`,
+        bottom: "auto",
+        left: "50%",
+        right: "auto",
+        width: "8px",
+        height: `${
+          Math.max(
+            0,
+            finalY - inicioY
+          )
+        }px`,
+        transform: "translateX(-50%)",
+      }
+    );
+
+    Object.assign(
+      lineaActiva.style,
+      {
+        top: `${inicioY}px`,
+        bottom: "auto",
+        left: "50%",
+        right: "auto",
+        width: "8px",
+        height: `${
+          Math.max(
+            0,
+            objetivoY - inicioY
+          )
+        }px`,
+        transform: "translateX(-50%)",
+      }
+    );
+  }
+
+  if (!animar) {
+    void lineaActiva.offsetHeight;
+    lineaActiva.style.transition = "";
+  }
+}
+
+    if (debeAnimar) {
+      barra.classList.add("animando");
+
+      aplicarProgreso(porcentajeInicial, false);
+
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => {
+          aplicarProgreso(porcentajeFinal, true);
+
+          const puntoActivo = puntos[activo];
+          if (puntoActivo) {
+            puntoActivo.classList.add("animando");
+          }
+        });
+      });
+
+      window.setTimeout(() => {
+        barra.classList.remove("animando");
+        puntos.forEach(punto => punto.classList.remove("animando"));
+      }, 1400);
     } else {
-      lineaActiva.style.height = porcentaje + "%";
-      lineaActiva.style.width = "8px";
+      aplicarProgreso(porcentajeFinal, false);
     }
 
+    sessionStorage.setItem(claveStorage, String(activo));
+
     aplicarTraduccionMetro();
+
+    window.addEventListener("resize", () => {
+      aplicarProgreso(porcentajeFinal, false);
+    });
+
     window.addEventListener("idiomaJuegoCambiado", aplicarTraduccionMetro);
+  })();
+</script>
+
+
+<script>
+  /* ==========================================================
+     METRO GLOBAL TABLET — REUBICACION
+     Mueve la ruta debajo del contenido principal en tablet vertical.
+     ========================================================== */
+  (function () {
+    const TABLET_MIN = 701;
+    const TABLET_MAX = 1100;
+
+    let barra = null;
+    let placeholder = null;
+    let ultimoModoHorizontal = null;
+
+    function esTabletVertical() {
+      return (
+        window.innerWidth >= TABLET_MIN &&
+        window.innerWidth <= TABLET_MAX &&
+        window.matchMedia("(orientation: portrait)").matches
+      );
+    }
+
+    function obtenerDestino() {
+      const main = document.querySelector("main");
+      if (main) return main;
+
+      return document.querySelector(
+        ".phone, " +
+        ".game-container, " +
+        ".selector-container, " +
+        ".bubblemap-container, " +
+        ".pitch-editor, " +
+        ".pitch-container, " +
+        ".peer-stage, " +
+        ".team-container-wrap"
+      );
+    }
+
+    function calcularLineaHorizontal() {
+      if (!barra || !barra.classList.contains("metro-tablet-horizontal")) {
+        return;
+      }
+
+      const puntos = Array.from(
+        barra.querySelectorAll(".metro-punto")
+      );
+      const lineaBase = barra.querySelector(".metro-linea-base");
+      const lineaActiva = barra.querySelector(".metro-linea-activa");
+
+      if (!puntos.length || !lineaBase || !lineaActiva) {
+        return;
+      }
+
+      const circulos = puntos
+        .map(p => p.querySelector(".metro-circulo"))
+        .filter(Boolean);
+
+      if (circulos.length !== puntos.length) {
+        return;
+      }
+
+      const primerPunto = puntos[0];
+      const ultimoPunto = puntos[puntos.length - 1];
+      const primerCirculo = circulos[0];
+      const ultimoCirculo = circulos[circulos.length - 1];
+
+      let indiceActivo = puntos.findIndex(
+        p => p.classList.contains("activo")
+      );
+
+      if (indiceActivo < 0) {
+        indiceActivo = 0;
+      }
+
+      const puntoActivo = puntos[indiceActivo];
+      const circuloActivo = circulos[indiceActivo];
+
+      const inicioX =
+        primerPunto.offsetLeft +
+        primerCirculo.offsetLeft +
+        primerCirculo.offsetWidth -
+        2;
+
+      const finalX =
+        ultimoPunto.offsetLeft +
+        ultimoCirculo.offsetLeft +
+        2;
+
+      const objetivoX =
+        indiceActivo === 0
+          ? inicioX
+          : (
+              puntoActivo.offsetLeft +
+              circuloActivo.offsetLeft +
+              2
+            );
+
+      const centroY =
+        primerPunto.offsetTop +
+        primerCirculo.offsetTop +
+        primerCirculo.offsetHeight / 2;
+
+      Object.assign(lineaBase.style, {
+        top: `${centroY}px`,
+        bottom: "auto",
+        left: `${inicioX}px`,
+        right: "auto",
+        width: `${Math.max(0, finalX - inicioX)}px`,
+        height: "6px",
+        transform: "translateY(-50%)"
+      });
+
+      Object.assign(lineaActiva.style, {
+        top: `${centroY}px`,
+        bottom: "auto",
+        left: `${inicioX}px`,
+        right: "auto",
+        width: `${Math.max(0, objetivoX - inicioX)}px`,
+        height: "6px",
+        transform: "translateY(-50%)"
+      });
+    }
+
+    function restaurarPosicionOriginal() {
+      if (!barra || !placeholder || !placeholder.parentNode) {
+        return;
+      }
+
+      placeholder.parentNode.insertBefore(
+        barra,
+        placeholder.nextSibling
+      );
+    }
+
+    function aplicarLayout() {
+      if (!barra) {
+        barra = document.getElementById("metroProgresoHabilidades");
+      }
+
+      if (!barra) return;
+
+      if (!placeholder) {
+        placeholder = document.createComment(
+          "metro-progreso-posicion-original"
+        );
+        barra.parentNode.insertBefore(placeholder, barra);
+      }
+
+      const horizontal = esTabletVertical();
+
+      if (horizontal) {
+        const destino = obtenerDestino();
+
+        barra.classList.add("metro-tablet-horizontal");
+
+        if (destino) {
+          destino.insertAdjacentElement("afterend", barra);
+        }
+
+        requestAnimationFrame(() => {
+          requestAnimationFrame(calcularLineaHorizontal);
+        });
+      } else {
+        barra.classList.remove("metro-tablet-horizontal");
+        restaurarPosicionOriginal();
+      }
+
+      ultimoModoHorizontal = horizontal;
+    }
+
+    function actualizar() {
+      const horizontal = esTabletVertical();
+
+      if (horizontal !== ultimoModoHorizontal) {
+        aplicarLayout();
+      } else if (horizontal) {
+        calcularLineaHorizontal();
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      aplicarLayout();
+      setTimeout(calcularLineaHorizontal, 80);
+      setTimeout(calcularLineaHorizontal, 250);
+    });
+
+    window.addEventListener("resize", actualizar, { passive: true });
+
+    window.addEventListener(
+      "orientationchange",
+      () => setTimeout(aplicarLayout, 120),
+      { passive: true }
+    );
+
+    window.addEventListener(
+      "idiomaJuegoCambiado",
+      () => setTimeout(calcularLineaHorizontal, 30)
+    );
+  })();
+</script>
+
+
+<script>
+  /* ==========================================================
+     METRO TABLET GLOBAL FINAL JS
+     Autónomo: no depende de parches anteriores.
+     ========================================================== */
+  (function () {
+    const MIN = 701;
+    const MAX = 1100;
+
+    let barra = null;
+    let placeholder = null;
+    let ultimoModo = null;
+
+    function esTabletVertical() {
+      return (
+        window.innerWidth >= MIN &&
+        window.innerWidth <= MAX &&
+        window.matchMedia("(orientation: portrait)").matches
+      );
+    }
+
+    function obtenerDestino() {
+      /*
+       * Prioridad: <main>.
+       * Así la ruta queda debajo del cuadro/pantalla principal.
+       */
+      const main = document.querySelector("main");
+      if (main) return main;
+
+      return document.querySelector(
+        ".team-container-wrap, " +
+        ".phone, " +
+        ".game-container, " +
+        ".selector-container, " +
+        ".bubblemap-container, " +
+        ".pitch-editor, " +
+        ".pitch-container, " +
+        ".peer-stage"
+      );
+    }
+
+    function guardarPosicionOriginal() {
+      if (!barra || placeholder) return;
+
+      placeholder = document.createComment(
+        "metro-posicion-original-tablet"
+      );
+
+      barra.parentNode.insertBefore(
+        placeholder,
+        barra
+      );
+    }
+
+    function restaurar() {
+      if (
+        !barra ||
+        !placeholder ||
+        !placeholder.parentNode
+      ) {
+        return;
+      }
+
+      placeholder.parentNode.insertBefore(
+        barra,
+        placeholder.nextSibling
+      );
+    }
+
+    function recalcularHorizontal() {
+      if (
+        !barra ||
+        !barra.classList.contains("metro-tablet-horizontal")
+      ) {
+        return;
+      }
+
+      const puntos = Array.from(
+        barra.querySelectorAll(".metro-punto")
+      );
+
+      const lineaBase =
+        barra.querySelector(".metro-linea-base");
+
+      const lineaActiva =
+        barra.querySelector(".metro-linea-activa");
+
+      if (
+        !puntos.length ||
+        !lineaBase ||
+        !lineaActiva
+      ) {
+        return;
+      }
+
+      const circulos = puntos.map(
+        p => p.querySelector(".metro-circulo")
+      );
+
+      if (circulos.some(c => !c)) {
+        return;
+      }
+
+      const primerPunto = puntos[0];
+      const ultimoPunto =
+        puntos[puntos.length - 1];
+
+      const primerCirculo = circulos[0];
+      const ultimoCirculo =
+        circulos[circulos.length - 1];
+
+      let activo = puntos.findIndex(
+        p => p.classList.contains("activo")
+      );
+
+      if (activo < 0) {
+        activo = 0;
+      }
+
+      const puntoActivo = puntos[activo];
+      const circuloActivo = circulos[activo];
+
+      const inicioX =
+        primerPunto.offsetLeft +
+        primerCirculo.offsetLeft +
+        primerCirculo.offsetWidth -
+        2;
+
+      const finalX =
+        ultimoPunto.offsetLeft +
+        ultimoCirculo.offsetLeft +
+        2;
+
+      const objetivoX =
+        activo === 0
+          ? inicioX
+          : (
+              puntoActivo.offsetLeft +
+              circuloActivo.offsetLeft +
+              2
+            );
+
+      const centroY =
+        primerPunto.offsetTop +
+        primerCirculo.offsetTop +
+        primerCirculo.offsetHeight / 2;
+
+      Object.assign(
+        lineaBase.style,
+        {
+          top: `${centroY}px`,
+          bottom: "auto",
+          left: `${inicioX}px`,
+          right: "auto",
+          width: `${Math.max(
+            0,
+            finalX - inicioX
+          )}px`,
+          height: "6px",
+          transform: "translateY(-50%)"
+        }
+      );
+
+      Object.assign(
+        lineaActiva.style,
+        {
+          top: `${centroY}px`,
+          bottom: "auto",
+          left: `${inicioX}px`,
+          right: "auto",
+          width: `${Math.max(
+            0,
+            objetivoX - inicioX
+          )}px`,
+          height: "6px",
+          transform: "translateY(-50%)"
+        }
+      );
+    }
+
+    function aplicar() {
+      barra = barra ||
+        document.getElementById(
+          "metroProgresoHabilidades"
+        );
+
+      if (!barra) return;
+
+      guardarPosicionOriginal();
+
+      const horizontal =
+        esTabletVertical();
+
+      if (horizontal) {
+        const destino =
+          obtenerDestino();
+
+        document.body.classList.add(
+          "metro-tablet-route-page"
+        );
+
+        barra.classList.add(
+          "metro-tablet-horizontal"
+        );
+
+        if (destino) {
+          destino.insertAdjacentElement(
+            "afterend",
+            barra
+          );
+        }
+
+        requestAnimationFrame(() => {
+          requestAnimationFrame(
+            recalcularHorizontal
+          );
+        });
+      } else {
+        document.body.classList.remove(
+          "metro-tablet-route-page"
+        );
+
+        barra.classList.remove(
+          "metro-tablet-horizontal"
+        );
+
+        restaurar();
+      }
+
+      ultimoModo = horizontal;
+    }
+
+    function actualizar() {
+      const horizontal =
+        esTabletVertical();
+
+      if (horizontal !== ultimoModo) {
+        aplicar();
+      } else if (horizontal) {
+        recalcularHorizontal();
+      }
+    }
+
+    function iniciar() {
+      aplicar();
+
+      /*
+       * El JS original marca activo/completado
+       * durante la carga. Recalculamos después.
+       */
+      setTimeout(
+        recalcularHorizontal,
+        50
+      );
+
+      setTimeout(
+        recalcularHorizontal,
+        200
+      );
+
+      setTimeout(
+        recalcularHorizontal,
+        500
+      );
+    }
+
+    if (
+      document.readyState === "loading"
+    ) {
+      document.addEventListener(
+        "DOMContentLoaded",
+        iniciar
+      );
+    } else {
+      iniciar();
+    }
+
+    window.addEventListener(
+      "resize",
+      actualizar,
+      { passive: true }
+    );
+
+    window.addEventListener(
+      "orientationchange",
+      () => {
+        setTimeout(
+          aplicar,
+          150
+        );
+      },
+      { passive: true }
+    );
+
+    window.addEventListener(
+      "idiomaJuegoCambiado",
+      () => {
+        setTimeout(
+          recalcularHorizontal,
+          30
+        );
+      }
+    );
   })();
 </script>

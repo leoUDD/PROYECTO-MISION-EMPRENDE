@@ -37,7 +37,6 @@ body{
 /* ================== CARD PRINCIPAL ================== */
 .phone{
   width: clamp(320px, 90vw, 1100px);
-  background: url('/static/images/fondo_card.webp') center/cover no-repeat;
   border-radius:var(--radius);
   box-shadow:var(--shadow);
   padding:40px 30px;
@@ -69,7 +68,6 @@ body{
   max-width:360px;
   aspect-ratio: 3 / 5;
 
-  background:url('/static/images/intro.webp') no-repeat;
   background-size: contain;
   background-position: right var(--pos-y);
 

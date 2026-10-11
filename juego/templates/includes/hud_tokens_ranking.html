@@ -1,4 +1,23 @@
 <style>
+  :root {
+    --hud-bg: rgba(5, 17, 36, .90);
+    --hud-bg-strong: rgba(3, 12, 28, .96);
+
+    --hud-blue: #00C8FF;
+    --hud-blue-soft: #5BE7FF;
+    --hud-green: #00FF88;
+    --hud-green-soft: #26FFC2;
+
+    --hud-text: #E6EEF8;
+    --hud-muted: rgba(230, 238, 248, .72);
+
+    --hud-border-blue: rgba(0, 200, 255, .45);
+    --hud-border-green: rgba(0, 255, 136, .55);
+
+    --hud-glow-blue: rgba(0, 200, 255, .28);
+    --hud-glow-green: rgba(0, 255, 136, .30);
+  }
+
   .hud-tokens-ranking {
     position: fixed;
     top: 14px;
@@ -7,43 +26,53 @@
     display: flex;
     gap: 8px;
     align-items: center;
+    max-width: calc(100vw - 28px);
     font-family: Poppins, Arial, sans-serif;
   }
 
   .hud-team-box,
   .hud-token-box,
   .hud-ranking-btn {
-    border: 1px solid rgba(0, 200, 255, .45);
-    background: rgba(7, 21, 43, .88);
-    color: white;
+    border: 1px solid var(--hud-border-blue);
+    background: var(--hud-bg);
+    color: var(--hud-text);
     border-radius: 999px;
     padding: 9px 14px;
     font-weight: 800;
-    box-shadow: 0 8px 20px rgba(0,0,0,.25);
-    backdrop-filter: blur(6px);
+    box-shadow:
+      0 8px 20px rgba(0, 0, 0, .25),
+      0 0 12px rgba(0, 200, 255, .10);
+    backdrop-filter: blur(7px);
+    -webkit-backdrop-filter: blur(7px);
   }
 
   .hud-team-box {
-    max-width: 260px;
+    max-width: 270px;
+    min-width: 0;
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    color: #E6EEF8;
-    border-color: rgba(255, 122, 26, .5);
+    border-color: var(--hud-border-green);
     background:
-      linear-gradient(90deg, rgba(255,122,26,.16), rgba(7,21,43,.9));
+      linear-gradient(
+        90deg,
+        rgba(0, 255, 136, .18),
+        rgba(0, 200, 255, .09),
+        rgba(5, 17, 36, .92)
+      );
   }
 
   .hud-team-label {
-    color: #FF7A1A;
+    color: var(--hud-green);
     font-size: 11px;
     letter-spacing: .08em;
     text-transform: uppercase;
     white-space: nowrap;
+    text-shadow: 0 0 8px var(--hud-glow-green);
   }
 
   .hud-team-name {
-    max-width: 145px;
+    max-width: 150px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -52,20 +81,58 @@
   }
 
   .hud-token-box {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     color: #ffffff;
+    border-color: var(--hud-border-blue);
+    background:
+      linear-gradient(
+        90deg,
+        rgba(0, 200, 255, .16),
+        rgba(5, 17, 36, .92)
+      );
+  }
+
+  .hud-token-icon {
+    color: var(--hud-blue-soft);
+    text-shadow: 0 0 8px var(--hud-glow-blue);
   }
 
   .hud-ranking-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     cursor: pointer;
     font-family: inherit;
+    border-color: var(--hud-border-green);
+    background:
+      linear-gradient(
+        90deg,
+        rgba(0, 255, 136, .16),
+        rgba(0, 200, 255, .12),
+        rgba(5, 17, 36, .92)
+      );
+  }
+
+  .hud-ranking-icon {
+    color: var(--hud-green-soft);
+    text-shadow: 0 0 8px var(--hud-glow-green);
   }
 
   .hud-ranking-btn:hover,
   .hud-team-box:hover,
   .hud-token-box:hover {
     box-shadow:
-      0 8px 20px rgba(0,0,0,.25),
-      0 0 16px rgba(0,200,255,.25);
+      0 8px 20px rgba(0, 0, 0, .25),
+      0 0 16px var(--hud-glow-blue),
+      0 0 18px var(--hud-glow-green);
+    transform: translateY(-1px);
+  }
+
+  .hud-ranking-btn:focus-visible {
+    outline: 2px solid var(--hud-green);
+    outline-offset: 3px;
   }
 
   .hud-ranking-panel {
@@ -74,12 +141,16 @@
     right: 14px;
     z-index: 9999;
     width: min(340px, calc(100vw - 28px));
-    background: rgba(7, 21, 43, .96);
+    max-height: min(70vh, 520px);
+    overflow-y: auto;
+    background: var(--hud-bg-strong);
     color: white;
-    border: 1px solid rgba(0, 200, 255, .35);
+    border: 1px solid var(--hud-border-blue);
     border-radius: 18px;
     padding: 14px;
-    box-shadow: 0 12px 28px rgba(0,0,0,.35);
+    box-shadow:
+      0 12px 28px rgba(0, 0, 0, .35),
+      0 0 22px rgba(0, 200, 255, .12);
     display: none;
     font-family: Poppins, Arial, sans-serif;
   }
@@ -91,15 +162,17 @@
   .hud-ranking-panel h3 {
     margin: 0 0 10px;
     font-size: 1rem;
-    color: #00c8ff;
+    color: var(--hud-green);
+    text-shadow: 0 0 10px var(--hud-glow-green);
   }
 
   .hud-ranking-row {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     gap: 10px;
     padding: 8px 0;
-    border-bottom: 1px solid rgba(255,255,255,.12);
+    border-bottom: 1px solid rgba(0, 200, 255, .18);
     font-size: .92rem;
   }
 
@@ -107,56 +180,130 @@
     border-bottom: none;
   }
 
+  .hud-ranking-row span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .hud-ranking-row strong {
+    flex-shrink: 0;
+    color: var(--hud-blue-soft);
+  }
+
   .hud-ranking-row.mi-grupo {
-    color: #FFDC9C;
+    color: var(--hud-green-soft);
+    text-shadow: 0 0 8px rgba(38, 255, 194, .25);
+  }
+
+  .hud-ranking-row.mi-grupo strong {
+    color: var(--hud-green);
   }
 
   .hud-ranking-empty {
-    color: rgba(255,255,255,.72);
+    color: var(--hud-muted);
     font-size: .9rem;
   }
 
-  @media (max-width: 760px) {
+  @media (max-width: 900px) {
     .hud-tokens-ranking {
-      top: 8px;
-      right: 8px;
-      transform: scale(.9);
-      transform-origin: top right;
-    }
-
-    .hud-team-box {
-      max-width: 190px;
-    }
-
-    .hud-team-name {
-      max-width: 92px;
-    }
-
-    .hud-ranking-panel {
-      top: 56px;
-      right: 8px;
-    }
-  }
-
-  @media (max-width: 520px) {
-    .hud-tokens-ranking {
-      left: 8px;
-      right: 8px;
-      width: calc(100vw - 16px);
-      justify-content: flex-end;
-      gap: 6px;
-      transform: none;
+      top: 10px;
+      right: 10px;
+      gap: 7px;
     }
 
     .hud-team-box,
     .hud-token-box,
     .hud-ranking-btn {
+      padding: 8px 12px;
+    }
+
+    .hud-team-box {
+      max-width: 220px;
+    }
+
+    .hud-team-name {
+      max-width: 115px;
+    }
+
+    .hud-ranking-panel {
+      top: 58px;
+      right: 10px;
+      width: min(320px, calc(100vw - 20px));
+    }
+  }
+
+  @media (max-width: 620px) {
+    .hud-tokens-ranking {
+      top: 8px;
+      left: 8px;
+      right: 8px;
+      width: calc(100vw - 16px);
+      max-width: none;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .hud-team-box,
+    .hud-token-box,
+    .hud-ranking-btn {
+      min-height: 38px;
       padding: 7px 10px;
       font-size: 12px;
     }
 
     .hud-team-box {
-      max-width: 150px;
+      width: 100%;
+      max-width: none;
+      min-width: 0;
+    }
+
+    .hud-team-label {
+      font-size: 10px;
+    }
+
+    .hud-team-name {
+      max-width: none;
+      min-width: 0;
+      font-size: 12px;
+    }
+
+    .hud-token-box {
+      justify-content: center;
+      min-width: 54px;
+    }
+
+    .hud-ranking-btn {
+      justify-content: center;
+      max-width: 112px;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    .hud-ranking-panel {
+      top: 54px;
+      left: 8px;
+      right: 8px;
+      width: auto;
+      max-height: calc(100vh - 70px);
+      border-radius: 16px;
+    }
+  }
+
+  @media (max-width: 430px) {
+    .hud-tokens-ranking {
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      gap: 5px;
+    }
+
+    .hud-team-box,
+    .hud-token-box,
+    .hud-ranking-btn {
+      padding: 7px 9px;
+      font-size: 11px;
     }
 
     .hud-team-label {
@@ -164,21 +311,49 @@
     }
 
     .hud-team-name {
-      max-width: 95px;
-      font-size: 12px;
+      font-size: 11px;
+    }
+
+    .hud-token-box {
+      min-width: 48px;
     }
 
     .hud-ranking-btn {
-      max-width: 96px;
-      overflow: hidden;
-      white-space: nowrap;
+      max-width: 44px;
+      width: 44px;
+      padding-left: 0;
+      padding-right: 0;
+    }
+
+    .hud-ranking-text {
+      display: none;
+    }
+  }
+
+  @media (max-width: 340px) {
+    .hud-tokens-ranking {
+      grid-template-columns: 1fr auto;
+      grid-template-areas:
+        "team team"
+        "tokens ranking";
+    }
+
+    .hud-team-box {
+      grid-area: team;
+    }
+
+    .hud-token-box {
+      grid-area: tokens;
+      justify-self: end;
+    }
+
+    .hud-ranking-btn {
+      grid-area: ranking;
+      justify-self: end;
     }
 
     .hud-ranking-panel {
-      top: 50px;
-      left: 8px;
-      right: 8px;
-      width: auto;
+      top: 94px;
     }
   }
 </style>
@@ -200,11 +375,19 @@
   </div>
 
   <div class="hud-token-box" title="Tokens">
-    🪙 <span id="hudTokens">--</span>
+    <span class="hud-token-icon">✦</span>
+    <span id="hudTokens">--</span>
   </div>
 
-  <button type="button" id="hudRankingBtn" class="hud-ranking-btn">
-    🏆 <span data-i18n="hud_ranking">Ranking</span>
+  <button
+    type="button"
+    id="hudRankingBtn"
+    class="hud-ranking-btn"
+    aria-expanded="false"
+    aria-controls="hudRankingPanel"
+  >
+    <span class="hud-ranking-icon">▲</span>
+    <span class="hud-ranking-text" data-i18n="hud_ranking">Ranking</span>
   </button>
 </div>
 
@@ -253,14 +436,28 @@
       }
     }
 
+    function abrirCerrarPanel() {
+      if (!panel || !btn) return;
+
+      panel.classList.toggle("visible");
+
+      const estaVisible = panel.classList.contains("visible");
+      btn.setAttribute("aria-expanded", estaVisible ? "true" : "false");
+    }
+
+    function cerrarPanel() {
+      if (!panel || !btn) return;
+
+      panel.classList.remove("visible");
+      btn.setAttribute("aria-expanded", "false");
+    }
+
     if (!sesionId || !grupoId) {
       aplicarTraduccionHud();
       return;
     }
 
-    btn?.addEventListener("click", () => {
-      panel?.classList.toggle("visible");
-    });
+    btn?.addEventListener("click", abrirCerrarPanel);
 
     document.addEventListener("click", (event) => {
       if (!panel || !btn || !hud) return;
@@ -269,7 +466,13 @@
       const clickDentroPanel = panel.contains(event.target);
 
       if (!clickDentroHud && !clickDentroPanel) {
-        panel.classList.remove("visible");
+        cerrarPanel();
+      }
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        cerrarPanel();
       }
     });
 
@@ -329,7 +532,7 @@
             return `
               <div class="hud-ranking-row ${esMiGrupo ? "mi-grupo" : ""}">
                 <span>${index + 1}. ${nombreSeguro}</span>
-                <strong>${tokens} 🪙</strong>
+                <strong>${tokens} ✦</strong>
               </div>
             `;
           }).join("");

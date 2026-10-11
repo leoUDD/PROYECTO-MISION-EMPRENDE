@@ -1,5 +1,4 @@
 {% load static %}
-{% include "atajos.html" %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -8,29 +7,36 @@
   <title>Misión Emprende UDD — Trabajo en Equipo</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/estilo_trabajoenequipo.css' %}" />
+  <link rel="icon" href="{% url 'favicon' %}">
 </head>
 
 <body data-sesion-id="{{ grupo.sesion.idsesion }}">
+
+  {% include "atajos.html" %}
 
   <main class="team-container-wrap">
     <div class="team-container" role="region" aria-label="Introducción a trabajo en equipo">
       <section class="team-section">
 
-        <!-- TÍTULO CON MARCO PROPIO -->
         <div class="title-wrapper">
           <h1 data-i18n="trabajo_equipo_titulo">Trabajo en Equipo</h1>
         </div>
 
-        <!-- PANEL UNIFICADO: texto + recordatorio + botón -->
         <div class="mission-panel">
-
-          <p data-i18n="desafios_intro_texto">
-            Agentes, toda misión inicia con un desafío.
-            Ahora elegirán su siguiente objetivo.
+          <p class="mission-lead" data-i18n="trabajo_equipo_lead">
+            ¡ARCHIVOS HISTÓRICOS DETECTADOS!
           </p>
 
-          <div class="tablet-reminder" data-i18n="desafios_intro_tablet">
-            📱 Protocolo: recuerden rotar la tablet.
+          <p data-i18n="trabajo_equipo_texto">
+            Los registros del Ecosistema de Emprendimiento UDD contienen conceptos fundamentales que fueron olvidados con el paso del tiempo.
+          </p>
+
+          <p class="mission-urgent">
+            <strong data-i18n="trabajo_equipo_urgente">Recupérenlos antes de que el sistema los elimine definitivamente.</strong>
+          </p>
+
+          <div class="tablet-reminder" data-i18n="trabajo_equipo_tablet">
+            📱 Protocolo: Entrega la Tablet a un compañero antes de continuar.
           </div>
 
           <div class="panel-divider"></div>
@@ -38,7 +44,6 @@
           <div class="next-step">
             {% include "includes/boton_listo_fase.html" with fase_clave="f1" fase_actual_esperada="f1_pre_sopa" campo_listos="gruposListosF1" campo_mi_grupo="listoF1" texto_boton="¡Estoy listo!" %}
           </div>
-
         </div>
 
       </section>
@@ -55,10 +60,13 @@
       }
 
       function traducirBotonListoFase() {
-        const botones = document.querySelectorAll(".next-step button, .btn-chip");
+        const botones = document.querySelectorAll(".next-step button, .btn-chip, .oai-btn-chip");
+
         botones.forEach(btn => {
           if (!btn) return;
+
           const textoActual = (btn.textContent || "").trim().toLowerCase();
+
           if (btn.disabled || textoActual.includes("esperando") || textoActual.includes("waiting")) {
             btn.textContent = tJuego("trabajo_equipo_boton_esperando", "Esperando...");
           } else {
@@ -68,11 +76,14 @@
       }
 
       function traducirContadoresListos() {
-        const textos = document.querySelectorAll(".contador-fase, #contador-listos-fase, #texto-espera-fase");
+        const textos = document.querySelectorAll(".contador-fase, #contador-listos-fase, #texto-espera-fase, .oai-estado-listo");
+
         textos.forEach(el => {
           if (!el) return;
+
           const texto = el.textContent || "";
           const match = texto.match(/(\d+)\/(\d+)/);
+
           if (match) {
             el.textContent = `${match[1]}/${match[2]} ${tJuego("trabajo_equipo_grupos_listos", "grupos listos")}`;
           } else if (texto.toLowerCase().includes("esperando") || texto.toLowerCase().includes("waiting")) {
@@ -87,6 +98,7 @@
       }
 
       setTimeout(traducirTrabajoEquipoDinamico, 300);
+      setInterval(traducirTrabajoEquipoDinamico, 1600);
 
       window.addEventListener("idiomaJuegoCambiado", () => {
         traducirTrabajoEquipoDinamico();

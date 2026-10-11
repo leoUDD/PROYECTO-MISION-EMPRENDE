@@ -1,5 +1,4 @@
 {% load static %}
-{% include "atajos.html" %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -8,13 +7,15 @@
   <title>Misión Emprende UDD — Bienvenida</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/estilo_pantalla_inicio.css' %}">
+  <link rel="icon" href="{% url 'favicon' %}">
 </head>
 <body data-sesion-id="{{ grupo.sesion.idsesion }}">
+  {% include "atajos.html" %}
   <main class="transition-container">
     <section class="card">
 
       <div class="logo">
-        <img src="{% static 'images/logo.webp' %}" alt="Logo Misión Emprende">
+        <img src="{% static 'images/logo2.webp' %}" alt="Logo Misión Emprende">
       </div>
 
       <h1 data-i18n="bienvenida_title">¡Has sido reclutado para la misión!</h1>

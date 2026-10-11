@@ -7,6 +7,7 @@
   <title>Profesores — Misión Emprende</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/estilo_registrarprofesor.css' %}" />
+  <link rel="icon" href="{% url 'favicon' %}">
 
   <style>
     .profesores-layout {
@@ -91,6 +92,8 @@
           <li><a href="{% url 'admin_desafios' %}">Desafíos</a></li>
           <li><a href="{% url 'admin_ruleta' %}">Ruleta</a></li>
           <li><a href="{% url 'admin_tiempos' %}">Tiempos</a></li>
+          <li><a href="{% url 'admin_preguntas_rompehielo' %}">Preguntas rompehielo</a></li>
+          <li><a href="{% url 'admin_galeria_fotos' %}">Galería de fotos</a></li>
 
           <li class="sidebar-separator"></li>
           <li><a href="{% url 'perfiles' %}" class="back-link">⟵ Cambiar de perfil</a></li>
@@ -127,6 +130,14 @@
             <input type="text" id="facultad" name="facultad" placeholder="Ingeniería, Negocios..." required>
           </div>
 
+          <div class="form-group">
+            <label for="clave">* Clave de acceso</label>
+            <input type="text" id="clave" name="clave" placeholder="Ej: mision-udd-2026!" required minlength="8" autocomplete="new-password">
+            <small style="display:block; margin-top:6px; opacity:.75;">
+              Mínimo 8 caracteres, con letras, números y símbolos. Cópiala antes de registrar: no se vuelve a mostrar.
+            </small>
+          </div>
+
           <button type="submit" class="btn-primary">Registrar profesor</button>
         </form>
 
@@ -155,6 +166,21 @@
                               onsubmit="return confirm('¿Seguro que quieres eliminar este profesor?');">
                           {% csrf_token %}
                           <button type="submit" class="btn-danger">Eliminar</button>
+                        </form>
+
+                        <form method="POST"
+                              action="{% url 'restablecer_clave_profesor' profesor.idprofesor %}"
+                              style="display:flex; gap:6px; align-items:center;"
+                              onsubmit="return confirm('La clave actual de este profesor dejará de funcionar. ¿Continuar?');">
+                          {% csrf_token %}
+                          <input type="text"
+                                 name="clave_nueva"
+                                 placeholder="Clave nueva (8+, letras, números y símbolos)"
+                                 required
+                                 minlength="8"
+                                 autocomplete="new-password"
+                                 style="width:240px;">
+                          <button type="submit" class="btn-primary">Restablecer clave</button>
                         </form>
 
                         <form method="POST"

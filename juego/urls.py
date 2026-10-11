@@ -1,19 +1,45 @@
 # juego/urls.py
 from django.urls import path
 from . import views
+from . import auth as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
+
 urlpatterns = [
+    path("favicon.ico", views.favicon_view, name="favicon"),
+    path("acceso/", auth_views.login_acceso, name="login_acceso"),
+    path("acceso/salir/", auth_views.logout_acceso, name="logout_acceso"),
+    path("profesor/<int:profesor_id>/restablecer-clave/", views.restablecer_clave_profesor, name="restablecer_clave_profesor"),
     #NUEVO
     path(
-    "sesion/<int:sesion_id>/dev/timer-10/",
-    views.dev_timer_10_segundos,
-    name="dev_timer_10_segundos"
+        "sesion/<int:sesion_id>/dev/timer-10/",
+        views.dev_timer_10_segundos,
+        name="dev_timer_10_segundos"
+        ),
+        path(
+        "dashboardadmin/preguntas-rompehielo/",
+        views.admin_preguntas_rompehielo,
+        name="admin_preguntas_rompehielo"
     ),
-    path("continuar-desde-mapa/", views.continuar_desde_mapa, name="continuar_desde_mapa"),
+    path(
+        "dashboardadmin/preguntas-rompehielo/<int:idpregunta>/editar/",
+        views.admin_preguntas_rompehielo_editar,
+        name="admin_preguntas_rompehielo_editar"
+    ),
+    path(
+        "dashboardadmin/preguntas-rompehielo/<int:idpregunta>/toggle/",
+        views.admin_preguntas_rompehielo_toggle,
+        name="admin_preguntas_rompehielo_toggle"
+    ),
+    path(
+        "dashboardadmin/preguntas-rompehielo/<int:idpregunta>/eliminar/",
+        views.admin_preguntas_rompehielo_eliminar,
+        name="admin_preguntas_rompehielo_eliminar"
+    ),
     path("sesion/<int:sesion_id>/fase-anterior/", views.profesor_fase_anterior, name="profesor_fase_anterior"),
     path("dashboardadmin/tiempos/", views.admin_tiempos, name="admin_tiempos"),
     path("dashboardadmin/ruleta/", views.admin_ruleta, name="admin_ruleta"),
+    path("dashboardadmin/galeria-fotos/", views.admin_galeria_fotos, name="admin_galeria_fotos"),
     path("ver-grupo/<int:grupo_id>/", views.ver_como_grupo, name="ver_como_grupo"),
     path("dashboardadmin/desafios/<int:desafio_id>/info/", views.admin_desafio_info, name="admin_desafio_info"),
     path("profesores/", views.registrarprofesor, name="listar_profesores"),
@@ -28,7 +54,6 @@ urlpatterns = [
     path("conocidos-modo/<str:modo>/", views.elegir_modo_conocidos, name="elegir_modo_conocidos"),
     path("conocidos-rapido/", views.conocidos_rapido, name="conocidos_rapido"),
     path("ruleta-lego-token/", views.aplicar_resultado_ruleta_lego, name="aplicar_resultado_ruleta_lego"),
-    path("habilidades-intro/", views.habilidades_intro, name="habilidades_intro"),
     path('dashboardadmin/tematicas/', views.admin_tematicas, name='admin_tematicas'),
     path('dashboardadmin/desafios/', views.admin_desafios, name='admin_desafios'),
     path("sopa/registrar-palabra/", views.registrar_palabra_sopa, name="registrar_palabra_sopa"),
@@ -41,6 +66,11 @@ urlpatterns = [
     path("sesion/<int:sesion_id>/actualizar-estado/", views.profesor_actualizar_estado, name="profesor_actualizar_estado"),
     path("sesion/<int:sesion_id>/siguiente-fase/", views.profesor_siguiente_fase, name="profesor_siguiente_fase"),
     path("finalizar-mision/", views.finalizar_mision, name="finalizar_mision"),
+    path(
+        "foto-equipo/guardar/",
+        views.guardar_foto_equipo,
+        name="guardar_foto_equipo",
+    ),
     path("grupo/<int:grupo_id>/listo/", views.marcar_grupo_listo, name="marcar_grupo_listo"),
     path("salir/", views.salir_grupo, name="salir_grupo"),
     path("sesion/<int:sesion_id>/control/", views.control_sesion, name="control_sesion"),
@@ -105,8 +135,27 @@ path(
     path('market/issue/<int:challenge_id>/', views.issue_challenge_view, name='issue_challenge'),
     path('peer-review/', views.peer_review_view, name='peer_review'),
     path("ranking/", views.ranking_view, name="ranking"),
+    path('galeria-equipos/', views.galeria_equipos, name='galeria_equipos'),
+    path('foto-equipo/<int:foto_id>/imagen/', views.foto_equipo_imagen, name='foto_equipo_imagen'),
     path('reflexion/', views.reflexion, name='reflexion'),
     path("mision-cumplida/", views.mision_cumplida_view, name="mision_cumplida"),
 
-]
+        # Microsoft OneDrive
+    path(
+        "onedrive/conectar/",
+        views.onedrive_conectar,
+        name="onedrive_conectar",
+    ),
+    path(
+        "onedrive/callback/",
+        views.onedrive_callback,
+        name="onedrive_callback",
+    ),
 
+    path(
+    "onedrive/probar/",
+    views.onedrive_probar,
+    name="onedrive_probar",
+),
+
+]

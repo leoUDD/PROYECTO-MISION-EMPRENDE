@@ -1,5 +1,4 @@
 {% load static %}
-{% include "atajos.html" %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -7,7 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Misión Emprende UDD — Presentar Pitch</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/linea_progreso_habilidades.css' %}">
   <link rel="stylesheet" href="{% static 'css/estilo_presentar_pitch.css' %}">
+<link rel="icon" href="{% url 'favicon' %}">
 
   <style>
     /* ============================================================
@@ -47,7 +48,7 @@
       font-weight: 900;
       color: #ffffff;
       margin: 4px 0 4px;
-      text-shadow: 0 0 14px rgba(0, 200, 255, 0.35);
+      text-shadow: 0 0 14px rgba(0, 242, 109, 0.35);
     }
 
     .grupo-actual-orden {
@@ -67,9 +68,9 @@
       padding: 14px;
       border-radius: 18px;
       background:
-        radial-gradient(circle at 50% 0%, rgba(0,200,255,.10), transparent 42%),
+        radial-gradient(circle at 50% 0%, rgba(0,242,109,.10), transparent 42%),
         rgba(255,255,255,.035);
-      border: 1px solid rgba(0, 200, 255, 0.14);
+      border: 1px solid rgba(0, 242, 109, 0.14);
     }
 
     .pitch-lego-img {
@@ -79,7 +80,7 @@
       object-fit: contain;
       border-radius: 18px;
       box-shadow:
-        0 0 22px rgba(0, 200, 255, 0.22),
+        0 0 22px rgba(0, 242, 109, 0.22),
         0 14px 32px rgba(0,0,0,.45);
     }
 
@@ -95,7 +96,7 @@
       border-radius: 18px;
       border: 1px dashed rgba(255,255,255,.24);
       background: rgba(255,255,255,.06);
-      color: #d9e6f2;
+      color: rgba(255,255,255,.84);
       font-weight: 700;
       line-height: 1.45;
     }
@@ -118,7 +119,7 @@
     }
 
     .timer-label-pitch {
-      color: #16c5ff;
+      color: #00F26D;
       font-weight: 800;
       font-size: 1.1rem;
       letter-spacing: .04em;
@@ -133,7 +134,7 @@
     }
 
     .pitch-start-help {
-      color: #d9e6f2;
+      color: rgba(255,255,255,.84);
       opacity: .95;
       text-align: center;
       font-size: .95rem;
@@ -152,21 +153,21 @@
       gap: 8px;
       padding: 10px 18px;
       border-radius: 999px;
-      border: 1px solid rgba(0, 200, 255, 0.4);
-      background: linear-gradient(135deg, rgba(0, 200, 255, 0.15), rgba(0, 120, 255, 0.25));
-      color: #E6F7FF;
+      border: 1px solid rgba(0, 242, 109, 0.4);
+      background: linear-gradient(135deg, rgba(0, 242, 109, 0.15), rgba(0, 59, 255, 0.25));
+      color: #FFFFFF;
       font-weight: 700;
       font-size: 0.95rem;
       cursor: pointer;
       transition: all 0.25s ease;
-      box-shadow: 0 0 10px rgba(0, 200, 255, 0.25);
+      box-shadow: 0 0 10px rgba(0, 242, 109, 0.25);
       backdrop-filter: blur(4px);
     }
 
     .btn-chip:hover {
       transform: translateY(-1px) scale(1.03);
-      background: linear-gradient(135deg, rgba(0, 200, 255, 0.35), rgba(0, 120, 255, 0.45));
-      box-shadow: 0 0 18px rgba(0, 200, 255, 0.45);
+      background: linear-gradient(135deg, rgba(0, 242, 109, 0.35), rgba(0, 59, 255, 0.45));
+      box-shadow: 0 0 18px rgba(0, 242, 109, 0.45);
     }
 
     .btn-chip:active {
@@ -208,7 +209,7 @@
 
     .pitch-text::-webkit-scrollbar-thumb,
     .orden-pitch-lista::-webkit-scrollbar-thumb {
-      background: rgba(0, 200, 255, .28);
+      background: rgba(0, 242, 109, .28);
       border-radius: 999px;
     }
 
@@ -217,8 +218,9 @@
     }
 
     .orden-pitch-lista {
+      list-style: none;
       margin: 8px 0 0;
-      padding-left: 22px;
+      padding-left: 4px;
       max-height: 300px;
       overflow-y: auto;
       line-height: 1.7;
@@ -305,12 +307,26 @@
   </style>
 </head>
 
-<body data-sesion-id="{{ grupo.sesion.idsesion }}" data-grupo-id="{{ grupo.idgrupo }}">
+<body class="presentar-pitch-page" data-sesion-id="{{ grupo.sesion.idsesion }}" data-grupo-id="{{ grupo.idgrupo }}">
+  {% include "atajos.html" %}
+  <div class="student-timer-host"
+       data-student-timer
+       data-compact-after="48"
+       role="timer"
+       aria-live="polite">
+    <div class="student-timer-card">
+
+            <div class="timer-label-pitch" data-i18n="presentar_pitch_temporizador">Temporizador</div>
+<div id="timer" class="timer-display" data-seconds="90">01:30
+            </div>
+    </div>
+  </div>
+
   <main class="pitch-container" role="main" aria-labelledby="page-title">
     <header class="header">
       <div>
-        <h1 id="page-title" class="title" data-i18n="presentar_pitch_titulo">Pitch del equipo</h1>
-        <p class="subtitle" data-i18n="presentar_pitch_subtitulo">Presenten su solución usando el texto que prepararon.</p>
+        <h1 id="page-title" class="title" data-i18n="presentar_pitch_titulo">Comunicación</h1>
+        <p class="subtitle" data-i18n="presentar_pitch_subtitulo">Presenten su solución de forma clara, breve y convincente.</p>
       </div>
     </header>
 
@@ -339,15 +355,24 @@
             >
 
             <div id="grupoActualAlumnoSinFoto" class="pitch-media-fallback" style="display:none;" data-i18n="presentar_pitch_sin_foto">
-              Este equipo no subió foto de su solución LEGO.
+              Este equipo no subió foto de su prototipo LEGO.
             </div>
           </div>
         </article>
 
         <aside class="timer-card timer-panel" aria-label="Temporizador de Pitch">
-          <div class="timer-display-wrap">
-            <div class="timer-label-pitch" data-i18n="presentar_pitch_temporizador">Temporizador</div>
-            <div id="timer" class="timer-display" data-seconds="90">01:30</div>
+
+          <!-- FEEDBACK — MENSAJE PARA OYENTES DEL PITCH -->
+          <div
+            id="listenerAttentionMessage"
+            class="listener-attention-message"
+            role="note"
+            aria-live="polite"
+          >
+            <span class="listener-attention-icon" aria-hidden="true">◉</span>
+            <p data-i18n="presentar_pitch_atencion_evaluacion">
+              Presten atención al grupo que está presentando, luego tendrán que evaluarlo.
+            </p>
           </div>
 
           <div id="pitchStartWrap" class="pitch-start-wrap" style="display:none;">
@@ -368,6 +393,18 @@
       <section class="presentacion-bottom">
         <article class="panel pitch-panel">
           <h3 data-i18n="presentar_pitch_mi_pitch">Pitch de mi equipo</h3>
+
+          <button
+            id="btnPitchReminder"
+            type="button"
+            class="pitch-reminder-btn"
+            aria-controls="textoGuardado"
+            aria-expanded="false"
+            data-i18n="presentar_pitch_recordatorio_boton"
+          >
+            📝 No olvides tu pitch
+          </button>
+
 
           <div id="textoGuardado" class="pitch-text" aria-live="polite">
             {% if miPitch %}
@@ -391,15 +428,245 @@
 
     <footer class="footer-actions">
       <div class="left-actions">
-        <span class="subtitle" data-i18n="presentar_pitch_consejo">Consejo: enfoquen problema, solución, impacto y próximos pasos.</span>
+        <span class="subtitle" data-i18n="presentar_pitch_consejo">Consejo: conecten el problema, la solución, el impacto y el cierre.</span>
       </div>
     </footer>
   </main>
 
+
+  <!-- FEEDBACK 2-3 — RECORDATORIO PITCH + PREPARACION -->
+
+  <!-- =========================================================
+       FEEDBACK 2-3 — RECORDATORIO PITCH + PREPARACION
+       ========================================================= -->
+  <div
+    id="pitchPrepOverlay"
+    class="pitch-prep-overlay"
+    aria-hidden="true"
+    role="status"
+    aria-live="polite"
+  >
+    <section class="pitch-prep-card">
+      <span
+        id="pitchPrepKicker"
+        class="pitch-prep-kicker"
+        data-i18n="presentar_pitch_prepara"
+      >Se prepara</span>
+
+      <h2 id="pitchPrepTeam" class="pitch-prep-team">Equipo</h2>
+
+      <p
+        id="pitchPrepMessage"
+        class="pitch-prep-message"
+        data-i18n="presentar_pitch_presta_atencion"
+      >El resto presta atención.</p>
+
+      <div class="pitch-prep-countdown-wrap">
+        <span
+          id="pitchPrepCountdownLabel"
+          class="pitch-prep-countdown-label"
+          data-i18n="presentar_pitch_comienza_en"
+        >La siguiente presentación comienza en</span>
+
+        <strong id="pitchPrepCountdown" class="pitch-prep-countdown">10</strong>
+      </div>
+    </section>
+  </div>
+
+
+  <script>
+    /* ==========================================================
+       FEEDBACK 2-3 — RECORDATORIO PITCH + PREPARACION
+       ========================================================== */
+    (function () {
+      const DURACION_PREPARACION = 10;
+
+      let grupoActualId = null;
+      let pitchAbierto = false;
+      let prepInterval = null;
+
+      function tFeedbackPitch(clave, fallback) {
+        try {
+          const idioma = window.i18nJuego?.obtenerIdioma?.() || "es";
+          return window.i18nJuego?.traducciones?.[idioma]?.[clave] || fallback;
+        } catch (_) {
+          return fallback;
+        }
+      }
+
+      function miGrupoId() {
+        return String(document.body.dataset.grupoId || "");
+      }
+
+      function sesionId() {
+        return String(document.body.dataset.sesionId || "");
+      }
+
+      function actualizarRecordatorioPitch(data) {
+        const grupo = data?.grupoActual;
+        if (!grupo) return;
+
+        const idActual = String(grupo.id ?? "");
+        const soyPresentador = idActual === miGrupoId();
+
+        if (grupoActualId !== idActual) {
+          grupoActualId = idActual;
+          pitchAbierto = false;
+          document.body.classList.remove("pitch-own-notes-open");
+        }
+
+        document.body.classList.toggle("pitch-presenter-mode", soyPresentador);
+        document.body.classList.toggle("pitch-listener-mode", !soyPresentador);
+
+        if (soyPresentador) {
+          document.body.classList.remove("pitch-own-notes-open");
+        } else {
+          document.body.classList.toggle("pitch-own-notes-open", pitchAbierto);
+        }
+
+        const btn = document.getElementById("btnPitchReminder");
+        if (btn) {
+          btn.textContent = pitchAbierto
+            ? tFeedbackPitch("presentar_pitch_recordatorio_cerrar", "Ocultar mi pitch")
+            : tFeedbackPitch("presentar_pitch_recordatorio_boton", "📝 No olvides tu pitch");
+
+          btn.setAttribute("aria-expanded", pitchAbierto ? "true" : "false");
+        }
+      }
+
+      function claveFinPreparacion(idEquipo) {
+        return `mision_emprende_pitch_prep_fin_${sesionId()}_${idEquipo}`;
+      }
+
+      function ocultarPreparacion() {
+        const overlay = document.getElementById("pitchPrepOverlay");
+        if (!overlay) return;
+
+        overlay.classList.remove("is-visible");
+        overlay.setAttribute("aria-hidden", "true");
+
+        if (prepInterval) {
+          clearInterval(prepInterval);
+          prepInterval = null;
+        }
+      }
+
+      function mostrarPreparacion(grupo) {
+        if (!grupo?.id) return;
+
+        const overlay = document.getElementById("pitchPrepOverlay");
+        const nombre = document.getElementById("pitchPrepTeam");
+        const countdown = document.getElementById("pitchPrepCountdown");
+
+        if (!overlay || !nombre || !countdown) return;
+
+        const key = claveFinPreparacion(String(grupo.id));
+        let fin = Number(sessionStorage.getItem(key) || 0);
+        const ahora = Date.now();
+
+        if (!fin) {
+          fin = ahora + (DURACION_PREPARACION * 1000);
+          sessionStorage.setItem(key, String(fin));
+        }
+
+        if (fin <= ahora) {
+          ocultarPreparacion();
+          return;
+        }
+
+        nombre.textContent = grupo.nombre || "Equipo";
+
+        overlay.classList.add("is-visible");
+        overlay.setAttribute("aria-hidden", "false");
+
+        const pintar = () => {
+          const restantes = Math.max(0, Math.ceil((fin - Date.now()) / 1000));
+          countdown.textContent = String(restantes);
+
+          if (restantes <= 0) {
+            ocultarPreparacion();
+          }
+        };
+
+        if (prepInterval) clearInterval(prepInterval);
+
+        pintar();
+        prepInterval = setInterval(pintar, 200);
+      }
+
+      function actualizar(data) {
+        const grupo = data?.grupoActual;
+        if (!grupo) return;
+
+        actualizarRecordatorioPitch(data);
+        mostrarPreparacion(grupo);
+      }
+
+      function aplicarTextos() {
+        const kicker = document.getElementById("pitchPrepKicker");
+        const message = document.getElementById("pitchPrepMessage");
+        const label = document.getElementById("pitchPrepCountdownLabel");
+        const btn = document.getElementById("btnPitchReminder");
+
+        if (kicker) {
+          kicker.textContent = tFeedbackPitch(
+            "presentar_pitch_prepara",
+            "Se prepara"
+          );
+        }
+
+        if (message) {
+          message.textContent = tFeedbackPitch(
+            "presentar_pitch_presta_atencion",
+            "El resto presta atención."
+          );
+        }
+
+        if (label) {
+          label.textContent = tFeedbackPitch(
+            "presentar_pitch_comienza_en",
+            "La siguiente presentación comienza en"
+          );
+        }
+
+        if (btn) {
+          btn.textContent = pitchAbierto
+            ? tFeedbackPitch("presentar_pitch_recordatorio_cerrar", "Ocultar mi pitch")
+            : tFeedbackPitch("presentar_pitch_recordatorio_boton", "📝 No olvides tu pitch");
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const btn = document.getElementById("btnPitchReminder");
+
+        if (btn) {
+          btn.addEventListener("click", () => {
+            pitchAbierto = !pitchAbierto;
+            document.body.classList.toggle("pitch-own-notes-open", pitchAbierto);
+
+            btn.textContent = pitchAbierto
+              ? tFeedbackPitch("presentar_pitch_recordatorio_cerrar", "Ocultar mi pitch")
+              : tFeedbackPitch("presentar_pitch_recordatorio_boton", "📝 No olvides tu pitch");
+
+            btn.setAttribute("aria-expanded", pitchAbierto ? "true" : "false");
+          });
+        }
+
+        aplicarTextos();
+      });
+
+      window.addEventListener("idiomaJuegoCambiado", aplicarTextos);
+
+      window.feedbackPitchUI = {
+        actualizar
+      };
+    })();
+  </script>
+
   <script src="{% static 'js/presentar_pitch.js' %}"></script>
 
   <script>
-    const sesionId = "{{ grupo.sesion.idsesion }}";
+    const sesionPitchId = "{{ grupo.sesion.idsesion }}";
     const grupoId = "{{ grupo.idgrupo }}";
     let redirigiendoPitch = false;
     let pollingEstadoPresentacion = null;
@@ -445,7 +712,7 @@
 
       lista.innerHTML = ordenPitch.map(item => {
         const esActual = grupoActual && String(grupoActual.id) === String(item.id);
-        return `<li ${esActual ? 'style="font-weight:700;color:#00C8FF;"' : ""}>
+        return `<li ${esActual ? 'style="font-weight:700;color:#00F26D;"' : ""}>
           ${item.orden}. ${item.nombre}${esActual ? ` ${tPitch("presentar_pitch_presentando_flecha", "← presentando")}` : ""}
         </li>`;
       }).join("");
@@ -467,7 +734,7 @@
       foto.removeAttribute("src");
       foto.style.display = "none";
       sinFoto.style.display = "flex";
-      sinFoto.textContent = tPitch("presentar_pitch_sin_foto", "Este equipo no subió foto de su solución LEGO.");
+      sinFoto.textContent = tPitch("presentar_pitch_sin_foto", "Este equipo no subió foto de su prototipo LEGO.");
     }
 
     function renderBotonInicio(data) {
@@ -559,13 +826,14 @@
 
       renderOrdenAlumno(data.ordenPitch, grupoActual);
       renderBotonInicio(data);
+      window.feedbackPitchUI?.actualizar(data);
     }
 
     async function cargarEstadoPresentacion() {
       if (redirigiendoPitch) return;
 
       try {
-        const res = await fetch(`/sesion/${sesionId}/estado-presentacion/`, {
+        const res = await fetch(`/sesion/${sesionPitchId}/estado-presentacion/`, {
           credentials: "same-origin",
           cache: "no-store"
         });
@@ -598,7 +866,7 @@
       btn.textContent = tPitch("presentar_pitch_boton_iniciando", "Iniciando...");
 
       try {
-        const res = await fetch(`/sesion/${sesionId}/iniciar-presentacion/`, {
+        const res = await fetch(`/sesion/${sesionPitchId}/iniciar-presentacion/`, {
           method: "POST",
           credentials: "same-origin",
           headers: {
