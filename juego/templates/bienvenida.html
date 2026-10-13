@@ -5,7 +5,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Misión Emprende UDD — Bienvenida</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700;800&family=Oxanium:wght@600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/estilo_bienvenida.css' %}">
   <link rel="icon" href="{% url 'favicon' %}">
 
@@ -82,44 +84,46 @@
 
   <div class="screen-wrapper">
 
-    <div class="mecard-outer" id="bienvenida-card">
-      <div class="mecard-inner">
+    <main class="hud" id="bienvenida-card">
+      <div class="hud__border">
+        <div class="hud__inner">
 
-        <span class="mecard-tick mecard-tick-top"></span>
-        <span class="mecard-tick mecard-tick-bottom"></span>
+          <header class="hud__bar">
+            <span>INICIO</span>
+            <span class="dots" aria-hidden="true"><i class="is-active"></i><i></i><i></i></span>
+            <span class="signal" aria-hidden="true">▲▲▲</span>
+          </header>
 
-        <div class="mecard-content">
-          <div class="mecard-logo">
-            <img src="{% static 'images/edem_udd_logo.webp' %}" alt="EdEm UDD">
-          </div>
-
-          <div class="mecard-title">
-            <div class="mecard-word mecard-word-mision">
-              <span class="layer glow">MISIÓN</span>
-              <span class="layer mid">MISIÓN</span>
-              <span class="layer crisp">MISIÓN</span>
+          <section class="hud__body">
+            <div class="badge">
+              <img src="{% static 'images/logo_registro.webp' %}" alt="Insignia Misión Emprende">
             </div>
-            <div class="mecard-word mecard-word-emprende">
-              <span class="layer glow">EMPRENDE</span>
-              <span class="layer mid">EMPRENDE</span>
-              <span class="layer crisp">EMPRENDE</span>
-            </div>
-          </div>
 
-          <a href="{% url 'pantalla_inicio' %}" class="mecard-btn" id="btnIniciar">
-            <span class="mecard-btn-icon">▶</span>
-            COMENZAR MISIÓN
-          </a>
+            <h1 class="title">
+              <span class="title__top">MISIÓN</span>
+              <span class="title__bottom">EMPRENDE</span>
+            </h1>
+
+            <p class="status">SISTEMA EN LÍNEA</p>
+
+            <div class="cta">
+              <a href="{% url 'pantalla_inicio' %}" class="btn" id="btnIniciar">
+                <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3l15 9-15 9z"/></svg>
+                COMENZAR MISIÓN
+              </a>
+            </div>
+          </section>
+
+
         </div>
-
       </div>
-    </div>
+    </main>
   </div>
 
   <!-- VIDEO VIAJE PANTALLA COMPLETA -->
   <div id="viajeOverlay" class="viaje-overlay oculto" aria-hidden="true">
     <video id="viajeVideo" class="video-viaje" preload="none" playsinline>
-      <source src="{% static 'videos/Viaje.mp4' %}" type="video/mp4">
+      <source src="{% static 'videos/Viaje.webm' %}" type="video/webm">
       Tu navegador no soporta video.
     </video>
 
@@ -266,13 +270,22 @@
     if (viajeVideo) {
       viajeVideo.addEventListener('ended', irASiguienteVista);
 
+      // Precarga diferida. load() reinicia el elemento de video, asi que
+      // solo se llama si el video todavia no se empezo a reproducir
+      // (si no, a los 3 s se quedaba en negro y nunca llegaba a 'ended').
       window.addEventListener('load', () => {
         setTimeout(() => {
-          if (viajeVideo.preload !== 'auto') {
+          if (!iniciandoViaje && viajeVideo.paused && viajeVideo.preload !== 'auto') {
             viajeVideo.preload = 'auto';
             viajeVideo.load();
           }
         }, 3000);
+      });
+
+      // Si el video falla una vez iniciado, mostrar el boton de respaldo
+      // en vez de quedar atascado en pantalla negra.
+      viajeVideo.addEventListener('error', () => {
+        if (iniciandoViaje && viajeFallback) viajeFallback.classList.add('visible');
       });
     }
 

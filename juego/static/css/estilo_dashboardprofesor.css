@@ -94,6 +94,17 @@ body {
   text-align: center;
 }
 
+/* Titulo dentro de un recuadro, para distinguirlo del primer fotograma del video */
+.title-caja {
+  padding: 10px 32px;
+  border: 3px solid var(--primary);
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--sidebar-bg);
+  box-shadow: var(--shadow);
+  margin-bottom: 18px;
+}
+
 .subtitle {
   color: var(--muted);
   font-size: clamp(15px, 1.8vw, 18px);
