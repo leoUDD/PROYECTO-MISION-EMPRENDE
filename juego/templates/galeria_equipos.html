@@ -122,7 +122,7 @@
   <!-- VIDEO FINAL PANTALLA COMPLETA -->
   <div id="viajeOverlay" class="viaje-overlay oculto" aria-hidden="true">
     <video id="viajeVideo" class="video-viaje" preload="none" playsinline>
-      <source src="{% static 'videos/VideoFinal.mp4' %}" type="video/mp4">
+      <source src="{% static 'videos/VideoFinal.webm' %}" type="video/webm">
       Tu navegador no soporta video.
     </video>
 
@@ -187,13 +187,22 @@
     if (viajeVideo) {
       viajeVideo.addEventListener('ended', irASiguienteVista);
 
+      // Precarga diferida. load() reinicia el elemento de video, asi que
+      // solo se llama si el video todavia no se empezo a reproducir
+      // (si no, a los 3 s se quedaba en negro y nunca llegaba a 'ended').
       window.addEventListener('load', () => {
         setTimeout(() => {
-          if (viajeVideo.preload !== 'auto') {
+          if (!iniciandoVideo && viajeVideo.paused && viajeVideo.preload !== 'auto') {
             viajeVideo.preload = 'auto';
             viajeVideo.load();
           }
         }, 3000);
+      });
+
+      // Si el video falla una vez iniciado, mostrar el boton de respaldo
+      // en vez de quedar atascado en pantalla negra.
+      viajeVideo.addEventListener('error', () => {
+        if (iniciandoVideo && viajeFallback) viajeFallback.classList.add('visible');
       });
     }
 

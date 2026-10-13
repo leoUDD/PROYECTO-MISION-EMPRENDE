@@ -1,11 +1,16 @@
 /* ============================================================
-   Misión Emprende UDD — estilo_bienvenida.css — FULL RESPONSIVE
-   Card rediseñada a partir de Claude Design "Rediseño cuadro azul ampliado"
+   Misión Emprende UDD — estilo_bienvenida.css
+   Tarjeta HUD de bienvenida (diseño "mision-inicio-card").
+   Esquinas cortadas, título neón, botón con esquinas en L.
    ============================================================ */
 
 :root {
-  --text:  #E6EEF8;
-  --frame-offset: clamp(8px, 2vw, 24px);
+  --cyan:     #4fd2ff;
+  --cyan-dim: #3fb6e6;
+  --green:    #5cff4a;
+  --card-bg:  #050d18;
+  --line:     #12324a;
+  --cut:      clamp(18px, 6vw, 28px);   /* corte diagonal de las esquinas */
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -15,253 +20,189 @@ a { text-decoration: none; }
 
 body {
   background:
-    linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)),
+    linear-gradient(rgba(4, 10, 18, .35), rgba(4, 10, 18, .35)),
     url('/static/images/FotoPresente.jpg') center / cover no-repeat fixed,
     #000712;
-  color: var(--text);
-  font-family: "Poppins", system-ui, sans-serif;
+  font-family: 'Share Tech Mono', ui-monospace, monospace;
   height: 100dvh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: calc(var(--frame-offset) + 8px);
+  display: grid;
+  place-items: center;
+  padding: 16px;
 }
 
-/* ============================================================
-   SCREEN WRAPPER
-   ============================================================ */
 .screen-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  animation: fadeUp 0.6s ease both;
+  display: grid;
+  place-items: center;
   width: 100%;
-  height: 100%;
+  animation: fadeUp 0.6s ease both;
 }
 
 /* ============================================================
-   CARD — marco octagonal con borde degradado
+   TARJETA
+   clip-path recorta también el borde y la sombra, por eso:
+   - un contenedor exterior de 1px pintado de cian hace de borde,
+   - el interior repite el recorte con el fondo oscuro,
+   - el brillo va con drop-shadow en el wrapper, que sí respeta
+     la forma recortada.
    ============================================================ */
-.mecard-outer {
-  --cut: clamp(20px, 6.5cqw, 46px);
-
+.hud {
   position: relative;
   container-type: inline-size;
-  container-name: mecard;
-
-  width: min(700px, 94vw);
-  padding: 3px;
-
-  clip-path: polygon(
-    var(--cut) 0, calc(100% - var(--cut)) 0,
-    100% var(--cut), 100% calc(100% - var(--cut)),
-    calc(100% - var(--cut)) 100%, var(--cut) 100%,
-    0 calc(100% - var(--cut)), 0 var(--cut)
-  );
-
-  background: linear-gradient(150deg, #19e36b 0%, #0fd98f 38%, #22a9e6 100%);
-  box-shadow:
-    0 0 90px rgba(25,227,107,.28),
-    0 50px 110px rgba(0,10,35,.65);
-
-  animation: fadeUp 0.6s ease 0.1s both;
+  width: min(460px, 100%);
+  filter: drop-shadow(0 0 22px rgba(79, 210, 255, 0.28));
 }
 
-.mecard-inner {
-  position: relative;
-
+.hud__border,
+.hud__inner {
   clip-path: polygon(
-    var(--cut) 0, calc(100% - var(--cut)) 0,
-    100% var(--cut), 100% calc(100% - var(--cut)),
-    calc(100% - var(--cut)) 100%, var(--cut) 100%,
-    0 calc(100% - var(--cut)), 0 var(--cut)
+    var(--cut) 0, calc(100% - var(--cut)) 0, 100% var(--cut),
+    100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%,
+    var(--cut) 100%, 0 calc(100% - var(--cut)), 0 var(--cut)
   );
+}
+.hud__border { padding: 1px; background: var(--cyan); }
+.hud__inner  { background: var(--card-bg); display: flex; flex-direction: column; }
 
-  background:
-    linear-gradient(112deg, transparent 34%, rgba(255,255,255,.08) 46%, transparent 56%),
-    radial-gradient(120% 80% at 12% 0%, rgba(34,169,230,.35), transparent 60%),
-    radial-gradient(90% 70% at 100% 108%, rgba(25,227,107,.22), transparent 65%),
-    linear-gradient(160deg, rgba(11,71,176,.55) 0%, rgba(0,32,95,.78) 48%, rgba(0,13,43,.9) 100%),
-    url('/static/images/fondo_tar3.webp') center / cover no-repeat;
+/* Barra superior */
+.hud__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: clamp(10px, 2vh, 14px) clamp(22px, 7.4cqw, 34px);
+  border-bottom: 1px solid var(--line);
+  font-size: 11px;
+  letter-spacing: .25em;
+  color: var(--cyan-dim);
+}
+.dots { display: flex; gap: 5px; }
+.dots i { width: 5px; height: 5px; border-radius: 50%; background: #1d4a66; }
+.dots i.is-active { background: var(--cyan); }
+.signal { font-size: 9px; color: var(--green); }
 
-  box-shadow:
-    inset 0 2px 0 rgba(255,255,255,.22),
-    inset 0 -60px 90px rgba(0,8,28,.55),
-    inset 0 0 140px rgba(0,12,40,.45);
+/* Cuerpo */
+.hud__body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(12px, 2.8vh, 22px);
+  padding: clamp(20px, 5vh, 40px) clamp(22px, 8.7cqw, 40px) clamp(20px, 4.5vh, 36px);
 }
 
-.mecard-tick {
+/* Insignia (la imagen ya trae su propio aro de neón) */
+.badge {
+  width: clamp(84px, 15vh, 124px);
+  height: clamp(84px, 15vh, 124px);
+  filter: drop-shadow(0 0 14px rgba(79, 210, 255, .45));
+}
+.badge img { width: 100%; height: 100%; object-fit: contain; }
+
+/* ============================================================
+   TÍTULO NEÓN
+   MISIÓN: solo contorno (color transparente + text-stroke).
+   EMPRENDE: relleno sólido. El glow son text-shadow apilados.
+   ============================================================ */
+.title {
+  margin: 0;
+  text-align: center;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 900;
+  line-height: 1.05;
+}
+.title__top {
+  display: block;
+  font-size: clamp(34px, min(12vw, 8vh), 60px);
+  letter-spacing: .08em;
+  color: transparent;
+  -webkit-text-stroke: 2px var(--cyan);
+  text-shadow: 0 0 10px rgba(79, 210, 255, .85), 0 0 26px rgba(79, 210, 255, .45);
+}
+.title__bottom {
+  display: block;
+  font-size: clamp(28px, min(10.5vw, 7vh), 52px);
+  letter-spacing: .06em;
+  color: var(--green);
+  text-shadow: 0 0 8px rgba(92, 255, 74, .8), 0 0 24px rgba(92, 255, 74, .45);
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 12px;
+  letter-spacing: .28em;
+  color: var(--cyan-dim);
+}
+.status::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+  animation: blink 1.6s steps(2) infinite;
+}
+
+/* ============================================================
+   BOTÓN con esquinas en "L"
+   Las L se dibujan con ::before / ::after en el wrapper (no en
+   el botón, porque su clip-path las recortaría).
+   ============================================================ */
+.cta { position: relative; width: 100%; margin-top: 8px; }
+.cta::before, .cta::after {
+  content: "";
   position: absolute;
-  left: 0;
-  right: 0;
-  height: 8px;
-  background-image: repeating-linear-gradient(90deg, rgba(34,169,230,.75) 0 2px, transparent 2px 22px);
+  width: 12px;
+  height: 12px;
   pointer-events: none;
 }
-.mecard-tick-top    { top: clamp(10px, 3.4cqw, 24px); }
-.mecard-tick-bottom { bottom: clamp(10px, 3.4cqw, 24px); }
+.cta::before { left: -6px;  top: -6px;    border-left: 2px solid var(--cyan);  border-top: 2px solid var(--cyan); }
+.cta::after  { right: -6px; bottom: -6px; border-right: 2px solid var(--cyan); border-bottom: 2px solid var(--cyan); }
 
-/* ============================================================
-   CONTENIDO
-   ============================================================ */
-.mecard-content {
-  position: relative;
-  z-index: 1;
-  padding: clamp(34px, 11cqw, 78px) clamp(26px, 9cqw, 64px) clamp(30px, 9.7cqw, 68px);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: clamp(24px, 6.5cqw, 46px);
-  text-align: center;
-}
-
-.mecard-logo {
-  width: clamp(140px, 44cqw, 308px);
-  animation: fadeDown 0.6s ease both;
-}
-
-.mecard-logo img {
+.btn {
   width: 100%;
-  height: auto;
-  mix-blend-mode: screen;
-  filter: drop-shadow(0 0 8px rgba(255,255,255,0.15));
-}
-
-/* ============================================================
-   TÍTULO — texto con glow multicapa
-   ============================================================ */
-.mecard-title {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: clamp(2px, 0.8cqw, 8px);
-}
-
-.mecard-word {
-  position: relative;
+  height: clamp(48px, 7.5vh, 58px);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Oxanium', sans-serif;
-  line-height: 1;
-  letter-spacing: 0.12em;
-  text-indent: 0.12em;
-}
-
-.mecard-word .layer {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  gap: 14px;
+  border: 1px solid #1f7fae;
+  background: #082238;
+  color: var(--cyan);
+  font: 600 clamp(13px, 3.5cqw, 16px) 'Orbitron', sans-serif;
+  letter-spacing: .3em;
   white-space: nowrap;
-}
-
-.mecard-word .layer.crisp { position: relative; }
-
-.mecard-word-mision {
-  height: clamp(34px, 15.7cqw, 110px);
-  font-size: clamp(30px, 13.7cqw, 96px);
-  font-weight: 700;
-}
-.mecard-word-mision .glow { color: transparent; -webkit-text-stroke: clamp(3px, 1.3cqw, 9px) #1b8fd8; filter: blur(9px); opacity: .9; }
-.mecard-word-mision .mid  { color: transparent; -webkit-text-stroke: clamp(1.5px, 0.6cqw, 4px) #35b6f5; filter: blur(2px); }
-.mecard-word-mision .crisp{ color: transparent; -webkit-text-stroke: clamp(0.6px, 0.2cqw, 1.4px) #d8f4ff; }
-
-.mecard-word-emprende {
-  height: clamp(32px, 15cqw, 106px);
-  font-size: clamp(28px, 13.1cqw, 92px);
-  font-weight: 800;
-  letter-spacing: 0.01em;
-  text-indent: 0.01em;
-}
-.mecard-word-emprende .glow { color: #2fd400; filter: blur(16px); opacity: .85; }
-.mecard-word-emprende .mid  { color: #46e60a; filter: blur(4px); }
-.mecard-word-emprende .crisp{ color: #57e825; -webkit-text-stroke: clamp(0.6px, 0.2cqw, 1.4px) #ecffd6; }
-
-/* ============================================================
-   BOTÓN
-   ============================================================ */
-.mecard-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: clamp(8px, 1.5cqw, 18px);
-  width: 100%;
-  height: clamp(50px, 14cqw, 98px);
-
-  background: linear-gradient(180deg, rgba(120,215,255,.34) 0%, rgba(34,169,230,.22) 42%, rgba(0,32,95,.5) 100%);
-  border: 2px solid #4cc3f0;
-  border-radius: 4px;
-  color: #ffffff;
-  font-family: 'IBM Plex Mono', monospace;
-  font-weight: 600;
-  font-size: clamp(14px, 3.71cqw, 26px);
-  letter-spacing: 0.22em;
-  text-shadow: 0 0 18px rgba(190,240,255,.55);
-
+  text-shadow: 0 0 8px rgba(79, 210, 255, .6);
   cursor: pointer;
-  animation: edemPulse 2.6s ease-in-out infinite;
-  transition: background .18s ease, border-color .18s ease, transform .18s ease;
+  clip-path: polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px);
+  transition: background .2s, color .2s;
 }
+.btn:hover { background: #0c3352; color: #fff; }
+.btn:focus-visible { outline: 2px solid var(--green); outline-offset: -4px; }
+.btn svg { fill: var(--green); flex-shrink: 0; }
 
-.mecard-btn-icon {
-  color: #19e36b;
-  font-size: clamp(13px, 2.86cqw, 20px);
-}
-
-.mecard-btn:hover {
-  background: rgba(25,227,107,.24);
-  border-color: #19e36b;
-  transform: translateY(-2px);
-}
-
-.mecard-btn.btn-locked {
-  opacity: 0.3;
+/* Estado que aplica el script al pulsar "Comenzar misión" */
+.btn.btn-locked {
+  opacity: 0.35;
   filter: grayscale(0.6);
   cursor: not-allowed;
-  animation: none;
 }
-
-.mecard-btn.btn-locked:hover {
-  background: linear-gradient(180deg, rgba(120,215,255,.34) 0%, rgba(34,169,230,.22) 42%, rgba(0,32,95,.5) 100%);
-  border-color: #4cc3f0;
-  transform: none;
-}
+.btn.btn-locked:hover { background: #082238; color: var(--cyan); }
 
 /* ============================================================
    ANIMACIONES
    ============================================================ */
-@keyframes fadeDown {
-  from { opacity:0; transform:translateY(-12px); }
-  to   { opacity:1; transform:translateY(0); }
-}
+@keyframes blink  { 50% { opacity: .3; } }
 @keyframes fadeUp {
-  from { opacity:0; transform:translateY(14px); }
-  to   { opacity:1; transform:translateY(0); }
-}
-@keyframes edemPulse {
-  0%, 100% { box-shadow: 0 0 0 1px rgba(34,169,230,.55), 0 0 28px rgba(25,227,107,.18); }
-  50%      { box-shadow: 0 0 0 1px rgba(34,169,230,.9), 0 0 60px rgba(25,227,107,.38); }
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ============================================================
-   RESPONSIVE
-   ============================================================ */
 @media (max-width: 480px) {
-  :root { --frame-offset: 4px; }
-
   body { padding: 8px; }
-
-  .mecard-outer { width: calc(100vw - 12px); }
-}
-
-@media (max-height: 600px) {
-  .mecard-content { gap: clamp(16px, 5cqw, 30px); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .mecard-btn, .mecard-logo, .mecard-outer { animation: none; opacity: 1; }
+  .screen-wrapper { animation: none; opacity: 1; }
+  .status::before { animation: none; }
 }
