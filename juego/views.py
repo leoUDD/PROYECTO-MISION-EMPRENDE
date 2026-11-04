@@ -5588,7 +5588,73 @@ def leer_filas_archivo(archivo):
 
 
 def leer_alumnos_desde_archivo(archivo):
-    return leer_filas_archivo(archivo)
+    filas = leer_filas_archivo(archivo)
+
+    if not filas:
+        return []
+
+    def obtener(fila, columna):
+        for clave, valor in fila.items():
+            if str(clave).strip().lstrip("\ufeff").lower() == columna.lower():
+                return str(valor).strip() if valor is not None else ""
+        return ""
+
+    columnas = {
+        str(c).strip().lstrip("\ufeff").lower()
+        for c in filas[0].keys()
+    }
+
+    # Formato antiguo: mantener su comportamiento original
+    if "student" not in columnas or "sis login id" not in columnas:
+        return filas
+
+    # Formato exportado desde Canvas
+    alumnos = []
+    correos = set()
+
+    for numero_fila, fila in enumerate(filas, start=2):
+        nombre_completo = obtener(fila, "Student")
+        correo = obtener(fila, "SIS Login ID")
+
+        # Filas especiales de Canvas
+        if not nombre_completo or nombre_completo.lower() in {
+            "points possible",
+            "test student",
+        }:
+            continue
+
+        if not correo or "@" not in correo:
+            raise ValueError(
+                f"Fila {numero_fila}: el alumno "
+                f"'{nombre_completo}' no tiene un correo válido "
+                "en SIS Login ID."
+            )
+
+        if correo.lower() in correos:
+            continue
+
+        correos.add(correo.lower())
+
+        # Canvas normalmente presenta: Apellidos, Nombres
+        if "," in nombre_completo:
+            apellidos, nombres = nombre_completo.split(",", 1)
+        else:
+            nombres = nombre_completo
+            apellidos = ""
+
+        alumnos.append({
+            "Correo": correo,
+            "RUT": "",
+            "Nombre": nombres.strip(),
+            "Apellido Paterno": apellidos.strip(),
+            "Apellido Materno": "",
+            "Carrera": "",
+        })
+
+    if not alumnos:
+        raise ValueError("No se encontraron alumnos válidos en el archivo Canvas.")
+
+    return alumnos
 
 
 def crear_alumnos_en_sesion(df, profesor, sesion):
