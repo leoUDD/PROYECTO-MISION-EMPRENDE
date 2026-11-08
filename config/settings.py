@@ -11,6 +11,8 @@ Variables relevantes:
     DB_ENGINE               "sqlite" (por defecto) o "mysql".
     DB_NAME / DB_USER / DB_PASSWORD / DB_HOST / DB_PORT   Solo para MySQL.
     CLAVE_ADMIN             Clave del panel de administración (obligatoria en producción).
+    DJANGO_STATIC_ROOT      Carpeta donde collectstatic deja los estáticos (por defecto: staticfiles/).
+    DJANGO_MEDIA_ROOT       Carpeta de archivos subidos (por defecto: media/).
 """
 
 from pathlib import Path
@@ -146,7 +148,10 @@ USE_TZ = True
 
 
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+# En el servidor de la universidad nginx sirve /static/ desde
+# staticfiles/static/ (usa "root", que agrega la ruta de la URL), por eso
+# alla se define DJANGO_STATIC_ROOT. Sin la variable queda como siempre.
+STATIC_ROOT = Path(os.getenv("DJANGO_STATIC_ROOT", "").strip() or BASE_DIR / "staticfiles")
 
 # juego/static/ ya lo descubre AppDirectoriesFinder porque 'juego' esta en
 # INSTALLED_APPS. Declararlo tambien en STATICFILES_DIRS lo hacia recorrer dos
@@ -189,7 +194,9 @@ WHITENOISE_SKIP_COMPRESS_EXTENSIONS = (
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+# En el servidor nginx publica /media/ desde /home/misionemprende/media
+# (DJANGO_MEDIA_ROOT en su .env). Sin la variable queda como siempre.
+MEDIA_ROOT = Path(os.getenv("DJANGO_MEDIA_ROOT", "").strip() or BASE_DIR / "media")
 
 # ---------------------------------------------------------------------------
 # Seguridad HTTP: solo se endurece fuera de desarrollo.
