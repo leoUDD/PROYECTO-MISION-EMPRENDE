@@ -46,6 +46,7 @@ import secrets
 from django.shortcuts import get_object_or_404
 import string
 import random
+import re
 from math import ceil
 from django.utils import timezone
 from django.db.models import F
@@ -643,6 +644,60 @@ def calcular_segundos_restantes(sesion):
 
     return max(restantes, 0)
 
+def sortear_orden_pitch(sesion):
+    """
+    Sortea el orden de presentación una sola vez.
+
+    Esta función corre desde el polling, así que varios navegadores pueden
+    llegar a la vez. Sin el bloqueo cada uno sorteaba por su cuenta y los
+    resultados se mezclaban: quedaban números repetidos y un grupo se saltaba.
+    El estado se vuelve a leer con la fila bloqueada, porque el que traía el
+    llamador puede estar desactualizado.
+
+    Devuelve True si esta llamada hizo el sorteo.
+    """
+    with transaction.atomic():
+        bloqueada = Sesion.objects.select_for_update().get(pk=sesion.pk)
+
+        if bloqueada.fase_actual != "f4_orden_pitch" or bloqueada.orden_sorteado:
+            return False
+
+        grupos_lista = list(
+            Grupo.objects.filter(sesion=bloqueada).order_by("idgrupo")
+        )
+
+        if not grupos_lista or not all(g.listo_f4_orden for g in grupos_lista):
+            return False
+
+        random.shuffle(grupos_lista)
+
+        for i, grupo in enumerate(grupos_lista, start=1):
+            grupo.orden_presentacion = i
+            grupo.save(update_fields=["orden_presentacion"])
+
+        Grupo.objects.filter(sesion=bloqueada).update(listo_f4_orden=False)
+
+        bloqueada.orden_sorteado = True
+        bloqueada.grupo_presentando = grupos_lista[0]
+        bloqueada.segundos_restantes = 0
+        bloqueada.timer_corriendo = False
+        bloqueada.timer_inicio_at = None
+        bloqueada.timer_fin_at = None
+        bloqueada.inicio_fase_habilitado = True
+        bloqueada.save(update_fields=[
+            "orden_sorteado",
+            "grupo_presentando",
+            "segundos_restantes",
+            "timer_corriendo",
+            "timer_inicio_at",
+            "timer_fin_at",
+            "inicio_fase_habilitado",
+        ])
+
+    sesion.refresh_from_db()
+    return True
+
+
 def autoavanzar_si_todos_listos(sesion):
     grupos = Grupo.objects.filter(sesion=sesion)
     total = grupos.count()
@@ -702,38 +757,7 @@ def autoavanzar_si_todos_listos(sesion):
 
         if not sesion.orden_sorteado:
             if listos_orden == total:
-                grupos_lista = list(
-                    Grupo.objects.filter(sesion=sesion).order_by("idgrupo")
-                )
-                random.shuffle(grupos_lista)
-
-                for i, grupo in enumerate(grupos_lista, start=1):
-                    grupo.orden_presentacion = i
-                    grupo.save(update_fields=["orden_presentacion"])
-
-                sesion.orden_sorteado = True
-                sesion.grupo_presentando = sorted(
-                    grupos_lista,
-                    key=lambda g: g.orden_presentacion
-                )[0]
-
-                Grupo.objects.filter(sesion=sesion).update(listo_f4_orden=False)
-
-                sesion.segundos_restantes = 0
-                sesion.timer_corriendo = False
-                sesion.timer_inicio_at = None
-                sesion.timer_fin_at = None
-                sesion.inicio_fase_habilitado = True
-                sesion.save(update_fields=[
-                    "orden_sorteado",
-                    "grupo_presentando",
-                    "segundos_restantes",
-                    "timer_corriendo",
-                    "timer_inicio_at",
-                    "timer_fin_at",
-                    "inicio_fase_habilitado",
-                ])
-                return True
+                return sortear_orden_pitch(sesion)
 
         else:
             if listos_orden == total:
@@ -1654,6 +1678,11 @@ def asignar_tematica_y_desafio_aleatorio(sesion):
         ])
 
 
+COMENTARIO_EVALUACION_AUTOMATICA = (
+    "Evaluación completada automáticamente porque se agotó el tiempo."
+)
+
+
 def completar_evaluaciones_faltantes(sesion):
     grupo_actual = sesion.grupo_presentando
 
@@ -1681,7 +1710,7 @@ def completar_evaluaciones_faltantes(sesion):
             viabilidad=5,
             equipo=5,
             presentacion=5,
-            comentario="Evaluación completada automáticamente porque se agotó el tiempo.",
+            comentario=COMENTARIO_EVALUACION_AUTOMATICA,
             reflexion="",
         )
 
@@ -1693,6 +1722,7 @@ def avanzar_al_siguiente_pitch_o_ranking(sesion):
     actual = sesion.grupo_presentando
 
     if actual is None:
+        entregar_premios_peer_review(sesion)
         sesion.fase_actual = "f6_ranking"
         sesion.save(update_fields=["fase_actual"])
         return
@@ -1703,6 +1733,7 @@ def avanzar_al_siguiente_pitch_o_ranking(sesion):
     ).order_by("orden_presentacion").first()
 
     if siguiente is None:
+        entregar_premios_peer_review(sesion)
         sesion.fase_actual = "f6_ranking"
         sesion.grupo_presentando = None
         sesion.save(update_fields=["fase_actual", "grupo_presentando"])
@@ -1936,7 +1967,6 @@ def profesor_actualizar_estado(request, sesion_id):
             if nueva_fase == "f5_evaluacion_pitch":
                 Grupo.objects.filter(sesion=sesion).update(
                     listo_ranking=False,
-                    recompensa_peer_otorgada=False,
                 )
 
             if nueva_fase in {"f1_ranking", "f2_ranking", "f3_ranking", "f6_ranking"}:
@@ -2619,11 +2649,16 @@ def iniciar_timer_inicio_fase(request, sesion_id):
         iniciar_timer_de_sesion(sesion)
         sesion.refresh_from_db()
 
+    # segundos_restantes guarda la duración total: si otro grupo ya arrancó el
+    # timer, devolverla hacía saltar el reloj de este grupo hacia atrás.
+    restantes = calcular_segundos_restantes(sesion)
+    sesion.refresh_from_db()
+
     return JsonResponse({
         "ok": True,
         "faseActual": sesion.fase_actual,
         "timerCorriendo": sesion.timer_corriendo,
-        "segundosRestantes": int(sesion.segundos_restantes or 0),
+        "segundosRestantes": restantes,
     })
 
 @never_cache
@@ -3241,6 +3276,13 @@ def tematicas(request):
         "tematicas": tematicas_bd,
     })
 
+MENSAJE_FOTO_LEGO_INVALIDA = (
+    "No pudimos leer esa foto. Prueba con otra, en JPG o PNG, "
+    "o marca que no pudieron subirla."
+)
+MENSAJE_IMAGEN_INVALIDA = "No se pudo leer la imagen. Prueba con otra, en JPG o PNG."
+
+
 @never_cache
 def lego(request):
     grupo = obtener_grupo_desde_session(request)
@@ -3255,6 +3297,7 @@ def lego(request):
     if request.method == "POST":
         sin_foto = request.POST.get("sin_foto_lego") == "on"
         foto = request.FILES.get("foto_lego")
+        error_foto = None
 
         if sin_foto:
             grupo.foto_lego = None
@@ -3266,18 +3309,28 @@ def lego(request):
             grupo.foto_lego = foto
             grupo.listo_f3_lego = True
             grupo.lego_sin_foto = False
-            grupo.save(update_fields=["foto_lego", "listo_f3_lego", "lego_sin_foto"])
 
-            limpiar_fotos_lego_por_desafio(grupo.desafio_elegido)
+            try:
+                grupo.save(update_fields=["foto_lego", "listo_f3_lego", "lego_sin_foto"])
+            except ValueError:
+                # Grupo.save convierte la foto antes de escribir: no quedó nada
+                # guardado y el grupo puede reintentar.
+                error_foto = MENSAJE_FOTO_LEGO_INVALIDA
+                grupo.refresh_from_db()
+            else:
+                limpiar_fotos_lego_por_desafio(grupo.desafio_elegido)
 
         else:
+            error_foto = "Debes subir una foto o marcar que no pudieron subirla."
+
+        if error_foto:
             if request.headers.get("X-Requested-With") == "XMLHttpRequest":
                 return JsonResponse({
                     "ok": False,
-                    "error": "Debes subir una foto o marcar que no pudieron subirla."
+                    "error": error_foto,
                 }, status=400)
 
-            messages.error(request, "Debes subir una foto o marcar que no pudieron subirla.")
+            messages.error(request, error_foto)
             return render(request, "lego.html", {
                 "grupo": grupo,
                 "desafio_nombre_actual": grupo.desafio_nombre or "Desafío no seleccionado",
@@ -3332,6 +3385,11 @@ def perfiles(request):
 def bienvenida(request):
     return render(request, 'bienvenida.html')
 
+def es_nombre_automatico(nombre):
+    """True si el equipo aún no eligió nombre: vacío o el "Grupo 3" inicial."""
+    return not nombre or re.fullmatch(r"Grupo \d+", nombre.strip()) is not None
+
+
 def registro(request):
     error = None
 
@@ -3369,7 +3427,12 @@ def registro(request):
             return render(request, "registro.html", {"error": error})
 
         if not nombre_grupo:
-            nombre_grupo = random.choice(nombres_aleatorios)
+            # Quien reingresa o entra desde otro dispositivo suele dejar el
+            # campo vacío: no debe perderse el nombre que eligió el equipo.
+            if es_nombre_automatico(grupo.nombregrupo):
+                nombre_grupo = random.choice(nombres_aleatorios)
+            else:
+                nombre_grupo = grupo.nombregrupo
 
         grupo.nombregrupo = nombre_grupo[:100]
         grupo.save(update_fields=["nombregrupo"])
@@ -5187,8 +5250,6 @@ def peer_review_view(request):
             reflexion=reflexion or None,
         )
 
-        otorgar_tokens_peer_review(grupo_evaluador)
-
         grupo_evaluador.listo_f5 = True
         grupo_evaluador.save(update_fields=["listo_f5"])
 
@@ -5856,40 +5917,63 @@ def listar_sesiones(request):
     })
 
 def otorgar_tokens_peer_review(grupo_evaluador: Grupo):
+    """
+    El grupo le da +2 tokens al equipo que mejor evaluó.
 
-    if getattr(grupo_evaluador, "recompensa_peer_otorgada", False):
-        return
+    Debe llamarse con todas sus evaluaciones ya hechas: si se llama antes,
+    premia a quien presentó primero. Los empates se sortean para que cada
+    grupo entregue siempre +2. Las evaluaciones automáticas no cuentan, porque
+    traen nota máxima sin que el grupo haya opinado.
+    """
 
-    sesion = grupo_evaluador.sesion
-    if not sesion:
-        return
-
-    qs = (
-        Evaluacion.objects
-        .filter(sesion=sesion, grupo_evaluador=grupo_evaluador)
-        .annotate(
-            total=(
-                F("claridad")
-                + F("creatividad")
-                + F("viabilidad")
-                + F("equipo")
-                + F("presentacion")
-            )
+    with transaction.atomic():
+        evaluador = (
+            Grupo.objects
+            .select_for_update()
+            .select_related("sesion")
+            .get(pk=grupo_evaluador.pk)
         )
-        .order_by("-total", "grupo_evaluado_id")
-    )
 
-    if not qs.exists():
-        return
+        if evaluador.recompensa_peer_otorgada or not evaluador.sesion:
+            return
 
-    mejor_eval = qs.first()
-    grupo_premiado = mejor_eval.grupo_evaluado
+        evaluaciones = list(
+            Evaluacion.objects
+            .filter(sesion=evaluador.sesion, grupo_evaluador=evaluador)
+            .exclude(comentario=COMENTARIO_EVALUACION_AUTOMATICA)
+        )
 
-    grupo_premiado.tokensgrupo = (grupo_premiado.tokensgrupo or 0) + 2
-    grupo_premiado.save()
+        if not evaluaciones:
+            return
 
-    grupo_evaluador.recompensa_peer_otorgada = True
-    grupo_evaluador.save()
+        mejor_puntaje = max(e.puntaje_total() for e in evaluaciones)
+        premiado_id = random.choice([
+            e.grupo_evaluado_id
+            for e in evaluaciones
+            if e.puntaje_total() == mejor_puntaje
+        ])
+
+        Grupo.objects.filter(pk=premiado_id).update(
+            tokensgrupo=Coalesce(F("tokensgrupo"), 0) + 2
+        )
+        Grupo.objects.filter(pk=evaluador.pk).update(
+            recompensa_peer_otorgada=True
+        )
+
+
+def entregar_premios_peer_review(sesion):
+    """
+    Entrega el premio de cada grupo al terminar todos los pitches.
+
+    Corre desde el polling: el bloqueo de la sesión evita que varias
+    consultas paguen a la vez o se bloqueen entre ellas.
+    """
+
+    with transaction.atomic():
+        Sesion.objects.select_for_update().get(pk=sesion.pk)
+
+        for grupo in Grupo.objects.filter(sesion=sesion).order_by("idgrupo"):
+            otorgar_tokens_peer_review(grupo)
 
 
 def ranking_view(request):
@@ -6025,7 +6109,12 @@ def admin_desafios(request):
             if request.FILES.get("imagen_desafio"):
                 desafio.imagen_desafio = request.FILES.get("imagen_desafio")
 
-            desafio.save()
+            try:
+                desafio.save()
+            except ValueError:
+                messages.error(request, f"El desafío no se guardó. {MENSAJE_IMAGEN_INVALIDA}")
+                return redirect("admin_desafios")
+
             messages.success(request, "Desafío actualizado correctamente.")
             return redirect("admin_desafios")
 
@@ -6049,7 +6138,12 @@ def admin_desafios(request):
 
                 if request.FILES.get("imagen_desafio"):
                     desafio.imagen_desafio = request.FILES.get("imagen_desafio")
-                    desafio.save()
+
+                    try:
+                        desafio.save()
+                    except ValueError:
+                        messages.warning(request, f"El desafío se creó sin imagen. {MENSAJE_IMAGEN_INVALIDA}")
+                        return redirect("admin_desafios")
 
                 messages.success(request, "Desafío creado correctamente.")
             else:
@@ -6234,7 +6328,11 @@ def admin_tematicas(request):
                     contador += 1
                     slug = f"{slug_base}-{contador}"
 
-                image = guardar_imagen_tematica(request.FILES.get("image_file"))
+                try:
+                    image = guardar_imagen_tematica(request.FILES.get("image_file"))
+                except ValueError:
+                    messages.error(request, f"La temática no se creó. {MENSAJE_IMAGEN_INVALIDA}")
+                    return redirect("admin_tematicas")
 
                 tematica = Tematica.objects.create(
                     slug=slug,
@@ -6278,7 +6376,12 @@ def admin_tematicas(request):
             tematica.accent = request.POST.get("accent", "#3b82f6").strip()
             tematica.activa = bool(request.POST.get("activa"))
 
-            nueva_imagen = guardar_imagen_tematica(request.FILES.get("image_file"))
+            try:
+                nueva_imagen = guardar_imagen_tematica(request.FILES.get("image_file"))
+            except ValueError:
+                messages.error(request, f"La temática no se guardó. {MENSAJE_IMAGEN_INVALIDA}")
+                return redirect("admin_tematicas")
+
             if nueva_imagen:
                 tematica.image = nueva_imagen
 
@@ -6639,6 +6742,7 @@ def ver_como_grupo(request, grupo_id):
 # Se retirara/ajustara cuando la integracion definitiva funcione.
 # ============================================================
 
+@requiere_admin
 def onedrive_conectar(request):
     from .onedrive_service import iniciar_autorizacion
 
@@ -6663,6 +6767,7 @@ def onedrive_conectar(request):
         )
 
 
+@requiere_admin
 def onedrive_callback(request):
     from .onedrive_service import (
         completar_autorizacion,
@@ -6728,6 +6833,7 @@ def onedrive_callback(request):
         )
 
 
+@requiere_admin
 def onedrive_probar(request):
     from .onedrive_service import (
         obtener_usuario_onedrive,

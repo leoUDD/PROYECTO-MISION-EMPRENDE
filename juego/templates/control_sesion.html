@@ -190,6 +190,7 @@
   </section>
 </div>
 
+<script src="{% static 'js/escapar_html.js' %}"></script>
 <script>
 const sesionId = "{{ sesion.idsesion }}";
 const controlLayout = document.getElementById("controlLayout");
@@ -377,7 +378,7 @@ function renderOrdenPitch(ordenPitch, grupoActual) {
   lista.innerHTML = ordenPitch.map(item => {
     const esActual = grupoActual && grupoActual.id === item.id;
     return `<li class="${esActual ? "orden-actual" : ""}">
-      ${item.orden}. ${item.nombre}${esActual ? " ← presentando" : ""}
+      ${item.orden}. ${escaparHtml(item.nombre)}${esActual ? " ← presentando" : ""}
     </li>`;
   }).join("");
 }

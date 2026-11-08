@@ -6,7 +6,7 @@ THEMES = {
         "hero": "Mejora hábitos y bienestar en tu comunidad.",
         "chips": ["🫶 Empatía", "💪 Bienestar", "💡 Innovación"],
         "accent": "#22c55e",
-        "image": "images/tema_salud.png",
+        "image": "images/salud.webp",
         "challenges": [
             {
                 "id": 1,
@@ -43,7 +43,7 @@ THEMES = {
         "hero": "Crea impacto ambiental positivo y medible.",
         "chips": ["🌱 Ambiental", "♻️ Circular", "⚙️ Creativo"],
         "accent": "#16a34a",
-        "image": "images/tema_sustentabilidad.png",
+        "image": "images/sustentabilidad.webp",
         "challenges": [
             {
                 "id": 1,
@@ -80,7 +80,7 @@ THEMES = {
         "hero": "Mejora la experiencia de aprendizaje e inclusión.",
         "chips": ["🗣️ Comunicar", "🎓 Liderazgo", "💭 Ideas"],
         "accent": "#3b82f6",
-        "image": "images/tema_educacion.png",
+        "image": "images/educacion.webp",
         "challenges": [
             {
                 "id": 1,

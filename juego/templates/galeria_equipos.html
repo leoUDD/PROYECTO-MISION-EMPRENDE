@@ -30,10 +30,13 @@
       pointer-events: all;
     }
 
+    /* contain: el video se ve completo; en pantallas de otra forma quedan
+       franjas negras en vez de recortarlo (celular, tablet). */
     .video-viaje {
       width: 100vw;
       height: 100vh;
-      object-fit: cover;
+      height: 100dvh;
+      object-fit: contain;
       background: #000;
       display: block;
     }

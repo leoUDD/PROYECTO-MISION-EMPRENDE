@@ -660,9 +660,9 @@
 
       host.classList.add("peer-timer-inline-host");
 
-      if (main) {
-        main.style.setProperty("margin-top", "0px", "important");
-      }
+      /* El margen superior del main lo calcula student_timer.js (despeja
+         el HUD). Antes aqui se forzaba a 0 y ambos scripts se pisaban
+         durante el primer segundo: el contenido saltaba al cargar. */
 
       host.style.setProperty("position", "static", "important");
       host.style.setProperty("left", "auto", "important");
@@ -696,6 +696,11 @@
         setTimeout(colocarTimerEnPeerReview, 120);
       });
     }
+
+    /* El encabezado y el timer ya estan en el DOM (este script va al final
+       del body): se mueve ya, antes de que student_timer.js mida en
+       DOMContentLoaded. Asi la pagina se acomoda una sola vez al cargar. */
+    colocarTimerEnPeerReview();
 
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", iniciar, { once: true });

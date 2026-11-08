@@ -16,6 +16,17 @@
   data-sesion-id="{{ grupo.sesion.idsesion }}"
   data-tiempo-inicial="{{ tiempo_inicial_lego|default:15 }}"
 >
+  {# Hijo directo de body: dentro de main, un filter o transform rompe position: fixed. #}
+  <button
+    id="astroLegoTrigger"
+    class="astro-lego-trigger"
+    type="button"
+    aria-label="Ver pregunta de Edemy"
+    data-i18n="lego_astro_aria"
+    data-i18n-attr="aria-label"
+  >
+    <img src="{% static 'images/EdemSerio.webp' %}" class="astro-lego-icon" alt="">
+  </button>
   {% include "atajos.html" %}
 
   <!-- ═══ MÚSICA DE FONDO ═══ -->
@@ -34,6 +45,7 @@
   <div class="student-timer-host"
        data-student-timer
        data-compact-after="48"
+       data-compact-hasta="701"
        role="timer"
        aria-live="polite">
     <div class="student-timer-card">
@@ -64,53 +76,10 @@
       </div>
       <div id="ruletaLegoResumen" class="ruleta-lego-resumen">
         <span id="ruletaIntentosTexto">Intentos disponibles: 3/3</span>
-        <span id="ruletaUltimoResultado">Aún no has lanzado la ruleta.</span>
+        <div id="ruletaUltimoResultado" class="ruleta-historial">Aún no has lanzado la ruleta.</div>
       </div>
     </section>
 
-    <button
-      id="astroLegoTrigger"
-      class="astro-lego-trigger"
-      type="button"
-      aria-label="Ver pregunta de Edemy"
-      data-i18n="lego_astro_aria"
-      data-i18n-attr="aria-label"
-    >
-      <img src="{% static 'images/EdemSerio.webp' %}" class="astro-lego-icon" alt="">
-    </button>
-
-    <div id="astroLegoOverlay" class="astro-lego-overlay" aria-hidden="true">
-      <div class="astro-lego-card">
-        <div class="astro-lego-flex">
-          <img src="{% static 'images/EdemSerio.webp' %}" class="astro-lego-standing" alt="">
-          <div class="astro-lego-text">
-            <h3 data-i18n="lego_astro_titulo">Pregunta de Edemy</h3>
-            <p data-i18n-html="true" data-i18n="lego_astro_intro">
-              Si han seguido la misión con atención, podrán responder esta pregunta y ganar <strong>2 tokens</strong>.
-            </p>
-            <p id="astroLegoPregunta">¿Cuál era el objetivo principal del Bubble Map?</p>
-            <div class="astro-lego-opciones" id="astroLegoOpciones">
-              <button type="button" class="astro-lego-opcion" id="astroLegoOpcionA" data-correcta="false">
-                A) Identificar las características técnicas de la solución.
-              </button>
-              <button type="button" class="astro-lego-opcion" id="astroLegoOpcionB" data-correcta="false">
-                B) Priorizar las ideas con mayor potencial de negocio.
-              </button>
-              <button type="button" class="astro-lego-opcion" id="astroLegoOpcionC" data-correcta="true">
-                C) Explorar las necesidades, emociones y motivaciones del usuario.
-              </button>
-              <button type="button" class="astro-lego-opcion" id="astroLegoOpcionD" data-correcta="false">
-                D) Definir las funcionalidades principales del prototipo.
-              </button>
-            </div>
-            <div id="astroLegoFeedback" class="astro-lego-feedback"></div>
-            <button id="astroLegoClose" class="astro-lego-close" type="button" data-i18n="lego_astro_cerrar">
-              Entendido
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <section id="desafioPanel" class="desafio-panel">
       <button type="button" class="desafio-toggle" id="desafioToggle">
@@ -150,6 +119,42 @@
         <div class="preview-label" data-i18n="lego_foto_preview">Vista previa</div>
         <img id="previewImg" class="preview-img" alt="Vista previa de la foto LEGO"
              data-i18n="lego_foto_preview_alt" data-i18n-attr="alt">
+      </div>
+    </div>
+
+  </main>
+
+  {# Hijos directos de body: dentro de main.phone, su backdrop-filter convierte position: fixed en relativo al contenedor y los modales quedaban cortados y sin scroll. #}
+    <div id="astroLegoOverlay" class="astro-lego-overlay" aria-hidden="true">
+      <div class="astro-lego-card">
+        <div class="astro-lego-flex">
+          <img src="{% static 'images/EdemSerio.webp' %}" class="astro-lego-standing" alt="">
+          <div class="astro-lego-text">
+            <h3 data-i18n="lego_astro_titulo">Pregunta de Edemy</h3>
+            <p data-i18n-html="true" data-i18n="lego_astro_intro">
+              Si han seguido la misión con atención, podrán responder esta pregunta y ganar <strong>2 tokens</strong>.
+            </p>
+            <p id="astroLegoPregunta">¿Cuál era el objetivo principal del Bubble Map?</p>
+            <div class="astro-lego-opciones" id="astroLegoOpciones">
+              <button type="button" class="astro-lego-opcion" id="astroLegoOpcionA" data-correcta="false">
+                A) Identificar las características técnicas de la solución.
+              </button>
+              <button type="button" class="astro-lego-opcion" id="astroLegoOpcionB" data-correcta="false">
+                B) Priorizar las ideas con mayor potencial de negocio.
+              </button>
+              <button type="button" class="astro-lego-opcion" id="astroLegoOpcionC" data-correcta="true">
+                C) Explorar las necesidades, emociones y motivaciones del usuario.
+              </button>
+              <button type="button" class="astro-lego-opcion" id="astroLegoOpcionD" data-correcta="false">
+                D) Definir las funcionalidades principales del prototipo.
+              </button>
+            </div>
+            <div id="astroLegoFeedback" class="astro-lego-feedback"></div>
+            <button id="astroLegoClose" class="astro-lego-close" type="button" data-i18n="lego_astro_cerrar">
+              Entendido
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -336,8 +341,6 @@
       </div>
     </div>
 
-  </main>
-
   <!-- ═══ SCRIPTS (sin cambios respecto al original) ═══ -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
@@ -466,6 +469,13 @@
         const bs = Number(data.segundosRestantes);
 
         if ((!timerIniciado || !data.timerCorriendo) && !Number.isNaN(bs)) {
+          timeLeft = bs; renderTimer();
+        }
+
+        // Con la pantalla bloqueada o la pestana en segundo plano el
+        // navegador frena el setInterval y el reloj local se atrasa. Se
+        // corrige con el del servidor (solo desfases reales, > 2 s).
+        if (timerIniciado && data.timerCorriendo && !Number.isNaN(bs) && Math.abs(bs - timeLeft) > 2) {
           timeLeft = bs; renderTimer();
         }
 
@@ -1236,15 +1246,48 @@
       }
       function guardarEstadoRuleta(d){ localStorage.setItem(STORAGE_RULETA,JSON.stringify(d)); }
 
+      function tokensDeResultado(r) {
+        const tokens = r.tokens ?? OPCIONES.find(o => o.id === r.id)?.tokens;
+        return Number(tokens) || 0;
+      }
+
+      /* Las opciones de tokens traen el número como icono y como título: unirlos
+         mostraba "-2 -2 tokens". Para ellas el texto se arma desde el valor. */
+      function textoResultadoRuleta(r) {
+        const tokens = tokensDeResultado(r);
+        if (tokens === 0) return `${r.icono||""} ${r.titulo}: ${r.detalle}`.trim();
+        const n = Math.abs(tokens);
+        const texto = tokens > 0
+          ? (n === 1 ? tRuleta("lego_ruleta_suma_uno","Se suma 1 token") : tRuleta("lego_ruleta_suman","Se suman {n} tokens"))
+          : (n === 1 ? tRuleta("lego_ruleta_resta_uno","Se resta 1 token") : tRuleta("lego_ruleta_restan","Se restan {n} tokens"));
+        return `${tokens > 0 ? "✅" : "🔻"} ${texto.replace("{n}", n)}`;
+      }
+
       function actualizarResumenRuleta() {
         const estado    = cargarEstadoRuleta();
         const restantes = Math.max(0,MAX_INTENTOS-estado.usados);
         if (intentosRestantes) intentosRestantes.textContent=String(restantes);
         if (intentosTexto)     intentosTexto.textContent=`${tRuleta("lego_ruleta_intentos_disponibles","Intentos disponibles:")} ${restantes}/${MAX_INTENTOS}`;
-        const ultimo = estado.historial[estado.historial.length-1];
-        const txtUlt = ultimo ? `${tRuleta("lego_ruleta_ultimo_resultado","Último resultado:")} ${ultimo.icono||""} ${ultimo.titulo} — ${ultimo.detalle}` : tRuleta("lego_ruleta_sin_lanzar","Aún no has lanzado la ruleta.");
-        if (ultimoResultado)  ultimoResultado.textContent=txtUlt;
-        if (resultadoActual)  resultadoActual.textContent=ultimo ? `${ultimo.icono||""} ${ultimo.titulo}: ${ultimo.detalle}` : tRuleta("lego_ruleta_sin_lanzar","Aún no has lanzado la ruleta.");
+        const historial = estado.historial.slice(-MAX_INTENTOS);
+        const ultimo = historial[historial.length-1];
+        const sinLanzar = tRuleta("lego_ruleta_sin_lanzar","Aún no has lanzado la ruleta.");
+        if (ultimoResultado) {
+          ultimoResultado.textContent = "";
+          if (!historial.length) {
+            ultimoResultado.textContent = sinLanzar;
+          } else {
+            const etiqueta = document.createElement("strong");
+            etiqueta.textContent = tRuleta("lego_ruleta_resultados","Resultados:");
+            const lista = document.createElement("ol");
+            historial.forEach(r => {
+              const item = document.createElement("li");
+              item.textContent = textoResultadoRuleta(r);
+              lista.appendChild(item);
+            });
+            ultimoResultado.append(etiqueta, lista);
+          }
+        }
+        if (resultadoActual) resultadoActual.textContent = ultimo ? textoResultadoRuleta(ultimo) : sinLanzar;
         if (btnLanzar) {
           btnLanzar.disabled  = restantes<=0||girando;
           btnLanzar.textContent = restantes<=0 ? tRuleta("lego_ruleta_sin_intentos","Sin intentos") : tRuleta("lego_ruleta_lanzar","Lanzar ruleta");
@@ -1272,7 +1315,10 @@
           if (audio) { audio.currentTime=0; audio.play().catch(()=>{}); }
           const gps    = 360/8;
           const centro = (opcion.slice*gps)+(gps/2);
-          anguloActual += 360*(5+Math.floor(Math.random()*2))+(360-centro);
+          // Gira desde la posicion actual hasta dejar el sorteado bajo la flecha.
+          const actual   = ((anguloActual%360)+360)%360;
+          const objetivo = (360-centro)%360;
+          anguloActual += 360*(5+Math.floor(Math.random()*2))+((objetivo-actual+360)%360);
           wheel.style.transform=`rotate(${anguloActual}deg)`;
           setTimeout(resolve,4200);
         });
@@ -1280,7 +1326,7 @@
           await fetch("{% url 'aplicar_resultado_ruleta_lego' %}",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json","X-CSRFToken":"{{ csrf_token }}"},body:JSON.stringify({tokens:opcion.tokens,resultado:opcion.id})});
         } catch(e){ console.error("Error ruleta:",e); }
         estado.usados+=1;
-        estado.historial.push({id:opcion.id,titulo:opcion.titulo,detalle:opcion.detalle,icono:opcion.icono,fecha:new Date().toISOString()});
+        estado.historial.push({id:opcion.id,tokens:opcion.tokens,titulo:opcion.titulo,detalle:opcion.detalle,icono:opcion.icono,fecha:new Date().toISOString()});
         guardarEstadoRuleta(estado);
         girando=false;
         actualizarResumenRuleta();

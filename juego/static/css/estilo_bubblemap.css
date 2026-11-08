@@ -312,11 +312,9 @@ body{
 /* ── Objeto celular ── */
 .objeto-celular-trigger{
   --edemy-size: clamp(64px, 6.5vw, 92px);
-  position: absolute;
-  top: clamp(10px, 2vh, 24px);
-  left: calc(100% - var(--edemy-size) - clamp(10px, 2vw, 24px));
-  right: auto;
-  bottom: auto;
+  position: fixed;
+  top: 0;
+  left: 0;
   width: var(--edemy-size);
   height: var(--edemy-size);
   border: none;
@@ -328,11 +326,12 @@ body{
   display: flex;
   align-items: center;
   justify-content: center;
+  transform: translate(calc(100vw - var(--edemy-size) - 24px), 96px);
   animation: celularFloat 19s ease-in-out infinite;
-  will-change: top, left, transform;
+  will-change: transform;
 }
 
-.objeto-celular-trigger:hover{
+.objeto-celular-trigger:hover .objeto-celular-icon{
   transform: scale(1.06);
 }
 
@@ -345,37 +344,15 @@ body{
     drop-shadow(0 0 26px rgba(0,252,152,.18));
 }
 
+/* Solo transform: animar top/left recalculaba la página en cada cuadro y en
+   Firefox el robot se veía saltar. */
 @keyframes celularFloat{
-  0%, 100%{
-    top: clamp(10px, 2vh, 24px);
-    left: calc(100% - var(--edemy-size) - clamp(10px, 2vw, 24px));
-    transform: rotate(-4deg) scale(1);
-  }
-  14%{
-    top: 8%;
-    left: 68%;
-    transform: rotate(6deg) scale(1.04);
-  }
-  30%{
-    top: 42%;
-    left: calc(100% - var(--edemy-size) - 18px);
-    transform: rotate(-3deg) scale(.98);
-  }
-  48%{
-    top: 66%;
-    left: 55%;
-    transform: rotate(7deg) scale(1.03);
-  }
-  66%{
-    top: 40%;
-    left: 6%;
-    transform: rotate(-6deg) scale(1.02);
-  }
-  82%{
-    top: 10%;
-    left: 30%;
-    transform: rotate(4deg) scale(.99);
-  }
+  0%, 100%{ transform: translate(calc(100vw - var(--edemy-size) - 24px), 96px) rotate(-4deg); }
+  14%{ transform: translate(68vw, 14vh) rotate(6deg) scale(1.04); }
+  30%{ transform: translate(calc(100vw - var(--edemy-size) - 18px), 46vh) rotate(-3deg) scale(.98); }
+  48%{ transform: translate(55vw, 70vh) rotate(7deg) scale(1.03); }
+  66%{ transform: translate(6vw, 44vh) rotate(-6deg) scale(1.02); }
+  82%{ transform: translate(30vw, 16vh) rotate(4deg) scale(.99); }
 }
 
 .objeto-celular-trigger.oculto{ display: none; }
@@ -2717,4 +2694,11 @@ body.bubblemap-page > .student-timer-host.bubblemap-timer-hidden {
 
 body.bubblemap-page .resultado-modal {
   z-index: 12000 !important;
+}
+
+/* Modales por encima del HUD de tokens (9999), la ruta de mision (9998) y
+   los botones de musica (9999): antes quedaban encima del modal y tapaban
+   su parte inferior y superior. */
+.astro-object-overlay {
+  z-index: 10050;
 }

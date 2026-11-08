@@ -22,6 +22,7 @@
        class="student-timer-host blur-target-bloqueado timer-esperando"
        data-student-timer
        data-compact-after="48"
+       data-compact-hasta="701"
        role="timer"
        aria-live="polite">
     <div class="student-timer-card">
@@ -603,6 +604,16 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       const backendTime = Number(data.segundosRestantes);
+
+      // Con la pantalla bloqueada o la pestana en segundo plano el navegador
+      // frena el setInterval y el reloj local se atrasa (un equipo terminaba
+      // y a otro le quedaban 30 s). Se corrige con el del servidor.
+      if (
+        timerStarted && timerInterval && data.timerCorriendo &&
+        !Number.isNaN(backendTime) && Math.abs(backendTime - timeLeft) > 2
+      ) {
+        timeLeft = backendTime; renderTimer();
+      }
 
       if (!astroMitadMostrado && timerStarted && Number(timeLeft) <= 150) {
         astroMitadMostrado = true;

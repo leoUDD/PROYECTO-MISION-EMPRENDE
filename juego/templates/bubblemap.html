@@ -13,6 +13,10 @@
 </head>
 
 <body class="bubblemap-page" data-sesion-id="{{ grupo.sesion.idsesion }}">
+  {# Hijo directo de body: dentro de main, un filter o transform rompe position: fixed. #}
+  <button id="objetoCelularTrigger" class="objeto-celular-trigger" type="button" aria-label="Encontrar tablet perdida" data-i18n="bubble_objeto_aria" data-i18n-attr="aria-label">
+      <img src="{% static 'images/EdemFeliz.webp' %}" class="objeto-celular-icon" alt="" aria-hidden="true">
+    </button>
   {% include "atajos.html" %}
 
   <!-- Música de fondo -->
@@ -22,6 +26,7 @@
   <div class="student-timer-host"
        data-student-timer
        data-compact-after="48"
+       data-compact-hasta="701"
        role="timer"
        aria-live="polite">
     <div class="student-timer-card">
@@ -53,23 +58,6 @@
       </div>
     </section>
 
-    <button id="objetoCelularTrigger" class="objeto-celular-trigger" type="button" aria-label="Encontrar tablet perdida" data-i18n="bubble_objeto_aria" data-i18n-attr="aria-label">
-      <img src="{% static 'images/EdemFeliz.webp' %}" class="objeto-celular-icon" alt="" aria-hidden="true">
-    </button>
-
-    <div id="objetoCelularOverlay" class="astro-object-overlay" aria-hidden="true">
-      <div class="astro-object-card">
-        <div class="astro-flex">
-          <img src="{% static 'images/EdemFeliz.webp' %}" class="astro-img" alt="" aria-hidden="true">
-          <div class="astro-text">
-            <h3 data-i18n="bubble_objeto_titulo">Registro de misión actualizado.</h3>
-            <p data-i18n="bubble_objeto_p1">Nuevos datos adquiridos: las personas tienen necesidades, emociones y motivaciones.</p>
-            <p data-i18n-html="true" data-i18n="bubble_objeto_p2">Lamentablemente, estas no aparecen como notificaciones. He solicitado esa actualización.</p>
-            <button id="objetoCelularClose" class="astro-object-close" type="button" data-i18n="bubble_objeto_boton">Entendido</button>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <details id="reglasBubble" class="reglas-bubble">
       <summary data-i18n="bubble_reglas_titulo">📌 ¿Cómo ganar más tokens?</summary>
@@ -146,6 +134,22 @@
     </div>
   </main>
 
+  {# Hijo directo de body: dentro de main queda bajo el HUD y la ruta (y el backdrop-filter rompe position: fixed). #}
+  <div id="objetoCelularOverlay" class="astro-object-overlay" aria-hidden="true">
+    <div class="astro-object-card">
+      <div class="astro-flex">
+        <img src="{% static 'images/EdemFeliz.webp' %}" class="astro-img" alt="" aria-hidden="true">
+        <div class="astro-text">
+          <h3 data-i18n="bubble_objeto_titulo">Registro de misión actualizado.</h3>
+          <p data-i18n="bubble_objeto_p1">Nuevos datos adquiridos: las personas tienen necesidades, emociones y motivaciones.</p>
+          <p data-i18n-html="true" data-i18n="bubble_objeto_p2">Lamentablemente, estas no aparecen como notificaciones. He solicitado esa actualización.</p>
+          <button id="objetoCelularClose" class="astro-object-close" type="button" data-i18n="bubble_objeto_boton">Entendido</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="{% static 'js/escapar_html.js' %}"></script>
   <script>
     const BASE_STORAGE_KEY = "bubblemap_data_v3";
     const SESSION_KEY = "browser_session_id";
@@ -339,7 +343,7 @@
           <span class="bubble-status">${ok ? "✅" : "✍️"}</span>
           <div>
             <div class="bubble-title">${titulo}</div>
-            <div class="bubble-preview">${textoCorto(texto)}</div>
+            <div class="bubble-preview">${escaparHtml(textoCorto(texto))}</div>
           </div>
         `;
         div.addEventListener("click", () => {
@@ -563,6 +567,17 @@
           pintarTiempo();
         }
 
+        // Con la pantalla bloqueada o la pestana en segundo plano el
+        // navegador frena el setInterval y el reloj local se atrasa. Se
+        // corrige con el del servidor (solo desfases reales, > 2 s).
+        if (
+          timerIniciado && data.timerCorriendo && !resultadoMostrado &&
+          !Number.isNaN(backendSeconds) && Math.abs(backendSeconds - timeLeft) > 2
+        ) {
+          timeLeft = backendSeconds;
+          pintarTiempo();
+        }
+
         if (!Number.isNaN(backendSeconds) && backendSeconds <= 0 && !data.timerCorriendo && !resultadoMostrado) {
           mostrarResultadoFinal();
           return;
@@ -632,10 +647,6 @@
         const host = obtenerHost();
         if (!host) return;
 
-        const rect = main.getBoundingClientRect();
-        const centroX = rect.left + (rect.width / 2);
-
-        host.style.setProperty("left", `${centroX}px`, "important");
         host.style.setProperty("right", "auto", "important");
         host.style.setProperty("transform", "translateX(-50%)", "important");
       }

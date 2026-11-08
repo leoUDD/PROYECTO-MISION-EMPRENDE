@@ -50,10 +50,15 @@
       Number(host.dataset.compactAfter || DEFAULT_COMPACT_AFTER)
     );
 
+    // Desde este ancho el timer conserva su tamano al hacer scroll.
+    const fullFrom = Number(host.dataset.compactHasta || 0);
+
     let ticking = false;
 
     function updateCompactState() {
-      const shouldCompact = window.scrollY > compactAfter;
+      const shouldCompact =
+        window.scrollY > compactAfter &&
+        !(fullFrom && window.innerWidth >= fullFrom);
 
       host.classList.toggle("is-compact", shouldCompact);
       ticking = false;
@@ -177,6 +182,21 @@
      */
     limpiarMargenCalculado(main);
 
+    /*
+     * Si la vista metio el timer dentro del main (Evaluacion lo pone en su
+     * encabezado), el timer ya no flota sobre el contenido: lo unico fijo
+     * arriba es el HUD de tokens/ranking, y es lo que hay que despejar.
+     */
+    let obstaculo = host;
+
+    if (main.contains(host)) {
+      obstaculo = document.querySelector(".hud-tokens-ranking");
+
+      if (!obstaculo || getComputedStyle(obstaculo).position !== "fixed") {
+        return;
+      }
+    }
+
     const mainRect = main.getBoundingClientRect();
 
     const mainCenterX =
@@ -193,54 +213,34 @@
     );
 
     /*
-     * Esperamos un frame para que el host ya haya tomado
-     * position:fixed + center-x y podamos medir su altura real.
+     * Se mide y se repone el margen en el mismo frame: si se esperaba al
+     * siguiente, el navegador alcanzaba a pintar el main sin margen y
+     * todo saltaba (se veia como una recarga al abrir un desplegable).
+     * getBoundingClientRect fuerza el layout, asi que el host ya refleja
+     * position:fixed y las variables recien asignadas.
      */
-    requestAnimationFrame(() => {
-      const currentHost = obtenerHost();
-      const currentMain = obtenerMain();
+    const timerRect = obstaculo.getBoundingClientRect();
+    const gap =
+      px(getComputedStyle(body).getPropertyValue("--student-timer-gap")) || 12;
 
-      if (!currentHost || !currentMain) return;
+    /*
+     * Solo agregamos espacio si el main chocaría con el timer.
+     * No imponemos un margen gigante a páginas que ya tienen
+     * suficiente aire superior.
+     */
+    const missing = Math.max(0, timerRect.bottom + gap - mainRect.top);
 
-      const timerRect =
-        currentHost.getBoundingClientRect();
+    if (missing > 0.5) {
+      const currentMargin = px(getComputedStyle(main).marginTop);
 
-      const newMainRect =
-        currentMain.getBoundingClientRect();
+      main.style.setProperty(
+        "margin-top",
+        `${currentMargin + missing}px`,
+        "important"
+      );
 
-      const styles =
-        getComputedStyle(body);
-
-      const gap =
-        px(styles.getPropertyValue("--student-timer-gap")) || 12;
-
-      const desiredMainTop =
-        timerRect.bottom + gap;
-
-      /*
-       * Solo agregamos espacio si el main chocaría con el timer.
-       * No imponemos un margen gigante a páginas que ya tienen
-       * suficiente aire superior.
-       */
-      const missing =
-        Math.max(
-          0,
-          desiredMainTop - newMainRect.top
-        );
-
-      if (missing > 0.5) {
-        const currentMargin =
-          px(getComputedStyle(currentMain).marginTop);
-
-        currentMain.style.setProperty(
-          "margin-top",
-          `${currentMargin + missing}px`,
-          "important"
-        );
-
-        currentMain.dataset.studentTimerMarginManaged = "1";
-      }
-    });
+      main.dataset.studentTimerMarginManaged = "1";
+    }
   }
 
   function programarAlineacion() {

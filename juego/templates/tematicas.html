@@ -1,4 +1,4 @@
-{% load static %}
+{% load static imagenes %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -13,6 +13,10 @@
 </head>
 
 <body class="tematicas-page">
+  {# Hijo directo de body: dentro de main, el backdrop-filter rompe position: fixed. #}
+  <button id="objetoCamaraTrigger" class="objeto-camara-trigger" type="button" aria-label="Ver mensaje de EdEmy" data-i18n="tematicas_camara_aria" data-i18n-attr="aria-label">
+    <img src="{% static 'images/EdemSerio.webp' %}" class="objeto-camara-img" alt="" aria-hidden="true">
+  </button>
   {% include "atajos.html" %}
   <div class="student-timer-host"
        data-student-timer
@@ -40,21 +44,6 @@
         </p>
       </header>
 
-      <button id="objetoCamaraTrigger" class="objeto-camara-trigger" type="button" aria-label="Ver mensaje de EdEmy" data-i18n="tematicas_camara_aria" data-i18n-attr="aria-label">
-        <img src="{% static 'images/EdemSerio.webp' %}" class="objeto-camara-img" alt="" aria-hidden="true">
-      </button>
-
-      <div id="objetoCamaraOverlay" class="astro-object-overlay" aria-hidden="true">
-        <div class="astro-flex">
-          <img src="{% static 'images/Consejo1.webp' %}" class="astro-img" alt="" aria-hidden="true">
-          <div class="astro-text">
-            <h3 data-i18n="tematicas_camara_titulo">Registro de misión actualizado.</h3>
-            <p data-i18n="tematicas_camara_p1">Recuerden: los desafíos están diseñados para poner a prueba sus habilidades.</p>
-            <p data-i18n="tematicas_camara_p2">No sus habilidades para entrar en pánico. Esa función ya viene incluida en los humanos.</p>
-            <button id="objetoCamaraClose" class="astro-object-close" type="button" data-i18n="tematicas_camara_boton">Entendido</button>
-          </div>
-        </div>
-      </div>
 
       <section class="themes-carousel" aria-label="Temáticas disponibles">
         <button class="carousel-btn prev" type="button" aria-label="Anterior" data-i18n="tematicas_anterior" data-i18n-attr="aria-label">‹</button>
@@ -62,11 +51,7 @@
           {% for tema in tematicas %}
             <article class="theme-card" tabindex="-1" data-slug="{{ tema.slug }}" data-url="{% url 'desafios' %}">
               <div class="thumb">
-                {% if tema.image|slice:":7" == "/media/" %}
-                  <img src="{{ tema.image }}" alt="Icono de {{ tema.title }}">
-                {% else %}
-                  <img src="{% static tema.image %}" alt="Icono de {{ tema.title }}">
-                {% endif %}
+                <img src="{{ tema|imagen_tematica }}" alt="Icono de {{ tema.title }}">
               </div>
               <div class="content">
                 <h2 class="title">{{ tema.title }}</h2>
@@ -85,6 +70,19 @@
       </section>
     </div>
   </main>
+
+  {# Hijo directo de body: dentro de main queda bajo el HUD y la ruta (y el backdrop-filter rompe position: fixed). #}
+  <div id="objetoCamaraOverlay" class="astro-object-overlay" aria-hidden="true">
+    <div class="astro-flex">
+      <img src="{% static 'images/Consejo1.webp' %}" class="astro-img" alt="" aria-hidden="true">
+      <div class="astro-text">
+        <h3 data-i18n="tematicas_camara_titulo">Registro de misión actualizado.</h3>
+        <p data-i18n="tematicas_camara_p1">Recuerden: los desafíos están diseñados para poner a prueba sus habilidades.</p>
+        <p data-i18n="tematicas_camara_p2">No sus habilidades para entrar en pánico. Esa función ya viene incluida en los humanos.</p>
+        <button id="objetoCamaraClose" class="astro-object-close" type="button" data-i18n="tematicas_camara_boton">Entendido</button>
+      </div>
+    </div>
+  </div>
 
   <div id="routes" data-sesion-id="{{ grupo.sesion.idsesion }}" data-grupo-id="{{ grupo.idgrupo }}"></div>
 

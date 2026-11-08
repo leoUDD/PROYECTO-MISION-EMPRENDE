@@ -79,7 +79,7 @@ body::before {
   z-index: 1;
   width: min(1080px, calc(100vw - 185px));
   min-height: clamp(640px, 86vh, 1080px);
-  margin: calc(var(--timer-bar-top) + var(--timer-bar-h) + 8px) 0 26px;
+  margin: calc(var(--student-timer-safe-top, 68px) + 100px) 0 26px;
   padding: clamp(30px, 3.4vw, 48px);
   border-radius: 30px;
   text-align: center;
@@ -1193,7 +1193,7 @@ body:has(#inicio-fase-overlay:not(.overlay-hidden)) .metro-progreso-habilidades 
   }
 
   .pitch-editor {
-    margin: calc(var(--timer-bar-top) + var(--timer-bar-h) + 14px) 0;
+    margin: 0;
     min-height: 560px;
   }
 
@@ -1345,4 +1345,18 @@ width: min(100%, 920px) !important;
     margin-left: auto !important;
     margin-right: auto !important;
 }
+}
+
+/* El timer es más bajo en celular: se reserva solo su altura. */
+@media (max-width: 700px) {
+  .pitch-editor {
+    margin-top: calc(var(--student-timer-safe-top, 58px) + 72px);
+  }
+}
+
+/* Modales por encima del HUD de tokens (9999), la ruta de mision (9998) y
+   los botones de musica (9999): antes quedaban encima del modal. */
+.modal-fin,
+.astro-pitch-overlay {
+  z-index: 10050;
 }

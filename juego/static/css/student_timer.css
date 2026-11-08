@@ -453,7 +453,7 @@ position: fixed !important;
 
   top: var(--student-timer-safe-top, 66px) !important;
 
-  left: var(--student-main-center-x, 50vw) !important;
+  left: 50% !important;
   right: auto !important;
   bottom: auto !important;
 
@@ -540,15 +540,23 @@ font-size: clamp(24px, 2.3vw, 30px) !important;
   white-space: nowrap !important;
 }
 
-@media (min-width: 1101px) {
+/* En escritorio queda a la altura del selector de idioma y del ranking; más
+   angosto no cabe entre ellos y baja a la fila siguiente. */
+@media (min-width: 1280px) {
 body.student-global-timer-layout {
---student-timer-safe-top: 68px;
+--student-timer-safe-top: 14px;
     --student-timer-gap: 14px;
+}
+
+/* La ruta de mision corre el contenedor: el centro de la ventana no es el suyo. */
+body.student-global-timer-layout > .student-timer-host,
+body.student-global-timer-layout > .student-timer-host.is-compact {
+left: var(--student-main-center-x, 50%) !important;
 }
 }
 
 @media (min-width: 701px)
-       and (max-width: 1400px)
+       and (max-width: 1279px)
        and (orientation: landscape) {
 body.student-global-timer-layout {
 --student-timer-safe-top:
@@ -583,4 +591,22 @@ body.student-global-timer-layout
 min-width: 160px !important;
     min-height: 58px !important;
 }
+}
+
+/* El selector de idioma ocupa la esquina izquierda de esta fila. */
+@media (max-width: 430px) {
+  body.student-global-timer-layout > .student-timer-host .student-timer-card {
+    max-width: calc(100vw - 210px) !important;
+    min-width: 0 !important;
+  }
+
+  body.student-global-timer-layout > .student-timer-host .student-timer-label {
+    white-space: normal;
+    text-align: center;
+  }
+}
+
+/* Minimo legible para la etiqueta (en tablet bajaba a 9-10px). */
+.student-timer-label {
+  font-size: clamp(11px, .85vw, 12px);
 }

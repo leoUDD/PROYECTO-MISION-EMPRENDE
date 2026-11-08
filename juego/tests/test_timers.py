@@ -3,6 +3,7 @@
 
 from datetime import timedelta
 
+from django.urls import reverse
 from django.utils import timezone
 
 from juego.models import Desafio, Evaluacion, Grupo, Tematica
@@ -145,3 +146,37 @@ class TimerTests(BaseJuegoTestCase):
         self.sesion.refresh_from_db()
         self.assertEqual(self.sesion.fase_actual, "f6_ranking")
         self.assertIsNone(self.sesion.grupo_presentando)
+
+
+class IniciarTimerRespuestaTests(BaseJuegoTestCase):
+    def test_devuelve_el_tiempo_restante_si_el_timer_ya_corre(self):
+        ahora = timezone.now()
+        self.set_fase(
+            "f4_construccion_pitch",
+            inicio_fase_habilitado=True,
+            timer_corriendo=True,
+            segundos_restantes=300,
+            timer_inicio_at=ahora - timedelta(seconds=250),
+            timer_fin_at=ahora + timedelta(seconds=50),
+        )
+
+        respuesta = self.client.post(
+            reverse("iniciar_timer_inicio_fase", args=[self.sesion.pk])
+        )
+
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertLessEqual(respuesta.json()["segundosRestantes"], 50)
+
+    def test_al_arrancar_devuelve_casi_todo_el_tiempo(self):
+        self.set_fase(
+            "f4_construccion_pitch",
+            inicio_fase_habilitado=True,
+            timer_corriendo=False,
+            segundos_restantes=300,
+        )
+
+        respuesta = self.client.post(
+            reverse("iniciar_timer_inicio_fase", args=[self.sesion.pk])
+        )
+
+        self.assertGreaterEqual(respuesta.json()["segundosRestantes"], 298)

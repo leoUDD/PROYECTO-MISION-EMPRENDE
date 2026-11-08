@@ -325,6 +325,7 @@
   <div class="student-timer-host"
        data-student-timer
        data-compact-after="48"
+       data-compact-hasta="701"
        role="timer"
        aria-live="polite">
     <div class="student-timer-card student-timer-card--progress">
@@ -347,32 +348,7 @@
     <audio id="victory-sound" src="{% static 'sounds/victory.mp3' %}" preload="auto"></audio>
     <audio id="musica-fondo"  src="{% static 'sounds/musica_sopa.mp3' %}" loop preload="auto"></audio>
 
-    <div id="timeModal" class="modal" aria-hidden="true" role="dialog" aria-labelledby="timeModalTitle">
-      <div class="modal-content">
-        <h2 id="timeModalTitle" data-i18n="sopa_time_titulo">⏰ ¡Tiempo terminado!</h2>
-        <p id="timeModalText" data-i18n="sopa_time_texto">
-          No alcanzaron a completar la sopa, pero cada palabra encontrada fue recompensada.
-        </p>
-        <p id="timeModalReward"><strong>0 palabras encontradas · 0 tokens obtenidos</strong></p>
-        <button id="btnRetry" type="button" data-i18n="sopa_boton_aceptar_foto">Aceptar y tomar foto</button>
-      </div>
-    </div>
-
     <div id="grid" class="grid blur-target-bloqueado" aria-label="Tablero de sopa de letras"></div>
-
-    <div id="winModal" class="modal" aria-hidden="true" role="dialog" aria-labelledby="winTitle">
-      <div class="modal-content">
-        <img src="{% static 'gifs/token_dorado_clean_grande.gif' %}" alt="Token de recompensa" class="token-animado">
-        <h2 id="winTitle" data-i18n="sopa_win_titulo">¡Buen trabajo!</h2>
-        <p id="winText" data-i18n="sopa_win_texto">
-          Encontraron todas las palabras y recibieron su recompensa.
-        </p>
-        <button id="btnWinFoto" type="button" data-i18n="sopa_boton_aceptar_foto">Aceptar y tomar foto</button>
-        <p id="winEspera" class="win-espera" hidden data-i18n="sopa_win_espera">
-          Esperando a los demás escuadrones...
-        </p>
-      </div>
-    </div>
 
     <div id="wordsBox" class="words blur-target-bloqueado">
       <h3 data-i18n="sopa_palabras_encontrar">Palabras a encontrar:</h3>
@@ -389,8 +365,6 @@
       <div id="status" class="status">0/8 encontradas</div>
     </div>
 
-    <!-- Botón mute -->
-    <button id="btn-musica" title="Silenciar música" aria-label="Silenciar música" onclick="toggleMusica()">🔊</button>
 
     <div
       id="routes"
@@ -402,6 +376,35 @@
       data-sopa-ganada="{{ sopa_ganada|yesno:'true,false' }}"
     ></div>
   </main>
+
+  {# Hijos directos de body: dentro de main.game-container, su backdrop-filter convierte position: fixed en relativo al contenedor (modales cortados). #}
+    <div id="timeModal" class="modal" aria-hidden="true" role="dialog" aria-labelledby="timeModalTitle">
+      <div class="modal-content">
+        <h2 id="timeModalTitle" data-i18n="sopa_time_titulo">⏰ ¡Tiempo terminado!</h2>
+        <p id="timeModalText" data-i18n="sopa_time_texto">
+          No alcanzaron a completar la sopa, pero cada palabra encontrada fue recompensada.
+        </p>
+        <p id="timeModalReward"><strong>0 palabras encontradas · 0 tokens obtenidos</strong></p>
+        <button id="btnRetry" type="button" data-i18n="sopa_boton_aceptar_foto">Aceptar y tomar foto</button>
+      </div>
+    </div>
+
+    <div id="winModal" class="modal" aria-hidden="true" role="dialog" aria-labelledby="winTitle">
+      <div class="modal-content">
+        <img src="{% static 'gifs/token_dorado_clean_grande.gif' %}" alt="Token de recompensa" class="token-animado">
+        <h2 id="winTitle" data-i18n="sopa_win_titulo">¡Buen trabajo!</h2>
+        <p id="winText" data-i18n="sopa_win_texto">
+          Encontraron todas las palabras y recibieron su recompensa.
+        </p>
+        <button id="btnWinFoto" type="button" data-i18n="sopa_boton_aceptar_foto">Aceptar y tomar foto</button>
+        <p id="winEspera" class="win-espera" hidden data-i18n="sopa_win_espera">
+          Esperando a los demás escuadrones...
+        </p>
+      </div>
+    </div>
+
+    <!-- Botón mute -->
+    <button id="btn-musica" title="Silenciar música" aria-label="Silenciar música" onclick="toggleMusica()">🔊</button>
 
   <div id="dialogo-inicial-overlay" class="oculto" aria-modal="true" role="dialog" aria-label="Mensaje de EdEmy">
     <div id="dialogo-backdrop"></div>

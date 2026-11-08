@@ -1,4 +1,4 @@
-{% load static %}
+{% load static imagenes %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -249,13 +249,7 @@
     <section class="tematicas-grid">
       {% for t in tematicas %}
         <article class="tematica-card">
-          {% if t.image %}
-            {% if t.image|slice:":7" == "/media/" %}
-              <img class="tematica-img" src="{{ t.image }}" alt="{{ t.title }}">
-            {% else %}
-              <img class="tematica-img" src="{% static t.image %}" alt="{{ t.title }}">
-            {% endif %}
-          {% endif %}
+          <img class="tematica-img" src="{{ t|imagen_tematica }}" alt="{{ t.title }}">
 
           <h2>{{ t.title }}</h2>
           <p>{{ t.hero }}</p>

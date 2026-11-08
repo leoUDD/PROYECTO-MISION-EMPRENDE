@@ -1265,6 +1265,50 @@ Panel lateral de misión.
     }
   }
 
+  /* Celular: la ruta es una barra fija abajo (72px + margen). Se reserva ese
+     alto al final de la pagina para que no tape lo ultimo (por ejemplo,
+     "Enviar evaluacion") y los botones de musica van encima de ella. */
+  @media (max-width: 700px) {
+    body:has(#metroProgresoHabilidades) {
+      padding-bottom: calc(100px + env(safe-area-inset-bottom)) !important;
+    }
+
+    body:has(#metroProgresoHabilidades) #btnMuteBubble,
+    body:has(#metroProgresoHabilidades) #btn-musica-lego,
+    body:has(#metroProgresoHabilidades) #btn-musica,
+    body:has(#metroProgresoHabilidades) #btn-musica-desafios,
+    body:has(#metroProgresoHabilidades) #btn-musica-ranking,
+    body:has(#metroProgresoHabilidades) #btn-musica-reflexion {
+      bottom: calc(96px + env(safe-area-inset-bottom)) !important;
+    }
+  }
+
+  /* Tablet vertical: la ruta queda al final del contenido; la musica debe
+     quedar por encima de ella al llegar abajo. */
+  @media (min-width: 701px) and (max-width: 1100px) and (orientation: portrait) {
+    body:has(#metroProgresoHabilidades) #btnMuteBubble,
+    body:has(#metroProgresoHabilidades) #btn-musica-lego,
+    body:has(#metroProgresoHabilidades) #btn-musica,
+    body:has(#metroProgresoHabilidades) #btn-musica-desafios,
+    body:has(#metroProgresoHabilidades) #btn-musica-ranking,
+    body:has(#metroProgresoHabilidades) #btn-musica-reflexion {
+      z-index: 9999 !important;
+    }
+
+  }
+
+  /* Tablet, notebook y PC: textos de la ruta con un minimo legible (en
+     tablet horizontal bajaban a 8px). En celular la barra es horizontal y
+     angosta, ahi se mantiene su tamano. */
+  @media (min-width: 701px) {
+    body .metro-progreso-habilidades .metro-punto small {
+      font-size: 11px !important;
+    }
+
+    body .metro-progreso-habilidades .metro-header span {
+      font-size: 11px !important;
+    }
+  }
 </style>
 
 <script>

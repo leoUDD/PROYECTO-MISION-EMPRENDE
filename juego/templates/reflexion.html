@@ -305,6 +305,19 @@
       </article>
     </section>
 
+    <section class="creditos-finales" aria-labelledby="creditosGracias">
+      <div class="creditos-panel">
+        <p id="creditosGracias" class="creditos-gracias" data-i18n="reflexion_creditos_gracias">¡Gracias por jugar!</p>
+        <p class="creditos-autores" data-i18n="reflexion_creditos_autores">
+          Desarrollado por alumnos de Ingeniería Civil en Informática e Innovación Tecnológica
+        </p>
+        <img class="creditos-logo"
+             src="{% static 'images/logo_facultad_ingenieria.webp' %}"
+             alt="Universidad del Desarrollo, Facultad de Ingeniería"
+             width="1000" height="330" loading="lazy" />
+      </div>
+    </section>
+
     <section class="final-cta">
       <a href="{% url 'finalizar_mision' %}" class="btn-primary" data-i18n="reflexion_boton_finalizar">
         Finalizar misión
