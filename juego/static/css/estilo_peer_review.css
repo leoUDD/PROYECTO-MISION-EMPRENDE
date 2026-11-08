@@ -2471,3 +2471,24 @@ body.peer-review-page
     padding-bottom: 84px !important;
   }
 }
+
+/* Deslizadores: la zona tocable era de 10px de alto (el circulo sobresale,
+   pero fuera de la caja no responde). Se amplia a 32px y la barra de color
+   se sigue pintando solo en los 10px centrales. */
+body.peer-review-page .score-range {
+  height: 32px;
+  padding: 11px 0;
+  box-sizing: border-box;
+  background-clip: content-box !important;
+}
+
+body.peer-review-page .criteria-kicker,
+body.peer-review-page .comment-kicker,
+body.peer-review-page .peer-timer-label,
+body.peer-review-page .peer-round-label {
+  font-size: 11px !important;
+}
+
+body.peer-review-page .range-help span {
+  font-size: 11px !important;
+}

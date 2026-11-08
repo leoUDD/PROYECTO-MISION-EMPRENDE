@@ -635,3 +635,81 @@ h1 {
     padding: 14px 20px;
   }
 }
+
+/* atajos.html angosta .next-step en todas las vistas; aqui debe calzar con
+   la consola de arriba, que forma una sola tarjeta con el. */
+.card .next-step {
+  width: 100% !important;
+}
+
+/* Si la tarjeta no cabe en el alto de la pantalla, se puede hacer scroll en
+   vez de cortarla arriba y abajo. */
+body {
+  height: auto;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  align-items: safe center;
+}
+
+/* Notebooks (768 o 720 px de alto): misma compactacion que en pantallas bajas. */
+@media (min-width: 700px) and (max-height: 820px) {
+  .logo {
+    width: clamp(80px, 13vh, 120px);
+    margin-bottom: 8px;
+  }
+
+  h1 { font-size: 1.5rem; }
+
+  .console-card {
+    margin: 12px auto 0 auto;
+    padding: 12px 18px;
+  }
+
+  .console-line + .console-line { margin-top: 3px; }
+
+  .console-prompt {
+    margin-top: 10px;
+    padding-top: 10px;
+  }
+
+  .next-step { padding: 12px 18px !important; }
+
+  .card {
+    padding: 20px 28px;
+    margin-top: 0;
+  }
+}
+
+/* Celular: los textos largos bajan de linea en vez de cortarse. */
+@media (max-width: 480px) {
+  .console-line {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+}
+
+/* atajos.html se carga despues de esta hoja y le pone a .next-step su estilo
+   de tarjeta independiente (borde celeste y esquinas redondeadas arriba).
+   Aqui la consola deja su borde inferior abierto para fusionarse con el, asi
+   que con ese estilo la consola se veia cortada abajo. Con mas especificidad
+   se recupera la tarjeta unica: mismo borde verde y fondo, esquinas solo
+   abajo y la linea punteada como union. */
+.card .next-step {
+  min-height: 0 !important;
+  margin-top: 0 !important;
+  border-radius: 0 0 22px 22px !important;
+  background: rgba(0, 12, 40, 0.82) !important;
+  border: 2px solid rgba(0, 242, 109, 0.72) !important;
+  border-top: 1px dashed rgba(0, 242, 109, 0.3) !important;
+  box-shadow:
+    inset 0 0 18px rgba(0, 242, 109, 0.08),
+    0 12px 20px rgba(0, 242, 109, 0.12) !important;
+  backdrop-filter: blur(6px) !important;
+}
+
+.card .next-step::before {
+  color: var(--udd-green);
+  text-shadow: 0 0 8px rgba(0, 242, 109, 0.55);
+}

@@ -51,6 +51,53 @@ class RegistroTests(BaseJuegoTestCase):
         self.assertTrue(self.grupo.nombregrupo)
         self.assertNotEqual(self.grupo.nombregrupo.strip(), "")
 
+    def test_nombre_automatico_recibe_uno_aleatorio(self):
+        self.assertEqual(self.grupo.nombregrupo, "Grupo 1")
+
+        self.client.post(reverse("registro"), {
+            "id_grupo": self.grupo.codigoacceso,
+            "nombre_grupo": "",
+        })
+
+        self.grupo.refresh_from_db()
+        self.assertNotEqual(self.grupo.nombregrupo, "Grupo 1")
+
+    def test_reingreso_sin_nombre_conserva_el_elegido(self):
+        self.grupo.nombregrupo = "Los Pumas"
+        self.grupo.save(update_fields=["nombregrupo"])
+
+        self.client.post(reverse("registro"), {
+            "id_grupo": self.grupo.codigoacceso,
+            "nombre_grupo": "",
+        })
+
+        self.grupo.refresh_from_db()
+        self.assertEqual(self.grupo.nombregrupo, "Los Pumas")
+
+    def test_nombre_parecido_al_automatico_se_conserva(self):
+        self.grupo.nombregrupo = "Grupo 5 Estrellas"
+        self.grupo.save(update_fields=["nombregrupo"])
+
+        self.client.post(reverse("registro"), {
+            "id_grupo": self.grupo.codigoacceso,
+            "nombre_grupo": "",
+        })
+
+        self.grupo.refresh_from_db()
+        self.assertEqual(self.grupo.nombregrupo, "Grupo 5 Estrellas")
+
+    def test_escribir_un_nombre_lo_cambia(self):
+        self.grupo.nombregrupo = "Los Pumas"
+        self.grupo.save(update_fields=["nombregrupo"])
+
+        self.client.post(reverse("registro"), {
+            "id_grupo": self.grupo.codigoacceso,
+            "nombre_grupo": "Los Linces",
+        })
+
+        self.grupo.refresh_from_db()
+        self.assertEqual(self.grupo.nombregrupo, "Los Linces")
+
     def test_reingreso_reemplaza_sesion_anterior(self):
         otro = self.grupos[1]
         self.login_alumno(self.grupo)

@@ -102,7 +102,9 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
+    # Igual al de Django, pero no borra la cookie nueva desde una consulta
+    # que salió con la cookie anterior (ver juego/middleware.py).
+    'juego.middleware.SessionMiddlewareSinBorrarCookieAjena',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',

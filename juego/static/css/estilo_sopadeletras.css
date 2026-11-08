@@ -1693,3 +1693,52 @@ width: auto !important;
 
   gap: 0 !important;
 }
+
+/* Con la barra de progreso el timer es ancho: en la fila superior debe caber
+   entre el selector de idioma y el HUD, y en celular va debajo del selector. */
+@media (min-width: 1280px) {
+  html body.student-global-timer-layout.sopa-page
+  > .student-timer-host:not(.is-compact)
+  .student-timer-card--progress {
+    width: 420px !important;
+    min-width: 0 !important;
+  }
+}
+
+@media (max-width: 620px) {
+  html body.student-global-timer-layout.sopa-page > .student-timer-host,
+  html body.student-global-timer-layout.sopa-page > .student-timer-host.is-compact {
+    top: 92px !important;
+  }
+
+  html body.student-global-timer-layout.sopa-page
+  > .student-timer-host
+  .student-timer-card {
+    max-width: calc(100vw - 40px) !important;
+  }
+}
+
+/* La barra cede espacio para que texto y numeros queden dentro de la tarjeta. */
+html body.sopa-page .student-timer-card--progress .timer-bar-track {
+  min-width: 60px !important;
+}
+
+/* Junto al HUD no cabe la frase: quedan la barra y los numeros. */
+@media (min-width: 1280px) and (max-width: 1365px) {
+  html body.student-global-timer-layout.sopa-page
+  > .student-timer-host:not(.is-compact)
+  .student-timer-card--progress {
+    width: 300px !important;
+  }
+
+  html body.sopa-page #timer-container > span[data-i18n="sopa_tiempo_restante"] {
+    display: none !important;
+  }
+}
+
+/* Modales por encima del HUD de tokens (9999), la ruta de mision (9998) y
+   los botones de musica (9999): antes quedaban encima del modal y tapaban
+   su parte inferior y superior. */
+.modal {
+  z-index: 10050;
+}

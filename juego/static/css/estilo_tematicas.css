@@ -1211,3 +1211,59 @@ width: min(100%, 920px) !important;
     margin-right: auto !important;
 }
 }
+
+/* Tablet y celular en horizontal: el body ya deja libre el espacio de la ruta
+   (padding-left). El margen de 132px se sumaba a ese espacio y empujaba el
+   contenedor fuera de la pantalla por la derecha. */
+@media (min-width: 701px) and (max-width: 1100px) and (orientation: landscape) {
+  .tematicas-page .selector-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+}
+
+/* EdEmy vive fuera del contenedor (su backdrop-filter convertia el
+   position: fixed en relativo al contenedor y lo dejaba volando sobre el
+   titulo). Flota en la esquina inferior izquierda, bajo la ruta. */
+html body.tematicas-page > .objeto-camara-trigger {
+  top: auto;
+  left: clamp(12px, 2vw, 28px);
+  bottom: clamp(16px, 3vh, 32px);
+  z-index: 7000;
+  animation: camaraFlotarEsquina 4s ease-in-out infinite;
+}
+
+@keyframes camaraFlotarEsquina {
+  0%, 100% { transform: translateY(0) rotate(-4deg); }
+  50% { transform: translateY(-10px) rotate(4deg); }
+}
+
+/* Celular: la ruta es una barra fija abajo; EdEmy va sobre ella. */
+@media (max-width: 700px) {
+  html body.tematicas-page > .objeto-camara-trigger {
+    bottom: calc(100px + env(safe-area-inset-bottom));
+  }
+}
+
+/* Celular horizontal: no queda espacio libre (la ruta ocupa la izquierda y
+   las tarjetas el resto); EdEmy es un consejo opcional y se oculta. */
+@media (max-height: 500px) and (orientation: landscape) {
+  html body.tematicas-page > .objeto-camara-trigger {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html body.tematicas-page > .objeto-camara-trigger {
+    animation: none;
+  }
+}
+
+/* Modales por encima del HUD de tokens (9999), la ruta de mision (9998) y
+   los botones de musica (9999): antes quedaban encima del modal y tapaban
+   su parte inferior y superior. */
+.astro-object-overlay {
+  z-index: 10050;
+}

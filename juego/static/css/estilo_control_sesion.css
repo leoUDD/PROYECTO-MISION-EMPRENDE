@@ -757,3 +757,15 @@ body.modal-alumnos-abierto { overflow: hidden; }
   .dev-grid { grid-template-columns: 1fr 1fr; }
   .btn-dev-10 { grid-column: 1 / -1; }
 }
+
+/* Pantallas tactiles: el boton "Ver" alumnos media 26px de alto. */
+@media (pointer: coarse) {
+  .btn-alumnos {
+    min-height: 36px;
+  }
+}
+
+#statListos span,
+.panel-heading span {
+  font-size: max(11px, 0.7rem);
+}

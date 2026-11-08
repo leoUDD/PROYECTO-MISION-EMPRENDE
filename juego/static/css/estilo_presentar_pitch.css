@@ -1863,3 +1863,64 @@ body.presentar-pitch-page > main.pitch-container {
     margin-top: 62px !important;
   }
 }
+
+/* Timer fijo arriba al centro, igual que en el resto de las pantallas. Sale del
+   flujo de la página, así que el main reserva su espacio. */
+html body.presentar-pitch-page {
+  --presentar-timer-top: 66px;
+  --presentar-main-top: 164px;
+}
+
+@media (min-width: 1280px) {
+  html body.presentar-pitch-page {
+    --presentar-timer-top: 14px;
+    --presentar-main-top: 112px;
+  }
+}
+
+@media (max-width: 700px) {
+  html body.presentar-pitch-page {
+    --presentar-timer-top: 58px;
+    --presentar-main-top: 146px;
+  }
+}
+
+html body.presentar-pitch-page > .student-timer-host {
+  position: fixed !important;
+  top: var(--presentar-timer-top) !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: fit-content !important;
+  max-width: calc(100vw - 28px) !important;
+  margin: 0 !important;
+  z-index: 9000 !important;
+}
+
+@media (min-width: 1280px) {
+  html body.presentar-pitch-page > .student-timer-host {
+    left: var(--presentar-main-center-x, 50%) !important;
+  }
+}
+
+/* El selector de idioma ocupa la esquina izquierda de esta fila. */
+@media (max-width: 430px) {
+  html body.presentar-pitch-page > .student-timer-host .student-timer-card {
+    min-width: 0 !important;
+    max-width: calc(100vw - 210px) !important;
+  }
+
+  html body.presentar-pitch-page > .student-timer-host .student-timer-label {
+    white-space: normal;
+    text-align: center;
+  }
+}
+
+html body.presentar-pitch-page > main.pitch-container {
+  margin-top: var(--presentar-main-top) !important;
+}
+
+html body.presentar-pitch-page .listener-attention-icon svg {
+  width: 70%;
+  height: 70%;
+  filter: drop-shadow(0 0 6px rgba(0, 252, 152, .55));
+}

@@ -749,6 +749,17 @@
           }
         }
 
+        // Con la pantalla bloqueada o la pestana en segundo plano el
+        // navegador frena el setInterval y el reloj local se atrasa. Se
+        // corrige con el del servidor (solo desfases reales, > 2 s).
+        if (
+          timerIniciado && timerInterval && data.timerCorriendo &&
+          !Number.isNaN(backendSeconds) && Math.abs(backendSeconds - timeLeft) > 2
+        ) {
+          timeLeft = backendSeconds;
+          pintarTiempo();
+        }
+
         if (
           data.inicioFaseHabilitado &&
           backendSeconds <= 0 &&

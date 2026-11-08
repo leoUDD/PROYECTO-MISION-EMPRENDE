@@ -578,8 +578,13 @@ function procesarEstadoSesion(data) {
   if (gameEnded) return;
   const backendSeconds = Number(data.segundosRestantes);
   if (!Number.isNaN(backendSeconds) && backendSeconds >= 0) {
-    timeLeft = backendSeconds;
-    renderTimer();
+    // Con el conteo local activo, la respuesta llega algo atrasada: aplicarla
+    // siempre hacía retroceder el reloj. Solo se corrige un desfase real.
+    const desfase = Math.abs(backendSeconds - timeLeft);
+    if (!timerInterval || !data.timerCorriendo || desfase > 2) {
+      timeLeft = backendSeconds;
+      renderTimer();
+    }
   }
   if (!timerStartedByProfesor && data.timerCorriendo && data.inicioFaseHabilitado) {
     timerStartedByProfesor = true;

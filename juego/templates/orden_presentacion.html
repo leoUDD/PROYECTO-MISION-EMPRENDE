@@ -416,8 +416,11 @@
     <source src="{% static 'sounds/sorteo_reveal.mp3' %}" type="audio/mpeg">
   </audio>
 
+  <script src="{% static 'js/escapar_html.js' %}"></script>
   <script>
-    const sesionId = "{{ grupo.sesion.idsesion }}";
+    // Nombre propio: sincronizacion_fase.html (incluido al final) ya declara
+    // la constante global sesionId y repetirla anulaba ese script completo.
+    const sesionIdOrden = "{{ grupo.sesion.idsesion }}";
     const grupoId = "{{ grupo.idgrupo }}";
     const btnOrdenListo = document.getElementById("btnOrdenListo");
     const ordenListoEstado = document.getElementById("ordenListoEstado");
@@ -520,7 +523,7 @@ let ordenSorteadoPrevio = false;
         return `
           <div class="fila-orden">
             <div class="numero-orden">${item.orden}</div>
-            <div class="nombre-orden">${item.nombre}</div>
+            <div class="nombre-orden">${escaparHtml(item.nombre)}</div>
             ${esActual ? `<div class="primero-tag">${tOrden("orden_presentacion_primero_tag", "primer turno")}</div>` : ``}
           </div>
         `;
@@ -562,7 +565,7 @@ let ordenSorteadoPrevio = false;
       const { lista, indiceFinal } = construirCarrete(ordenPitch);
 
       if (reelListaEl) {
-        reelListaEl.innerHTML = lista.map(nombre => `<div class="reel-item">${nombre}</div>`).join("");
+        reelListaEl.innerHTML = lista.map(nombre => `<div class="reel-item">${escaparHtml(nombre)}</div>`).join("");
       }
 
       const primerItem = reelListaEl ? reelListaEl.querySelector(".reel-item") : null;
@@ -677,7 +680,7 @@ let ordenSorteadoPrevio = false;
 
     async function cargarOrden() {
       try {
-        const res = await fetch(`/sesion/${sesionId}/estado-presentacion/`, {
+        const res = await fetch(`/sesion/${sesionIdOrden}/estado-presentacion/`, {
           credentials: "same-origin",
           cache: "no-store"
         });
