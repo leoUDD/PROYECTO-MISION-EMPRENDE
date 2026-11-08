@@ -735,11 +735,30 @@ textarea::placeholder {
   align-items: center;
   justify-content: center;
   padding: clamp(24px, 4vw, 72px);
+  /* Sin backdrop-filter, igual que los dialogos de Lego, Bubble y Sopa: un
+     blur en vivo de pantalla completa sobre una pagina con otros
+     backdrop-filter congelaba el dibujo en iPad (iPadOS 17): el texto no se
+     veia y la cuenta regresiva no se cerraba. Una cortina mas opaca reemplaza
+     el oscurecimiento que daba brightness(.6). */
   background:
     radial-gradient(circle at center, rgba(0, 252, 152, .10), transparent 42%),
-    rgba(0, 5, 18, .68);
-  backdrop-filter: blur(10px) brightness(.6);
-  -webkit-backdrop-filter: blur(10px) brightness(.6);
+    rgba(0, 5, 18, .82);
+}
+
+/* Mientras EdEmy habla, los vidrios esmerilados de detras quedan tapados por
+   la cortina: se apagan para no recalcularlos (mismo criterio que en Sopa). */
+body:has(#inicio-fase-overlay:not(.overlay-hidden)) .pitch-editor,
+body:has(#inicio-fase-overlay:not(.overlay-hidden)) .desafio-panel,
+body:has(#inicio-fase-overlay:not(.overlay-hidden)) .tips,
+body:has(#inicio-fase-overlay:not(.overlay-hidden)) textarea,
+body:has(#inicio-fase-overlay:not(.overlay-hidden)) .pitch-writing-instruction,
+body:has(#inicio-fase-overlay:not(.overlay-hidden)) .student-timer-host,
+body:has(#inicio-fase-overlay:not(.overlay-hidden)) .student-timer-host *,
+body:has(#inicio-fase-overlay:not(.overlay-hidden)) .hud-tokens-ranking,
+body:has(#inicio-fase-overlay:not(.overlay-hidden)) .hud-tokens-ranking *,
+body:has(#inicio-fase-overlay:not(.overlay-hidden)) .metro-progreso-habilidades {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 .inicio-fase-overlay.overlay-hidden {
